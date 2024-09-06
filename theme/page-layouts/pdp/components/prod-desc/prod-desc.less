@@ -1,0 +1,90 @@
+@import "../../../../styles/main.less";
+
+.descContainerDesktop {
+  display: none;
+  margin: 3rem 0;
+
+  @media @desktop {
+    display: block;
+  }
+
+  .tabsContainer {
+    display: flex;
+
+    .tabs {
+      padding: 8px 32px;
+      color: @TextLabel;
+      cursor: pointer;
+    }
+
+    .active {
+      background-color: @ThemeAccentL2;
+      color: @TextHeading;
+      border: 1px solid @DividerStokes;
+      border-radius: 12px 12px 0 0;
+      border-bottom: 1px solid @ThemeAccentL2;
+      margin-bottom: -1px;
+    }
+  }
+  .details {
+    padding: 24px 32px 24px 16px;
+    background: @ThemeAccentL2;
+    border: 1px solid @DividerStokes;
+    border-radius: 0px 12px 12px 12px;
+
+    .items {
+      list-style: outside;
+      padding-left: 1rem;
+    }
+  }
+}
+.uktLinks {
+  font-weight: 500;
+}
+.return {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.descContainerMobile {
+  padding: 0 1rem;
+  margin: 2rem 0;
+  @media @desktop {
+    padding: 0;
+  }
+
+  &.isDesktopHidden {
+    @media @desktop {
+      display: none;
+    }
+  }
+
+  .section-text {
+    margin: 10px 0px;
+  }
+}
+.pdpDetail {
+  width: 100%;
+  list-style: outside;
+  padding: 0 0 14px;
+}
+
+.bulletSpacing {
+  padding-left: 16px;
+  list-style: disc;
+}
+
+.noDataPlaceholder {
+  color: gray;
+  text-align: center;
+  padding: 1rem;
+}
+
+.productLongDescription {
+  & > :first-child {
+    margin-top: 0;
+  }
+  & > :last-child {
+    margin-bottom: 0;
+  }
+}

@@ -1,0 +1,119 @@
+@import "../main.less";
+
+.testimonial {
+  &__title {
+    margin-bottom: 24px;
+    text-align: center;
+    padding: 0 16px;
+
+    @media @mobile {
+      padding: 0 40px;
+    }
+
+    @media @desktop {
+      margin-bottom: 32px;
+    }
+  }
+
+  &__carousel {
+    --gap: 12px;
+    padding-bottom: 32px;
+    padding-left: 16px;
+    padding-right: var(--p-right-mob);
+    // @media @tablet {
+    //   padding-left: 24px;
+    // }
+    @media @mobile-up {
+      padding-left: 24px;
+      padding-right: var(--p-right-tablet);
+    }
+    @media @desktop {
+      --gap: 24px;
+      padding: 0 40px;
+    }
+
+    :global {
+      .slick-list {
+        margin: 0 calc(var(--gap) / 2 * -1) !important;
+        padding-left: 0 !important;
+      }
+
+      .slick-slide {
+        padding: 0 calc(var(--gap) / 2);
+      }
+      .slick-next {
+        right: 0px;
+      }
+    }
+  }
+
+  &__block {
+    display: flex;
+    border-radius: @ImageRadius;
+    background-color: @ThemeAccentL5;
+    border: 1px solid @DividerStokes;
+    height: auto;
+    @media @tablet {
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    @media @desktop {
+      align-items: center;
+      padding: 16px;
+      .column-gap(16px);
+    }
+    &__image {
+      border-radius: @ImageRadius;
+      width: 100%;
+      @media @desktop {
+        flex: 0 0 232px;
+      }
+    }
+
+    &__info {
+      @media @tablet {
+        padding: 16px;
+      }
+      @media @desktop {
+        flex: 1 0 0;
+        min-width: 0;
+      }
+      @media @tablet {
+        &.has-image {
+          flex-grow: 1;
+        }
+      }
+
+      &__text {
+        font-style: italic;
+        font-size: 16px;
+        line-height: 24px;
+        margin-bottom: 16px;
+        .overflow-ellipsis();
+
+        @media @desktop {
+          margin-bottom: 24px;
+        }
+      }
+
+      &__author {
+        &__name {
+          margin-bottom: 4px;
+          .overflow-ellipsis();
+        }
+
+        &__description {
+          .overflow-ellipsis();
+        }
+      }
+    }
+  }
+}
+
+.sliderWrap {
+  max-width: 100%;
+  @media @desktop-down {
+    width: 100vw;
+  }
+}

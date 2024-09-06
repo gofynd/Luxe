@@ -1,0 +1,104 @@
+@import "../../../styles/main.less";
+
+.updateItem {
+  display: flex;
+  align-items: center;
+  .bagImg {
+    margin: 20px 20px 20px 0;
+    img {
+      max-width: 100px;
+      max-height: 100px;
+      cursor: pointer;
+    }
+  }
+  .bagInfo {
+    display: flex;
+    // align-items: center;
+    flex-direction: column;
+    width: 100%;
+    @media @mobile {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .brandName {
+      margin-bottom: 5px;
+    }
+    .boldxxxs {
+      font-weight: 700;
+      font-size: 12px;
+      @media @mobile {
+        font-size: 11px;
+      }
+    }
+    .lightxxxs {
+      font-weight: 300;
+      font-size: 12px;
+      @media @mobile {
+        font-size: 11px;
+      }
+    }
+    .sizeQuantityContainer {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      background: @Alabaster2;
+      align-items: center;
+      padding: 10px;
+      height: 50px;
+      box-sizing: border-box;
+      margin-top: 20px;
+      .sizeContainer {
+        background: white;
+        padding: 10px 20px 10px 10px;
+        border: 1px solid @Iron;
+        .regular-xxs {
+          font-weight: 400;
+          font-size: 13px;
+          @media @mobile {
+            font-size: 12px;
+          }
+          .bold-xxs {
+            font-weight: 700;
+            font-size: 13px;
+            @media @mobile {
+              font-size: 12px;
+            }
+          }
+        }
+      }
+    }
+    .priceContainer {
+      margin-top: 20px;
+      margin-bottom: 10px;
+    }
+    .darkLg {
+      font-weight: 500;
+      font-size: 20px;
+      @media @mobile {
+        font-size: 16px;
+      }
+    }
+    .lightxxs {
+      font-weight: 300;
+      font-size: 13px;
+      @media @mobile {
+        font-size: 12px;
+      }
+    }
+  }
+  .qtyCtrl {
+    margin-left: auto;
+    position: relative;
+    @media @mobile {
+      margin-left: 20px;
+    }
+    .maxAvail {
+      // margin: 0px 0px 10px;
+      text-align: center;
+      color: @Required;
+    }
+    /deep/.qty-control .qty-amount input {
+      padding: 2px 0px;
+    }
+  }
+}

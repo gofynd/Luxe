@@ -1,0 +1,86 @@
+@import "../../../../styles/main.less";
+
+.delivery {
+  margin-bottom: 4px;
+  display: flex;
+  border-radius: @ButtonRadius;
+  background-color: @ThemeAccentL4;
+}
+.deliveryInfo {
+  margin-top: 48px;
+
+  @media @tablet {
+    margin-top: 32px;
+  }
+
+  .deliveryLabel {
+    margin-bottom: 6px;
+    color: @TextHeading;
+  }
+  .uktLinks {
+    .user-select-none();
+    font-size: 15px;
+  }
+}
+.deliveryDate {
+  color: @SuccessText;
+  display: flex;
+  align-items: center;
+
+  .deliveryIcon {
+    width: 14px;
+    height: 12px;
+
+    /deep/ svg {
+      path {
+        fill: @SuccessText;
+      }
+    }
+  }
+  p {
+    margin-left: 0.25rem;
+  }
+}
+.error {
+  color: @ErrorText;
+}
+.button {
+  // background: none;
+  border: none;
+  padding: 0 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  // color: @ButtonPrimary;
+
+  // & > span {
+  //   border-bottom: 1px solid @ButtonPrimary;
+  // }
+  .deliveryIcon {
+    display: block;
+    width: 14px;
+    height: 12px;
+    margin-left: 0.5rem;
+
+    @media @tablet {
+      display: none;
+    }
+  }
+}
+
+.pincodeInput {
+  background: none;
+  border: none;
+  padding: 1rem 0.5rem;
+  width: 100%;
+  text-overflow: ellipsis;
+  @media @mobile {
+    font-size: 16px;
+  }
+}
+
+.error {
+  color: @ErrorText;
+}
+.emptyPincode {
+  color: @InformationText;
+}

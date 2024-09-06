@@ -1,0 +1,142 @@
+@import "../../styles/main.less";
+
+.bold-md {
+  font-weight: 700;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+}
+.bold-sm {
+  font-weight: 700;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+.bold-xxs {
+  font-weight: 700;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.main {
+  color: @Mako;
+
+  .addressItemContainer {
+    padding: 12px;
+    .addressItem {
+      cursor: pointer;
+      background-color: @PageBackground;
+      &:hover {
+        background-color: @LightGray;
+      }
+    }
+  }
+
+  .addressContainer {
+    display: block;
+    padding: 20px;
+    background-color: @White;
+    border-bottom: 1px solid @LightGray;
+    margin-bottom: 5px;
+    @media @mobile {
+      padding: 20px 5px;
+    }
+    .addressHeader {
+      display: inline;
+      .title {
+        display: inline;
+        .savedAddress {
+          color: @DustyGray;
+          font-weight: 100;
+          margin-left: 5px;
+        }
+      }
+      .addAddr {
+        color: var(--primaryColor);
+        float: right;
+        cursor: pointer;
+      }
+      @media @mobile {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .title {
+          font-size: 12px;
+          .savedAddress {
+            font-size: 10px;
+          }
+        }
+        .addAddr {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+  .addressBlock {
+    display: flex;
+    padding: 30px 15px;
+    background-color: @Alabaster2;
+    margin: 15px;
+    align-items: center;
+    cursor: pointer;
+    justify-content: space-between;
+    .nameContainer {
+      display: flex;
+      flex-direction: column;
+    }
+    @media @mobile {
+      margin: 15px;
+    }
+    //  width: calc(100% - 50px);
+    &:hover {
+      background: @LightGray;
+    }
+    .address {
+      padding-top: 10px;
+      line-height: 20px;
+    }
+    .name {
+      display: inline;
+    }
+    .rightArrow {
+      float: right;
+      margin-bottom: 2px;
+    }
+  }
+  .addressFormWrapper {
+    padding: 0 12px;
+  }
+}
+
+.actionBtns {
+  justify-content: space-between;
+  display: flex;
+  width: 95%;
+  .btn {
+    padding: 15px;
+    border-radius: 5px;
+    width: 49%;
+    margin-bottom: 15px;
+    border: none;
+    font-weight: bold;
+    background-color: var(--secondaryColor);
+  }
+  .cancelBtn {
+    background-color: @White;
+    color: var(--secondaryColor);
+    border: 1px solid var(--secondaryColor);
+  }
+  .commonBtn {
+    text-align: center;
+    color: @White;
+    cursor: pointer;
+    background-color: var(--primaryColor);
+  }
+}
+
+.defaultAdd {
+  background-color: var(--buttonPrimary);
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--buttonSecondary);
+}

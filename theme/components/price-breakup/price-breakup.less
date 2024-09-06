@@ -1,0 +1,69 @@
+@import "../../styles/main.less";
+
+.priceSummaryContainer {
+  background: @PageBackground;
+  border-radius: var(--card-border-radius);
+  border: 1px solid @DividerStokes;
+  padding: 24px;
+  @media @mobile {
+    padding: 20px;
+    border-radius: 0;
+  }
+  .priceSummaryHeading {
+    font-size: 13px;
+    font-weight: 500;
+    color: @TextLabel;
+    margin-bottom: 16px;
+  }
+  .priceSummaryItem {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: @TextBody;
+    @media @mobile {
+      margin-top: 12px;
+    }
+  }
+  .priceSummaryItemTotal {
+    color: @TextHeading;
+    border-top: 1px solid @DividerStokes;
+    margin-top: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 24px 0 0;
+    @media @mobile {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+  }
+  .discountPreviewContiner {
+    background-color: #fff9dc;
+    border-radius: var(--card-border-radius);
+    padding: 8px 0;
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .discountPreviewMessage {
+      margin-left: 4px;
+    }
+    .discountPreviewAmount {
+      margin-left: 4px;
+      font-weight: 600;
+    }
+  }
+}
+.svgIcon {
+  width: 22px;
+  height: 22px;
+}
+.discount {
+  color: @SuccessText;
+}

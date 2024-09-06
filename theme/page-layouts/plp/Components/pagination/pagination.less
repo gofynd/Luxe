@@ -1,0 +1,44 @@
+@import "../../../../styles/main.less";
+
+@lg-min: 1024px;
+.pagination {
+  display: flex;
+  align-items: center;
+  .arrow-icon {
+    width: 40px;
+    height: 40px;
+    padding: 7px;
+    fill: @TextBody;
+
+    &.left-arrow {
+      transform: rotate(90deg);
+    }
+    &.right-arrow {
+      transform: rotate(-90deg);
+    }
+  }
+
+  .page-container {
+    display: flex;
+    align-items: center;
+    .column-gap(8px);
+    .page-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: @TextBody;
+      border: 1px solid @DividerStokes;
+      border-radius: 50%;
+      &.active {
+        border-color: @ButtonPrimary;
+        pointer-events: none;
+      }
+    }
+  }
+}
+.disable {
+  fill: @TextSecondary;
+  pointer-events: none;
+}

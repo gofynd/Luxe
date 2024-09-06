@@ -1,0 +1,26 @@
+@import "../main.less";
+
+.imageWrapper {
+  @media (max-width: 800px) and (min-width: 481px) {
+    .aspect-ratio(16/5) !important;
+  }
+  img {
+    transition: 300ms all cubic-bezier(0, 0, 0.2, 1);
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.carouselImage {
+  width: 100%;
+  min-height: 400px;
+  background-color: white;
+  @media @tablet {
+    min-height: 200px;
+  }
+  @media @mobile {
+    min-height: 500px;
+  }
+}

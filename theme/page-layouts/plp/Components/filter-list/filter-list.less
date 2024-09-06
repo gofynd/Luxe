@@ -1,0 +1,194 @@
+@import "../../../../styles/main.less";
+
+.filter__list {
+  &--search {
+    position: relative;
+    margin-bottom: 16px;
+    .text {
+      font-size: 12px;
+      line-height: 14px;
+      padding: 15px 15px 15px 44px;
+      width: 100%;
+      border: 1px solid @DividerStokes;
+      background-color: transparent;
+    }
+    .search-icon {
+      width: 18px;
+      height: 18px;
+      position: absolute;
+      left: 12px;
+    }
+  }
+  &--items {
+    .filter__item {
+      cursor: pointer;
+      &:hover .checkbox-icon:not(.selected) {
+        stroke: @ButtonPrimary;
+      }
+      .checkbox-icon {
+        width: 26px;
+        height: 26px;
+        margin-right: 8px;
+        stroke: @DividerStokes;
+        &.selected {
+          fill: @ButtonPrimary;
+          stroke: none;
+        }
+      }
+      &--color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        margin-right: 8px;
+        border: 1px solid @DividerStokes;
+      }
+      &--value {
+        color: @TextBody;
+        margin-right: 4px;
+      }
+      &--count {
+        color: @TextDisabled;
+      }
+    }
+  }
+  &--item:not(:last-child) {
+    margin-bottom: 8px;
+  }
+  .view-more {
+    text-transform: uppercase;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 16px;
+    margin-top: 16px;
+    color: @TextBody;
+    cursor: pointer;
+    .arrow-icon {
+      fill: @TextBody;
+      width: 20px;
+      height: 20px;
+      &.expanded {
+        transform: scale(1, -1);
+      }
+    }
+  }
+  .filter__popup {
+    width: 1023px;
+    height: calc(100vh - var(--headerHeight) - 40px);
+    max-height: 562px;
+    border: 1px solid @DividerStokes;
+    background-color: @DialogBackground;
+    position: fixed;
+    top: calc(50% + (var(--headerHeight) / 2));
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 41;
+    border-radius: 8px;
+    &--header {
+      padding: 16px 24px;
+      border-bottom: 1px solid @DividerStokes;
+      .search {
+        &__input {
+          border-radius: 4px;
+          padding: 16px;
+          width: 264px;
+          border: 1px solid @DividerStokes;
+          margin-right: 32px;
+        }
+      }
+      .alphabets {
+        display: flex;
+        .column-gap(13px);
+        .overflow-ellipsis();
+        & > li {
+          font-size: 14px;
+          font-weight: 500;
+          line-height: 16px;
+          letter-spacing: -0.02em;
+          color: @ButtonPrimary;
+          &.disabled {
+            color: @TextDisabled;
+          }
+        }
+      }
+      .close-icon {
+        margin-left: auto;
+        width: 24px;
+        height: 24px;
+        fill: @TextHeading;
+        cursor: pointer;
+      }
+    }
+    &--content {
+      display: flex;
+      flex-wrap: wrap;
+      flex-direction: column;
+      height: calc(100% - 87px);
+      padding: 24px 12px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-margin-left: 24px;
+      .alphabet-label {
+        padding-left: 12px;
+        margin-bottom: 11px;
+        & > h4 {
+          color: @ButtonPrimary;
+        }
+      }
+      .filter {
+        padding-left: 12px;
+        margin-bottom: 5px;
+        &__item {
+          font-size: 12px;
+          line-height: 14px;
+          cursor: pointer;
+          &:hover .checkbox-icon:not(.selected) {
+            stroke: @ButtonPrimary;
+          }
+          .checkbox-icon {
+            width: 26px;
+            height: 26px;
+            margin-right: 8px;
+            stroke: @DividerStokes;
+            &.selected {
+              fill: @ButtonPrimary;
+            }
+          }
+          &--value {
+            color: @TextBody;
+            margin-right: 4px;
+          }
+          &--count {
+            color: @TextDisabled;
+          }
+        }
+      }
+      & > * {
+        min-width: 310px;
+      }
+    }
+  }
+  .overlay {
+    display: none;
+    position: fixed;
+    .inset(0);
+    background-color: @Overlay;
+    opacity: 0.6;
+    z-index: 40;
+    &.show {
+      display: block;
+    }
+  }
+  .filter__item--color {
+    overflow: hidden;
+  }
+  .multiIcon {
+    background: linear-gradient(
+      136deg,
+      rgba(73, 52, 155, 1) 0%,
+      rgba(28, 188, 217, 1) 33%,
+      rgba(87, 210, 28, 1) 53%,
+      rgba(255, 202, 25, 1) 73%,
+      rgba(209, 11, 0, 1) 100%
+    );
+  }
+}

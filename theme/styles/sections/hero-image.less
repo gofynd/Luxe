@@ -1,0 +1,81 @@
+@import "../../styles/main.less";
+
+.heroImageContainer {
+  padding: 0;
+  position: relative;
+  margin-bottom: calc(var(--margin_bottom) + 16px);
+  isolation: isolate;
+  overflow: hidden;
+}
+.overlayItems {
+  position: absolute;
+  top: var(--top-position-desktop);
+  left: var(--left-position-desktop);
+  right: var(--right-position-desktop);
+  bottom: var(--bottom-position-desktop);
+  transform: var(--transform-desktop);
+  text-align: var(--content-alignment-desktop);
+  // z-index: 2;
+  z-index: 10;
+  ::v-deep a {
+    z-index: 10;
+  }
+  @media @mobile {
+    padding: 0 1rem;
+    width: 100%;
+    top: var(--top-position-mobile);
+    left: unset;
+    right: unset;
+    bottom: var(--bottom-position-mobile);
+    transform: var(--transform-mobile);
+    text-align: var(--content-alignment-mobile);
+  }
+
+  @media @tablet-strict {
+    max-width: 384px;
+    top: var(--top-position-mobile);
+    left: var(--left-position-mobile);
+    right: var(--right-position-mobile);
+    bottom: var(--bottom-position-mobile);
+    transform: var(--transform-mobile);
+    text-align: var(--content-alignment-mobile);
+  }
+
+  @media @desktop {
+    max-width: 543px;
+  }
+
+  .header {
+    font-size: 64px;
+    line-height: 66px;
+
+    @media @tablet {
+      font-size: 36px;
+      line-height: 38px;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  .description {
+    margin-top: 8px;
+    opacity: 0.8;
+  }
+
+  .cta_button {
+    margin-top: 32px;
+    padding: 16px 32px;
+    border-radius: 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 16px;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
+
+    @media @tablet {
+      font-size: 12px;
+      margin-top: 24px;
+      line-height: 14px;
+    }
+  }
+}

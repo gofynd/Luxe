@@ -1,0 +1,34 @@
+@import "../../../../styles/main.less";
+
+.filter {
+  &__title {
+    margin-bottom: 16px;
+    cursor: pointer;
+    .name {
+      color: @TextHeading;
+    }
+    .arrow-icon {
+      width: 24px;
+      height: 24px;
+      fill: @TextHeading;
+      transition: all 0.25s ease;
+      &.isOpen {
+        transform: scale(1, -1);
+      }
+    }
+  }
+  &__list {
+    transition: 300ms all cubic-bezier(0, 0, 0.2, 1);
+    max-height: 3000px;
+    margin-bottom: 22px;
+    opacity: 1;
+    visibility: visible;
+    &.collapse {
+      max-height: 0;
+      margin-bottom: 0;
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+    }
+  }
+}

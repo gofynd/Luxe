@@ -1,0 +1,89 @@
+@import "../../../../styles/main.less";
+
+.items {
+  margin: auto;
+  position: relative;
+  padding: 0 10px;
+  .user-select-none();
+  .flex-center();
+  .dd-label {
+    color: @TextLabel;
+  }
+
+  .selected {
+    margin-left: 8px;
+    color: @TextHeading;
+    cursor: pointer;
+    .user-select-none();
+
+    .arrow-icon {
+      width: 16px;
+      height: 16px;
+      fill: @TextHeading;
+      margin-left: 4px;
+      &.open {
+        transform: scale(1, -1);
+      }
+    }
+  }
+
+  .menu {
+    background-color: @DialogBackground;
+    position: absolute;
+    top: 32px;
+    left: 10px;
+    z-index: @menu;
+    margin: auto;
+    min-width: 190px;
+    border-radius: 8px;
+    padding: 16px;
+
+    li {
+      font-size: 12px;
+      line-height: 14px;
+      color: @TextHeading;
+      cursor: pointer;
+      &:not(:last-child) {
+        margin-bottom: 14px;
+      }
+      &:hover {
+        opacity: 0.5;
+      }
+    }
+  }
+  &.sort-list {
+    .sort-icon {
+      display: none;
+      @media @mobile {
+        display: flex;
+      }
+    }
+    #sortopt {
+      @media @mobile {
+        display: none;
+      }
+    }
+    @media @mobile {
+      .selected {
+        .selectedSort {
+          display: none;
+        }
+      }
+      .menu {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        li {
+          padding: 18px;
+          border-bottom: 1px solid @Gray;
+          justify-content: center;
+          .inline-svg {
+            display: none;
+          }
+        }
+      }
+    }
+  }
+}

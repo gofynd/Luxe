@@ -1,0 +1,130 @@
+@import "../styles/main.less";
+
+.contactUs_mainContainer {
+  background-color: #fff;
+  margin: 0 auto;
+}
+
+.contact_us {
+  padding: 25px 0;
+  margin: 20px;
+
+  &.card_container {
+    margin: 0 40px;
+    position: relative;
+
+    @media @mobile {
+      margin: 0;
+    }
+
+    .regular_sm {
+      padding: 10px;
+      font-weight: 400;
+      font-size: 16px;
+
+      @media @mobile {
+        font-size: 14px;
+      }
+
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+    }
+  }
+
+  &.contact_container {
+    display: flex;
+    width: 100%;
+    align-items: center;
+
+    @media @mobile {
+      flex-direction: column;
+    }
+
+    .desc {
+      padding-top: 3%;
+    }
+  }
+}
+
+.headers {
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+
+    @media @mobile {
+      padding: 10px;
+    }
+
+    color: @TextBody;
+  }
+}
+
+.flex_item {
+  margin: 30px;
+  justify-content: center;
+  flex: 1;
+  width: 45%;
+  .item {
+    margin-bottom: 35px;
+  }
+
+  @media @mobile {
+    width: 90%;
+  }
+
+  .form_row {
+    width: 90% !important;
+    margin: 20px 0;
+  }
+
+  .contact_details {
+    .item {
+      margin-bottom: 35px;
+
+      @media @mobile {
+        margin-bottom: 15px;
+      }
+
+      h6 {
+        font-size: 16px;
+      }
+    }
+    .dustyColor {
+      color: @DustyGray2;
+      font-size: 16px;
+    }
+  }
+}
+
+.bold_xl {
+  font-weight: 700;
+  font-size: 22px;
+
+  @media @mobile {
+    font-size: 18px;
+  }
+
+  -webkit-font-smoothing: antialiased;
+}
+
+.btn_submit {
+  padding: 10px;
+  background: var(--textHeading);
+  border: 0;
+  border-radius: 3px;
+  cursor: pointer;
+  min-width: 40%;
+  color: #fff;
+}
+
+.bold_xs {
+  font-weight: 700;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.common_btn {
+  text-align: center;
+}

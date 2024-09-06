@@ -1,0 +1,146 @@
+@import "../../../styles/main.less";
+
+.headerDesktop {
+  .firstRow {
+    display: flex;
+    padding: 7px 0;
+    .middle {
+      .logo,
+      a {
+        max-height: 65px;
+      }
+    }
+    .left,
+    .right {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+    .right__icons {
+      justify-content: flex-end;
+      .column-gap(16px);
+      min-height: 55px;
+      &--bag,
+      &--wishlist {
+        & > div {
+          position: relative;
+          .count {
+            width: 16px;
+            height: 16px;
+            background-color: @HeaderIcon;
+            color: @HeaderBackground;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 10px;
+            .flex-center();
+            position: absolute;
+            right: 0;
+            top: 0;
+            transform: translate(50%, -50%);
+          }
+        }
+      }
+      .labelSignin {
+        color: @HeaderNav;
+        cursor: pointer;
+      }
+    }
+  }
+  .secondRow {
+    display: flex;
+    justify-content: center;
+  }
+  &.layout_1,
+  &.layout_2,
+  &.layout_3 {
+    .firstRow {
+      .left {
+        margin: 0 74px;
+        justify-content: center;
+      }
+      .middle {
+        order: -1;
+      }
+      .right {
+        flex: 0 1 auto;
+        padding: 0 8px;
+      }
+    }
+  }
+  &.layout_2 {
+    .firstRow {
+      .left {
+        justify-content: flex-start;
+      }
+    }
+  }
+  &.layout_3 {
+    .first-row {
+      .left {
+        justify-content: flex-end;
+      }
+    }
+  }
+  &.single {
+    &.layout_4 {
+      .firstRow {
+        .middle {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+      }
+    }
+    .firstRow {
+      @media @desktop {
+        padding: 15px 0;
+      }
+      .right__icons {
+        .column-gap(31px);
+
+        &--bag,
+        &--wishlist {
+          & > div .count {
+            width: 14px;
+            height: 14px;
+          }
+        }
+        &--bag {
+          & > div .count {
+            transform: translate(4px, 0px);
+          }
+        }
+        &--wishlist {
+          & > div .count {
+            transform: translate(3px, -3px);
+          }
+        }
+      }
+    }
+  }
+  &.double {
+    &.layout_2 {
+      .secondRow {
+        justify-content: flex-start;
+      }
+    }
+    &.layout_3 {
+      .secondRow {
+        justify-content: flex-end;
+      }
+    }
+  }
+}
+.headerIcon {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  fill: @HeaderIcon;
+}
+.singleRowIcon {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  fill: @HeaderIcon;
+}

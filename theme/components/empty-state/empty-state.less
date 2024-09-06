@@ -1,0 +1,55 @@
+@import "../../styles/main.less";
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  justify-content: center;
+  height: 100%;
+  min-height: 75vh;
+}
+.heading {
+  font-size: 32px;
+  line-height: 42px;
+  margin: 0 0 32px;
+  text-transform: lowercase;
+  text-align: center;
+  &::first-letter {
+    text-transform: capitalize;
+  }
+  @media @tablet {
+    font-size: 24px;
+    line-height: 32px;
+    text-align: center;
+  }
+}
+.description {
+  display: flex;
+  justify-content: center;
+  max-width: 480px;
+  margin: 12px auto 32px;
+  text-align: center;
+  line-height: 18px;
+  letter-spacing: -0.02em;
+  color: @TextBody;
+}
+.button {
+  display: flex;
+  justify-content: center;
+  border: 1px solid @ButtonPrimary;
+  color: @ButtonPrimary;
+  width: 204px;
+  max-width: 484px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 16.42px;
+  @media @mobile {
+    font-size: 12px;
+    line-height: 14.08px;
+  }
+}

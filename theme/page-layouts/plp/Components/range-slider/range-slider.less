@@ -1,0 +1,84 @@
+@import "../../../../styles/main.less";
+
+.slider-filter {
+  margin-top: 35px;
+}
+.range-box {
+  display: flex;
+  justify-content: space-between;
+  .range-item {
+    .label {
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 14px;
+      display: block;
+      color: @TextBody;
+      margin-bottom: 8px;
+    }
+    .currency {
+      font-family: @CurrencyFont;
+      font-size: 12px;
+      line-height: 14px;
+      color: @TextDisabled;
+      margin-right: 8px;
+    }
+  }
+  input {
+    display: block;
+    min-width: 76px;
+    max-width: 100px;
+    padding: 6px 0;
+    border: 1px solid @DividerStokes;
+    color: @TextBody;
+    text-align: center;
+    background: transparent;
+    position: relative;
+    &[type="number"]::-webkit-inner-spin-button,
+    &[type="number"]::-webkit-outer-spin-button {
+      position: absolute;
+      width: 12.5%;
+      height: 100%;
+      top: 0;
+      right: 0;
+    }
+  }
+}
+/deep/ .price-slider {
+  margin-bottom: 12px;
+  .vue-slider-dot-handle {
+    border: 1px solid @ButtonPrimary;
+  }
+  .vue-slider-process {
+    background-color: @ButtonPrimary;
+  }
+  .vue-slider-tooltip {
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 16px;
+    letter-spacing: -0.02em;
+    color: @TextHeading;
+    &::before {
+      content: unset !important;
+    }
+    @media @desktop {
+      font-size: 16px;
+      line-height: 18px;
+    }
+  }
+  .vue-slider .vue-slider-dot {
+    .vue-slider-tooltip-top {
+      all: revert;
+      position: absolute;
+      bottom: calc(100% + 5px);
+    }
+    &:nth-child(1) .vue-slider-tooltip-top {
+      left: 0;
+    }
+    &:nth-child(2) .vue-slider-tooltip-top {
+      right: 0;
+    }
+  }
+}

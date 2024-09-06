@@ -1,0 +1,93 @@
+@import "../../../styles/main.less";
+
+.header {
+  position: relative;
+  background-color: @HeaderBackground;
+  z-index: unset !important;
+  .headerContainer {
+    max-width: @page-width;
+    margin-left: auto;
+    margin-right: auto;
+    @media @desktop {
+      padding-inline: 40px;
+    }
+  }
+  .headerIcon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    fill: @HeaderIcon;
+  }
+  .desktop {
+    @media @tablet {
+      display: none;
+    }
+  }
+
+  .mobile {
+    display: flex;
+    align-content: center;
+    padding: 7px 8px;
+    .middle {
+      .logo {
+        max-height: 42px;
+      }
+    }
+    .left,
+    .right {
+      flex: 1;
+    }
+    .right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      & > * {
+        padding: 4px 8px;
+      }
+      &__icons {
+        &--bag {
+          position: relative;
+          .cartCount {
+            width: 16px;
+            height: 16px;
+            line-height: 16px;
+            text-align: center;
+            vertical-align: middle;
+            background-color: @HeaderIcon;
+            color: @HeaderBackground;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 10px;
+            .flex-center();
+            position: absolute;
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+          }
+        }
+      }
+    }
+
+    @media @desktop {
+      display: none;
+    }
+    &.single {
+      .right__icons--bag {
+        .cart {
+          width: 18px;
+          height: 18px;
+        }
+        & > .cart-count {
+          width: 14px;
+          height: 14px;
+          transform: translate(4px, 0px);
+        }
+      }
+    }
+  }
+
+  .mobileIcon {
+    width: 24px;
+    height: 24px;
+  }
+}
