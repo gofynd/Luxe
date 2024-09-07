@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useGlobalStore } from "fdk-core/utils";
 import { motion, useInView } from "framer-motion";
 
 import styles from "./fy-image.less";
@@ -64,8 +63,6 @@ const FyImage = ({
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const imgWrapperRef = useRef(null);
-  // const THEME = useGlobalStore(fpi.getters.THEME);
-  // const globalConfig = THEME?.config?.list[0]?.global_config?.custom?.props;
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true });
   useEffect(() => {
@@ -160,10 +157,6 @@ const FyImage = ({
     });
 
   const getSources = () => {
-    // if (isLazyLoaded && !isIntersecting) {
-    //   return getLazyLoadSources();
-    // }
-
     return getLazyLoadSources().map((source) => {
       source.srcset = getUrl(source.width, source.url);
       return source;

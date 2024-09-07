@@ -265,7 +265,6 @@ export function Component({ props, globalConfig }) {
   };
 
   useEffect(() => {
-    // setShowOverlay(autoplay?.value)
     if (isYoutube(videoUrl?.value)) {
       removeYTScript();
     }
@@ -293,47 +292,39 @@ export function Component({ props, globalConfig }) {
       )}
       <div className={`${styles.video_container}`} onClick={phoneClick}>
         <IntersectionObserverComponent>
-          {
-            videoFile?.value ? (
-              <video
-                ref={videoRef}
-                width="100%"
-                poster={coverUrl?.value?.replace("original", "resize-w:900")}
-                autoPlay={autoplay?.value}
-                muted={autoplay?.value}
-                loop={showloop?.value}
-                controls={!hidecontrols?.value}
-                webkitPlaysInline="true"
-                playsInline
-                onPause={() => setShowOverlay(true)}
-                onEnded={() => setShowOverlay(true)}
-                onPlay={() => setShowOverlay(false)}
-                onLoadedData={() => setIsLoading(false)}
-                onProgress={() => setIsLoading(false)}
-                preload="auto"
-                src={getVideoSource()}
+          {videoFile?.value ? (
+            <video
+              ref={videoRef}
+              width="100%"
+              poster={coverUrl?.value?.replace("original", "resize-w:900")}
+              autoPlay={autoplay?.value}
+              muted={autoplay?.value}
+              loop={showloop?.value}
+              controls={!hidecontrols?.value}
+              webkitPlaysInline="true"
+              playsInline
+              onPause={() => setShowOverlay(true)}
+              onEnded={() => setShowOverlay(true)}
+              onPlay={() => setShowOverlay(false)}
+              onLoadedData={() => setIsLoading(false)}
+              onProgress={() => setIsLoading(false)}
+              preload="auto"
+              src={getVideoSource()}
+              allowFullScreen
+            />
+          ) : (
+            isYoutube() && (
+              /* eslint-disable react/no-unknown-property */
+              <div
+                className={styles.yt_video}
+                ref={ytVideoRef}
+                id={`yt-video-${getYTVideoID(videoUrl?.value)}`}
+                data-videoid={getYTVideoID(videoUrl?.value)}
+                data-videometa={JSON.stringify(props)}
                 allowFullScreen
               />
-            ) : (
-              isYoutube() && (
-                //  <div
-                //           className={styles["yt_container"]}
-                //           allowFullScreen
-                //         >
-
-                /* eslint-disable react/no-unknown-property */
-                <div
-                  className={styles.yt_video}
-                  ref={ytVideoRef}
-                  id={`yt-video-${getYTVideoID(videoUrl?.value)}`}
-                  data-videoid={getYTVideoID(videoUrl?.value)}
-                  data-videometa={JSON.stringify(props)}
-                  allowFullScreen
-                />
-              )
             )
-            // </div>
-          }
+          )}
 
           {showOverlay && (
             <div

@@ -5,7 +5,6 @@ import Slider from "react-slick";
 
 import styles from "../styles/sections/image-gallery.less";
 import FyImage from "../components/core/fy-image/fy-image";
-import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient, throttle } from "../helper/utils";
 import placeholder from "../assets/images/img-placeholder-1.png";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
@@ -20,7 +19,6 @@ export function Component({ props, blocks, globalConfig, preset }) {
     item_count,
     mobile_layout,
     desktop_layout,
-    link,
   } = props;
   const [windowWidth, setWindowWidth] = useState(0);
   const [config, setConfig] = useState({
@@ -33,9 +31,6 @@ export function Component({ props, blocks, globalConfig, preset }) {
     autoplay: false,
     autoplaySpeed: 3000,
     cssEase: "linear",
-    // arrows: getGallery.length > item_count?.value || false,
-    // nextArrow: <SvgWrapper svgSrc="arrow-right" />,
-    // prevArrow: <SvgWrapper svgSrc="arrow-left" />,
     arrows: false,
     adaptiveHeight: true,
     responsive: [

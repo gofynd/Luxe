@@ -252,7 +252,6 @@ const useProductDescription = (fpi, slug) => {
       };
       fpi.executeGQL(ADD_TO_CART, payload).then((outRes) => {
         if (outRes?.data?.addItemsToCart?.success) {
-          // fpi.executeGQL(CART_ITEMS_COUNT, null).then((res) => {
           showSnackbar(
             outRes?.data?.addItemsToCart?.message || "Added to Cart",
             "success"
@@ -262,7 +261,6 @@ const useProductDescription = (fpi, slug) => {
               `/cart/checkout/?buy_now=true&id=${outRes?.data?.addItemsToCart?.cart?.id}`
             );
           }
-          // });
         } else {
           showSnackbar(
             outRes?.data?.addItemsToCart?.message || "Failed to add to cart",

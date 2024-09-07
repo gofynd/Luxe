@@ -1,6 +1,6 @@
 import React from "react";
 
-function Profile({ fpi }) {
+function Profile() {
   return (
     <>
       <h1 style={{ color: "red" }}>
@@ -11,6 +11,6 @@ function Profile({ fpi }) {
   );
 }
 
-Profile.serverFetch = ({ router }) => {};
+Profile.serverFetch = () => {};
 
 export default Profile;

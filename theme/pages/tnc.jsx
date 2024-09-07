@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import FyHTMLRenderer from "../components/core/fy-html-renderer/fy-html-renderer";
 import { useGlobalStore } from "fdk-core/utils";
 import { LEGAL_DATA } from "../queries/legalDocuments";

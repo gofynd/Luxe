@@ -24,14 +24,17 @@ const useSharedCart = (fpi) => {
     });
   }, [fpi]);
 
+  // bagItems variable serves to organize and group items from the sharedCart based on specific criteria
   const bagItems = useMemo(() => {
     if (sharedCart && sharedCart?.items) {
+      // Add an index to each item and create a new array with the indexed items
       const allItems = sharedCart.items.map((item, index) => ({
         ...item,
         item_index: index,
       }));
       // return allItems;
       /* eslint no-param-reassign: "error" */
+      // Group items by the combination of seller ID, store ID, and product ID
       const grpBySameSellerAndProduct = allItems.reduce((result, item) => {
         result[
           `${item.article.seller.uid}${item.article.store.uid}${item.product.uid}`

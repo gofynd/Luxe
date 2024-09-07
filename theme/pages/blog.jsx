@@ -151,12 +151,6 @@ function Blog({ fpi }) {
   const getBlogTitle = (title) => {
     const blogTitle =
       title?.length > 50 ? `${title.slice(0, 50).trim()}...` : title;
-    //   if (searchText) {
-    //     let regex = new RegExp(searchText, "gi");
-    //     return title.replace(regex, function (match) {
-    //       return '<span className={`${styles.highlight}`}>' + match + "</span>";
-    //     });
-    //   }
     return blogTitle;
   };
   const tagsList = () => {

@@ -113,10 +113,6 @@ const usePayment = (fpi) => {
     } = paymentPayload;
     // Implement the logic to proceed with the payment
     if (mode === "newCARD") {
-      // if (!isCardSecure) {
-      //     openRbiGuidelineDialog = true;
-      //     return;
-      // }
       const payload = {
         aggregator_name: selectedNewCardData.aggregator_name,
         payment_mode: "CARD",
@@ -180,10 +176,7 @@ const usePayment = (fpi) => {
         ...options,
         payment: {
           ...selectedCard,
-          // card_security_code: selectedCardCVV,
           is_card_secure: selectedCard.compliant_with_tokenisation_guidelines,
-
-          // : isSavedCardSecure,
         },
         address_id,
         billing_address_id: address_id,
@@ -279,7 +272,6 @@ const usePayment = (fpi) => {
           updateCartPaymentRequestInput: payload,
         })
         .then(() => {
-          // if (res?.selectPaymentMode?.is_valid) {
           addParamsToLocation({
             ...getQueryParams(),
             aggregator_name:
@@ -303,13 +295,11 @@ const usePayment = (fpi) => {
             billing_address_id: address_id,
             paymentflow: paymentOption?.payment_flows[options.aggregator_name],
           });
-          // }
         });
     } else if (mode === "COD") {
       const payload = {
         aggregator_name: selectedTabData.aggregator_name,
         payment_mode: mode,
-        // payment_identifier: "" + selectedTabData.payment_mode_id,
         id: cart_id,
       };
 

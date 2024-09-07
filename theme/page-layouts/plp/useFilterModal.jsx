@@ -16,8 +16,6 @@ const useFilterModal = ({
   };
 
   const handleApplyClick = () => {
-    // console.log({ sortItem });
-    // handleSortUpdate(sortItem.value);
     closeModal();
   };
 

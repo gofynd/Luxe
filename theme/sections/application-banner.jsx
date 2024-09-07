@@ -3,6 +3,7 @@ import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { FDKLink } from "fdk-core/components";
 import styles from "../styles/sections/application-banner.less";
+import { isRunningOnClient } from "../helper/utils";
 
 export function Component({ props, blocks, globalConfig }) {
   const [isMobile, setIsMobile] = useState(false);
@@ -10,25 +11,37 @@ export function Component({ props, blocks, globalConfig }) {
   const [tooltipHeight, setTooltipHeight] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [tooltipWidth, setTooltipWidth] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(
+    isRunningOnClient() ? window?.innerWidth : 400
+  );
+  const [interval, setInterval] = useState([]);
 
   const { image_desktop, image_mobile, banner_link } = props;
 
+  // useEffect hook to handle window resizing and mobile detection
   useEffect(() => {
+    // Check if the code is running on the client-side (browser)
     if (isRunningOnClient()) {
       const localDetectMobileWidth = () =>
         document?.getElementsByTagName("body")?.[0]?.getBoundingClientRect()
           ?.width <= 768;
 
+      // Function to handle the window resize event
       const handleResize = () => {
         setWindowWidth(window?.innerWidth);
       };
+
+      // Set the initial mobile detection based on body width
       setIsMobile(localDetectMobileWidth());
-
       window?.addEventListener("resize", handleResize);
-
       return () => {
         window.removeEventListener("resize", handleResize);
       };
+    }
+
+    // Check if the 'blocks' array has any elements
+    if (blocks?.length) {
+      setInterval(blocks?.length);
     }
   }, []);
 
@@ -79,6 +92,7 @@ export function Component({ props, blocks, globalConfig }) {
       : require("../assets/images/placeholder19x6.png");
 
   const getImgSrcSet = useCallback(() => {
+    // Check if high-definition images (img_hd) are available in globalConfig
     if (globalConfig?.img_hd?.value) {
       return [
         { breakpoint: { min: 1400 }, width: 2500 },
@@ -92,6 +106,7 @@ export function Component({ props, blocks, globalConfig }) {
         },
       ];
     }
+    // Return a lower resolution image set if img_hd is not available
     return [
       { breakpoint: { min: 1400 }, width: 1500 },
       { breakpoint: { min: 1023 }, width: 1200 },
@@ -105,14 +120,20 @@ export function Component({ props, blocks, globalConfig }) {
     ];
   }, [globalConfig]);
 
+  // Function to handle the tooltip display on mouse over event
   const mouseOverTooltip = (param, index) => {
     if (!isMobile) {
+      // Clear any existing tooltip hide timer for the specific index
       clearTimeout(interval[index]);
+
+      // If 'param' is falsy, this indicates the tooltip should be hidden
       if (!param) {
         interval[index] = setTimeout(() => {
+          // Update the state to hide the tooltip for the specified index
           setShowTooltip((prev) => ({ ...prev, [index]: param }));
         }, 200);
       } else {
+        // If 'param' is truthy, show the tooltip immediately by updating the state
         setShowTooltip((prev) => ({ ...prev, [index]: param }));
       }
     }
@@ -141,7 +162,7 @@ export function Component({ props, blocks, globalConfig }) {
     >
       <FDKLink to={banner_link?.value}>
         <FyImage
-          customClass={styles["imageWrapper"]}
+          customClass={styles.imageWrapper}
           src={getDesktopImage()}
           aspectRatio={19 / 6}
           mobileAspectRatio={4 / 5}
@@ -202,7 +223,7 @@ export function Component({ props, blocks, globalConfig }) {
 
                 <div
                   id="tooltip"
-                  className={`${styles["tooltip"]} ${
+                  className={`${styles.tooltip} ${
                     showTooltip[index] &&
                     block.props?.pointer_type?.value === "pointer"
                       ? styles["tooltip-visible"]

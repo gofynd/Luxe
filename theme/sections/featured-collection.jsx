@@ -16,7 +16,6 @@ import { FEATURED_COLLECTION } from "../queries/collectionsQuery";
 import "fdk-react-templates/components/product-card/product-card.css";
 
 export function Component({ props, globalConfig, fpi }) {
-  //   let getGallery = [];
   const defaultCategories = ["Chair", "Sofa", "Plants & Flowers", "Bags"];
   const bannerRef = useRef(null);
   const {
@@ -45,10 +44,6 @@ export function Component({ props, globalConfig, fpi }) {
   const slug =
     customValues?.featuredCollectionData?.data?.collection?.slug ?? "";
   const [windowWidth, setWindowWidth] = useState(0);
-  // const [getGallery, setGetGallery] = useState([]);
-  // const [slug, setSlug] = useState("");
-  // const [bannerUrl, setBannerUrl] = useState("");
-  // const [imgAlt, setImgAlt] = useState("");
   const [isClient, setIsClient] = useState(false);
   const [config, setConfig] = useState({
     dots: true,

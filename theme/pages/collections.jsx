@@ -123,18 +123,4 @@ export const settings = JSON.stringify({
   ],
 });
 
-// Collections.serverFetch = async ({ fpi, props }) => {
-//   try {
-//     const payload = {
-//       slug: props.collection.value,
-//       first: 12,
-//       pageNo: 1,
-//     };
-//     await fpi.executeGQL(FEATURED_COLLECTION, payload).then((res) => {
-//       return fpi.custom.setValue("featuredCollectionData", res);
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
-
 export default Collections;

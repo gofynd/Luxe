@@ -65,9 +65,6 @@ function Categories({ fpi }) {
     </div>
   );
 }
-// Brands.serverFetch = async ({ fpi }) => {
-//   fpi.executeGraphQL(BRAND_LISTING);
-// };
 
 export const settings = JSON.stringify({
   props: [

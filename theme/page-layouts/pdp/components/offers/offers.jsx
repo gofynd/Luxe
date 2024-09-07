@@ -9,31 +9,6 @@ function Offers({ couponsList, promotionsList }) {
   const [showMoreOffers, setShowMoreOffers] = useState(false);
   const [sidebarActiveTab, setSidebarActiveTab] = useState("coupons");
 
-  //   useEffect(() => {
-  //     const fetchCoupons = async () => {
-  //       try {
-  //         const response = await apiSDK.cart.getCoupons({});
-  //         setCouponsList(response?.available_coupon_list || []);
-  //       } catch (ex) {
-  //         console.error('Error while fetching coupons:', ex);
-  //       }
-  //     };
-
-  //     const fetchPromotions = async () => {
-  //       try {
-  //         const response = await apiSDK.cart.getPromotionOffers({
-  //           slug: context.product.slug,
-  //         });
-  //         setPromotionsList(response?.available_promotions || []);
-  //       } catch (ex) {
-  //         console.error('Error while fetching promotions:', ex);
-  //       }
-  //     };
-
-  //     fetchCoupons();
-  //     fetchPromotions();
-  //   }, [apiSDK.cart, context.product.slug]);
-
   const openMoreOffersSidebar = (offerType) => {
     setSidebarActiveTab(offerType);
     setShowMoreOffers(true);

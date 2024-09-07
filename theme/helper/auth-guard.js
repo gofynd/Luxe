@@ -19,6 +19,7 @@ export async function isLoggedIn({ fpi, store }) {
   }
 }
 
+// Guards against logged-in users accessing certain pages (like login pages)
 export async function loginGuard({ fpi, store }) {
   try {
     const loggedIn = await isLoggedIn({ fpi, store });

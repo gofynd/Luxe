@@ -232,11 +232,6 @@ function ProfileShipmentUpdatePage({ fpi }) {
   }, [shipmentDetails, selectedReason, imageList]);
   const getUpdatedBagsList = () => {
     const arrBags = [];
-
-    // for (let i = 0; i < getBag.length; i++) {
-    //   if (refs?.current[i]?.getUpdatedBags())
-    //     arrBags = arrBags.concat(refs?.current[i]?.getUpdatedBags());
-    // }
     return arrBags;
   };
   const getProductDetails = () => {
@@ -393,25 +388,9 @@ function ProfileShipmentUpdatePage({ fpi }) {
         );
     }
 
-    // if (!confirmReturn) {
-    //   setConfirmReturn(true);
-    //   return;
-    // }
     if (getStatusForUpdate() === "return_pre_qc") {
       setInProgress(true);
       const imgRes = [];
-      //   const imgRes = Promise.all(
-      //     imageList.map((item) => {
-      //         return media.upload({
-      //           data: item,
-      //           content_type: item.type,
-      //           file_name: item.name,
-      //           size: item.size,
-      //           namespace: "misc",
-      //           params: {},
-      //         });
-      //     })
-      //   );
       setInProgress(false);
       setCdnUrls(
         imgRes.map((item) => {
@@ -423,10 +402,6 @@ function ProfileShipmentUpdatePage({ fpi }) {
     }
 
     const reason = selectedReason;
-    // let updateBags = getUpdatedBagsList();
-    // if (updateBags.length === 0) {
-    //   return showUpdateErrorText("No Items to return");
-    // } else
     if (
       reason[0]?.display_name === "Others" &&
       reason[0]?.reason_other_text.length <= 0
@@ -504,7 +479,6 @@ function ProfileShipmentUpdatePage({ fpi }) {
                       )}
                       <SvgWrapper
                         svgSrc="arrowDropdownBlack"
-                        // onBlur={close}
                         className={`${showReasonsAccordion[i] ? styles.rotate : ""} ${styles.animate}`}
                       />
                     </div>
@@ -552,12 +526,10 @@ function ProfileShipmentUpdatePage({ fpi }) {
                         ></OrdersHeader>
                         <SvgWrapper
                           svgSrc="arrowDropdownBlack"
-                          //   onBlur={close}
                           className={`${showBeneficiariesAccordion ? styles.rotate : ""} ${styles.animate}`}
                         />
                       </div>
                     </div>
-                    {/* <ukt-accordion> */}
                     <div>
                       {showBeneficiariesAccordion && (
                         <>
@@ -580,7 +552,6 @@ function ProfileShipmentUpdatePage({ fpi }) {
                         </>
                       )}
                     </div>
-                    {/* // </ukt-accordion> */}
                     {selectedBeneficary && !showBeneficiariesAccordion && (
                       <BeneficiaryItem
                         beneficiary={selectedBeneficary}

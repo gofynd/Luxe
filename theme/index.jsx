@@ -18,12 +18,15 @@ export default async ({
 }) => {
   const proxyDomain = domain;
 
+  // Configure FPIClient with provided options
   const fpiOptions = {
     applicationID,
     applicationToken,
     domain: proxyDomain,
     storeInitialData,
   };
+
+  // Initialize the FPIClient with the configuration options
   const { client } = new FPIClient(fpiOptions);
 
   return {

@@ -3,7 +3,6 @@ import Slider from "react-slick";
 import FyImage from "../components/core/fy-image/fy-image";
 import styles from "../styles/sections/testimonials.less";
 import { isRunningOnClient } from "../helper/utils";
-import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
 export function Component({ props, globalConfig, blocks, preset }) {
   const { title, autoplay, slide_interval, testimonials } = props;
@@ -22,10 +21,6 @@ export function Component({ props, globalConfig, blocks, preset }) {
 
   useEffect(() => {
     if (isRunningOnClient()) {
-      const localDetectMobileWidth = () =>
-        document?.getElementsByTagName("body")?.[0]?.getBoundingClientRect()
-          ?.width <= 768;
-
       const handleResize = () => {
         setWindowWidth(window?.innerWidth);
       };

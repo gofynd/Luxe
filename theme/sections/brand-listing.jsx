@@ -33,31 +33,6 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     isRunningOnClient() ? window?.innerWidth : 400
   );
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
-  // const fetchBrands = async () => {
-  //   const promisesArr = [];
-  //   setIsLoading(true);
-  //   blocks.forEach((block) => {
-  //     if (block.props?.brand?.value) {
-  //       promisesArr.push(
-  //         fpi.executeGQL(BRAND_DETAILS, { slug: block.props.brand.value.id })
-  //       );
-  //     }
-  //   });
-
-  //   Promise.all(promisesArr)
-  //     .then((responses) => {
-  //       setBrands(responses);
-  //       setIsLoading(false);
-  //     })
-  //     .catch((err) => {
-  //       setIsLoading(false);
-  //       console.log(err);
-  //     });
-  // };
-
-  // useEffect(() => {
-  //   fetchBrands();
-  // }, [JSON.stringify(blocks)]);
 
   useEffect(() => {
     if (customValues?.brandData?.length > 0) {
@@ -67,17 +42,6 @@ export function Component({ props, globalConfig, blocks, fpi }) {
 
   useEffect(() => {
     if (isRunningOnClient()) {
-      //   const localDetectMobileWidth = () => {
-      //     return (
-      //       document?.getElementsByTagName("body")?.[0]?.getBoundingClientRect()
-      //         ?.width <= 768
-      //     );
-      //   };
-
-      //   if(localDetectMobileWidth){
-      //     setDesktopLayout("grid")
-      //   }
-
       const handleResize = () => {
         setWindowWidth(window?.innerWidth);
       };

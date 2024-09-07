@@ -84,13 +84,6 @@ function ProductDescriptionPdp({ fpi, slug }) {
   }
 
   function getProductPrice(key) {
-    // if (this.storeInfo && this.storeInfo.price) {
-    //   const { is_set } = this.storeInfo;
-    //   if (is_set) {
-    //     return this.storeInfo.price_per_piece[key];
-    //   }
-    //   return this.storeInfo.price[key];
-    // }
     if (selectedSize && productPriceBySlug) {
       if (productPriceBySlug?.set) {
         return productPriceBySlug?.price_per_piece[key] || "";
@@ -123,12 +116,6 @@ function ProductDescriptionPdp({ fpi, slug }) {
       onSizeSelection(sizes?.sizes?.[0]);
     }
   }, [isSizeCollapsed, preSelectFirstOfMany]);
-
-  // function getReviewRatingInfo() {
-  //   const customMeta = productDetails?.custom_meta || [];
-
-  //   return getReviewRatingData(customMeta);
-  // }
 
   const isSizeGuideAvailable = () => {
     const sizeChartHeader = productMeta?.size_chart?.headers || {};
@@ -276,15 +263,12 @@ function ProductDescriptionPdp({ fpi, slug }) {
                 <div className={`${styles.sellerInfo} ${styles.fontBody}`}>
                   <div
                     className={`${styles.storeSeller} ${styles.captionNormal}`}
-                    // v-if="showSellerStoreLabel"
                   >
                     <span className={styles.soldByLabel}>Seller :</span>
                     <div
-                      // v-if="showSellerStoreLabel"
                       className={`${styles.nameWrapper} ${
                         pageConfig?.seller_store_selection && styles.selectable
                       }`}
-                      // @click="onSellerClick(sellerData.loadStores)"
                     >
                       <p className={styles.storeSellerName}>
                         {`${productPriceBySlug?.seller?.name || ""}`}

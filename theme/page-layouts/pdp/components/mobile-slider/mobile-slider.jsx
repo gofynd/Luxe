@@ -109,15 +109,6 @@ function MobileSlider({
     )}/0.jpg`;
   }
 
-  function getActiveIndex(index) {
-    // if (typeof index === "number" && index !== this.currentIndex) {
-    //   setShowReplayButton(false);
-    //   const newArray = [...yourArray];
-    //   setLoadedVideos((prev)=> ...prev,loadedVideos[index](false));
-    //   this.currentIndex = index;
-    // }
-  }
-
   return (
     <div className={styles.mobilePdpCarouselBox} style={{ maxWidth: "100vw" }}>
       <Slider

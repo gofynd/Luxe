@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// import GlideCarousel, { GlideSlide } from "some-carousel-library"; // replace with actual import
 import { FDKLink } from "fdk-core/components"; // replace with actual import
 import Slider from "react-slick";
 import FyImage from "../components/core/fy-image/fy-image"; // replace with actual import
@@ -69,7 +68,6 @@ export function Component({ props, globalConfig, blocks, preset }) {
       slidesToShow: trustMarker.length === 1 ? 1 : 5, // Show only one slide if there's only one testimonial
       slidesToScroll: trustMarker.length === 1 ? 1 : 5, // Scroll one slide if there's only one testimonial
       autoplay: false,
-      // autoplaySpeed: slide_interval?.value * 1000,
       centerMode: false,
       centerPadding: trustMarker.length === 1 ? "0" : "152px",
       responsive: [
@@ -140,15 +138,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
 
         {desktopLayout === "grid" && (
           <div className="section Trust-marker">
-            <div
-              className={styles["Trust-marker-image-container"]}
-              // style={{
-              //   gridTemplateColumns:
-              //     getTrustMarker().length < 5 &&
-              //     desktopWidth &&
-              //     `repeat(${getTrustMarker().length}, 1fr)`,
-              // }}
-            >
+            <div className={styles["Trust-marker-image-container"]}>
               {getTrustMarker().map((block, i) => (
                 <FDKLink
                   key={i}
@@ -227,8 +217,6 @@ export function Component({ props, globalConfig, blocks, preset }) {
                     </span>
                   </div>
                 </FDKLink>
-                // </div>
-                // </div>
               ))}
             </Slider>
           </div>

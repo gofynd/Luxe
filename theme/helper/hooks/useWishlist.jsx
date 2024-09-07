@@ -12,13 +12,6 @@ export const useWishlist = ({ fpi }) => {
   const pageSizeRef = useRef(500);
   const followedlList = useGlobalStore(fpi.getters.FOLLOWED_LIST);
   const { showSnackbar } = useSnackbar();
-  // console.log({
-  //   FOLLOWED_LIST: useGlobalStore(fpi.getters.FOLLOWED_LIST),
-  //   FOLLOWED_PRODUCTS: useGlobalStore(fpi.getters.FOLLOWED_PRODUCTS),
-  //   FOLLOWER_COUNT_BY_ID: useGlobalStore(fpi.getters.FOLLOWER_COUNT_BY_ID),
-  //   FOLLOW_BY_ID: useGlobalStore(fpi.getters.FOLLOW_BY_ID),
-  //   FOLLOW_IDS: useGlobalStore(fpi.getters.FOLLOW_IDS),
-  // });
 
   function fetchFollowdProductsId() {
     const payload = {
@@ -92,12 +85,6 @@ export const useWishlist = ({ fpi }) => {
       addToWishList(product);
     }
   }
-
-  // useEffect(() => {
-  //   if (followedlList?.items) {
-  //     fetchFollowdProductsId();
-  //   }
-  // }, []);
 
   const followedIdList = useMemo(() => {
     return followedlList?.items?.map((item) => item.uid) || [];
