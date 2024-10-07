@@ -544,32 +544,894 @@
       {
         "sections": [
           {
-            "label": "",
-            "blocks": [],
-            "source": "themeBundle",
+            "blocks": [
+              {
+                "type": "hotspot_desktop",
+                "name": "Hotspot Desktop",
+                "props": {
+                  "pointer_type": {
+                    "type": "select",
+                    "value": "pointer"
+                  },
+                  "edit_visible": {
+                    "type": "checkbox",
+                    "value": true
+                  },
+                  "x_position": {
+                    "type": "range",
+                    "value": 50
+                  },
+                  "y_position": {
+                    "type": "range",
+                    "value": 50
+                  },
+                  "box_width": {
+                    "type": "range",
+                    "value": 15
+                  },
+                  "box_height": {
+                    "type": "range",
+                    "value": 15
+                  },
+                  "hotspot_image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1725613920549.png"
+                  },
+                  "hotspot_header": {
+                    "type": "text",
+                    "value": "Header"
+                  },
+                  "hotspot_description": {
+                    "type": "textarea",
+                    "value": "Description"
+                  },
+                  "hotspot_link_text": {
+                    "type": "text",
+                    "value": "Link"
+                  },
+                  "redirect_link": {
+                    "type": "url",
+                    "value": "https://glam.fynd.io/products"
+                  }
+                }
+              },
+              {
+                "type": "hotspot_mobile",
+                "name": "Hotspot Mobile",
+                "props": {
+                  "pointer_type": {
+                    "type": "select",
+                    "value": "pointer"
+                  },
+                  "edit_visible": {
+                    "type": "checkbox",
+                    "value": true
+                  },
+                  "x_position": {
+                    "type": "range",
+                    "value": 50
+                  },
+                  "y_position": {
+                    "type": "range",
+                    "value": 50
+                  },
+                  "box_width": {
+                    "type": "range",
+                    "value": 15
+                  },
+                  "box_height": {
+                    "type": "range",
+                    "value": 15
+                  },
+                  "hotspot_image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727341922988.png"
+                  },
+                  "hotspot_header": {
+                    "type": "text",
+                    "value": "Header"
+                  },
+                  "hotspot_description": {
+                    "type": "textarea",
+                    "value": "Description"
+                  },
+                  "hotspot_link_text": {
+                    "type": "text",
+                    "value": "Link"
+                  },
+                  "redirect_link": {
+                    "type": "url",
+                    "value": "https://glam.fynd.io/products"
+                  }
+                }
+              }
+            ],
+            "label": "Hero Image",
+            "name": "hero-image",
             "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
               "screen": {
-                "mobile": true,
                 "desktop": true,
+                "mobile": true,
                 "tablet": true
               },
               "user": {
-                "authenticated": true,
-                "anonymous": true
-              },
-              "route": {
-                "selected": "none",
-                "exact_url": ""
+                "anonymous": true,
+                "authenticated": true
               }
             },
-            "name": "raw-html",
+            "preset": {},
             "props": {
-              "code": {
-                "type": "code",
-                "value": "<h1>\n  Welcome to skyfire\n</h1>"
+              "heading": {
+                "type": "text",
+                "value": "Welcome to Your New Store"
+              },
+              "description": {
+                "type": "text",
+                "value": "Begin your journey by adding unique images and banners. This is your chance to create a captivating first impression. Customize it to reflect your brand's personality and style!"
+              },
+              "overlay_option": {
+                "value": "no_overlay",
+                "type": "select"
+              },
+              "button_text": {
+                "type": "text",
+                "value": "Shop Now"
+              },
+              "button_link": {
+                "type": "url",
+                "value": "www.google.com"
+              },
+              "invert_button_color": {
+                "type": "checkbox",
+                "value": false
+              },
+              "desktop_banner": {
+                "type": "image_picker",
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727339523452.png"
+              },
+              "text_placement_desktop": {
+                "type": "select",
+                "value": "top_left"
+              },
+              "text_alignment_desktop": {
+                "type": "select",
+                "value": "left"
+              },
+              "mobile_banner": {
+                "type": "image_picker",
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727343244011.png"
+              },
+              "text_placement_mobile": {
+                "value": "top_left",
+                "type": "select"
+              },
+              "text_alignment_mobile": {
+                "value": "left",
+                "type": "select"
+              }
+            }
+          },
+          {
+            "blocks": [
+              {
+                "type": "category",
+                "name": "Brand Item",
+                "props": {
+                  "brand": {
+                    "type": "brand",
+                    "value": {
+                      "display": "ANWYN",
+                      "id": "anwyn"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "category",
+                "name": "Brand Item",
+                "props": {
+                  "brand": {
+                    "type": "brand",
+                    "value": {
+                      "display": "FusionWave",
+                      "id": "fusionwave"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "category",
+                "name": "Brand Item",
+                "props": {
+                  "brand": {
+                    "type": "brand",
+                    "value": {
+                      "display": "Flashh",
+                      "id": "flash"
+                    }
+                  }
+                }
+              },
+              {
+                "type": "category",
+                "name": "Brand Item",
+                "props": {
+                  "brand": {
+                    "type": "brand",
+                    "value": {
+                      "display": "Astraa",
+                      "id": "astraa"
+                    }
+                  }
+                }
+              }
+            ],
+            "label": "Brands Listing",
+            "name": "brand-listing",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
               }
             },
-            "preset": {}
+            "preset": {
+              "blocks": [
+                {
+                  "name": "Brand Item"
+                },
+                {
+                  "name": "Brand Item"
+                },
+                {
+                  "name": "Brand Item"
+                },
+                {
+                  "name": "Brand Item"
+                }
+              ]
+            },
+            "props": {
+              "per_row": {
+                "type": "range",
+                "value": 3
+              },
+              "logoOnly": {
+                "value": false,
+                "type": "checkbox"
+              },
+              "layout_mobile": {
+                "value": "stacked",
+                "type": "select"
+              },
+              "layout_desktop": {
+                "type": "select",
+                "value": "horizontal"
+              },
+              "img_container_bg": {
+                "value": "#00000000",
+                "type": "color"
+              },
+              "img_fill": {
+                "value": true,
+                "type": "checkbox"
+              },
+              "heading": {
+                "value": "Our Top Brands",
+                "type": "text"
+              },
+              "description": {
+                "value": "All is unique no matter how you put it",
+                "type": "textarea"
+              },
+              "button_text": {
+                "value": "VIEW ALL",
+                "type": "text"
+              }
+            }
+          },
+          {
+            "blocks": [
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": "https://glam.fynd.io/products"
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": "https://glam.fynd.io/products"
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": "https://glam.fynd.io/products"
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "trustmarker",
+                "name": "Trust Marker",
+                "props": {
+                  "marker_logo": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1727347103963.png"
+                  },
+                  "marker_heading": {
+                    "type": "text",
+                    "value": "Free Delivery"
+                  },
+                  "marker_description": {
+                    "type": "text",
+                    "value": "Don`t love it? Don`t worry.Return delivery is free."
+                  },
+                  "marker_link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              }
+            ],
+            "label": "Trust Marker",
+            "name": "trust-marker",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {
+              "blocks": [
+                {
+                  "name": "Trust Marker",
+                  "props": {
+                    "marker_heading": {
+                      "type": "text",
+                      "value": "Free Delivery"
+                    },
+                    "marker_description": {
+                      "type": "textarea",
+                      "value": "Don't love it? Don't worry.Return delivery is free."
+                    }
+                  }
+                },
+                {
+                  "name": "Trust Marker",
+                  "props": {
+                    "marker_heading": {
+                      "type": "text",
+                      "value": "Satisfied or Refunded"
+                    },
+                    "marker_description": {
+                      "type": "textarea",
+                      "value": "Don't love it? Don't worry.Return delivery is free."
+                    }
+                  }
+                },
+                {
+                  "name": "Trust Marker",
+                  "props": {
+                    "marker_heading": {
+                      "type": "text",
+                      "value": "Top-notch Support"
+                    },
+                    "marker_description": {
+                      "type": "textarea",
+                      "value": "Don't love it? Don't worry.Return delivery is free."
+                    }
+                  }
+                },
+                {
+                  "name": "Trust Marker",
+                  "props": {
+                    "marker_heading": {
+                      "type": "text",
+                      "value": "Secure Payments"
+                    },
+                    "marker_description": {
+                      "type": "textarea",
+                      "value": "Don't love it? Don't worry.Return delivery is free."
+                    }
+                  }
+                },
+                {
+                  "name": "Trust Marker",
+                  "props": {
+                    "marker_heading": {
+                      "type": "text",
+                      "value": "5.0 star rating"
+                    },
+                    "marker_description": {
+                      "type": "textarea",
+                      "value": "Don't love it? Don't worry.Return delivery is free."
+                    }
+                  }
+                }
+              ]
+            },
+            "props": {
+              "title": {
+                "type": "text",
+                "value": "Trust Marker Heading"
+              },
+              "description": {
+                "value": "Add description",
+                "type": "text"
+              },
+              "desktop_layout": {
+                "type": "select",
+                "value": "horizontal"
+              }
+            }
+          },
+          {
+            "blocks": [],
+            "label": "Featured Collection",
+            "name": "featured-collection",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {},
+            "props": {
+              "collection": {
+                "type": "collection",
+                "value": "short-kurti"
+              },
+              "desktop_layout": {
+                "type": "select",
+                "value": "horizontal"
+              },
+              "mobile_layout": {
+                "type": "select",
+                "value": "banner_horizontal_scroll"
+              },
+              "img_container_bg": {
+                "type": "color",
+                "value": "#461B1B00"
+              },
+              "img_fill": {
+                "type": "checkbox",
+                "value": true
+              },
+              "heading": {
+                "type": "text",
+                "value": "Featured Collection Heading"
+              },
+              "description": {
+                "type": "text",
+                "value": "Showcase your top collections here! Whether it's new arrivals, trending items, or special promotions, use this space to draw attention to what's most important in your store."
+              },
+              "button_text": {
+                "type": "text",
+                "value": "View all"
+              },
+              "item_count": {
+                "type": "range",
+                "value": 4
+              }
+            }
+          },
+          {
+            "blocks": [],
+            "label": "Featured Products",
+            "name": "featured-products",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {},
+            "props": {
+              "product": {
+                "type": "product",
+                "value": "blueberry-muffin-100percent-arabica-instant-coffee-100g-11715233"
+              },
+              "Heading": {
+                "type": "text",
+                "value": "Heading Featured Products"
+              },
+              "description": {
+                "type": "text",
+                "value": "Description Heading Featured ProductsHeading Featured ProductsHeading Featured ProductsHeading Featured ProductsHeading Featured Products"
+              },
+              "show_seller": {
+                "value": true,
+                "type": "checkbox"
+              },
+              "show_size_guide": {
+                "value": true,
+                "type": "checkbox"
+              },
+              "size_selection_style": {
+                "type": "radio",
+                "value": "dropdown"
+              },
+              "hide_single_size": {
+                "value": false,
+                "type": "checkbox"
+              },
+              "tax_label": {
+                "value": "Price inclusive of all tax",
+                "type": "text"
+              }
+            }
+          },
+          {
+            "blocks": [
+              {
+                "type": "testimonial",
+                "name": "Testimonial",
+                "props": {
+                  "author_image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1723663037411.png"
+                  },
+                  "author_testimonial": {
+                    "type": "textarea",
+                    "value": "Add customer reviews and testimonials to showcase your store's happy customers."
+                  },
+                  "author_name": {
+                    "type": "text",
+                    "value": "Author Name"
+                  },
+                  "author_description": {
+                    "type": "text",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "testimonial",
+                "name": "Testimonial",
+                "props": {
+                  "author_image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/668765e1c984016d78222a21/theme/pictures/free/original/theme-image-1725613920549.png"
+                  },
+                  "author_testimonial": {
+                    "type": "textarea",
+                    "value": ""
+                  },
+                  "author_name": {
+                    "type": "text",
+                    "value": "Author Name"
+                  },
+                  "author_description": {
+                    "type": "text",
+                    "value": "Author Description"
+                  }
+                }
+              },
+              {
+                "type": "testimonial",
+                "name": "Testimonial",
+                "props": {
+                  "author_image": {
+                    "type": "image_picker",
+                    "value": ""
+                  },
+                  "author_testimonial": {
+                    "type": "textarea",
+                    "value": "Add customer reviews and testimonials to showcase your store's happy customers."
+                  },
+                  "author_name": {
+                    "type": "text",
+                    "value": ""
+                  },
+                  "author_description": {
+                    "type": "text",
+                    "value": ""
+                  }
+                }
+              }
+            ],
+            "label": "Testimonial",
+            "name": "testimonials",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {
+              "blocks": [
+                {
+                  "name": "Testimonial",
+                  "props": {
+                    "author_image": {
+                      "type": "image_picker",
+                      "value": ""
+                    },
+                    "author_testimonial": {
+                      "type": "textarea",
+                      "value": "Add customer reviews and testimonials to showcase your store's happy customers."
+                    },
+                    "author_name": {
+                      "type": "text",
+                      "value": "Author Description"
+                    },
+                    "author_description": {
+                      "type": "text",
+                      "value": "Author Description"
+                    }
+                  }
+                },
+                {
+                  "name": "Testimonial",
+                  "props": {
+                    "author_image": {
+                      "type": "image_picker",
+                      "value": ""
+                    },
+                    "author_testimonial": {
+                      "type": "textarea",
+                      "value": "Add customer reviews and testimonials to showcase your store's happy customers."
+                    },
+                    "author_name": {
+                      "type": "text",
+                      "value": "Author Description"
+                    },
+                    "author_description": {
+                      "type": "text",
+                      "value": "Author Description"
+                    }
+                  }
+                }
+              ]
+            },
+            "props": {
+              "title": {
+                "value": "What People Are Saying About Us ",
+                "type": "text"
+              },
+              "autoplay": {
+                "type": "checkbox",
+                "value": true
+              },
+              "slide_interval": {
+                "type": "range",
+                "value": 2
+              }
+            }
           }
         ],
         "value": "home"
