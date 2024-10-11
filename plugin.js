@@ -19,7 +19,6 @@ class NodeJSPolyfill {
         (assets) => {
           // Iterate over each asset in the compilation
           for (const assetName in assets) {
-            console.log({ assetName }); // Log asset name for debugging purposes
 
             // Check if the asset is a JavaScript file
             if (assetName.endsWith(".js")) {
