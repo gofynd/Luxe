@@ -34,7 +34,7 @@ function HeaderDesktop({
   };
 
   const getShopLogo = () =>
-    appInfo?.logo?.secure_url?.replace("original", "resize-h:65") ||
+    appInfo?.logo?.secure_url?.replace("original", "resize-h:165") ||
     fallbackLogo;
 
   return (
@@ -84,36 +84,24 @@ function HeaderDesktop({
               fpi={fpi}
             />
           </div>
-          {isDoubleRowHeader && LoggedIn && (
-            <button
-              type="button"
-              aria-label="Username"
-              className={`${styles.icon} ${styles["right__icons--profile"]}`}
-              onClick={() => checkLogin("profile")}
-            >
-              <SvgWrapper
-                className={`${styles.user} ${isDoubleRowHeader ? styles.headerIcon : styles.singleRowIcon}`}
-                svgSrc="single-row-user"
-              />
-            </button>
-          )}
+
           <button
             type="button"
-            className={`${styles.icon} ${styles["right__icons--wishlist"]}`}
+            className={` ${styles["right__icons--wishlist"]}`}
             title="wishlist"
             onClick={() => checkLogin("wishlist")}
           >
-            <div>
+            <div className={styles.icon}>
               <SvgWrapper
-                className={`${styles.wishlist} ${isDoubleRowHeader ? styles.headerIcon : styles.singleRowIcon}`}
-                svgSrc={isDoubleRowHeader ? "wishlist" : "single-row-wishlist"}
+                className={`${styles.wishlist} ${styles.singleRowIcon}`}
+                svgSrc="single-row-wishlist"
               />
               {wishlistCount > 0 && LoggedIn && (
                 <p className={styles.count}>{wishlistCount}</p>
               )}
             </div>
           </button>
-          {!isDoubleRowHeader && (
+          {(!isDoubleRowHeader || (isDoubleRowHeader && LoggedIn)) && (
             <button
               type="button"
               className={`${styles.icon} ${styles["right__icons--profile"]}`}
@@ -135,8 +123,8 @@ function HeaderDesktop({
               >
                 <div>
                   <SvgWrapper
-                    className={`${styles.cart} ${isDoubleRowHeader ? styles.headerIcon : styles.singleRowIcon}`}
-                    svgSrc={isDoubleRowHeader ? "cart" : "single-row-cart"}
+                    className={`${styles.cart} ${styles.singleRowIcon}`}
+                    svgSrc="single-row-cart"
                   />
                   <p
                     className={styles.count}

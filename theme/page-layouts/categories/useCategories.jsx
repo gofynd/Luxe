@@ -1,9 +1,6 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState } from "react";
 import { useGlobalStore } from "fdk-core/utils";
 import { CATEGORIES_LISTING } from "../../queries/categoryQuery";
-// import { useLocation, useNavigate, createSearchParams } from "react-router-dom";
-
-// let isProductListingMounted = false;
 
 const useCategories = (fpi) => {
   const THEME = useGlobalStore(fpi.getters.THEME);

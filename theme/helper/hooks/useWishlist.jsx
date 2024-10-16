@@ -10,10 +10,10 @@ import { useSnackbar } from "./hooks";
 export const useWishlist = ({ fpi }) => {
   const [isLoading, setIsLoading] = useState(false);
   const pageSizeRef = useRef(500);
-  const followedlList = useGlobalStore(fpi.getters.FOLLOWED_LIST);
+  const followedList = useGlobalStore(fpi.getters.FOLLOWED_LIST);
   const { showSnackbar } = useSnackbar();
 
-  function fetchFollowdProductsId() {
+  function fetchFollowedProductsId() {
     const payload = {
       collectionType: "products",
       pageSize: pageSizeRef.current,
@@ -37,7 +37,7 @@ export const useWishlist = ({ fpi }) => {
             res?.data?.followById?.message || "Added to wishlist",
             "success"
           );
-          return fetchFollowdProductsId().then(() => res?.data?.followById);
+          return fetchFollowedProductsId().then(() => res?.data?.followById);
         }
       })
       .finally(() => {
@@ -66,7 +66,9 @@ export const useWishlist = ({ fpi }) => {
                 "Products Removed From Wishlist",
               "success"
             );
-            return fetchFollowdProductsId().then(() => res?.data?.unfollowById);
+            return fetchFollowedProductsId().then(
+              () => res?.data?.unfollowById
+            );
           }
         })
         .finally(() => {
@@ -75,11 +77,11 @@ export const useWishlist = ({ fpi }) => {
     }
   }
 
-  function toggleWishlist({ product, isFollwed }) {
+  function toggleWishlist({ product, isFollowed }) {
     if (isLoading) {
       return;
     }
-    if (isFollwed) {
+    if (isFollowed) {
       removeFromWishlist(product);
     } else {
       addToWishList(product);
@@ -87,13 +89,13 @@ export const useWishlist = ({ fpi }) => {
   }
 
   const followedIdList = useMemo(() => {
-    return followedlList?.items?.map((item) => item.uid) || [];
-  }, [followedlList]);
+    return followedList?.items?.map((item) => item.uid) || [];
+  }, [followedList]);
 
   return {
     isLoading,
     followedIdList,
-    followedCount: followedlList?.page?.item_total || 0,
+    followedCount: followedList?.page?.item_total || 0,
     addToWishList,
     removeFromWishlist,
     toggleWishlist,

@@ -15,6 +15,7 @@ function MobileSlider({
   removeFromWishlist,
   addToWishList,
   setCurrentImageIndex,
+  slideTabCentreNone = false,
 }) {
   const settings = {
     dots: true,
@@ -36,10 +37,10 @@ function MobileSlider({
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
-          centerPadding: "90px",
-          centerMode: true,
+          centerPadding: !slideTabCentreNone && "90px",
+          centerMode: images.length > 1 && !slideTabCentreNone,
           fade: false,
-          infinite: true,
+          infinite: images.length > 1,
         },
       },
       {
@@ -107,6 +108,15 @@ function MobileSlider({
     return `http://img.youtube.com/vi/${src?.substr(
       (src?.lastIndexOf("/") ?? "") + 1
     )}/0.jpg`;
+  }
+
+  function getActiveIndex(index) {
+    // if (typeof index === "number" && index !== this.currentIndex) {
+    //   setShowReplayButton(false);
+    //   const newArray = [...yourArray];
+    //   setLoadedVideos((prev)=> ...prev,loadedVideos[index](false));
+    //   this.currentIndex = index;
+    // }
   }
 
   return (

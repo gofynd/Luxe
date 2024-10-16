@@ -20,4 +20,6 @@ export const settings = JSON.stringify({
 CartPage.serverFetch = () => {};
 
 // CartPage.authGuard = isLoggedIn;
+export const sections = JSON.stringify([]);
+
 export default CartPage;

@@ -87,7 +87,7 @@ function BlogTabs({
       </div>
 
       <div className={`${styles.sideTabs__content}`}>
-        {show_top_blog && topViewedBlogs?.length && sideTab === "tab1" && (
+        {show_top_blog && topViewedBlogs?.length > 0 && sideTab === "tab1" && (
           <div role="tabpanel">
             <div className={`${styles.sideTabs__list}`} role="list">
               {topViewedBlogs.map((blog, item) => (
@@ -116,7 +116,7 @@ function BlogTabs({
             </div>
           </div>
         )}
-        {show_recent_blog && recentBlogs?.length && sideTab === "tab2" && (
+        {show_recent_blog && recentBlogs?.length > 0 && sideTab === "tab2" && (
           <div role="tabpanel">
             <div className={`${styles.sideTabs__list}`} role="list">
               {recentBlogs.map((blog, item) => (

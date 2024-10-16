@@ -16,6 +16,8 @@ import {
   LOGOUT,
   FORGOT_PASSWORD,
 } from "../../queries/authQuery";
+// import { loginUserInFb } from '../../helper/facebook.utils';
+// import { renderButton } from '../../helper/google.utils';
 
 export const useAccounts = ({ fpi }) => {
   const navigate = useNavigate();
@@ -465,6 +467,10 @@ export const useAccounts = ({ fpi }) => {
     });
   };
 
+  const sendVerificationLinkEmail = (data) => {
+    // return this.$store.dispatch(SEND_VERIFICATION_LINK_EMAIL, data);
+  };
+
   const facebookText = useMemo(() => {
     if (facebookUser?.is_signed_in) {
       return `Continue as ${facebookUser.profile.full_name}`;
@@ -500,6 +506,30 @@ export const useAccounts = ({ fpi }) => {
     // });
   };
 
+  const deleteUser = (data) => {
+    // return this.$store.dispatch(DELETE_USER, data);
+  };
+
+  const sendForgotOtpMobile = (data) => {
+    // return this.$store.dispatch(SEND_FORGOT_OTP_MOBILE, data);
+  };
+
+  const sendForgotOtpEmail = (data) => {
+    // return this.$store.dispatch(SEND_FORGOT_OTP_EMAIL, data);
+  };
+
+  const verifyForgotMobileOtp = (data) => {
+    // return this.$store.dispatch(VERIFY_MOBILE_FORGOT_OTP, data);
+  };
+
+  const verifyForgotEmailOtp = (data) => {
+    // return this.$store.dispatch(VERIFY_EMAIL_FORGOT_OTP, data);
+  };
+
+  const resetForgotPassword = (data) => {
+    // return this.$store.dispatch(RESET_FORGOT_PASSWORD, data);
+  };
+
   return {
     userData,
     platformData,
@@ -523,6 +553,7 @@ export const useAccounts = ({ fpi }) => {
     resendVerifyEmailOtp,
     verifyMobileOtp,
     verifyEmailOtp,
+    sendVerificationLinkEmail,
     facebook,
     addEmail,
   };

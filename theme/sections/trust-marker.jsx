@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+// import GlideCarousel, { GlideSlide } from "some-carousel-library"; // replace with actual import
 import { FDKLink } from "fdk-core/components"; // replace with actual import
 import Slider from "react-slick";
 import FyImage from "../components/core/fy-image/fy-image"; // replace with actual import
 import styles from "../styles/trust-marker.less";
 import { isRunningOnClient } from "../helper/utils";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
+import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
 export function Component({ props, globalConfig, blocks, preset }) {
   const { title, description, desktop_layout } = props;
-
   const [desktopLayout, setDesktopLayout] = useState(desktop_layout?.value);
   const [mobileScroll, setMobileScroll] = useState(false);
   const [desktopWidth, setDesktopWidth] = useState(false);
@@ -16,7 +17,6 @@ export function Component({ props, globalConfig, blocks, preset }) {
   const [windowWidth, setWindowWidth] = useState(
     isRunningOnClient() ? window?.innerWidth : 400
   );
-
   const getTrustMarker = () => {
     const marker = blocks.length === 0 ? preset.blocks : blocks;
     if (windowWidth > 480) {
@@ -30,12 +30,19 @@ export function Component({ props, globalConfig, blocks, preset }) {
       const detectWidth = document
         ?.getElementsByTagName("body")?.[0]
         ?.getBoundingClientRect()?.width;
-
       if (
-        (detectWidth <= 769 && detectWidth > 481) ||
-        getTrustMarker()?.length < 5
+        detectWidth < 481 &&
+        getTrustMarker()?.length > 2 &&
+        desktop_layout?.value === "horizontal"
+      ) {
+        setDesktopLayout("horizontal");
+      } else if (
+        getTrustMarker()?.length < 6 ||
+        desktop_layout?.value === "grid"
       ) {
         setDesktopLayout("grid");
+      } else {
+        setDesktopLayout("horizontal");
       }
 
       if (detectWidth < 481 && getTrustMarker()?.length > 4) {
@@ -60,16 +67,28 @@ export function Component({ props, globalConfig, blocks, preset }) {
   const slickSetting = () => {
     const trustMarker = getTrustMarker();
     return {
-      dots: true,
-      arrows: false,
+      dots: trustMarker.length > 5,
+      arrows: trustMarker.length > 5,
       focusOnSelect: true,
-      infinite: trustMarker.length > 1, // Only infinite if more than one testimonial
+      infinite: trustMarker.length > 1,
       speed: 600,
-      slidesToShow: trustMarker.length === 1 ? 1 : 5, // Show only one slide if there's only one testimonial
-      slidesToScroll: trustMarker.length === 1 ? 1 : 5, // Scroll one slide if there's only one testimonial
+      slidesToShow: trustMarker.length < 5 ? trustMarker.length : 5,
+      slidesToScroll: trustMarker.length < 5 ? 1 : 5,
       autoplay: false,
+      customPaging: (i) => {
+        return <button>{i + 1}</button>;
+      },
+      appendDots: (dots) => (
+        <ul>
+          {/* Show maximum 8 dots */}
+          {dots.slice(0, 8)}
+        </ul>
+      ),
+      // autoplaySpeed: slide_interval?.value * 1000,
       centerMode: false,
       centerPadding: trustMarker.length === 1 ? "0" : "152px",
+      nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
+      prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
       responsive: [
         {
           breakpoint: 1440,
@@ -94,23 +113,12 @@ export function Component({ props, globalConfig, blocks, preset }) {
         {
           breakpoint: 480,
           settings: {
-            dots: false,
+            dots: true,
             arrows: false,
-            slidesToShow: 1,
+            slidesToShow: trustMarker.length < 3 ? trustMarker.length : 3,
             slidesToScroll: 1,
-            centerMode: trustMarker.length !== 1,
+            // centerMode: trustMarker.length !== 1,
             centerPadding: "50px",
-          },
-        },
-        {
-          breakpoint: 320,
-          settings: {
-            dots: false,
-            arrows: false,
-            slidesToShow: 1,
-            slidesToScroll: 1,
-            centerMode: trustMarker.length !== 1,
-            centerPadding: "23px",
           },
         },
       ],
@@ -118,31 +126,37 @@ export function Component({ props, globalConfig, blocks, preset }) {
   };
 
   const dynamicStyles = {
-    paddingBottom: "16px",
+    paddingTop: "16px",
     marginBottom: `
       ${globalConfig.section_margin_bottom}px`,
     maxWidth: "100vw",
+    "--img-background-color": globalConfig?.img_container_bg,
   };
 
   return (
     <div style={dynamicStyles} className={styles.trustMarker}>
-      <IntersectionObserverComponent>
-        <div className={styles["Trust-marker-heading"]}>
+      <div className={styles["Trust-marker-heading"]}>
+        {title?.value && (
           <h2 className={`${styles["section-title"]} fontHeader`}>
             {title?.value}
           </h2>
+        )}
+        {description?.value && (
           <div className={`${styles["section-description"]} bSmall fontBody`}>
             {description?.value}
           </div>
-        </div>
-
+        )}
+      </div>
+      <IntersectionObserverComponent>
         {desktopLayout === "grid" && (
           <div className="section Trust-marker">
-            <div className={styles["Trust-marker-image-container"]}>
+            <div
+              className={`${styles["Trust-marker-image-container"]} ${getTrustMarker()?.length < 6 && styles["stack-view"]}`}
+            >
               {getTrustMarker().map((block, i) => (
                 <FDKLink
                   key={i}
-                  link={block?.props?.marker_link?.value}
+                  to={block?.props?.marker_link?.value}
                   className={`${
                     styles["marker-link"]
                   } animation-fade-up ${"animate"}`}
@@ -153,7 +167,8 @@ export function Component({ props, globalConfig, blocks, preset }) {
                   <div className={styles.trust_marker_image}>
                     <FyImage
                       className={styles.trust_marker_image}
-                      sources={[{ breakpoint: { min: 100 }, width: 100 }]}
+                      sources={[{ breakpoint: { min: 100 }, width: 200 }]}
+                      backgroundColor={globalConfig?.img_container_bg}
                       src={
                         block?.props?.marker_logo?.value
                           ? block?.props?.marker_logo?.value
@@ -168,7 +183,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
                       {block?.props?.marker_heading?.value}
                     </span>
                     <span
-                      className={`${styles["marker-description"]} bSmall  font-body`}
+                      className={`${styles["marker-description"]} bSmall  fontBody`}
                     >
                       {block?.props?.marker_description?.value}
                     </span>
@@ -180,15 +195,20 @@ export function Component({ props, globalConfig, blocks, preset }) {
         )}
 
         {desktopLayout === "horizontal" && (
-          <div className={styles.sliderView}>
+          <div
+            className={styles.sliderView}
+            style={{
+              "--slick-dots": `${Math.ceil(getTrustMarker()?.length / 5) * 22 + 10}px`,
+            }}
+          >
             <Slider
-              className={styles.testimonial__carousel}
+              className={`${styles.testimonial__carousel}`}
               {...slickSetting()}
             >
               {getTrustMarker().map((block, i) => (
                 <FDKLink
                   key={i}
-                  link={block?.props?.marker_link?.value}
+                  to={block?.props?.marker_link?.value}
                   className={`${
                     mobileScroll && styles["marker-link"]
                   } animation-fade-up ${"animate"}`}
@@ -196,10 +216,11 @@ export function Component({ props, globalConfig, blocks, preset }) {
                 >
                   <div className={styles.trust_marker_image}>
                     <FyImage
-                      sources={[{ breakpoint: { max: 100 }, width: 100 }]}
+                      sources={[{ breakpoint: { max: 100 }, width: 200 }]}
+                      backgroundColor={globalConfig?.img_container_bg}
                       src={
                         block?.props?.marker_logo?.value
-                          ? block?.props?.marker_logo?.value.replace
+                          ? block?.props?.marker_logo?.value
                           : require("../assets/images/placeholder1X1.png")
                       }
                     />
@@ -217,11 +238,64 @@ export function Component({ props, globalConfig, blocks, preset }) {
                     </span>
                   </div>
                 </FDKLink>
+                // </div>
+                // </div>
               ))}
             </Slider>
           </div>
         )}
       </IntersectionObserverComponent>
+      <noscript>
+        <div className="section Trust-marker">
+          <div
+            className={styles["Trust-marker-image-container"]}
+            // style={{
+            //   gridTemplateColumns:
+            //     getTrustMarker().length < 5 &&
+            //     desktopWidth &&
+            //     `repeat(${getTrustMarker().length}, 1fr)`,
+            // }}
+          >
+            {getTrustMarker().map((block, i) => (
+              <FDKLink
+                key={i}
+                to={block?.props?.marker_link?.value}
+                className={`${
+                  styles["marker-link"]
+                } animation-fade-up ${"animate"}`}
+                style={{
+                  "--delay": `${150 * (i + 1)}ms `,
+                }}
+              >
+                <div className={styles.trust_marker_image}>
+                  <FyImage
+                    className={styles.trust_marker_image}
+                    sources={[{ breakpoint: { min: 100 }, width: 200 }]}
+                    backgroundColor={globalConfig?.img_container_bg}
+                    src={
+                      block?.props?.marker_logo?.value
+                        ? block?.props?.marker_logo?.value
+                        : require("../assets/images/placeholder1X1.png")
+                    }
+                  />
+                </div>
+                <div className={styles["trust-marker-data"]}>
+                  <span
+                    className={`${styles["marker-heading"]} captionSemiBold fontHeader`}
+                  >
+                    {block?.props?.marker_heading?.value}
+                  </span>
+                  <span
+                    className={`${styles["marker-description"]} bSmall  font-body`}
+                  >
+                    {block?.props?.marker_description?.value}
+                  </span>
+                </div>
+              </FDKLink>
+            ))}
+          </div>
+        </div>
+      </noscript>
     </div>
   );
 }
@@ -283,7 +357,7 @@ export const settings = {
         {
           type: "text",
           id: "marker_description",
-          default: "Don`t love it? Don`t worry.Return delivery is free.",
+          default: "Don`t love it? Don`t worry. Return delivery is free.",
           label: "Description",
         },
         {
@@ -306,7 +380,7 @@ export const settings = {
           },
           marker_description: {
             type: "textarea",
-            value: "Don't love it? Don't worry.Return delivery is free.",
+            value: "Don't love it? Don't worry. Return delivery is free.",
           },
         },
       },
@@ -319,7 +393,7 @@ export const settings = {
           },
           marker_description: {
             type: "textarea",
-            value: "Don't love it? Don't worry.Return delivery is free.",
+            default: "Don’t love it? Don’t worry. Return delivery is free.",
           },
         },
       },
@@ -332,7 +406,7 @@ export const settings = {
           },
           marker_description: {
             type: "textarea",
-            value: "Don't love it? Don't worry.Return delivery is free.",
+            value: "Don't love it? Don't worry. Return delivery is free.",
           },
         },
       },
@@ -345,7 +419,7 @@ export const settings = {
           },
           marker_description: {
             type: "textarea",
-            value: "Don't love it? Don't worry.Return delivery is free.",
+            value: "Don't love it? Don't worry. Return delivery is free.",
           },
         },
       },
@@ -358,7 +432,7 @@ export const settings = {
           },
           marker_description: {
             type: "textarea",
-            value: "Don't love it? Don't worry.Return delivery is free.",
+            value: "Don't love it? Don't worry. Return delivery is free.",
           },
         },
       },

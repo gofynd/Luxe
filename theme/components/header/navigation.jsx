@@ -300,7 +300,10 @@ function Navigation({
           transition={{ duration: 0.3, ease: "easeInOut" }}
           style={{
             position: "fixed",
-            top: 0,
+            top:
+              globalConfig?.header_layout === "double"
+                ? 0
+                : "var(--headerHeight)",
             left: 0,
             height: "100%",
           }}
@@ -575,7 +578,7 @@ function Navigation({
               }}
             >
               <SvgWrapper
-                className={`${styles.wishlist} ${styles.menuIcon} ${styles["sidebar-icon"]}`}
+                className={`${styles.wishlist} ${styles.menuIcon}  ${styles.sidebarIcon}`}
                 svgSrc="wishlist"
               />
               <span>Wishlist</span>

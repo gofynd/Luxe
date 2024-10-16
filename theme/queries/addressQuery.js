@@ -41,7 +41,6 @@ export const ADDRESS_LIST = `query addresses(
       tags
       user_id
       sector
-      expire_at
       state_code
     }
     pii_masking

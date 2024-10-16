@@ -23,7 +23,6 @@ export const FETCH_BLOGS_LIST = `query ApplicationContent(
         publish_date
         title
         summary
-        status
         author {
             designation
             id
@@ -31,7 +30,7 @@ export const FETCH_BLOGS_LIST = `query ApplicationContent(
         }
         feature_image {
             aspect_ratio
-            _id
+            id
             secure_url
         }
         date_meta {
@@ -81,7 +80,7 @@ export const GET_BLOG = `query blog($slug: String!) {
     }
     feature_image {
       aspect_ratio
-      _id
+      id
       secure_url
     }
     published
@@ -96,7 +95,6 @@ export const GET_BLOG = `query blog($slug: String!) {
     publish_date
     title
     summary
-    status
   }
 }
 `;

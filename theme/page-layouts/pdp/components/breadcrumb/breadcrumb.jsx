@@ -4,7 +4,6 @@ import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Uti
 import styles from "./breadcrumb.less";
 
 function BreadCrumb({ productData, pageConfig, customClass }) {
-  console.log(productData);
   const getBrand = () => productData?.brand || {};
 
   const getCategory = () => {

@@ -1,26 +1,34 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Slider from "react-slick";
 import FyImage from "../components/core/fy-image/fy-image";
 import styles from "../styles/sections/testimonials.less";
 import { isRunningOnClient } from "../helper/utils";
+import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
 export function Component({ props, globalConfig, blocks, preset }) {
   const { title, autoplay, slide_interval, testimonials } = props;
-
   const [windowWidth, setWindowWidth] = useState(
     isRunningOnClient() ? window?.innerWidth : 400
   );
   const [blocksData, setBlocksData] = useState([]);
+  const [isImageless, setIsImageless] = useState(false);
+
   useEffect(() => {
     if (blocks.length === 0) {
       setBlocksData(preset?.blocks);
     } else {
       setBlocksData(blocks);
     }
+    const isImageUnavailable = !blocks?.some(
+      (b) => b.props.author_image?.value?.length > 0
+    );
+    setIsImageless(isImageUnavailable);
   }, [JSON.stringify(blocks)]);
 
   useEffect(() => {
     if (isRunningOnClient()) {
+      setWindowWidth(window?.innerWidth);
+
       const handleResize = () => {
         setWindowWidth(window?.innerWidth);
       };
@@ -54,17 +62,19 @@ export function Component({ props, globalConfig, blocks, preset }) {
   const slickSetting = () => {
     const testimonialsList = getTestimonials();
     return {
-      dots: true,
-      arrows: false,
+      dots: testimonialsList.length > 2,
+      arrows: testimonialsList.length > 2,
       focusOnSelect: true,
-      infinite: testimonialsList.length > 1, // Only infinite if more than one testimonial
+      infinite: testimonialsList.length > 1,
       speed: 600,
-      slidesToShow: testimonialsList.length === 1 ? 1 : 2, // Show only one slide if there's only one testimonial
-      slidesToScroll: testimonialsList.length === 1 ? 1 : 2, // Scroll one slide if there's only one testimonial
-      autoplay: autoplay?.value,
+      slidesToShow: 2, // Show only one slide if there's only one testimonial
+      slidesToScroll: 2, // Scroll one slide if there's only one testimonial
+      autoplay: autoplay?.value && testimonialsList.length > 2,
       autoplaySpeed: Number(slide_interval?.value) * 1000,
       centerMode: testimonialsList.length !== 2,
       centerPadding: testimonialsList.length === 1 ? "0" : "152px",
+      nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
+      prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
       responsive: [
         {
           breakpoint: 1440,
@@ -77,6 +87,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
           settings: {
             arrows: false,
             centerPadding: "50px",
+            autoplay: autoplay?.value && testimonialsList.length > 2,
           },
         },
         {
@@ -84,6 +95,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
           settings: {
             arrows: false,
             centerPadding: "64px",
+            autoplay: autoplay?.value && testimonialsList.length > 2,
           },
         },
         {
@@ -95,6 +107,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
             slidesToScroll: 1,
             centerMode: testimonialsList.length !== 1,
             centerPadding: "50px",
+            autoplay: autoplay?.value && testimonialsList.length > 1,
           },
         },
         {
@@ -113,10 +126,9 @@ export function Component({ props, globalConfig, blocks, preset }) {
   };
 
   const dynamicStyles = {
-    padding: "16px 0",
-    "margin-bottom": `${globalConfig.section_margin_bottom}px`,
-    "--p-right-tablet": `${testimonials?.length < 3 ? "24px" : ""}`,
-    "--p-right-mob": `${testimonials?.length < 2 ? "16px" : ""}`,
+    padding: `16px 0 ${globalConfig.section_margin_bottom}px`,
+    "--p-right-tablet": `${getTestimonials()?.length < 3 ? "24px" : ""}`,
+    "--p-right-mob": `${getTestimonials()?.length < 2 ? "16px" : ""}`,
   };
 
   return (
@@ -126,11 +138,17 @@ export function Component({ props, globalConfig, blocks, preset }) {
       </h2>
 
       <noscript>
-        <div style={{ display: "flex" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gridRowGap: "10px",
+          }}
+        >
           {blocks.map((block, index) => (
             <div key={index} style={{ padding: "0 12px" }}>
               <div
-                className={`${styles.testimonial__block} animation-fade-up animate`}
+                className={`${styles.testimonial__block} ${isImageless ? styles.b24 : ""} animation-fade-up animate`}
               >
                 {block.props?.author_image?.value && (
                   <FyImage
@@ -180,16 +198,21 @@ export function Component({ props, globalConfig, blocks, preset }) {
         </div>
       </noscript>
 
-      <div className={styles.sliderWrap}>
+      <div
+        className={styles.sliderWrap}
+        style={{
+          "--slick-dots": `${Math.ceil(getTestimonials()?.length) * 22 + 10}px`,
+        }}
+      >
         {getTestimonials()?.length > 0 && (
           <Slider
-            className={`${styles.testimonial__carousel}`}
+            className={`${styles.testimonial__carousel} ${getTestimonials()?.length > 2 && windowWidth > 500 ? "" : "no-nav"}`}
             {...slickSetting()}
           >
             {getTestimonials().map((block, index) => (
-              <div key={index}>
+              <div key={index} className={styles.testimonialItem}>
                 <div
-                  className={`${styles.testimonial__block} animation-fade-up animate`}
+                  className={`${styles.testimonial__block} ${isImageless ? styles.b24 : ""} animation-fade-up animate`}
                   style={{
                     "--delay":
                       getTestimonials().length - 1 === index
@@ -222,7 +245,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
                       className={`${styles.testimonial__block__info__text} fontBody`}
                       title={block.props?.author_testimonial?.value}
                     >
-                      {`"${block.props?.author_testimonial?.value || ""}"`}
+                      {`"${block.props?.author_testimonial?.value || "Add customer reviews and testimonials to showcase your store's happy customers."}"`}
                     </div>
                     <div className={styles.testimonial__block__info__author}>
                       <h5
@@ -317,6 +340,28 @@ export const settings = {
   ],
   preset: {
     blocks: [
+      {
+        name: "Testimonial",
+        props: {
+          author_image: {
+            type: "image_picker",
+            value: "",
+          },
+          author_testimonial: {
+            type: "textarea",
+            value:
+              "Add customer reviews and testimonials to showcase your store's happy customers.",
+          },
+          author_name: {
+            type: "text",
+            value: "Author Description",
+          },
+          author_description: {
+            type: "text",
+            value: "Author Description",
+          },
+        },
+      },
       {
         name: "Testimonial",
         props: {

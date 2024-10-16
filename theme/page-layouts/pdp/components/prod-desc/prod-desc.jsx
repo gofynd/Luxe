@@ -4,9 +4,17 @@ import FyHTMLRenderer from "../../../../components/core/fy-html-renderer/fy-html
 import styles from "./prod-desc.less";
 
 function ProdDesc({ product, pageConfig, customClass }) {
-  const [activeTab, setActiveTab] = useState(
-    (product?.highlights || []).length ? 0 : 1
-  );
+  const getInitialActiveTab = (product) => {
+    if ((product?.highlights || []).length) {
+      return 0; // If highlights exist, set to tab 0
+    }
+    if ((product?.description || "").length) {
+      return 1; // If description exists, set to tab 1
+    }
+    return 2; // Default to tab 2
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialActiveTab(product));
   const [productDescription, setProductDescription] = useState({
     details: product?.description || "",
     title: "Product Description",
@@ -17,7 +25,7 @@ function ProdDesc({ product, pageConfig, customClass }) {
   });
 
   useEffect(() => {
-    setActiveTab((product?.highlights || []).length ? 0 : 1);
+    setActiveTab(getInitialActiveTab(product));
     setProductDescription({
       ...productDescription,
       details: product?.description || "",
@@ -50,7 +58,9 @@ function ProdDesc({ product, pageConfig, customClass }) {
 
   const isProductHighlightAvailable = () =>
     productHighlight?.details?.length > 0;
-  const isProductDescAvailable = () => productDescription?.details?.length > 0;
+  const isProductDescAvailable = () =>
+    productDescription?.details?.length > 0 &&
+    !productDescription?.details.startsWith("<style");
 
   const isDisplayDataAvailable = () =>
     isProductHighlightAvailable() ||
@@ -162,51 +172,61 @@ function ProdDesc({ product, pageConfig, customClass }) {
               </button>
             ))}
           </div>
-          <div className={`${styles.b2} ${styles.details}`}>
-            {activeTab === 0 && isProductHighlightAvailable() && (
-              <ul className={styles.items}>
-                {productHighlight.details.length > 0 ? (
-                  productHighlight.details.map((item, index) => (
-                    <li key={index}>{item}</li>
-                  ))
-                ) : (
-                  <div className={styles.noDataPlaceholder}>No Data Found</div>
-                )}
-              </ul>
-            )}
+          {isDisplayDataAvailable() && (
+            <div className={`${styles.b2} ${styles.details}`}>
+              {activeTab === 0 && isProductHighlightAvailable() && (
+                <ul className={styles.items}>
+                  {productHighlight.details.length > 0 ? (
+                    productHighlight.details.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))
+                  ) : (
+                    <div className={styles.noDataPlaceholder}>
+                      No Data Found
+                    </div>
+                  )}
+                </ul>
+              )}
 
-            {activeTab === 1 && isProductDescAvailable() && (
-              <div className={styles.productLongDescription}>
-                {productDescription.details ? (
-                  <FyHTMLRenderer
-                    customClass={styles.pdpDetail}
-                    htmlContent={productDescription.details}
-                  />
-                ) : (
-                  <div className={styles.noDataPlaceholder}>No Data Found</div>
-                )}
-              </div>
-            )}
+              {activeTab === 1 && isProductDescAvailable() && (
+                <div className={styles.productLongDescription}>
+                  {productDescription.details ? (
+                    <FyHTMLRenderer
+                      customClass={styles.pdpDetail}
+                      htmlContent={productDescription.details}
+                    />
+                  ) : (
+                    <div className={styles.noDataPlaceholder}>
+                      No Data Found
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {activeTab > 1 && (
-              <ul
-                className={pageConfig?.product_details_bullets && styles.items}
-              >
-                {getActiveGroupedAttribute()?.details?.length > 0 ? (
-                  getActiveGroupedAttribute().details.map((property, val) => (
-                    <li key={`${val}`}>
-                      <span className={styles.prop}>
-                        {`${property.key} :`}{" "}
-                      </span>
-                      <span className={styles.val}>{property.value}</span>
-                    </li>
-                  ))
-                ) : (
-                  <div className={styles.noDataPlaceholder}>No Data Found</div>
-                )}
-              </ul>
-            )}
-          </div>
+              {activeTab > 1 && (
+                <ul
+                  className={
+                    pageConfig?.product_details_bullets && styles.items
+                  }
+                >
+                  {getActiveGroupedAttribute()?.details?.length > 0 ? (
+                    getActiveGroupedAttribute().details.map((property, val) => (
+                      <li key={`${val}`}>
+                        <span className={styles.prop}>
+                          {`${property.key} :`}{" "}
+                        </span>
+                        <span className={styles.val}>{property.value}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <div className={styles.noDataPlaceholder}>
+                      No Data Found
+                    </div>
+                  )}
+                </ul>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

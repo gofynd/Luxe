@@ -17,10 +17,29 @@ a {
   z-index: @header;
 }
 
+// body {
+//   box-sizing: border-box;
+//   overflow-x: hidden;
+//   @media @desktop {
+//     min-height: calc(100vh - 404px);
+//   }
+// }
+
 .active-app,
 .activeApp {
   background-color: @PageBackground;
 }
+
+//SVG fix on cart checkout page
+// .card-container.cart-page-container {
+//   .inline-svg {
+//     width: 24px;
+//     height: 24px;
+//   }
+//   .address-left .inline-svg {
+//     display: inline-block;
+//   }
+// }
 
 .card-item .card-desc .price .effective-price {
   font-size: 0.875rem;
@@ -95,6 +114,16 @@ a {
 .justifyEvenly {
   justify-content: space-evenly;
 }
+// .desktop {
+//   @media @tablet {
+//     display: none;
+//   }
+// }
+// .mobile {
+//   @media @desktop {
+//     display: none;
+//   }
+// }
 
 // Topography
 h1,
@@ -376,6 +405,14 @@ img::selection {
   @media @mobile {
     margin-top: 24px;
   }
+  // &.view-all-horizontal {
+  //   @media @tablet {
+  //     margin-top: 40px;
+  //   }
+  //   @media @mobile {
+  //     margin-top: 24px;
+  //   }
+  // }
 }
 
 .accent-btn,

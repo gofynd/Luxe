@@ -79,6 +79,32 @@ function LightboxImage({
     alt: img.alt,
   }));
 
+  // useEffect(() => {
+  //   if (autoPlay) {
+  //     setTimer(setInterval(() => nextImage(), autoPlayTime));
+  //   }
+
+  //   onToggleLightBox(lightBoxOn);
+
+  //   // const containerRef = useRef(null);
+
+  //   // if (containerRef.current) {
+  //   //   const hammer = new Hammer(containerRef.current);
+
+  //   //   // hammer?.on("swiperight", () => previousImage());
+  //   //   // hammer?.on("swipeleft", () => nextImage());
+  //   // }
+
+  //   setIsMounted(true);
+
+  //   return () => {
+  //     document.removeEventListener("keydown", addKeyEvent);
+  //     if (autoPlay) {
+  //       clearInterval(timer);
+  //     }
+  //   };
+  // }, [select, lightBoxOn]);
+
   const toggleMute = () => {
     setIsMute(!isMute);
   };

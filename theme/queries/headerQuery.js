@@ -114,6 +114,5 @@ export const SEARCH_PRODUCT = `query products(
         url
       }
     }
-    message
   }
 }`;

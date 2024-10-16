@@ -5,4 +5,6 @@ function ForgetPassword({ fpi }) {
   return <ForgetPasswordPage fpi={fpi} />;
 }
 
+export const sections = JSON.stringify([]);
+
 export default ForgetPassword;

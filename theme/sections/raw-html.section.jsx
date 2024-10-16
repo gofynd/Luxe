@@ -10,6 +10,7 @@ export function Component({ props, globalConfig }) {
 
   return !code?.value ? null : (
     <div
+      className="basePageContainer margin0auto"
       dangerouslySetInnerHTML={{ __html: code.value }}
       style={{ marginBottom: `${margin_bottom}px` }}
     />
@@ -17,7 +18,8 @@ export function Component({ props, globalConfig }) {
 }
 
 export const settings = {
-  label: "Raw HTML",
+  name: "custom-html",
+  label: "Custom HTML",
   props: [
     {
       id: "code",

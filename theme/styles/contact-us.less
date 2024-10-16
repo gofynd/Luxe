@@ -1,130 +1,98 @@
 @import "../styles/main.less";
 
 .contactUs_mainContainer {
-  background-color: #fff;
+  display: flex;
+  box-sizing: border-box;
+  overflow: hidden;
   margin: 0 auto;
-}
-
-.contact_us {
-  padding: 25px 0;
-  margin: 20px;
-
-  &.card_container {
-    margin: 0 40px;
+  @media @tablet {
+    padding: 0;
+  }
+  .imageContainer {
     position: relative;
-
-    @media @mobile {
-      margin: 0;
-    }
-
-    .regular_sm {
-      padding: 10px;
-      font-weight: 400;
-      font-size: 16px;
-
-      @media @mobile {
-        font-size: 14px;
+    width: 50%;
+    .imageWrapper {
+      height: 100%;
+      img {
+        object-fit: cover;
       }
-
-      text-align: center;
-      -webkit-font-smoothing: antialiased;
-    }
-  }
-
-  &.contact_container {
-    display: flex;
-    width: 100%;
-    align-items: center;
-
-    @media @mobile {
-      flex-direction: column;
-    }
-
-    .desc {
-      padding-top: 3%;
+      .overlay {
+        opacity: var(--overlay-opacity);
+      }
     }
   }
 }
+.onImageContainer {
+  flex-direction: column;
+  width: 50% !important;
+  padding: 80px 120px !important;
+  gap: 56px !important;
+  .flex_item {
+    width: 100%;
+  }
+}
 
-.headers {
-  .item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 10px 0;
-
-    @media @mobile {
-      padding: 10px;
-    }
-
-    color: @TextBody;
+.contact_container {
+  display: flex;
+  width: 61.1%;
+  align-items: flex-start;
+  margin: 0 auto;
+  padding: 80px 0px;
+  gap: 80px;
+  @media @tablet {
+    flex-direction: column;
+    width: 100%;
+    padding: 32px 16px;
+    gap: 48px;
   }
 }
 
 .flex_item {
-  margin: 30px;
-  justify-content: center;
-  flex: 1;
-  width: 45%;
-  .item {
-    margin-bottom: 35px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 50%;
+  @media @tablet {
+    width: 100%;
   }
-
-  @media @mobile {
-    width: 90%;
-  }
-
-  .form_row {
-    width: 90% !important;
-    margin: 20px 0;
-  }
-
-  .contact_details {
+  .listItems {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-self: stretch;
     .item {
-      margin-bottom: 35px;
-
-      @media @mobile {
-        margin-bottom: 15px;
-      }
-
-      h6 {
-        font-size: 16px;
-      }
-    }
-    .dustyColor {
-      color: @DustyGray2;
-      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      align-self: stretch;
     }
   }
-}
-
-.bold_xl {
-  font-weight: 700;
-  font-size: 22px;
-
-  @media @mobile {
-    font-size: 18px;
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
   }
-
-  -webkit-font-smoothing: antialiased;
+  .form_row {
+    width: 100%;
+    .lableText {
+      background-color: @PageBackground;
+    }
+    .inputPlaceholder::placeholder {
+      color: @TextLabel;
+      opacity: 1;
+    }
+    .inputPlaceholder:focus::placeholder {
+      color: @TextBody;
+    }
+  }
 }
 
 .btn_submit {
-  padding: 10px;
-  background: var(--textHeading);
-  border: 0;
-  border-radius: 3px;
-  cursor: pointer;
-  min-width: 40%;
-  color: #fff;
+  height: 48px;
+  padding: 20px 24px !important;
+  width: unset !important;
+  font-weight: 600;
 }
-
-.bold_xs {
-  font-weight: 700;
-  font-size: 14px;
-  -webkit-font-smoothing: antialiased;
-}
-
-.common_btn {
-  text-align: center;
+.invert {
+  flex-direction: row-reverse;
 }

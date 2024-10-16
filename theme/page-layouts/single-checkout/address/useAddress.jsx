@@ -20,6 +20,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
   const cart_id = searchParams.get("id");
   const address_id = searchParams.get("address_id");
   const [selectedAddressId, setSelectedAddressId] = useState(address_id || "");
+  const [invalidAddressError, setInvalidAddressError] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [isNewAddress, setIssNewAddress] = useState(true);
   const [addressItem, setAddressItem] = useState(false);
@@ -219,7 +220,16 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
         });
         setShowShipment(true);
         setAddressLoader(false);
+        setInvalidAddressError(null);
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
       } else {
+        setInvalidAddressError({
+          id: id.length ? id : findAddress?.id,
+          message: res?.data?.selectAddress?.message,
+        });
         showSnackbar("Failed to select an address", "error");
       }
     });
@@ -260,13 +270,13 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
           localityObj?.localities.forEach((locality) => {
             switch (locality.type) {
               case "city":
-                data.city = capitalize(locality.name);
+                data.city = capitalize(locality.display_name);
                 break;
               case "state":
-                data.state = capitalize(locality.name);
+                data.state = capitalize(locality.display_name);
                 break;
               case "country":
-                data.country = capitalize(locality.name);
+                data.country = capitalize(locality.display_name);
                 break;
               default:
                 break;
@@ -290,6 +300,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     allAddresses,
     addressItem,
     selectedAddressId,
+    invalidAddressError,
     getDefaultAddress,
     getOtherAddress,
     isAddressLoading,

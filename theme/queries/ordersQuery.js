@@ -32,7 +32,6 @@ export const ORDER_LISTING = `query orders(
       order_created_time
       order_id
       total_shipments_in_order
-      is_validated
       shipments {
         awb_no
         beneficiary_details
@@ -81,6 +80,30 @@ export const ORDER_LISTING = `query orders(
             seller_identifier
             size
             slug_key
+          }
+          prices {
+            added_to_fynd_cash
+            amount_paid
+            amount_paid_roundoff
+            brand_calculated_amount
+            cashback
+            cashback_applied
+            cod_charges
+            coupon_effective_discount
+            coupon_value
+            currency_code
+            currency_symbol
+            delivery_charge
+            discount
+            fynd_credits
+            gst_tax_percentage
+            price_effective
+            price_marked
+            promotion_effective_discount
+            refund_amount
+            refund_credit
+            transfer_price
+            value_of_good
           }
         }
         shipment_status {
@@ -196,6 +219,30 @@ export const ORDER_BY_ID = `query order($orderId: String!) {
             name
           }
         }
+        prices {
+          added_to_fynd_cash
+          amount_paid
+          amount_paid_roundoff
+          brand_calculated_amount
+          cashback
+          cashback_applied
+          cod_charges
+          coupon_effective_discount
+          coupon_value
+          currency_code
+          currency_symbol
+          delivery_charge
+          discount
+          fynd_credits
+          gst_tax_percentage
+          price_effective
+          price_marked
+          promotion_effective_discount
+          refund_amount
+          refund_credit
+          transfer_price
+          value_of_good
+        }
       }
       breakup_values {
         currency_code
@@ -240,7 +287,6 @@ export const ORDER_BY_ID = `query order($orderId: String!) {
       mobile
       name
     }
-    is_validated
   }
 }
 `;

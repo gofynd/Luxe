@@ -34,4 +34,6 @@ Policy.serverFetch = async ({ fpi }) => {
   }
 };
 
+export const sections = JSON.stringify([]);
+
 export default Policy;

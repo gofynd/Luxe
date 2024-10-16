@@ -6,6 +6,7 @@ import useHeader from "../header/useHeader";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 import fallbackLogo from "../../assets/images/logo.png";
 import IntersectionObserverComponent from "../intersection-observer/intersection-observer";
+import SocailMedia from "../socail-media/socail-media";
 
 function Footer({ fpi }) {
   const { globalConfig, FooterNavigation, contactInfo, supportInfo } =
@@ -36,7 +37,7 @@ function Footer({ fpi }) {
 
   function getSocialIcon(title) {
     return title && typeof title === "string"
-      ? `footer-${title.toLowerCase()}`
+      ? `socail-${title.toLowerCase()}`
       : "";
   }
 
@@ -124,7 +125,8 @@ function Footer({ fpi }) {
                     >
                       Contact Us
                     </h5>
-                    <div
+                    <a
+                      href={`tel:${phoneArray?.[0]?.number}`}
                       className={`${styles.detail} ${styles.b1} ${styles.fontBody}`}
                     >
                       {`${
@@ -132,7 +134,7 @@ function Footer({ fpi }) {
                           ? `+ ${phoneArray?.[0]?.code} -`
                           : ""
                       } ${phoneArray?.[0]?.number}`}
-                    </div>
+                    </a>
                   </div>
                 )}
                 {emailActive && emailArray?.[0]?.value && (
@@ -159,37 +161,7 @@ function Footer({ fpi }) {
                         Social Media
                       </h5>
                       <span>
-                        <ul
-                          className={`${styles.social} ${styles.flexAlignCenter}`}
-                        >
-                          {Object.keys(contactInfo?.social_links).map((key) =>
-                            contactInfo?.social_links?.[key]?.link?.length >
-                              0 && key !== "__typename" ? (
-                              <li className={styles.socialIcon} key={key}>
-                                <FDKLink
-                                  to={contactInfo?.social_links?.[key].link}
-                                  target="_blank"
-                                  title={contactInfo?.social_links?.[key].title}
-                                  className={styles.flexAlignCenter}
-                                >
-                                  <SvgWrapper
-                                    className={`${styles.footerIcon} ${
-                                      contactInfo?.social_links?.[key].title ===
-                                        "Vimeo" ||
-                                      contactInfo?.social_links?.[key].title ===
-                                        "Youtube"
-                                        ? styles.vimeo
-                                        : ""
-                                    }`}
-                                    svgSrc={getSocialIcon(
-                                      contactInfo?.social_links?.[key].title
-                                    )}
-                                  />
-                                </FDKLink>
-                              </li>
-                            ) : null
-                          )}
-                        </ul>
+                        <SocailMedia social_links={contactInfo?.social_links} />
                       </span>
                     </>
                   )}

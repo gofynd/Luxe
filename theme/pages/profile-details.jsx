@@ -13,4 +13,6 @@ function ProfileDetails({ fpi }) {
 
 ProfileDetails.authGuard = isLoggedIn;
 
+export const sections = JSON.stringify([]);
+
 export default ProfileDetails;

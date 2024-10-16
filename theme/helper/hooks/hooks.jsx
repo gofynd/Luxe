@@ -35,7 +35,6 @@ const getColor = (type) => {
 export const useSnackbar = () => {
   const snackbarRef = useRef(null);
 
-  // Function to display a snackbar with a message and type (e.g., success, error).
   const showSnackbar = (message, type) => {
     // Dismiss the current snackbar if it exists
     if (snackbarRef?.current) {
@@ -61,7 +60,6 @@ export const useSnackbar = () => {
 export const useRichText = (htmlContent) => {
   const [clientMarkedContent, setClientMarkedContent] = useState("");
 
-  // Function to preprocess custom markdown-like syntax into HTML tags
   const preprocessMarkdown = (markdown) => {
     return markdown
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
@@ -76,7 +74,6 @@ export const useRichText = (htmlContent) => {
       });
   };
 
-  // useEffect to process and sanitize HTML content when htmlContent changes
   useEffect(() => {
     if (htmlContent) {
       const processedContent = preprocessMarkdown(htmlContent);
@@ -84,7 +81,33 @@ export const useRichText = (htmlContent) => {
       const sanitizedHtml = DOMPurify.sanitize(markedContent);
       setClientMarkedContent(sanitizedHtml);
     }
-  }, [htmlContent]);
+  }, []);
 
   return clientMarkedContent;
+};
+
+export const useSliderDotsWidth = (sliderRef, departmentCategories) => {
+  const [dotsWidth, setDotsWidth] = useState(0);
+
+  useEffect(() => {
+    const updateDotsWidth = () => {
+      if (sliderRef.current) {
+        const slickDots = sliderRef.current.querySelector(".slick-dots");
+        if (slickDots) {
+          const { width } = slickDots.getBoundingClientRect();
+          setDotsWidth(width);
+        }
+      }
+    };
+    setTimeout(() => {
+      updateDotsWidth();
+    }, 100);
+    window.addEventListener("resize", updateDotsWidth);
+
+    return () => {
+      window.removeEventListener("resize", updateDotsWidth);
+    };
+  }, [sliderRef.current, departmentCategories]);
+
+  return dotsWidth;
 };

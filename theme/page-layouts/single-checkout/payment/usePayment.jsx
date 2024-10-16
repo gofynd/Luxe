@@ -110,9 +110,14 @@ const usePayment = (fpi) => {
       selectedOtherNB,
       selectedNB,
       vpa,
+      selectedOtherPayment,
     } = paymentPayload;
     // Implement the logic to proceed with the payment
     if (mode === "newCARD") {
+      // if (!isCardSecure) {
+      //     openRbiGuidelineDialog = true;
+      //     return;
+      // }
       const payload = {
         aggregator_name: selectedNewCardData.aggregator_name,
         payment_mode: "CARD",
@@ -176,7 +181,10 @@ const usePayment = (fpi) => {
         ...options,
         payment: {
           ...selectedCard,
+          // card_security_code: selectedCardCVV,
           is_card_secure: selectedCard.compliant_with_tokenisation_guidelines,
+
+          // : isSavedCardSecure,
         },
         address_id,
         billing_address_id: address_id,
@@ -272,6 +280,7 @@ const usePayment = (fpi) => {
           updateCartPaymentRequestInput: payload,
         })
         .then(() => {
+          // if (res?.selectPaymentMode?.is_valid) {
           addParamsToLocation({
             ...getQueryParams(),
             aggregator_name:
@@ -295,11 +304,13 @@ const usePayment = (fpi) => {
             billing_address_id: address_id,
             paymentflow: paymentOption?.payment_flows[options.aggregator_name],
           });
+          // }
         });
     } else if (mode === "COD") {
       const payload = {
         aggregator_name: selectedTabData.aggregator_name,
         payment_mode: mode,
+        // payment_identifier: "" + selectedTabData.payment_mode_id,
         id: cart_id,
       };
 
@@ -392,6 +403,47 @@ const usePayment = (fpi) => {
             paymentflow:
               paymentOption?.payment_flows[selectedCardless.aggregator_name],
           });
+        });
+    } else if (mode === "Other") {
+      const payload = {
+        aggregator_name: selectedOtherPayment.aggregator_name,
+        payment_mode: selectedOtherPayment.code,
+        payment_identifier: selectedOtherPayment.code,
+        merchant_code: selectedOtherPayment.merchant_code,
+        id: cart_id,
+      };
+      await fpi
+        .executeGQL(SELECT_PAYMENT_MODE, {
+          updateCartPaymentRequestInput: payload,
+        })
+        .then(() => {
+          addParamsToLocation({
+            ...getQueryParams(),
+            aggregator_name: selectedOtherPayment.aggregator_name,
+            payment_mode: selectedOtherPayment.code,
+            payment_identifier: selectedOtherPayment.code,
+            merchant_code: selectedOtherPayment.merchant_code,
+          });
+          const { id, is_redirection, ...options } = payload;
+          fpi.payment
+            .checkoutPayment({
+              ...options,
+              payment: selectedOtherPayment,
+              address_id,
+              billing_address_id: address_id,
+              paymentflow:
+                paymentOption?.payment_flows[
+                  selectedOtherPayment.aggregator_name?.toLowerCase()
+                ],
+            })
+            .then((res) => {
+              if (res?.error?.message) {
+                console.log(
+                  res,
+                  "response while calling fpi.payment.checkoutPayment"
+                );
+              }
+            });
         });
     }
   };

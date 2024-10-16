@@ -10,6 +10,7 @@ function Home({ numberOfSections, fpi }) {
   const mode = THEME?.config?.list.find(
     (f) => f.name === THEME?.config?.current
   );
+  console.log(page, ":page", THEME, ":theme");
   const globalConfig = mode?.global_config?.custom?.props;
   const { sections = [], error, isLoading } = page || {};
   if (error) {
@@ -35,16 +36,7 @@ function Home({ numberOfSections, fpi }) {
 }
 
 export const settings = JSON.stringify({
-  props: [
-    {
-      id: "code",
-      label: "Your Code Here",
-      type: "code",
-      default: "",
-      info: "Add Your custom HTML Code below. You can also use the full screen icon to open a code editor and add your code",
-    },
-  ],
-  blocks: [],
+  props: [],
 });
 
 export const sections = JSON.stringify([

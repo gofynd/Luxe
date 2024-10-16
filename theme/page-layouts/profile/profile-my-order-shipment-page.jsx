@@ -1,16 +1,22 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FDKLink } from "fdk-core/components";
+import OrdersHeader from "fdk-react-templates/components/order-header/order-header";
+import "fdk-react-templates/components/order-header/order-header.css";
+import ShipmentItem from "fdk-react-templates/components/shipment-item/shipment-item";
+import "fdk-react-templates/components/shipment-item/shipment-item.css";
+import ShipmentTracking from "fdk-react-templates/components/shipment-tracking/shipment-tracking";
+import "fdk-react-templates/components/shipment-tracking/shipment-tracking.css";
+import ShipmentBreakup from "fdk-react-templates/components/shipment-breakup/shipment-breakup";
+import "fdk-react-templates/components/shipment-breakup/shipment-breakup.css";
+import ShipmentAddress from "fdk-react-templates/components/shipment-address/shipment-address";
+import "fdk-react-templates/components/shipment-address/shipment-address.css";
+import PaymentDetailCard from "fdk-react-templates/components/payment-detail-card/payment-detail-card";
+import "fdk-react-templates/components/payment-detail-card/payment-detail-card.css";
 import styles from "./styles/profile-my-order-shipment-page.less";
-import ProfileRoot from "../../components/profile/profile-root";
 import useShipmentDetails from "../orders/useShipmentDetails";
 import Loader from "../../components/loader/loader";
-import OrdersHeader from "../../components/orders/order-header";
-import ShipmentItem from "../../components/orders/shipment-item";
-import ShipmentTracking from "../../components/orders/shipment-tracking";
-import ShipmentAddress from "../../components/orders/shipment-address";
-import PaymentDetailCard from "../../components/orders/payment-detail-card";
-import ShipmentBreakup from "../../components/orders/shipment-breakup";
+import EmptyState from "../../components/empty-state/empty-state";
+import ProfileRoot from "../../components/profile/profile-root";
 
 function ProfileMyOrderShipmentPage({ fpi }) {
   const navigate = useNavigate();
@@ -75,10 +81,7 @@ function ProfileMyOrderShipmentPage({ fpi }) {
         <div className={`${styles.basePageContainer}`}>
           {!shipmentDetails && (
             <div className={`${styles.error}`}>
-              <span className={`${styles.bold}`}>No results found</span>
-              <FDKLink to="/" className={`${styles.continueShoppingBtn}`}>
-                RETURN TO HOMEPAGE
-              </FDKLink>
+              <EmptyState></EmptyState>
             </div>
           )}
           <div>
@@ -96,7 +99,7 @@ function ProfileMyOrderShipmentPage({ fpi }) {
                     <div
                       className={`${styles.status}`}
                       style={{
-                        "background-color":
+                        backgroundColor:
                           shipmentDetails?.shipment_status.hex_code || "green",
                       }}
                     >
@@ -107,6 +110,7 @@ function ProfileMyOrderShipmentPage({ fpi }) {
                 <div className={`${styles.shipmentBagItem}`}>
                   {getSlicedGroupedShipmentBags()?.map((item, index) => (
                     <div
+                      key={item.item.brand.name + index}
                       className={
                         !(item.can_cancel || item.can_return)
                           ? `${styles.updateDisable}`

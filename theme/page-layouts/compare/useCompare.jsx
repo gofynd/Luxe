@@ -1,14 +1,21 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useGlobalStore } from "fdk-core/utils";
+import Loader from "../../components/loader/loader";
 import { PRODUCT_COMPARISON, SEARCH_PRODUCT } from "../../queries/compareQuery";
 import { useSnackbar } from "../../helper/hooks";
 import { debounce } from "../../helper/utils";
 
 const useCompare = (fpi) => {
+  const THEME = useGlobalStore(fpi.getters.THEME);
+  const mode = THEME?.config?.list.find(
+    (f) => f.name === THEME?.config?.current
+  );
+  const globalConfig = mode?.global_config?.custom?.props;
+
   const location = useLocation();
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
-
   const initializeSlugs = () => {
     try {
       const storedSlugs = JSON.parse(localStorage?.getItem("compare_slugs"));
@@ -103,6 +110,28 @@ const useCompare = (fpi) => {
     }
   };
 
+  const isDifferentAttr = (attr) => {
+    const attributes = products.map((p) => p.attributes[attr.key]);
+    const allEqual = attributes.every((a) => a === attributes[0]);
+    return !allEqual;
+  };
+
+  const getAttribute = (cProduct, attribute) => {
+    let value = cProduct?.attributes?.[attribute?.key];
+    if (!value) {
+      return "---";
+    } else if (Array.isArray(value)) {
+      value = value.join(", ");
+    }
+    return value;
+  };
+
+  const checkHtml = (string) => {
+    return /<(?=.*? .*?\/ ?>|br|hr|input|!--|wbr)[a-z]+.*?>|<([a-z]+).*?<\/\1>/i.test(
+      string
+    );
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -133,14 +162,22 @@ const useCompare = (fpi) => {
     products,
     attributes,
     category,
+    showSearch,
+    searchText,
+    filteredSuggestions,
+    cardProps: {
+      isSaleBadge: false,
+      isWishlistIcon: false,
+      isImageFill: globalConfig?.img_fill,
+    },
+    loader: <Loader />,
+    setShowSearch,
     handleAdd,
     handleRemove,
-    showSearch,
-    setShowSearch,
-    searchText,
     handleInputChange,
-    setSuggestions,
-    filteredSuggestions,
+    isDifferentAttr,
+    getAttribute,
+    checkHtml,
   };
 };
 

@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { ORDER_LISTING, ORDER_BY_ID } from "../../queries/ordersQuery";
 import { ADD_TO_CART } from "../../queries/pdpQuery";
 import { CART_ITEMS_COUNT } from "../../queries/wishlistQuery";
+import { fetchCartDetails } from "../cart/useCart";
 import { useGlobalStore } from "fdk-core/utils";
 import dayjs from "dayjs";
 import { useSnackbar } from "../../helper/hooks";
@@ -35,20 +36,25 @@ const useOrdersListing = (fpi) => {
   useEffect(() => {
     setIsLoading(true);
     try {
-      const values = {
-        orderId: params.orderId,
-      };
-      fpi
-        .executeGQL(ORDER_BY_ID, values)
-        .then((res) => {
-          if (res?.data?.order) {
-            const data = res?.data?.order;
-            setOrderShipments(data);
-          }
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+      if (params?.orderId) {
+        const values = {
+          orderId: params?.orderId,
+        };
+        fpi
+          .executeGQL(ORDER_BY_ID, values)
+          .then((res) => {
+            if (res?.data?.order === null) {
+              setOrderShipments({});
+            }
+            if (res?.data?.order) {
+              const data = res?.data?.order;
+              setOrderShipments(data);
+            }
+          })
+          .finally(() => {
+            setIsLoading(false);
+          });
+      }
     } catch (error) {
       console.log({ error });
       setIsLoading(false);
@@ -108,6 +114,7 @@ const useOrdersListing = (fpi) => {
             "success"
           );
         });
+        fetchCartDetails(fpi);
       } else {
         showSnackbar(
           outRes?.data?.addItemsToCart?.message || "Failed to add to cart",

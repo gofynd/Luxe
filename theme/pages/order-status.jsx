@@ -9,13 +9,30 @@ import { ORDER_BY_ID } from "../queries/checkoutQuery";
 
 import "fdk-react-templates/pages/order-status/order-status.css";
 import Loader from "../components/loader/loader";
+import cartClock from "../assets/images/cart-clock.png";
+import FyImage from "../components/core/fy-image/fy-image";
 
 function OrderPolling({ isLoggedIn }) {
+  const retryStyle = {
+    width: "180px",
+    height: "180px",
+    position: "relative",
+    left: "50%",
+    transform: "translateX(-50%)",
+  };
   return (
     <>
+      <div style={retryStyle}>
+        <FyImage src={cartClock} />
+      </div>
       <h3
-        style={{ color: "var(--textHeading)", marginTop: "20%" }}
-        className="h2 fontBody"
+        style={{
+          color: "var(--textHeading)",
+          maxWidth: "1000px",
+          margin: "5% auto",
+          textAlign: "center",
+        }}
+        className="h3 fontBody"
       >
         Sorry Its Taking Longer. We will notify you once the order is processed.
         You can also check
@@ -82,5 +99,7 @@ function OrderStatus({ fpi }) {
     </div>
   );
 }
+
+export const sections = JSON.stringify([]);
 
 export default OrderStatus;

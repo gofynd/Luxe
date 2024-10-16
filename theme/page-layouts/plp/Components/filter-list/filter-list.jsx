@@ -16,6 +16,7 @@ function FilterList({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const MAX_ITEM_COUNT = 7;
+  const navigate = useNavigate();
 
   const getFilteredItems = (searchStr) => {
     if (!searchStr) {
@@ -40,6 +41,10 @@ function FilterList({
   };
 
   const filterClicked = (filterItem) => {
+    // if (!isMobileView) {
+    //   navigate(filterItem.url);
+    //   return;
+    // }
     updateFilter(filterItem, filter);
   };
 

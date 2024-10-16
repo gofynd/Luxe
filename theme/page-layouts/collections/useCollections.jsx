@@ -32,8 +32,7 @@ const useCollections = (fpi) => {
         setIsLoading(false);
         setPageData(data?.collections?.page);
         const activeCollections =
-          data?.collections?.items?.filter((m) => m.is_active && m.published) ??
-          [];
+          data?.collections?.items?.filter((m) => m.is_active) ?? [];
         setCollections((preVal) => {
           return [...(reset ? [] : (preVal ?? [])), ...activeCollections];
         });

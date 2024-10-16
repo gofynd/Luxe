@@ -39,4 +39,5 @@ export const settings = JSON.stringify({
 
 Register.authGuard = loginGuard;
 
+export const sections = JSON.stringify([]);
 export default Register;

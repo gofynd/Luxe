@@ -1,28 +1,19 @@
-import React, { useMemo } from "react";
+import React from "react";
+import { useGlobalStore } from "fdk-core/utils";
 import { useAccounts } from "../../helper/hooks";
+import AccountLockedPage from "fdk-react-templates/page-layouts/auth/account-locked/account-locked";
+import "fdk-react-templates/page-layouts/auth/account-locked/account-locked.css";
 import AuthContainer from "../auth/auth-container/auth-container";
-import styles from "./account-locked-page.less";
 
 function AccountLocked({ fpi }) {
-  const supportEmail = useMemo(() => "", []);
+  const supportInfo = useGlobalStore(fpi.getters.SUPPORT_INFORMATION);
   const { openHomePage } = useAccounts({ fpi });
+
+  const { email } = supportInfo?.contact ?? {};
+
   return (
     <AuthContainer>
-      <div>
-        <div className={styles.deleteAccountTxt}>Your Account is locked</div>
-        <p className={styles.deleteAccountDesc}>
-          As per your request, your account will be deleted soon. If you wish to
-          restore your account, please contact on below support email id.
-        </p>
-        <p className={styles.supportEmail}>{{ supportEmail }}</p>
-        <button
-          className={styles.deleteAccountBtn}
-          type="submit"
-          onClick={() => openHomePage()}
-        >
-          Continue
-        </button>
-      </div>
+      <AccountLockedPage email={email} openHomePage={openHomePage} />
     </AuthContainer>
   );
 }

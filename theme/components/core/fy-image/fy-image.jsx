@@ -1,39 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useGlobalStore } from "fdk-core/utils";
 import { motion, useInView } from "framer-motion";
 
 import styles from "./fy-image.less";
 import ImageSkeleton from "../skeletons/image-skeleton";
 import { isRunningOnClient, transformImage } from "../../../helper/utils";
 import PLACEHOLDER_URL from "../../../assets/images/placeholder.png";
-
-const IMAGE_SIZES = [
-  "original",
-  "30x0",
-  "44x0",
-  "66x0",
-  "50x0",
-  "75x0",
-  "60x60",
-  "90x90",
-  "100x0",
-  "130x200",
-  "135x0",
-  "270x0",
-  "360x0",
-  "500x0",
-  "400x0",
-  "540x0",
-  "720x0",
-  "312x480",
-  "resize-(w|h)?:[0-9]+(,)?(w|h)*(:)?[0-9]*",
-];
-
-function searchStringInArray(str, strArray) {
-  for (let j = 0; j < strArray.length; j++) {
-    if (str?.match(new RegExp(`/${strArray[j]}/`))) return strArray[j];
-  }
-  return "";
-}
 
 const FyImage = ({
   backgroundColor = "#ffffff",
@@ -55,14 +27,18 @@ const FyImage = ({
   isLazyLoaded = true,
   blurWidth = 50,
   customClass,
+  overlayCustomClass,
   globalConfig,
   defer = true,
+  isImageCover = false,
 }) => {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const imgWrapperRef = useRef(null);
+  // const THEME = useGlobalStore(fpi.getters.THEME);
+  // const globalConfig = THEME?.config?.list[0]?.global_config?.custom?.props;
   const ref = React.useRef(null);
   const isInView = useInView(ref, { once: true });
   useEffect(() => {
@@ -97,10 +73,8 @@ const FyImage = ({
   };
 
   const getSrc = () => {
-    const key = searchStringInArray(src, IMAGE_SIZES);
-
     if (isLazyLoaded && !isIntersecting) {
-      return transformImage(src, key, blurWidth);
+      return transformImage(src, blurWidth);
     }
 
     if (isError) {
@@ -134,16 +108,9 @@ const FyImage = ({
       url = placeholder;
     }
 
-    const key = searchStringInArray(url, IMAGE_SIZES);
-
     return sources
       .map((s) => {
-        let src = url;
-
-        if (key) {
-          src = transformImage(url, key, s.width);
-        }
-
+        const src = transformImage(url, s.width);
         return `${src} ${s.width}w`;
       })
       .join(", ");
@@ -157,6 +124,10 @@ const FyImage = ({
     });
 
   const getSources = () => {
+    // if (isLazyLoaded && !isIntersecting) {
+    //   return getLazyLoadSources();
+    // }
+
     return getLazyLoadSources().map((source) => {
       source.srcset = getUrl(source.width, source.url);
       return source;
@@ -191,13 +162,7 @@ const FyImage = ({
       url = placeholder;
     }
 
-    const key = searchStringInArray(url, IMAGE_SIZES);
-
-    if (key) {
-      return transformImage(url, key, width);
-    } else {
-      return transformImage(url);
-    }
+    return transformImage(url, width);
   };
 
   const onError = () => {
@@ -216,13 +181,16 @@ const FyImage = ({
   return (
     <div
       className={`${styles.imageWrapper} ${
-        globalConfig?.img_fill ? styles.fill : ""
+        globalConfig?.img_fill || isImageCover ? styles.fill : ""
       } ${customClass}`}
       style={dynamicStyles}
       ref={imgWrapperRef}
     >
       {showOverlay && (
-        <div className={styles.overlay} style={overlayStyles}></div>
+        <div
+          className={`${styles.overlay} ${overlayCustomClass}`}
+          style={overlayStyles}
+        ></div>
       )}
       <motion.div
         ref={ref}

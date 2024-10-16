@@ -1,3 +1,5 @@
+import Pixelbin, { transformations } from "@pixelbin/core";
+
 export const debounce = (func, wait) => {
   let timeout;
   const debouncedFunction = (...args) => {
@@ -153,29 +155,38 @@ export function checkIfNumber(value) {
   return numberPattern.test(value);
 }
 
-// transformImage simply modifies image URLs by resizing the image and adjusting the image resolution based on the device's pixel density (device pixel ratio)
-export const transformImage = (url, key, width) => {
-  const dpr = Math.min(
-    Math.max(
-      Math.round(isRunningOnClient() ? window.devicePixelRatio || 1 : 1),
-      1
-    ),
-    5
+export function isEmptyOrNull(obj) {
+  return (
+    obj === null ||
+    obj === undefined ||
+    (typeof obj === "object" && Object.keys(obj).length === 0)
   );
-  let updatedUrl = url;
+}
 
-  // If both a key and width are provided, update the URL by replacing the part of the path that matches `key` with a resize instruction including the specified width.
-  if (key && width) {
-    const str = `/${key}/`;
-    updatedUrl = url.replace(new RegExp(str), `/resize-w:${width}/`);
-  }
+export const transformImage = (url, width) => {
+  let updatedUrl = url;
   try {
-    const parsedUrl = new URL(updatedUrl);
-    parsedUrl.searchParams.append("dpr", 1);
-    return parsedUrl.toString();
+    const obj = Pixelbin.utils.urlToObj(url);
+    if (width) {
+      const pixelbin = new Pixelbin({
+        cloudName: obj.cloudName,
+        zone: obj.zone || "default",
+      });
+
+      const resizeTransformation = transformations.Basic.resize({
+        width,
+        dpr: 1,
+      });
+
+      updatedUrl = pixelbin
+        .image(obj.workerPath)
+        .setTransformation(resizeTransformation)
+        .getUrl();
+    }
   } catch (error) {
-    return updatedUrl;
+    console.warn("Error processing the URL:", error.message);
   }
+  return updatedUrl;
 };
 
 export function updateGraphQueryWithValue(mainString, replacements) {
@@ -193,31 +204,21 @@ export function updateGraphQueryWithValue(mainString, replacements) {
   return mStr;
 }
 
-// Throttle function limits the rate at which a function can be executed.
 export function throttle(func, wait) {
-  // Flag to indicate if the function is currently waiting to be executed
   let waiting = false;
 
-  // Handler function that will be called to handle throttled execution
   function throttleHandler(...args) {
-    // If the function is already waiting, do nothing
     if (waiting) {
       return;
     }
 
-    // Set the waiting flag to true to prevent further calls
     waiting = true;
-
-    // Set a timeout to execute the function after the specified wait time
     setTimeout(function executeFunction() {
-      // Call the original function with the provided arguments
       func.apply(this, args);
-      // Reset the waiting flag to allow future calls
       waiting = false;
     }, wait);
   }
 
-  // Return the throttled function handler
   return throttleHandler;
 }
 
@@ -269,30 +270,23 @@ export const currencyFormat = (value, currencySymbol) => {
   return "";
 };
 
-// Function to process and compute review rating data from custom metadata
 export const getReviewRatingData = (customMeta) => {
-  // Initialize an empty object to hold review rating data
   const data = {};
 
-  // Check if customMeta is provided and is an array with elements
   if (customMeta && customMeta.length) {
     customMeta.forEach((item) => {
       if (item.key) {
-        // Convert the item's value to a number and store it in the data object with the item's key
         data[item.key] = Number(item?.value || "");
       }
     });
 
     const avgRating = data.rating_sum / data.rating_count;
 
-    // Store the average rating in the data object, rounded to one decimal place
     data.avg_ratings = Number(Number(avgRating).toFixed(1)) || 0;
   }
 
-  // Return the data object containing review rating information
   return data;
 };
-
 export function removeCookie(name) {
   if (isRunningOnClient()) {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
@@ -301,31 +295,22 @@ export function removeCookie(name) {
 
 export function getCookie(key) {
   if (isRunningOnClient()) {
-    // Construct the cookie name string to search for
     const name = `${key}=`;
-    // Decode the document.cookie string
     const decoded = decodeURIComponent(document.cookie);
-    // Split the cookie string into an array of individual cookies
     const cArr = decoded.split("; ");
     let res;
-
-    // Iterate through the cookie array to find the cookie with the specified key
     cArr.forEach((val) => {
       if (val.indexOf(name) === 0) res = val.substring(name.length);
     });
-    // If no cookie was found, return an empty string
     if (!res) {
       return "";
     }
-
     try {
-      // Attempt to parse the cookie value as JSON
       return JSON.parse(res);
     } catch (e) {
       return res || null;
     }
   } else {
-    // If not running on the client side, return null
     return null;
   }
 }

@@ -18,6 +18,8 @@ function PicZoom({
   followed,
   removeFromWishlist,
   addToWishList,
+  isLoading,
+  hideImagePreview = false,
 }) {
   const [imageFullyLoaded, setImageFullyLoaded] = useState(true);
   const [imageLoading, setImageLoading] = useState(false);
@@ -98,24 +100,29 @@ function PicZoom({
       {type === "image" && (
         // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <div
-          className={styles.loadImage}
-          onClick={() => onClickImage(currentIndex)}
+          className={!hideImagePreview ? styles.loadImage : ""}
+          onClick={() => {
+            if (!hideImagePreview) {
+              onClickImage(currentIndex);
+            }
+          }}
           title={currentIndex}
         >
-          <FyImage
-            customClass={styles.pdpImage}
-            src={source}
-            alt={alt}
-            aspectRatio={getProductImgAspectRatio(globalConfig)}
-            showSkeleton={false}
-            globalConfig={globalConfig}
-            onLoad={imageLoaded}
-            sources={[
-              { breakpoint: { min: 780 }, width: 600 },
-              { breakpoint: { min: 480 }, width: 400 },
-            ]}
-            defer={currentIndex > 0}
-          />
+          {!isLoading && (
+            <FyImage
+              customClass={styles.pdpImage}
+              src={source}
+              alt={alt}
+              aspectRatio={getProductImgAspectRatio(globalConfig)}
+              globalConfig={globalConfig}
+              onLoad={imageLoaded}
+              sources={[
+                { breakpoint: { min: 780 }, width: 600 },
+                { breakpoint: { min: 480 }, width: 400 },
+              ]}
+              defer={currentIndex > 0}
+            />
+          )}
         </div>
       )}
       {type === "video" && (

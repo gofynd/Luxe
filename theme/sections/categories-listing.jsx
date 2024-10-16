@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
 
@@ -35,7 +35,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
   const [windowWidth, setWindowWidth] = useState();
   // const [departmentCategories, setDepartmentCategories] = useState([]);
   const [config, setConfig] = useState({
-    dots: true,
+    dots: false,
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 3,
@@ -45,9 +45,18 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
     autoplaySpeed: 3000,
     cssEase: "linear",
     arrows: false,
+    customPaging: (i) => {
+      return <button>{i + 1}</button>;
+    },
+    appendDots: (dots) => (
+      <ul>
+        {/* Show maximum 8 dots */}
+        {dots.slice(0, 8)}
+      </ul>
+    ),
     // arrows: getGallery.length > item_count?.value,
-    // nextArrow: <SvgWrapper svgSrc="arrow-right" />,
-    // prevArrow: <SvgWrapper svgSrc="arrow-left" />,
+    nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
+    prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
     adaptiveHeight: true,
     responsive: [
       {
@@ -116,7 +125,14 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
         autoplaySpeed: play_slides?.value * 1000,
       }));
     }
-  }, [autoplay, play_slides, item_count]);
+    if (config.arrows !== imagesForScrollView()?.length > item_count?.value) {
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        arrows: imagesForScrollView()?.length > item_count?.value,
+        dots: imagesForScrollView()?.length > item_count?.value,
+      }));
+    }
+  }, [autoplay, play_slides, item_count, imagesForScrollView()?.length]);
 
   useEffect(() => {
     const handleResize = throttle(() => {
@@ -125,6 +141,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
 
     if (isRunningOnClient()) {
       window.addEventListener("resize", handleResize);
+      handleResize();
     }
 
     return () => {
@@ -210,7 +227,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
   return (
     <div
       style={{
-        marginBottom: `${globalConfig.section_margin_bottom + 16}px`,
+        padding: `16px 0 ${globalConfig.section_margin_bottom}px`,
         "--bg-color": `${img_container_bg?.value || "#00000000"}`,
       }}
     >
@@ -227,8 +244,21 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
         </div>
         <IntersectionObserverComponent>
           {departmentCategories.length > 0 && showScrollView() && (
-            <div className={styles.slideWrap}>
-              <Slider {...config}>
+            <div
+              className={styles.slideWrap}
+              style={{
+                "--slick-dots": `${Math.ceil(imagesForScrollView()?.length / item_count?.value) * 22 + 10}px`,
+              }}
+            >
+              <Slider
+                className={`
+                  ${
+                    imagesForScrollView()?.length <= item_count?.value
+                      ? "no-nav"
+                      : ""
+                  } ${styles.customSlider}`}
+                {...config}
+              >
                 {imagesForScrollView()?.map((category, index) => (
                   <div data-cardtype="'Categories'" key={index}>
                     <FDKLink
@@ -238,6 +268,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                       {getDesktopImage(category).length > 0 && (
                         <div className={styles.sliderView}>
                           <FyImage
+                            backgroundColor={img_container_bg?.value}
                             customClass={`${styles.imageGallery} ${
                               img_fill?.value ? styles.streach : ""
                             }`}
@@ -246,7 +277,9 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                             aspectRatio={0.8}
                             mobileAspectRatio={0.8}
                           />
-                          <div className={styles.flexJustifyCenter}>
+                          <div
+                            className={`${styles.flexJustifyCenter} ${styles["pos-relative"]}`}
+                          >
                             {category?.name && (
                               <div
                                 className={`${styles["categories-name"]} ${styles.h5} ${styles.fontBody} ${styles.inlineBlock}`}
@@ -284,6 +317,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                     {getDesktopImage(category).length > 0 && (
                       <div>
                         <FyImage
+                          backgroundColor={img_container_bg?.value}
                           customClass={`${styles.imageGallery} ${
                             img_fill?.value ? styles.streach : ""
                           }`}
@@ -325,6 +359,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                 >
                   <div style={{ padding: "0 12px" }}>
                     <FyImage
+                      backgroundColor={img_container_bg?.value}
                       customClass={`${styles.imageGallery} ${
                         img_fill?.value ? styles.streach : ""
                       }`}
@@ -405,7 +440,7 @@ export const settings = {
       type: "checkbox",
       id: "img_fill",
       category: "Image Container",
-      default: false,
+      default: true,
       label: "Fit image to the container",
       info: "If the image aspect ratio is different from the container, the image will be clipped to fit the container. The aspect ratio of the image will be maintained",
     },

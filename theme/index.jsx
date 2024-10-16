@@ -18,15 +18,12 @@ export default async ({
 }) => {
   const proxyDomain = domain;
 
-  // Configure FPIClient with provided options
   const fpiOptions = {
     applicationID,
     applicationToken,
     domain: proxyDomain,
     storeInitialData,
   };
-
-  // Initialize the FPIClient with the configuration options
   const { client } = new FPIClient(fpiOptions);
 
   return {
@@ -110,11 +107,11 @@ export default async ({
       import(/* webpackChunkName:"getOrdersList" */ "./pages/orders-list"),
     getShipmentDetails: () =>
       import(
-        /* webpackChunkName:"getOrdersList" */ "./page-layouts/profile/profile-my-order-shipment-page"
+        /* webpackChunkName:"getShipmentDetails" */ "./page-layouts/profile/profile-my-order-shipment-page"
       ),
     getShipmentUpdate: () =>
       import(
-        /* webpackChunkName:"getOrdersList" */ "./page-layouts/profile/profile-shipment-update-page"
+        /* webpackChunkName:"getShipmentUpdate" */ "./page-layouts/profile/profile-shipment-update-page"
       ),
     getProfilePhone: () =>
       import(
@@ -123,7 +120,7 @@ export default async ({
     getFaq: () => import(/* webpackChunkName:"getFaq" */ "./pages/faq"),
     getProfileEmail: () =>
       import(
-        /* webpackChunkName:"getProfilePhone" */ "./page-layouts/profile/email"
+        /* webpackChunkName:"getProfileEmail" */ "./page-layouts/profile/email"
       ),
     getVerifyEmail: () =>
       import(/* webpackChunkName:"getVerifyEmail" */ "./pages/verify-email"),
@@ -143,15 +140,23 @@ export default async ({
     getBlog: () => import(/* webpackChunkName:"getBlog" */ "./pages/blog"),
     getBlogPage: () =>
       import(
-        /* webpackChunkName:"getBlogDetail" */ "./page-layouts/blog/BlogPage"
+        /* webpackChunkName:"getBlogPage" */ "./page-layouts/blog/BlogPage"
       ),
     getContactUs: () =>
       import(/* webpackChunkName:"getContactUs" */ "./pages/contact-us"),
+    getFormItem: () =>
+      import(/* webpackChunkName:"getFormItem" */ "./components/FormItem"),
     getOrderTracking: () =>
-      import(/* webpackChunkName:"getContactUs" */ "./pages/order-tracking"),
+      import(
+        /* webpackChunkName:"getOrderTracking" */ "./pages/order-tracking"
+      ),
     getOrderTrackingDetails: () =>
       import(
-        /* webpackChunkName:"getContactUs" */ "./pages/order-tracking-details"
+        /* webpackChunkName:"getOrderTrackingDetails" */ "./pages/order-tracking-details"
+      ),
+    getSections: () =>
+      import(
+        /* webpackChunkName:"getSections" */ "./page-layouts/section-render/section-page"
       ),
   };
 };

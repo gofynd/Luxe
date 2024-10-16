@@ -196,8 +196,9 @@
   }
   .sidebar {
     top: var(--headerHeight);
+    height: calc(100% - var(--headerHeight)) !important;
     &__navigation {
-      padding: 40px 24px 0;
+      padding: 24px 24px 0;
       &--item {
         border: none;
         line-height: 20px;
@@ -214,7 +215,7 @@
         }
         &.title {
           border-radius: 4px;
-          background-color: @ThemeAccentL4;
+          background-color: transparent;
           color: @TextHeading;
           padding: 9px 5px;
           .arrowLeftIcon {
@@ -229,7 +230,9 @@
     }
     &__footer {
       padding-bottom: 32px;
-      background-color: @ThemeAccentL4;
+      @media @desktop {
+        background-color: @ThemeAccentL4;
+      }
       &--item {
         color: @TextHeading;
         .sidebar-icon {

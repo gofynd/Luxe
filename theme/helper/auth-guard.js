@@ -13,13 +13,12 @@ export async function isLoggedIn({ fpi, store }) {
 
     const userData = await fpi.executeGQL(USER_DATA_QUERY);
 
-    return !!(userData?.data?.user?.loggedInUser ?? false);
+    return !!(userData?.data?.user?.logged_in_user ?? false);
   } catch (error) {
     return false;
   }
 }
 
-// Guards against logged-in users accessing certain pages (like login pages)
 export async function loginGuard({ fpi, store }) {
   try {
     const loggedIn = await isLoggedIn({ fpi, store });

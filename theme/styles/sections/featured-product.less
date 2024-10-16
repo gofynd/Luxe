@@ -1,5 +1,8 @@
 @import "../main.less";
 
+.featured_product_container {
+  position: relative;
+}
 .featured-products-header {
   margin-top: 2rem;
   display: flex;
@@ -123,48 +126,75 @@
   padding: 1rem 2.5rem 0;
   color: @TextBody;
   margin-bottom: 3rem;
-
-  .isDesktop {
-    display: block;
-
-    @media @tablet {
-      display: none;
-    }
-  }
-  .isMobile {
-    display: block;
-
-    @media @desktop {
-      display: none;
-    }
+  @media @mobile {
+    padding: 1rem 1.75rem;
   }
 
   @media @tablet {
-    padding: 0;
-    margin-top: 0;
+    padding: 2rem 1.5rem;
   }
   .productDescContainer {
-    align-items: center;
     display: flex;
     justify-content: space-between;
     box-sizing: border-box;
-    @media @tablet {
+    @media @mobile {
       flex-direction: column;
     }
     .left {
-      width: 58.18%;
-      margin-right: 40px;
-
-      @media @tablet {
+      @media @mobile {
         width: 100%;
-        box-sizing: border-box;
       }
+      :global {
+        .slick-dots {
+          width: 100%;
+          bottom: 2.3rem;
+          position: absolute;
+          li {
+            margin: 0 2px;
+            button {
+              width: 10px;
+            }
+            &.slick-active {
+              button {
+                background-color: @TextHeading;
+                width: 18px;
+              }
+            }
+          }
+        }
+        .slick-list {
+          @media @tablet {
+            min-height: 100%;
+          }
+          @media @mobile {
+            min-height: 100%;
+          }
+        }
+        .slick-slider {
+          padding-bottom: 0px;
+          margin-bottom: 0px;
+        }
+
+        .slick-slide {
+          border-right: none;
+          @media @mobile {
+            border-width: 0;
+          }
+        }
+      }
+      width: 50%;
+      margin-right: 2rem;
+
+      // @media @tablet {
+      //   width: 100%;
+      //   box-sizing: border-box;
+      // }
     }
     .right {
-      width: 41.82%;
+      width: 48%;
       box-sizing: border-box;
       position: relative;
-
+      align-self: center;
       @media @tablet {
         width: 100%;
         box-sizing: border-box;
@@ -186,11 +216,13 @@
         }
 
         &__title {
-          line-height: 43px;
-
+          line-height: 36px;
+          margin-bottom: 1rem;
+          word-wrap: break-word;
+          letter-spacing: -0.02em;
           @media @tablet {
-            line-height: 37px;
-            margin-top: 24px;
+            line-height: 32px;
+            font-size: 24px;
           }
           @media @mobile {
             font-size: 20px;
@@ -199,8 +231,8 @@
 
         .taxLabel {
           color: @TextDisabled;
-          margin-top: 2px;
-          margin-bottom: 24px;
+          margin-top: 8px;
+          margin-bottom: 16px;
 
           @media @desktop {
             margin-bottom: 16px;
@@ -247,8 +279,8 @@
           }
         }
         &__price {
-          font-size: 1rem;
-          margin: 16px 0 2px;
+          font-size: 16px;
+          margin: 0 0 2px;
           display: flex;
           align-items: center;
 
@@ -257,9 +289,8 @@
           }
 
           &--effective {
-            line-height: 23px;
-            min-height: 23px;
-
+            color: @TextHeading;
+            text-transform: capitalize;
             @media @tablet {
               line-height: 19px;
               min-height: 19px;
@@ -635,6 +666,7 @@
 }
 
 .sizeSelection {
+  // margin: 24px 0 16px 0;
   display: grid;
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.5s;

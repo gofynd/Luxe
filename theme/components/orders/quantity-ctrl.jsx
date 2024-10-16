@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { FDKLink } from "fdk-core/components";
 import styles from "./styles/quantity-ctrl.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 

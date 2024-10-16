@@ -17,9 +17,11 @@
 
   &__carousel {
     --gap: 12px;
-    padding-bottom: 32px;
     padding-left: 16px;
     padding-right: var(--p-right-mob);
+    // @media @tablet {
+    //   padding-left: 24px;
+    // }
     @media @mobile-up {
       padding-left: 24px;
       padding-right: var(--p-right-tablet);
@@ -31,25 +33,39 @@
 
     :global {
       .slick-list {
-        margin: 0 calc(var(--gap) / 2 * -1) !important;
+        margin: 0 calc(var(--gap) / 2 * -1);
         padding-left: 0 !important;
+        @media @tablet {
+          margin: 0;
+        }
       }
 
+      .slick-track {
+        display: flex !important;
+      }
       .slick-slide {
         padding: 0 calc(var(--gap) / 2);
-      }
-      .slick-next {
-        right: 0px;
+        height: inherit !important;
+        & > div,
+        & > div > div {
+          height: 100%;
+        }
+        .testimonialItem {
+          height: 100%;
+        }
       }
     }
   }
 
   &__block {
     display: flex;
-    border-radius: @ImageRadius;
+    border-radius: calc(2 * @ImageRadius);
+    @media @tablet {
+      border-radius: @ImageRadius;
+    }
     background-color: @ThemeAccentL5;
     border: 1px solid @DividerStokes;
-    height: auto;
+    height: 100%;
     @media @tablet {
       flex-direction: column;
       justify-content: center;
@@ -61,8 +77,8 @@
       .column-gap(16px);
     }
     &__image {
-      border-radius: @ImageRadius;
       width: 100%;
+      border-radius: @ImageRadius;
       @media @desktop {
         flex: 0 0 232px;
       }
@@ -113,4 +129,7 @@
   @media @desktop-down {
     width: 100vw;
   }
+}
+.b24 {
+  border-radius: 24px;
 }

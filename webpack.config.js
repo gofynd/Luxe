@@ -5,54 +5,50 @@ const NodeJSPolyfill = require("./plugin");
 const { readFileSync } = require("node:fs");
 const { Overlay } = require("react-hydration-overlay");
 
-// Path to the polyfill JavaScript file
 const polyfillCodePath = path.join(__dirname, "./polyfill.js");
-// Read the contents of the polyfill JavaScript file
 const polyfillCode = readFileSync(polyfillCodePath, { encoding: "utf-8" });
 
 module.exports = (configOptions) => {
   const {
-    isLocal, // Flag indicating if the environment is local (development) or not
-    isHMREnabled, // Flag indicating if Hot Module Replacement (HMR) is enabled
-    context, // Base directory for resolving paths
-    assetNormalizedBasePath, // Base path for assets in production (CDN or other)
-    imageCDNNormalizedBasePath, // Base path for images when using a CDN
-    localImageBasePath, // Base path for local images in development
-    localFontsBasePath, // Base path for local fonts in development
+    isLocal,
+    isHMREnabled,
+    context,
+    assetNormalizedBasePath,
+    localBasePath,
+    imageCDNNormalizedBasePath,
+    buildPath,
+    localImageBasePath,
+    localFontsBasePath,
   } = configOptions;
-
   return {
     entry: {
-      // Entry point for the theme bundle
       themeBundle: [path.resolve(context, "theme/index.jsx")],
     },
     resolve: {
-      // Resolve file extensions
       extensions: ["", ".js", ".jsx", ".ts", ".tsx"],
     },
     module: {
       rules: [
         {
-          // Rule to handle TypeScript (.ts, .tsx) files
-          test: /\.(ts|tsx)$/, // Matches TypeScript files (.ts and .tsx)
-          exclude: /node_modules/, // Excludes node_modules to improve performance
+          test: /\.(ts|tsx)$/,
+          exclude: /node_modules/,
           use: [
             {
-              loader: "babel-loader", // Uses Babel to transpile TypeScript code
+              loader: "babel-loader",
               options: {
                 presets: [
                   [
-                    "@babel/preset-env", // Transpiles JavaScript based on target environments (browsers, etc.)
+                    "@babel/preset-env",
                     {
-                      targets: "defaults", // Default target browsers/environments
+                      targets: "defaults",
                     },
                   ],
-                  "@babel/preset-react", // Transpiles JSX syntax for React
-                  "@babel/preset-typescript", // Transpiles TypeScript to JavaScript
+                  "@babel/preset-react",
+                  "@babel/preset-typescript",
                 ],
                 plugins: [
                   ...(isLocal && isHMREnabled
-                    ? [require.resolve("react-refresh/babel")] // Enables hot module replacement (HMR) for React components in development
+                    ? [require.resolve("react-refresh/babel")]
                     : []),
                 ],
               },
@@ -60,26 +56,25 @@ module.exports = (configOptions) => {
           ],
         },
         {
-          // Rule to handle JavaScript (.js, .jsx) files in the "theme" folder
-          test: /\.(jsx|js)$/, // Matches JavaScript and JSX files (.js and .jsx)
-          include: path.resolve(context, "theme"), // Only applies to files in the "theme" directory
-          exclude: /node_modules/, // Excludes node_modules for better performance
+          test: /\.(jsx|js)$/,
+          include: path.resolve(context, "theme"),
+          exclude: /node_modules/,
           use: [
             {
-              loader: "babel-loader", // Uses Babel to transpile JavaScript/JSX
+              loader: "babel-loader",
               options: {
                 presets: [
                   [
-                    "@babel/preset-env", // Transpiles modern JavaScript based on target environments
+                    "@babel/preset-env",
                     {
-                      targets: "defaults", // Default target browsers/environments
+                      targets: "defaults",
                     },
                   ],
-                  "@babel/preset-react", // Transpiles JSX syntax for React
+                  "@babel/preset-react",
                 ],
                 plugins: [
                   ...(isLocal && isHMREnabled
-                    ? [require.resolve("react-refresh/babel")] // Enables React HMR in development
+                    ? [require.resolve("react-refresh/babel")]
                     : []),
                 ],
               },
@@ -87,111 +82,106 @@ module.exports = (configOptions) => {
           ],
         },
         {
-          // Rule to handle regular CSS files (excluding .global.css)
-          test: /\.css$/i, // Matches CSS files
+          test: /\.css$/i,
           use: [
-            MiniCssExtractPlugin.loader, // Extracts CSS into separate files
+            MiniCssExtractPlugin.loader,
             {
-              loader: "css-loader", // Loads and interprets CSS files
+              loader: "css-loader",
               options: {
-                modules: false, // Disables CSS modules for regular CSS files
+                modules: false,
               },
             },
           ],
-          exclude: /\.global\.css$/, // Excludes global CSS files (handled by the next rule)
+          exclude: /\.global\.css$/,
         },
         {
-          // Rule to handle global CSS files
-          test: /\.css$/i, // Matches CSS files
+          test: /\.css$/i,
           use: [
-            MiniCssExtractPlugin.loader, // Extracts CSS into separate files
+            MiniCssExtractPlugin.loader,
             {
-              loader: "css-loader", // Loads and interprets CSS files
+              loader: "css-loader",
               options: {
-                modules: false, // Disables CSS modules for global CSS files
+                modules: false,
               },
             },
           ],
-          include: /\.global\.css$/, // Only includes global CSS files
+          include: /\.global\.css$/,
         },
         {
-          // Rule to handle global Less files
-          test: /\.less$/i, // Matches Less files (.less)
+          test: /\.less$/i,
           use: [
-            MiniCssExtractPlugin.loader, // Extracts CSS from Less files
+            // compiles Less to CSS
+            MiniCssExtractPlugin.loader,
             {
-              loader: "css-loader", // Loads and interprets CSS from Less files
+              loader: "css-loader",
               options: {
-                modules: false, // Disables CSS modules for global Less files
+                modules: false,
               },
             },
-            "less-loader", // Compiles Less to CSS
+            "less-loader",
           ],
-          include: /\.global\.less$/, // Only includes global Less files
+          include: /\.global\.less$/,
         },
         {
-          // Rule to handle Less files with CSS modules
-          test: /\.less$/i, // Matches Less files
+          test: /\.less$/i,
           use: [
-            MiniCssExtractPlugin.loader, // Extracts CSS from Less files
+            // compiles Less to CSS
+            MiniCssExtractPlugin.loader,
             {
-              loader: "css-loader", // Loads and interprets CSS from Less files
+              loader: "css-loader",
               options: {
                 modules: {
                   localIdentName: isLocal
-                    ? "[path][name]__[local]--[hash:base64:5]" // Names classes for easier debugging in development
-                    : "[hash:base64:5]", // Shorter hashed class names in production
+                    ? "[path][name]__[local]--[hash:base64:5]"
+                    : "[hash:base64:5]",
                 },
               },
             },
-            "less-loader", // Compiles Less to CSS
+            "less-loader",
           ],
-          exclude: /\.global\.less$/, // Excludes global Less files
+          exclude: /\.global\.less$/,
         },
         {
-          // Rule to handle image files
-          test: /\.(png|jpg|jpeg|gif)$/i, // Matches image files
-          type: "asset/resource", // Uses Webpack's asset/resource type to handle these files
+          test: /\.(png|jpg|jpeg|gif)$/i,
+          type: "asset/resource",
           generator: {
             publicPath: isLocal
-              ? localImageBasePath // Uses local image path in development
-              : imageCDNNormalizedBasePath, // Uses CDN image path in production
-            outputPath: "assets/images/", // Outputs images to the assets/images/ folder
+              ? localImageBasePath
+              : imageCDNNormalizedBasePath,
+            outputPath: "assets/images/",
           },
         },
         {
-          // Rule to handle font files
-          test: /\.(ttf|otf|woff|woff2)$/i, // Matches font files
-          type: "asset/resource", // Uses Webpack's asset/resource type to handle these files
+          test: /\.(ttf|otf|woff|woff2)$/i,
+          type: "asset/resource",
           generator: {
-            publicPath: isLocal ? localFontsBasePath : assetNormalizedBasePath, // Adjusts path for local or CDN use
-            outputPath: "assets/fonts/", // Outputs fonts to the assets/fonts/ folder
+            publicPath: isLocal ? localFontsBasePath : assetNormalizedBasePath,
+            outputPath: "assets/fonts/",
           },
         },
         {
-          // Rule to handle SVG files
-          test: /\.svg$/, // Matches SVG files
-          use: ["@svgr/webpack"], // Uses svgr to convert SVG files into React components
+          test: /\.svg$/,
+          use: ["@svgr/webpack"],
         },
       ],
     },
     plugins: [
       new MiniCssExtractPlugin({
-        filename: isLocal ? "[name].css" : "[name].[contenthash].css", // Generate different filenames based on environment
+        filename: isLocal ? "[name].css" : "[name].[contenthash].css",
       }),
       new NodeJSPolyfill({
-        snippet: polyfillCode, // Include polyfill code for Node.js compatibility
+        snippet: polyfillCode,
       }),
       ...(isLocal
         ? [
             new Overlay({
-              querySelector: "div#app", // Apply hydration overlay in development mode
+              querySelector: "div#app",
             }),
           ]
         : []),
     ],
     optimization: {
-      minimizer: [`...`, new CssMinimizerPlugin()], // Use CssMinimizerPlugin for CSS minimization
+      minimizer: [`...`, new CssMinimizerPlugin()],
     },
   };
 };

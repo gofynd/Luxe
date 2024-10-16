@@ -58,6 +58,7 @@ const useLoginOtp = ({ fpi }) => {
     };
     signInWithOtp(payload)
       .then((res) => {
+        // console.log("verifyOtp", { res });
         // if (data?.errors) {
         //   throw data?.errors?.[0];
         // }
@@ -69,6 +70,7 @@ const useLoginOtp = ({ fpi }) => {
           //     query: this.$router.currentRoute.query,
           // });
         }
+        // console.log(err);
         setOtpError({ message: err?.message || "Something went wrong" });
       });
   };

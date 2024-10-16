@@ -36,6 +36,9 @@ const useBlog = ({ fpi }) => {
       show_top_blog: pageConfig.show_top_blog || "",
       fallback_image: pageConfig.fallback_image || "",
       button_text: pageConfig.button_text || "",
+      autoplay: pageConfig.autoplay || false,
+      slide_interval: pageConfig.slide_interval || 3.5,
+      btn_text: pageConfig.btn_text || "",
     }),
     [pageConfig]
   );

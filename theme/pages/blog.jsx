@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Slider from "react-slick";
 import { useNavigate } from "react-router-dom";
 import { FDKLink } from "fdk-core/components";
@@ -7,6 +7,8 @@ import useBlog from "../page-layouts/blog/useBlog";
 import BlogFooter from "../components/blog/blog-footer";
 import BlogTabs from "../components/blog/blog-tabs";
 import FyImage from "../components/core/fy-image/fy-image";
+import EmptyState from "fdk-react-templates/components/empty-state/empty-state";
+import "fdk-react-templates/components/empty-state/empty-state.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
 function MemoizedSlide({ fpi, blog, index }) {
@@ -72,7 +74,7 @@ function MemoizedSlide({ fpi, blog, index }) {
           title={blog?.title}
           to={`/blog/${blog?.slug}`}
         >
-          {sliderProps?.button_text}
+          {sliderProps?.btn_text}
         </FDKLink>
       </div>
       <FyImage
@@ -82,7 +84,8 @@ function MemoizedSlide({ fpi, blog, index }) {
         mobileAspectRatio={3 / 4}
         defer={false}
         alt={`slide-${index}`}
-        showSkeleton={true}
+        showSkeleton={false}
+        isImageCover={true}
       />
     </div>
   );
@@ -91,6 +94,7 @@ function Blog({ fpi }) {
   const { blogs, footerProps, sliderProps, fetchBlogs } = useBlog({ fpi });
   const [blogFilter, setBlogFilter] = useState(() => new Map());
   const [searchText, setSearchText] = useState("");
+  const [blogCount, setBlogCount] = useState(0);
   const navigate = useNavigate();
 
   const getBlogDetails = (slug) => {
@@ -105,13 +109,52 @@ function Blog({ fpi }) {
     slidesToScroll: 1,
     swipeToSlide: true,
     lazyLoad: "ondemand",
-    autoplay: true,
+    autoplay: false,
     pauseOnHover: true,
     cssEase: "linear",
     arrows: false,
     nextArrow: <SvgWrapper svgSrc="arrow-right" />,
     prevArrow: <SvgWrapper svgSrc="arrow-left" />,
   });
+
+  useEffect(() => {
+    if (blogFilter?.size === 0) setBlogCount(blogs?.page?.item_total);
+    return () => {};
+  }, [blogs]);
+
+  useEffect(() => {
+    const payload = {
+      page_no: 1,
+      page_size: 12,
+    };
+
+    [...blogFilter?.values()]?.map((item, index) => {
+      if (item.pretext === "text") {
+        payload.search = item.display;
+      } else {
+        delete payload.search;
+      }
+      if (item.pretext === "tag") {
+        if (payload.tags) payload.tags = `${payload.tags},${item.display}`;
+        else payload.tags = item.display;
+      } else {
+        delete payload.tags;
+      }
+      return null;
+    });
+    fetchBlogs(payload, true);
+    return () => {};
+  }, [blogFilter]);
+
+  useEffect(() => {
+    if (sliderProps?.autoplay) {
+      setConfig((prevConfig) => ({
+        ...prevConfig,
+        autoplay: sliderProps.autoplay,
+        speed: sliderProps.slide_interval * 100,
+      }));
+    }
+  }, [sliderProps?.autoplay]);
 
   const convertUTCDateToLocalDate = (date, format) => {
     if (!format) {
@@ -151,6 +194,12 @@ function Blog({ fpi }) {
   const getBlogTitle = (title) => {
     const blogTitle =
       title?.length > 50 ? `${title.slice(0, 50).trim()}...` : title;
+    //   if (searchText) {
+    //     let regex = new RegExp(searchText, "gi");
+    //     return title.replace(regex, function (match) {
+    //       return '<span className={`${styles.highlight}`}>' + match + "</span>";
+    //     });
+    //   }
     return blogTitle;
   };
   const tagsList = () => {
@@ -224,20 +273,27 @@ function Blog({ fpi }) {
   return (
     <div>
       <div className={styles.blogContainer}>
-        {/* <div className={styles.sliderWrapper}>
+        {blogFilter?.size === 0 && blogs?.page?.item_total === 0 && (
+          <EmptyState title="No blogs found"></EmptyState>
+        )}
+        <div className={styles.sliderWrapper}>
           <Slider {...config} initialSlide={0}>
             {blogs?.items?.map((blog, index) => (
               <MemoizedSlide fpi={fpi} key={index} blog={blog} index={index} />
             ))}
           </Slider>
-        </div> */}
+        </div>
         <div className={styles.filterWrapper}>
           <div className={`${styles.filterWrapper__header}`}>
             <div>
               {blogFilter?.size > 0 && (
                 <span>Showing {blogs?.page?.item_total} results of </span>
               )}
-              <span>{blogs?.page?.item_total}</span> items
+              {blogCount > 0 && (
+                <>
+                  <span>{blogCount}</span> items
+                </>
+              )}
             </div>
             {blogFilter?.size > 0 && (
               <span className={`${styles.resetBtn}`} onClick={resetFilters}>
@@ -251,6 +307,7 @@ function Blog({ fpi }) {
               {blogs &&
                 Object.values(tagsList())?.map((tag, index) => (
                   <button
+                    key={index}
                     type="button"
                     className={`${styles.tagBtn} ${blogFilter?.has(tag?.key) ? `${styles.tagBtnSelected}` : ""}`}
                     onClick={() => toggleTagFilter(tag)}
@@ -265,7 +322,7 @@ function Blog({ fpi }) {
                   type="text"
                   className={`${styles.blogSearch__input}`}
                   placeholder="Search here..."
-                  maxlength="80"
+                  maxLength="80"
                   value={searchText}
                   onChange={(e) => searchTextUpdate(e?.target?.value)}
                 />
@@ -291,9 +348,16 @@ function Blog({ fpi }) {
                   </div>
                 ))}
             </div>
+            {blogFilter?.size > 0 && blogs?.page?.item_total === 0 && (
+              <EmptyState title="No blogs found"></EmptyState>
+            )}
             <div className={`${styles.blogContainer__grid}`}>
-              {blogs?.items?.map((blog, item) => (
-                <FDKLink to={`/blog/${blog.slug}`} title={blog.title}>
+              {blogs?.items?.map((blog, index) => (
+                <FDKLink
+                  key={`${blog.title}_${index}`}
+                  to={`/blog/${blog.slug}`}
+                  title={blog.title}
+                >
                   <div className={`${styles.blog}`}>
                     <div className={`${styles.blog__image}`}>
                       <FyImage

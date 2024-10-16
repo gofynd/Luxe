@@ -63,14 +63,12 @@ export const CART_DETAILS = `query Cart($areaCode: String, $assignCardId: Int, $
             currency_symbol
             effective
             marked
-            selling
           }
           converted {
             currency_code
             currency_symbol
             effective
             marked
-            selling
           }
         }
       }
@@ -168,14 +166,12 @@ export const CART_DETAILS = `query Cart($areaCode: String, $assignCardId: Int, $
           currency_symbol
           effective
           marked
-          selling
         }
         converted {
           currency_code
           currency_symbol
           effective
           marked
-          selling
         }
       }
       delivery_promise {
@@ -226,7 +222,6 @@ export const CART_DETAILS = `query Cart($areaCode: String, $assignCardId: Int, $
       raw {
         cod_charge
         convenience_fee
-        promotion
         coupon
         delivery_charge
         discount
@@ -311,14 +306,7 @@ export const CART_DETAILS = `query Cart($areaCode: String, $assignCardId: Int, $
       offer_text
       start_date
       sub_title
-      tags
       title
-      medias {
-          alt
-          key
-          type
-          url
-      }
     }
     page {
       current
@@ -469,14 +457,12 @@ export const CART_UPDATE = `mutation UpdateCart($areaCode: String, $b: Boolean, 
                 currency_symbol
                 effective
                 marked
-                selling
               }
               converted {
                 currency_code
                 currency_symbol
                 effective
                 marked
-                selling
               }
             }
           }
@@ -531,14 +517,12 @@ export const CART_UPDATE = `mutation UpdateCart($areaCode: String, $b: Boolean, 
               currency_symbol
               effective
               marked
-              selling
             }
             converted {
               currency_code
               currency_symbol
               effective
               marked
-              selling
             }
           }
           price_per_unit {
@@ -726,14 +710,12 @@ export const APPLY_COUPON = `mutation ApplyCoupon($applyCouponRequestInput: Appl
             currency_symbol
             effective
             marked
-            selling
           }
           converted {
             currency_code
             currency_symbol
             effective
             marked
-            selling
           }
         }
         seller {
@@ -744,7 +726,6 @@ export const APPLY_COUPON = `mutation ApplyCoupon($applyCouponRequestInput: Appl
           name
           store_code
           uid
-          code
         }
       }
       availability {
@@ -798,14 +779,12 @@ export const APPLY_COUPON = `mutation ApplyCoupon($applyCouponRequestInput: Appl
           currency_symbol
           effective
           marked
-          selling
         }
         converted {
           currency_code
           currency_symbol
           effective
           marked
-          selling
         }
       }
       price_per_unit {
@@ -926,7 +905,6 @@ export const REMOVE_COUPON = `mutation RemoveCoupon($removeCouponId: String) {
       raw {
         cod_charge
         convenience_fee
-        promotion
         coupon
         delivery_charge
         discount
@@ -1012,14 +990,12 @@ export const REMOVE_COUPON = `mutation RemoveCoupon($removeCouponId: String) {
             currency_symbol
             effective
             marked
-            selling
           }
           converted {
             currency_code
             currency_symbol
             effective
             marked
-            selling
           }
         }
         seller {
@@ -1030,7 +1006,6 @@ export const REMOVE_COUPON = `mutation RemoveCoupon($removeCouponId: String) {
           name
           store_code
           uid
-          code
         }
       }
       availability {
@@ -1084,14 +1059,12 @@ export const REMOVE_COUPON = `mutation RemoveCoupon($removeCouponId: String) {
           currency_symbol
           effective
           marked
-          selling
         }
         converted {
           currency_code
           currency_symbol
           effective
           marked
-          selling
         }
       }
       price_per_unit {

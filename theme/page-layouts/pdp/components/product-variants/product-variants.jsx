@@ -1,13 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FDKLink } from "fdk-core/components";
 import FyImage from "../../../../components/core/fy-image/fy-image";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import styles from "./product-variants.less";
 import { isRunningOnClient } from "../../../../helper/utils";
 
-function ProductVariants({ variants, product, currentSlug, globalConfig }) {
+function ProductVariants({
+  variants,
+  product,
+  currentSlug,
+  globalConfig,
+  preventRedirect = false,
+  setSlug,
+}) {
   const isProductSet = product.is_set;
-
   const getVariantSetText = () => (isProductSet ? "Size" : "Set");
   const getProductLink = (item) => {
     return `/product/${item.slug}`;
@@ -21,8 +27,9 @@ function ProductVariants({ variants, product, currentSlug, globalConfig }) {
   };
 
   const isVariantSelected = (item) => {
-    if (isRunningOnClient()) {
-      console.log(window?.location?.pathname.includes(item.slug));
+    if (currentSlug) {
+      return currentSlug?.includes(item.slug);
+    } else if (isRunningOnClient()) {
       return window?.location?.pathname.includes(item.slug);
     }
   };
@@ -157,9 +164,15 @@ function ProductVariants({ variants, product, currentSlug, globalConfig }) {
                           isVariantSelected(variant) ? styles.selected : ""
                         } ${!variant.is_available ? styles.unavailable : ""}`}
                       >
-                        <FDKLink to={getProductLink(variant)}>
-                          <div>{variant?.value}</div>
-                        </FDKLink>
+                        {!preventRedirect ? (
+                          <FDKLink to={getProductLink(variant)}>
+                            <div>{variant?.value}</div>
+                          </FDKLink>
+                        ) : (
+                          <div onClick={() => setSlug(variant?.slug)}>
+                            {variant?.value}
+                          </div>
+                        )}
                         <span />
                       </div>
                     ))}

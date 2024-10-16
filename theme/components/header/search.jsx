@@ -7,7 +7,6 @@ import FyImage from "../core/fy-image/fy-image";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 
 import styles from "./styles/search.less";
-import useHeader from "./useHeader";
 import { SEARCH_PRODUCT } from "../../queries/headerQuery";
 
 function Search({ screen, onSearchOpened, globalConfig, fpi }) {
@@ -110,7 +109,7 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
       <button onClick={openSearch} aria-label="search" type="button">
         <SvgWrapper
           className={`${styles.searchIcon} ${styles.headerIcon}`}
-          svgSrc={isDoubleRowHeader ? "search" : "single-row-search"}
+          svgSrc="single-row-search"
         />
       </button>
       <div>
@@ -191,7 +190,7 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
                   }}
                 >
                   {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */}
-                  {getProductSearchSuggestions(searchData).map(
+                  {getProductSearchSuggestions(searchData)?.map(
                     (product, index) => (
                       <li
                         key={index}
@@ -204,7 +203,7 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
                           <FyImage
                             src={getImage(product)?.url}
                             alt={getImage(product)?.alt}
-                            sources={[{ width: 56 }]}
+                            sources={[{ width: 200 }]}
                             globalConfig={globalConfig}
                           />
                         </div>

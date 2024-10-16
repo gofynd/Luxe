@@ -1,34 +1,38 @@
-.emptyContainer {
-  margin: 0 auto;
-  height: calc(100vh - 500px) !important;
-  align-items: center;
+@import "../../styles/main.less";
+
+.notFoundContainer {
   display: flex;
+  height: 664px;
   justify-content: center;
-  .emptyState {
-    text-align: center;
-    img {
-      width: 60%;
+  align-items: center;
+  overflow: hidden;
+  @media @tablet {
+    padding: 64px 16px;
+  }
+  .container {
+    display: flex;
+    width: 532px;
+    padding: 0px 24px;
+    flex-direction: column;
+    align-items: center;
+    @media @tablet {
+      width: 100%;
+      padding: 0;
     }
-    .noItems {
-      .title {
-        font-size: 20px;
-        margin: 15px 10px;
-        color: #000;
-        font-weight: 700;
-      }
+    gap: 32px;
+    .title {
+      text-align: center;
     }
-    .btnLink {
-      width: 250px;
-      margin: auto;
-      display: flex;
-      .backBtn {
-        padding: 0;
-        height: 40px;
-        width: 250px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
+    .button {
+      height: 48px;
+      padding: 12px 32px;
+      gap: 4px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-size: 14px;
+      @media @tablet {
+        font-size: 12px;
+        padding: 12px 20px;
       }
     }
   }

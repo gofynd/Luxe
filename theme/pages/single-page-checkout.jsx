@@ -100,4 +100,6 @@ function SingleCheckoutPage({ fpi }) {
   );
 }
 
+export const sections = JSON.stringify([]);
+
 export default SingleCheckoutPage;

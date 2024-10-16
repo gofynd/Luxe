@@ -1,6 +1,6 @@
 export const GET_REFUND_DETAILS = `query refund($orderId: String!) {
   refund {
-    userBeneficiariesDetail(orderId: $orderId) {
+    user_beneficiaries_detail(orderId: $orderId) {
         show_beneficiary_details
         beneficiaries {
             account_holder
@@ -29,7 +29,7 @@ export const GET_REFUND_DETAILS = `query refund($orderId: String!) {
 
 export const GET_ACTVE_REFUND_MODE = `query refund($orderId: String!) {
    refund { 
-        userBeneficiariesDetail(orderId: $orderId) {
+        user_beneficiaries_detail(orderId: $orderId) {
             show_beneficiary_details
             beneficiaries {
                 account_holder
@@ -53,7 +53,7 @@ export const GET_ACTVE_REFUND_MODE = `query refund($orderId: String!) {
                 transfer_mode
             }
         }
-        activeRefundTransferModes {
+        active_refund_transfer_modes {
             data {
                 display_name
                 items {
@@ -70,25 +70,10 @@ export const GET_ACTVE_REFUND_MODE = `query refund($orderId: String!) {
 
 export const VERIFY_IFSC_CODE = `query Payment($ifscCode: String!) {
    payment { 
-        verifyIFSCCode(ifscCode: $ifscCode) {
+        verify_IFSC_code(ifscCode: $ifscCode) {
             bank_name
             branch_name
             success
-            ADDRESS
-            BANK
-            BANKCODE
-            BRANCH
-            CENTRE
-            CITY
-            DISTRICT
-            IFSC
-            IMPS
-            ISO3166
-            MICR
-            NEFT
-            RTGS
-            STATE
-            UPI
         }
     }
 }`;

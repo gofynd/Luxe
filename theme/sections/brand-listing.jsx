@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/brand-listing.less";
-import FyImage from "../components/core/fy-image/fy-image";
 import Slider from "react-slick";
 import { FDKLink } from "fdk-core/components";
 import { BRAND_DETAILS } from "../queries/brandsQuery";
-import placeHolder1X1 from "../assets/images/placeholder1X1.png";
-import placeHolder9X16 from "../assets/images/placeholder9x16.png";
+import placeHolder1X1 from "../assets/images/brand-small-placeholder.png";
+import placeHolder9X16 from "../assets/images/brand-placeholder-1.png";
 import { useGlobalStore } from "fdk-core/utils";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import "fdk-react-templates/components/core/fy-image/fy-image.css";
+import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
-export function Component({ props, globalConfig, blocks, fpi }) {
+export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
   const {
     heading,
     description,
@@ -19,29 +21,53 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     layout_desktop,
     img_fill,
     button_text,
+    img_container_bg,
   } = props;
 
+  const placeholderBrands = [
+    "Maison Margiela",
+    "Adidas",
+    "Peter England",
+    "DIOR",
+  ];
+
   const [isLoading, setIsLoading] = useState(false);
-  const [brands, setBrands] = useState(
-    blocks?.reduce((acc, b) => {
-      if (b?.props?.brand?.value?.id)
-        return [...acc, b?.props?.brand?.value?.id];
-      return acc;
-    }, []) || []
-  );
   const [windowWidth, setWindowWidth] = useState(
     isRunningOnClient() ? window?.innerWidth : 400
   );
-  const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const brandCustomValue = useGlobalStore(fpi?.getters?.CUSTOM_VALUE) ?? {};
+  const brandIds = useMemo(() => {
+    return (
+      blocks?.reduce((acc, b) => {
+        if (b?.props?.brand?.value?.id)
+          return [...acc, b?.props?.brand?.value?.id];
+        return acc;
+      }, []) ?? []
+    );
+  }, [blocks]);
+  const customSectionId = brandIds?.toSorted()?.join?.("__");
+  const brands = brandCustomValue[`brandData-${customSectionId}`];
 
   useEffect(() => {
-    if (customValues?.brandData?.length > 0) {
-      setBrands(customValues?.brandData);
-    }
-  }, [JSON.stringify(blocks)]);
+    const fetchBrands = async () => {
+      if (!brands?.length && brandIds?.length) {
+        try {
+          const promisesArr = brandIds?.map((slug) =>
+            fpi.executeGQL(BRAND_DETAILS, { slug })
+          );
+          const responses = await Promise.all(promisesArr);
+          fpi.custom.setValue(`brandData-${customSectionId}`, responses);
+        } catch (err) {
+          console.log(err);
+        }
+      }
+    };
+    fetchBrands();
+  }, [brandIds, customSectionId]);
 
   useEffect(() => {
     if (isRunningOnClient()) {
+      setWindowWidth(window?.innerWidth);
       const handleResize = () => {
         setWindowWidth(window?.innerWidth);
       };
@@ -70,22 +96,27 @@ export function Component({ props, globalConfig, blocks, fpi }) {
       { breakpoint: { max: 480 }, width: 136 },
     ];
   };
-  console.log(brands, "brands");
 
   const showStackedView = () => {
-    const hasBrands = (brands || []).length > 0;
-    if (windowWidth <= 768) {
-      return hasBrands && layout_mobile?.value === "stacked";
+    if (
+      (windowWidth > 768 && per_row?.value >= brands?.length) ||
+      brands?.length === 1
+    ) {
+      return true;
     }
-    return hasBrands && layout_desktop?.value === "grid";
+    if (!brands?.length) return [];
+    if (windowWidth <= 768) {
+      return layout_mobile?.value === "stacked";
+    }
+    return layout_desktop?.value === "grid";
   };
 
   const showScrollView = () => {
-    const hasBrands = (brands || []).length > 0;
-    if (windowWidth <= 768) {
-      return hasBrands && layout_mobile?.value === "horizontal";
+    if (windowWidth <= 768 && brands?.length > 1) {
+      return layout_mobile?.value === "horizontal";
+    } else if (per_row?.value < brands?.length) {
+      return layout_desktop?.value === "horizontal";
     }
-    return hasBrands && layout_desktop?.value === "horizontal";
   };
 
   const getBrandCount = () => {
@@ -119,22 +150,37 @@ export function Component({ props, globalConfig, blocks, fpi }) {
       : card?.data?.brand?.banners?.portrait?.url || getPlaceHolder();
   };
 
-  const slickSetting = {
-    dots: false,
-    arrows: true,
+  const [slickSetting, setSlickSettings] = useState({
+    dots: brands?.length > per_row?.value,
+    arrows: brands?.length > per_row?.value,
+    nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
+    prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
     focusOnSelect: true,
     infinite: true,
     speed: 600,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    // adaptiveHeight: true,
+    customPaging: (i) => {
+      return <button>{i + 1}</button>;
+    },
+    appendDots: (dots) => (
+      <ul>
+        {/* Show maximum 8 dots */}
+        {dots.slice(0, 8)}
+      </ul>
+    ),
+    slidesToShow: brands?.length < 4 ? brands?.length : 4,
+    slidesToScroll: brands?.length < 4 ? brands?.length : 4,
     responsive: [
       {
-        breakpoint: 768,
+        breakpoint: 780,
         settings: {
           arrows: false,
-          slidesToShow: 3,
+          slidesToShow: brands?.length < 4 ? brands?.length : 3,
           slidesToScroll: 3,
+          swipe: true,
+          swipeToSlide: false,
+          touchThreshold: 80,
+          draggable: false,
+          touchMove: true,
         },
       },
       {
@@ -146,10 +192,32 @@ export function Component({ props, globalConfig, blocks, fpi }) {
           slidesToScroll: logoOnly?.value ? 3 : 1,
           centerMode: !(logoOnly?.value || getBrandCount()?.length === 1),
           centerPadding: "25px",
+          swipe: true,
+          swipeToSlide: false,
+          touchThreshold: 80,
+          draggable: false,
+          touchMove: true,
         },
       },
     ],
-  };
+  });
+
+  useEffect(() => {
+    if (per_row?.value !== slickSetting.slidesToShow) {
+      setSlickSettings((prevConfig) => ({
+        ...prevConfig,
+        slidesToShow: per_row?.value,
+        slidesToScroll: per_row?.value,
+      }));
+    }
+    if (slickSetting.arrows !== brands?.length > per_row?.value) {
+      setSlickSettings((prevConfig) => ({
+        ...prevConfig,
+        arrows: brands?.length > per_row?.value,
+        dots: brands?.length > per_row?.value,
+      }));
+    }
+  }, [per_row, brands]);
 
   const isDemoBlock = () => {
     const brands =
@@ -163,9 +231,7 @@ export function Component({ props, globalConfig, blocks, fpi }) {
   };
 
   const dynamicStyles = {
-    paddingBottom: "16px",
-    marginBottom: `
-    ${globalConfig.section_margin_bottom}px`,
+    padding: `16px 0 ${globalConfig.section_margin_bottom}px`,
   };
 
   const getPlaceHolder = () => {
@@ -202,7 +268,7 @@ export function Component({ props, globalConfig, blocks, fpi }) {
             } ${styles[`card-count-${per_row?.value}`]}`}
             style={{ "--brand-item": per_row?.value }}
           >
-            {getBrandCount().map((card, index) => (
+            {getBrandCount()?.map((card, index) => (
               <div
                 key={index}
                 //   className={`${styles["animation-fade-up"]}`}
@@ -214,16 +280,16 @@ export function Component({ props, globalConfig, blocks, fpi }) {
                     className={styles["pos-relative"]}
                   >
                     <FyImage
-                      className={`${
-                        !logoOnly?.value ? styles["brand-image"] : ""
-                      } ${img_fill?.value ? styles.streach : ""}`}
+                      backgroundColor={img_container_bg?.value}
+                      customClass={
+                        !logoOnly?.value ? styles["brand-image"] : styles.imgRad
+                      }
+                      isImageFill={img_fill?.value || logoOnly?.value}
                       src={getImgSrc(card)}
                       alt={card?.data?.brand?.name || ""}
-                      style={{
-                        aspectRatio: logoOnly?.value ? "1" : "0.8",
-                        "--mobile-aspect-ratio": logoOnly?.value ? "1" : "0.8",
-                      }}
-                      srcSet={getImgSrcSet()}
+                      aspectRatio={logoOnly?.value ? "1" : "0.8"}
+                      mobileAspectRatio={logoOnly?.value ? "1" : "0.8"}
+                      sources={getImgSrcSet()}
                     />
                     {card?.data?.brand?.name?.length > 0 &&
                       !logoOnly?.value && (
@@ -236,18 +302,18 @@ export function Component({ props, globalConfig, blocks, fpi }) {
                                   : logoPlaceholderSrc()
                               }
                               alt={card?.data?.brand?.name || ""}
-                              style={{
-                                aspectRatio: "1",
-                                "--mobile-aspect-ratio": "1",
-                              }}
-                              srcSet={JSON.stringify([
+                              aspectRatio="1"
+                              mobileAspectRatio="1"
+                              sources={[
                                 { breakpoint: { min: 769 }, width: 60 },
                                 { breakpoint: { max: 768 }, width: 60 },
                                 { breakpoint: { max: 480 }, width: 60 },
-                              ])}
+                              ]}
                             />
                           </div>
-                          <span className={styles.fontBody}>
+                          <span
+                            className={`${styles.fontBody} ${styles.brandNameSec}`}
+                          >
                             {card?.data?.brand?.name}
                           </span>
                         </div>
@@ -265,31 +331,35 @@ export function Component({ props, globalConfig, blocks, fpi }) {
             } ${logoOnly?.value ? "logoWidth" : ""} ${
               getBrandCount().length === 1 ? styles["single-card"] : ""
             }`}
-            style={{ "--brand-item": per_row?.value }}
+            style={{
+              "--brand-item": per_row?.value,
+              "--slick-dots": `${Math.ceil(getBrandCount()?.length / per_row?.value) * 22 + 10}px`,
+            }}
           >
             <Slider
               style={{ maxWidth: "100vw" }}
-              className={`${styles["brands-carousel"]} ${logoOnly?.value ? styles["logo-carousel"] : ""}`}
+              className={`${styles["brands-carousel"]} ${logoOnly?.value ? styles[`logo-carousel`] : ""} ${logoOnly?.value ? styles[`card-count-${per_row?.value}`] : ""} ${getBrandCount()?.length <= per_row?.value ? "no-nav" : ""}`}
               {...slickSetting}
             >
               {!isLoading &&
-                getBrandCount().map((card, index) => (
-                  <div key={index}>
+                getBrandCount()?.map((card, index) => (
+                  <div key={index} className={styles["custom-slick-slide"]}>
                     <div
                       // className={`${styles["animation-fade-up"]}`}
                       style={{ "--delay": `${150 * (index + 1)}ms` }}
                     >
                       <FDKLink
-                        link={`/products/?brand=${card?.data?.brand?.slug}`}
+                        to={`/products/?brand=${card?.data?.brand?.slug}`}
                       >
                         <div
                           data-cardtype="BRANDS"
                           style={{ position: "relative" }}
+                          // className={`${logoOnly?.value ? styles["logo-carousel"] : ""}`}
                         >
                           <FyImage
-                            className={`${styles["brand-image"]} ${
-                              !logoOnly?.value ? "" : styles.streach
-                            }`}
+                            backgroundColor={img_container_bg?.value}
+                            customClass={styles["brand-image"]}
+                            isImageFill={img_fill?.value || logoOnly?.value}
                             src={getImgSrc(card)}
                             aspectRatio={logoOnly?.value ? 1 : 0.8}
                             mobileAspectRatio={logoOnly?.value ? 1 : 0.8}
@@ -334,13 +404,13 @@ export function Component({ props, globalConfig, blocks, fpi }) {
               logoOnly?.value ? styles.logoWidth : styles.nonLogoMaxWidth
             } ${styles["card-count-4"]}`}
           >
-            {[...Array(4)].map((_, index) => (
+            {placeholderBrands?.map((item, index) => (
               <div key={index}>
                 <div data-cardtype="BRANDS" className={styles["pos-relative"]}>
                   <FyImage
-                    className={`${styles.streach} ${
-                      logoOnly?.value ? styles["brand-image"] : ""
-                    }}`}
+                    backgroundColor={img_container_bg?.value}
+                    customClass={logoOnly?.value ? styles["brand-image"] : ""}
+                    isImageFill={true}
                     src={getPlaceHolder()}
                     aspectRatio={logoOnly?.value ? 1 : 0.8}
                     mobileAspectRatio={logoOnly?.value ? 1 : 0.8}
@@ -361,9 +431,7 @@ export function Component({ props, globalConfig, blocks, fpi }) {
                           ]}
                         />
                       </div>
-                      <span className={styles.fontBody}>{`BRAND ${
-                        index + 1
-                      }`}</span>
+                      <span className={styles.fontBody}>{item}</span>
                     </div>
                   )}
                 </div>
@@ -371,20 +439,22 @@ export function Component({ props, globalConfig, blocks, fpi }) {
             ))}
           </div>
         )}
-        <div
-          className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
-        >
-          <FDKLink to="/brands/">
-            {button_text?.value && (
-              <button
-                type="button"
-                className={`${styles["section-button"]} ${styles["btn-secondary"]}`}
-              >
-                {button_text?.value}
-              </button>
-            )}
-          </FDKLink>
-        </div>
+        {button_text && (
+          <div
+            className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
+          >
+            <FDKLink to="/brands/">
+              {button_text?.value && (
+                <button
+                  type="button"
+                  className={`${styles["section-button"]} ${styles["btn-secondary"]}`}
+                >
+                  {button_text?.value}
+                </button>
+              )}
+            </FDKLink>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -456,7 +526,7 @@ export const settings = {
       type: "checkbox",
       id: "img_fill",
       category: "Image Container",
-      default: false,
+      default: true,
       label: "Fit image to the container",
       info: "If the image aspect ratio is different from the container, the image will be clipped to fit the container. The aspect ratio of the image will be maintained",
     },
@@ -512,13 +582,16 @@ export const settings = {
   },
 };
 
-Component.serverFetch = async ({ fpi, blocks }) => {
+Component.serverFetch = async ({ fpi, blocks, id }) => {
   try {
     const promisesArr = [];
+    const ids = [];
     blocks.map(async (block) => {
       if (block?.props?.brand?.value) {
+        const slug = block.props.brand.value.id;
+        ids.push(slug);
         const res = fpi.executeGQL(BRAND_DETAILS, {
-          slug: block.props.brand.value.id,
+          slug,
         });
         if (res !== undefined) {
           promisesArr.push(res);
@@ -526,7 +599,10 @@ Component.serverFetch = async ({ fpi, blocks }) => {
       }
     });
     const responses = await Promise.all(promisesArr);
-    return fpi.custom.setValue("brandData", responses);
+    return fpi.custom.setValue(
+      `brandData-${ids?.toSorted()?.join("__")}`,
+      responses
+    );
   } catch (err) {
     console.log(err);
   }

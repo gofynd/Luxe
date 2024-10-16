@@ -1,35 +1,19 @@
 @import "../../../styles/main.less";
 
+.sidebarHeader {
+  background-color: #efe7d6;
+}
+
 .sizeContainer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 540px;
-  height: 100%;
-  z-index: 101;
-  background: @DialogBackground;
   box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.2);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-
-  @media @tablet {
-    width: 100%;
-  }
-
-  .sidebarHeader {
-    background-color: #efe7d6;
-    padding: 1rem 1.5rem;
+  .sizeWrapper {
     display: flex;
-    justify-content: space-between;
-
-    .closeIcon {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-    }
+    flex-direction: column;
+    flex: 1;
   }
-
   .sizeTabs {
     width: 100%;
     display: flex;
@@ -62,11 +46,14 @@
   .sidebarBody {
     height: 100%;
     position: relative;
+    flex: 1;
   }
 
   .rightContainer {
     padding: 0 24px;
-
+    flex: 1;
+    height: 100%;
+    align-items: center;
     @media @tablet {
       height: 100%;
       display: flex;
@@ -204,14 +191,10 @@
 }
 
 .notAvailable {
-  position: absolute;
-  top: 50%;
-  left: 50%;
   text-align: center;
-  transform: translate(-50%, -50%);
   width: 100%;
 
-  @media @mobile-up {
+  @media @mobile {
     max-width: 415px;
   }
 

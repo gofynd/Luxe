@@ -1,12 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FDKLink } from "fdk-core/components";
 
-import { getGlobalConfigValue } from "../helper/utils";
 import FyImage from "../components/core/fy-image/fy-image";
 import styles from "../styles/sections/media-with-text.less";
+import { GET_PRODUCT_DETAILS } from "../queries/pdpQuery";
+import { isRunningOnClient } from "../helper/utils";
+import Hotspot from "../components/hotspot/product-hotspot";
 
-export function Component({ props, globalConfig }) {
+export function Component({ props, globalConfig, blocks, fpi }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [productsInfo, setProductsInfo] = useState([]);
   const {
     image_desktop,
     image_mobile,
@@ -86,6 +91,81 @@ export function Component({ props, globalConfig }) {
     ];
   };
 
+  const getProductSlugs = () => {
+    return (
+      blocks?.reduce((acc, block) => {
+        const productSlug = block?.props?.product?.value;
+        if (productSlug && !acc.includes(productSlug)) {
+          acc.push(productSlug);
+        }
+        return acc;
+      }, []) || []
+    );
+  };
+
+  const fetchProductsData = () => {
+    if (!getProductSlugs()?.length) {
+      return;
+    }
+
+    Promise.all(
+      getProductSlugs()?.map((slug) => {
+        return fpi.executeGQL(GET_PRODUCT_DETAILS, { slug });
+      })
+    )
+      .then((results) => {
+        setProducts(results);
+      })
+      .catch((e) => console.log(e));
+
+    // Promise.all(
+    //   getProductSlugs()?.map((slug) => {
+    //     return fpi.executeGQL(PRODUCT_SIZE_PRICE, { slug });
+    //   })
+    // )
+    //   .then((results) => {
+    //     setProductsInfo(results);
+    //   })
+    //   .catch((e) => console.log(e));
+  };
+
+  const getFormattedProducts = () => {
+    return getProductSlugs()?.reduce((acc, slug, index) => {
+      acc[slug] = products?.[index]?.data?.product;
+      acc[slug] = { ...acc[slug], price: productsInfo?.[index]?.price };
+      return acc;
+    }, {});
+  };
+
+  const getHotspots = () => {
+    return {
+      desktop: blocks?.filter((block) => block?.type === "hotspot_desktop"),
+      mobile: blocks?.filter((block) => block?.type === "hotspot_mobile"),
+    };
+  };
+  useEffect(() => {
+    fetchProductsData();
+  }, [JSON.stringify(products)]);
+
+  useEffect(() => {
+    if (isRunningOnClient()) {
+      const localDetectMobileWidth = () =>
+        document?.getElementsByTagName("body")?.[0]?.getBoundingClientRect()
+          ?.width <= 768;
+
+      const handleResize = () => {
+        // setWindowWidth(window?.innerWidth);
+      };
+      setIsMobile(localDetectMobileWidth());
+
+      window?.addEventListener("resize", handleResize);
+
+      return () => {
+        window.removeEventListener("resize", handleResize);
+      };
+    }
+  }, []);
+
   const dynamicStyles = {
     "padding-bottom": "16px",
     "margin-bottom": `${globalConfig?.section_margin_bottom}px`,
@@ -104,7 +184,27 @@ export function Component({ props, globalConfig }) {
           mobileAspectRatio={320 / 467}
           sources={getImgSrcSet()}
         />
+        {!isMobile &&
+          getHotspots()?.desktop?.map((hotspot, index) => (
+            <Hotspot
+              className={styles["hotspot--desktop"]}
+              key={index}
+              hotspot={hotspot}
+              product={getFormattedProducts()?.[hotspot?.props?.product?.value]}
+            />
+          ))}
+        {isMobile &&
+          getHotspots()?.mobile?.map((hotspot, index) => (
+            <Hotspot
+              className={styles["hotspot--mobile"]}
+              key={index}
+              hotspot={hotspot}
+              isMobile={isMobile}
+              product={getFormattedProducts()?.[hotspot?.props?.product?.value]}
+            />
+          ))}
       </div>
+
       <div className={styles.media_text__info}>
         {title?.value && (
           <h2 className={`${styles.media_text__heading} fontHeader`}>
@@ -182,6 +282,74 @@ export const settings = {
       default: false,
       label: "Invert Section",
       info: "Reverse the section on desktop",
+    },
+  ],
+  blocks: [
+    {
+      type: "hotspot_desktop",
+      name: "Hotspot Desktop",
+      props: [
+        {
+          type: "range",
+          id: "y_position",
+          min: 0,
+          max: 100,
+          step: 1,
+          unit: "%",
+          label: "Vertical Position",
+          default: 50,
+        },
+        {
+          type: "range",
+          id: "x_position",
+          min: 0,
+          max: 100,
+          step: 1,
+          unit: "%",
+          label: "Horizontal Position",
+          default: 50,
+        },
+        {
+          type: "product",
+          name: "Product",
+          id: "product",
+          label: "Select a Product",
+          info: "Product Item to be displayed",
+        },
+      ],
+    },
+    {
+      type: "hotspot_mobile",
+      name: "Hotspot Mobile",
+      props: [
+        {
+          type: "range",
+          id: "y_position",
+          min: 0,
+          max: 100,
+          step: 1,
+          unit: "%",
+          label: "Vertical Position",
+          default: 50,
+        },
+        {
+          type: "range",
+          id: "x_position",
+          min: 0,
+          max: 100,
+          step: 1,
+          unit: "%",
+          label: "Horizontal Position",
+          default: 50,
+        },
+        {
+          type: "product",
+          name: "Product",
+          id: "product",
+          label: "Select a Product",
+          info: "Product Item to be displayed",
+        },
+      ],
     },
   ],
 };

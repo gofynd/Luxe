@@ -7,7 +7,7 @@ function PaymentList({ payments, selectpayment }) {
     <div className={`${styles.paymentList}`}>
       {payments?.map((payment, index) => (
         <div key={index}>
-          {payment?.items?.length > 0 && (
+          {Array.isArray(payment?.items) && payment.items.length > 1 && (
             <p
               className={`${styles.paymentListItem} ${styles.nohover} ${styles.noborder} ${styles.darkersm}`}
             >

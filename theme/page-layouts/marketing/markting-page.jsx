@@ -7,13 +7,15 @@ import PageNotFound from "../../components/page-not-found/page-not-found";
 import Loader from "../../components/loader/loader";
 import { useGlobalStore } from "fdk-core/utils";
 
-function MarketingPage({ fpi, defaultSlug }) {
+function MarketingPage({ fpi, defaultSlug, id: sectionId }) {
   let { slug } = useParams();
   if (defaultSlug) slug = defaultSlug;
   const containerRef = useRef(null);
   const customPage = useGlobalStore(fpi.getters.CUSTOM_PAGE) || {};
   const contentData = useGlobalStore(fpi.getters.CUSTOM_VALUE) || {};
-  const [content, setContent] = useState(contentData?.marketingData || null);
+  const [content, setContent] = useState(
+    contentData?.[`marketingData-${sectionId}`] || null
+  );
   const { content_path, type } = customPage;
 
   useEffect(() => {
@@ -22,20 +24,23 @@ function MarketingPage({ fpi, defaultSlug }) {
         slug,
       };
       fpi.executeGQL(GET_PAGE, payload).then((res) => {
-        setContent(res?.data?.customPage?.content_path);
+        fetch(res?.data?.customPage?.content_path).then(async (res) => {
+          const text = await res.text();
+          setContent(text);
+        });
       });
     }
-    if (!content) {
-      fetch(content_path).then(async (res) => {
-        const text = await res.text();
-        setContent(text);
-      });
-    }
+    // if (!content) {
+    //   fetch(content_path).then(async (res) => {
+    //     const text = await res.text();
+    //     setContent(text);
+    //   });
+    // }
   }, [slug]);
 
   const {
     seo = {},
-    sanitized_content: sanitizedContent = [],
+    // sanitized_content: sanitizedContent = [],
     error,
   } = customPage || {};
 
@@ -80,7 +85,7 @@ function MarketingPage({ fpi, defaultSlug }) {
   );
 }
 
-MarketingPage.serverFetch = async ({ router, fpi }) => {
+MarketingPage.serverFetch = async ({ router, fpi, id }) => {
   const { slug } = router?.params ?? {};
   const payload = {
     slug,
@@ -91,7 +96,7 @@ MarketingPage.serverFetch = async ({ router, fpi }) => {
       pageResponse?.data?.customPage?.content_path
     );
     const content = await contentResponse.text();
-    fpi.custom.setValue("marketingData", content);
+    fpi.custom.setValue(`marketingData-${id}`, content);
   }
   return pageResponse;
 };

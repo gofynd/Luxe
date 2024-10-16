@@ -9,7 +9,6 @@ export const CATEGORIES_LISTING = `query Categories($department: String) {
               params
               query
               type
-              url
             }
             type
           }
@@ -46,7 +45,6 @@ export const CATEGORIES_LISTING = `query Categories($department: String) {
                   params
                   query
                   type
-                  url
                 }
                 type
               }
@@ -74,7 +72,6 @@ export const CATEGORIES_LISTING = `query Categories($department: String) {
                 params
                 query
                 type
-                url
               }
               type
             }

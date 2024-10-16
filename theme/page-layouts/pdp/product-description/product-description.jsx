@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { FDKLink } from "fdk-core/components";
-
 import OutsideClickHandler from "react-outside-click-handler";
 import styles from "./product-description.less";
 
@@ -16,12 +15,20 @@ import ProdDesc from "../components/prod-desc/prod-desc";
 import BreadCrumb from "../components/breadcrumb/breadcrumb";
 import Badges from "../components/badges/badges";
 import ProductCompareButton from "../../compare/product-compare-button";
+import StickyAddToCart from "../components/sticky-addtocart/sticky-addtocart";
+import { isEmptyOrNull, isRunningOnClient } from "../../../helper/utils";
+import FyButton from "fdk-react-templates/components/core/fy-button/fy-button";
+import Loader from "fdk-react-templates/components/loader/loader";
+import "fdk-react-templates/components/loader/loader.css";
+import MoreOffers from "../components/offers/more-offers";
 
 function ProductDescriptionPdp({ fpi, slug }) {
+  const addToCartBtnRef = useRef(null);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const {
     productDetails,
     isLoading,
+    isLoadingPriceBySize,
     productPriceBySlug,
     productMeta,
     currentPincode,
@@ -38,10 +45,14 @@ function ProductDescriptionPdp({ fpi, slug }) {
     removeFromWishlist,
     addProductForCheckout,
     checkPincode,
+    setPincodeErrorMessage,
+    isPageLoading,
   } = useProductDescription(fpi, slug);
   const priceDataDefault = productMeta?.price;
   const [selectedSize, setSelectedSize] = useState("");
   const [showSizeDropdown, setShowSizeDropdown] = useState(false);
+  const [showMoreOffers, setShowMoreOffers] = useState(false);
+  const [sidebarActiveTab, setSidebarActiveTab] = useState("coupons");
   const [errMessage, setErrorMessage] = useState("");
   const {
     media,
@@ -56,7 +67,6 @@ function ProductDescriptionPdp({ fpi, slug }) {
 
   const {
     show_price,
-    show_size_guide = true,
     disable_cart,
     button_options,
     custom_button_text,
@@ -69,6 +79,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
   const isSingleSize = sizes?.sizes?.length === 1;
   const isSizeCollapsed = pageConfig?.hide_single_size && isSingleSize;
   const preSelectFirstOfMany = pageConfig?.preselect_size;
+  const { show_size_guide = true } = pageConfig;
 
   function getManufacturingTime() {
     const custom_order = productDetails?.custom_order;
@@ -83,8 +94,8 @@ function ProductDescriptionPdp({ fpi, slug }) {
     return false;
   }
 
-  function getProductPrice(key) {
-    if (selectedSize && productPriceBySlug) {
+  const getProductPrice = (key) => {
+    if (selectedSize && !isEmptyOrNull(productPriceBySlug)) {
       if (productPriceBySlug?.set) {
         return productPriceBySlug?.price_per_piece[key] || "";
       }
@@ -100,16 +111,16 @@ function ProductDescriptionPdp({ fpi, slug }) {
             priceDataDefault?.[key]?.max || ""
           } `;
     }
-  }
+  };
 
-  function onSizeSelection(size) {
+  const onSizeSelection = (size) => {
     if (size?.quantity === 0 && !isMto) {
       return;
     }
     setSelectedSize(size?.value);
     setCurrentSize(size);
     setShowSizeDropdown(false);
-  }
+  };
 
   useEffect(() => {
     if (isSizeCollapsed || (preSelectFirstOfMany && sizes !== undefined)) {
@@ -117,12 +128,29 @@ function ProductDescriptionPdp({ fpi, slug }) {
     }
   }, [isSizeCollapsed, preSelectFirstOfMany]);
 
-  const isSizeGuideAvailable = () => {
+  // function getReviewRatingInfo() {
+  //   const customMeta = productDetails?.custom_meta || [];
+
+  //   return getReviewRatingData(customMeta);
+  // }
+
+  const isSizeGuideAvailable = useMemo(() => {
     const sizeChartHeader = productMeta?.size_chart?.headers || {};
     return (
       Object.keys(sizeChartHeader).length > 0 || productMeta?.size_chart?.image
     );
-  };
+  }, [productMeta]);
+
+  if (isRunningOnClient() && isPageLoading) {
+    return (
+      <div className={styles.loader}>
+        <Loader
+          containerClassName={styles.loaderContainer}
+          loaderClassName={styles.customLoader}
+        />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -145,6 +173,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                   followed={followed}
                   removeFromWishlist={removeFromWishlist}
                   addToWishList={addToWishList}
+                  isLoading={isLoading}
                 />
               </div>
             )}
@@ -259,39 +288,46 @@ function ProductDescriptionPdp({ fpi, slug }) {
                 </div>
               )}
               {/* ---------- Seller Details ---------- */}
-              {pageConfig?.show_seller && selectedSize && (
-                <div className={`${styles.sellerInfo} ${styles.fontBody}`}>
-                  <div
-                    className={`${styles.storeSeller} ${styles.captionNormal}`}
-                  >
-                    <span className={styles.soldByLabel}>Seller :</span>
+              {pageConfig?.show_seller &&
+                selectedSize &&
+                !isEmptyOrNull(productPriceBySlug) && (
+                  <div className={`${styles.sellerInfo} ${styles.fontBody}`}>
                     <div
-                      className={`${styles.nameWrapper} ${
-                        pageConfig?.seller_store_selection && styles.selectable
-                      }`}
+                      className={`${styles.storeSeller} ${styles.captionNormal}`}
                     >
-                      <p className={styles.storeSellerName}>
-                        {`${productPriceBySlug?.seller?.name || ""}`}
-                      </p>
-                      {productPriceBySlug?.seller?.count > 1 && (
-                        <span
-                          className={`${styles.captionSemiBold} ${styles.otherSellers}`}
-                        >
-                          &nbsp;&&nbsp;
-                          {`${(productPriceBySlug?.seller?.count ?? 2) - 1} Other${
-                            productPriceBySlug?.seller?.count > 1 > 2 ? "s" : ""
-                          }`}
-                        </span>
-                      )}
-                      {pageConfig?.seller_store_selection && (
-                        <SvgWrapper
-                          svgSrc="arrow-down"
-                          className={styles.dropdownArrow}
-                        />
-                      )}
+                      <span className={styles.soldByLabel}>Seller :</span>
+                      <div
+                        // v-if="showSellerStoreLabel"
+                        className={`${styles.nameWrapper} ${
+                          pageConfig?.seller_store_selection &&
+                          styles.selectable
+                        }`}
+                        // @click="onSellerClick(sellerData.loadStores)"
+                      >
+                        <p className={styles.storeSellerName}>
+                          {`${productPriceBySlug?.seller?.name || ""}`}
+                        </p>
+                        {productPriceBySlug?.seller?.count > 1 && (
+                          <span
+                            className={`${styles.captionSemiBold} ${styles.otherSellers}`}
+                          >
+                            &nbsp;&&nbsp;
+                            {`${(productPriceBySlug?.seller?.count ?? 2) - 1} Other${
+                              productPriceBySlug?.seller?.count > 1 > 2
+                                ? "s"
+                                : ""
+                            }`}
+                          </span>
+                        )}
+                        {pageConfig?.seller_store_selection && (
+                          <SvgWrapper
+                            svgSrc="arrow-down"
+                            className={styles.dropdownArrow}
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  {/* <store-modal
+                    {/* <store-modal
       :is-open="showStoreModal"
       :active-store-info="storeInfo"
       :all_stores_info="all_stores_info"
@@ -301,8 +337,8 @@ function ProductDescriptionPdp({ fpi, slug }) {
       @store-filter="updateStoreFilter"
       @store-item-select="setStoreInfo"
     ></store-modal> */}
-                </div>
-              )}
+                  </div>
+                )}
               {/* ---------- Size Container ---------- */}
               <div className={styles.sizeContainer}>
                 {isSizeSelectionBlock && productMeta?.sellable && (
@@ -354,7 +390,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
               </div>
               {/* ---------- Size Guide ---------- */}
               {show_size_guide &&
-                isSizeGuideAvailable() &&
+                isSizeGuideAvailable &&
                 productMeta?.sellable && (
                   <div>
                     <button
@@ -365,14 +401,6 @@ function ProductDescriptionPdp({ fpi, slug }) {
                       <span>SIZE GUIDE</span>
                       <SvgWrapper svgSrc="scale" className={styles.scaleIcon} />
                     </button>
-                    {showSizeGuide && (
-                      <SizeGuide
-                        customClass={styles.sizeGuide}
-                        isOpen={showSizeGuide}
-                        productMeta={productMeta}
-                        onCloseDialog={() => setShowSizeGuide(false)}
-                      />
-                    )}
                   </div>
                 )}
               {/* ---------- Size Dropdown And Action Buttons ---------- */}
@@ -451,16 +479,23 @@ function ProductDescriptionPdp({ fpi, slug }) {
                     }`}
                   >
                     {!disable_cart && productMeta?.sellable && (
-                      <button
+                      <FyButton
+                        ref={addToCartBtnRef}
                         type="button"
                         className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
                         onClick={(e) =>
                           addProductForCheckout(e, selectedSize, false)
                         }
+                        disabled={isLoadingPriceBySize}
+                        startIcon={
+                          <SvgWrapper
+                            svgSrc="cart"
+                            className={styles.cartIcon}
+                          />
+                        }
                       >
-                        <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
                         ADD TO CART
-                      </button>
+                      </FyButton>
                     )}
                     {!productMeta?.sellable && (
                       <button
@@ -490,6 +525,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                           onClick={(e) =>
                             addProductForCheckout(e, selectedSize, true)
                           }
+                          disabled={isLoadingPriceBySize}
                         >
                           <SvgWrapper
                             svgSrc="buy-now"
@@ -511,6 +547,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                       onClick={(e) =>
                         addProductForCheckout(e, selectedSize, true)
                       }
+                      disabled={isLoadingPriceBySize}
                     >
                       <SvgWrapper
                         svgSrc="buy-now'"
@@ -551,6 +588,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                   setErrorMessage={setErrorMessage}
                   checkPincode={checkPincode}
                   fpi={fpi}
+                  setPincodeErrorMessage={setPincodeErrorMessage}
                 />
               )}
               {pageConfig?.add_to_compare && (
@@ -563,7 +601,12 @@ function ProductDescriptionPdp({ fpi, slug }) {
 
               {/* ---------- Offers---------- */}
               {productMeta?.sellable && pageConfig?.show_offers && (
-                <Offers couponsList={coupons} promotionsList={promotions} />
+                <Offers
+                  couponsList={coupons}
+                  promotionsList={promotions}
+                  setShowMoreOffers={setShowMoreOffers}
+                  setSidebarActiveTab={setSidebarActiveTab}
+                />
               )}
               {/* ----------Prod Meta ---------- */}
               <ul className={`${styles.productDetail} ${styles.fontBody}`}>
@@ -617,7 +660,46 @@ function ProductDescriptionPdp({ fpi, slug }) {
           pageConfig={pageConfig}
         />
       </div>
-
+      {button_options?.includes("addtocart") &&
+        !disable_cart &&
+        productMeta?.sellable && (
+          <StickyAddToCart
+            addToCartBtnRef={addToCartBtnRef}
+            productMeta={productMeta}
+            selectedSize={selectedSize}
+            setSelectedSize={setSelectedSize}
+            pageConfig={pageConfig}
+            sizes={sizes}
+            getProductPrice={getProductPrice}
+            addProductForCheckout={addProductForCheckout}
+            onSizeSelection={onSizeSelection}
+            productPriceBySlug={productPriceBySlug}
+            isSizeGuideAvailable={show_size_guide && isSizeGuideAvailable}
+            deliveryInfoProps={{
+              pincode: currentPincode,
+              tat: productPriceBySlug?.delivery_promise,
+              selectPincodeError,
+              pincodeErrorMessage,
+              setCurrentPincode,
+              setErrorMessage,
+              checkPincode,
+              fpi,
+            }}
+          />
+        )}
+      <MoreOffers
+        isOpen={showMoreOffers}
+        onCloseDialog={() => setShowMoreOffers(false)}
+        couponsList={coupons}
+        promotionsList={promotions}
+        sidebarActiveTab={sidebarActiveTab}
+      />
+      <SizeGuide
+        customClass={styles.sizeGuide}
+        isOpen={showSizeGuide}
+        productMeta={productMeta}
+        onCloseDialog={() => setShowSizeGuide(false)}
+      />
       {/* {isLoading && <Loader />} */}
     </>
   );

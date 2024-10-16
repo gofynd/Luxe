@@ -1,26 +1,41 @@
-import React, { useState, useEffect } from "react";
-import OutsideClickHandler from "react-outside-click-handler";
-
-import MoreOffers from "./more-offers";
+import React from "react";
 import styles from "./offers.less";
-import { isRunningOnClient } from "../../../../helper/utils";
 
-function Offers({ couponsList, promotionsList }) {
-  const [showMoreOffers, setShowMoreOffers] = useState(false);
-  const [sidebarActiveTab, setSidebarActiveTab] = useState("coupons");
+function Offers({
+  couponsList,
+  promotionsList,
+  setShowMoreOffers,
+  setSidebarActiveTab,
+}) {
+  //   useEffect(() => {
+  //     const fetchCoupons = async () => {
+  //       try {
+  //         const response = await apiSDK.cart.getCoupons({});
+  //         setCouponsList(response?.available_coupon_list || []);
+  //       } catch (ex) {
+  //         console.error('Error while fetching coupons:', ex);
+  //       }
+  //     };
+
+  //     const fetchPromotions = async () => {
+  //       try {
+  //         const response = await apiSDK.cart.getPromotionOffers({
+  //           slug: context.product.slug,
+  //         });
+  //         setPromotionsList(response?.available_promotions || []);
+  //       } catch (ex) {
+  //         console.error('Error while fetching promotions:', ex);
+  //       }
+  //     };
+
+  //     fetchCoupons();
+  //     fetchPromotions();
+  //   }, [apiSDK.cart, context.product.slug]);
 
   const openMoreOffersSidebar = (offerType) => {
     setSidebarActiveTab(offerType);
     setShowMoreOffers(true);
   };
-
-  useEffect(() => {
-    if (isRunningOnClient() && typeof document !== "undefined") {
-      document.querySelector("body").style.overflow = showMoreOffers
-        ? "hidden"
-        : "auto";
-    }
-  }, [showMoreOffers]);
 
   return (
     <div className={styles.offersWrapper}>
@@ -82,15 +97,6 @@ function Offers({ couponsList, promotionsList }) {
               </div>
             )}
           </div>
-          <OutsideClickHandler onOutsideClick={() => setShowMoreOffers(false)}>
-            <MoreOffers
-              isOpen={showMoreOffers}
-              onCloseDialog={() => setShowMoreOffers(false)}
-              couponsList={couponsList}
-              promotionsList={promotionsList}
-              sidebarActiveTab={sidebarActiveTab}
-            />
-          </OutsideClickHandler>
         </div>
       )}
     </div>

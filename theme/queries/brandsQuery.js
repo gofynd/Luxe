@@ -18,7 +18,6 @@ export const DEPARTMENT_LIST = `query Departments {
 export const BRAND_LISTING = `query Brands($pageNo: Int, $pageSize: Int) {
     brands(pageNo: $pageNo, pageSize: $pageSize) {
       items {
-        custom_config
         banners {
           landscape {
             alt
@@ -47,7 +46,6 @@ export const BRAND_LISTING = `query Brands($pageNo: Int, $pageSize: Int) {
             params
             query
             type
-            url
           }
           type
         }
@@ -69,7 +67,6 @@ export const BRAND_LISTING = `query Brands($pageNo: Int, $pageSize: Int) {
 
 export const BRAND_DETAILS = `query brand($slug: String!) {
   brand(slug: $slug) {
-    custom_config
     description
     banners{
       landscape{
@@ -87,12 +84,6 @@ export const BRAND_DETAILS = `query brand($slug: String!) {
       url
     }
     name
-    uid
-    action {
-      type
-    }
-    departments
-    discount
     slug
   }
 }

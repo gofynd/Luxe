@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FDKLink } from "fdk-core/components";
-
 import Values from "values.js";
+import { useGlobalStore } from "fdk-core/utils";
+import { fetchCartDetails } from "../../page-layouts/cart/useCart";
 import {
   getProductImgAspectRatio,
   isRunningOnClient,
   throttle,
+  isEmptyOrNull,
 } from "../../helper/utils";
 import Search from "./search";
 import HeaderDesktop from "./desktop-header";
@@ -15,8 +17,10 @@ import useHeader from "./useHeader";
 import styles from "./styles/header.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 import fallbackLogo from "../../assets/images/logo.png";
+import { useAccounts } from "../../helper/hooks";
 
 function Header({ fpi }) {
+  const CART_ITEMS = useGlobalStore(fpi.getters.CART);
   const [resetNav, setResetNav] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
   const navigate = useNavigate();
@@ -31,6 +35,8 @@ function Header({ fpi }) {
     loggedIn,
   } = useHeader(fpi);
 
+  const { openLogin } = useAccounts({ fpi });
+
   const checkHeaderHeight = throttle(() => {
     if (isRunningOnClient()) {
       setHeaderHeight(headerRef.current.getBoundingClientRect().height);
@@ -38,6 +44,9 @@ function Header({ fpi }) {
   }, 1400);
 
   useEffect(() => {
+    if (isEmptyOrNull(CART_ITEMS?.cart_items)) {
+      fetchCartDetails(fpi);
+    }
     if (isRunningOnClient()) {
       setHeaderHeight(headerRef.current.getBoundingClientRect().height);
       window.addEventListener("resize", checkHeaderHeight);
@@ -110,8 +119,8 @@ function Header({ fpi }) {
   }, [globalConfig, headerHeight]);
 
   const getShopLogoMobile = () =>
-    appInfo?.mobile_logo?.secure_url?.replace("original", "resize-h:65") ||
-    appInfo?.logo?.secure_url?.replace("original", "resize-h:65") ||
+    appInfo?.mobile_logo?.secure_url?.replace("original", "resize-h:165") ||
+    appInfo?.logo?.secure_url?.replace("original", "resize-h:165") ||
     fallbackLogo;
 
   const checkLogin = (type) => {
@@ -121,7 +130,7 @@ function Header({ fpi }) {
     }
 
     if (!loggedIn) {
-      navigate("auth/login");
+      openLogin();
       return;
     }
 
@@ -143,6 +152,12 @@ function Header({ fpi }) {
       setResetNav(false);
     }, 500);
   };
+
+  // to scroll top whenever path changes
+  const location = useLocation();
+  useLayoutEffect(() => {
+    window?.scrollTo?.(0, 0);
+  }, [location.pathname]);
 
   return (
     <div className={`${styles.ctHeaderWrapper} fontBody`}>
@@ -192,7 +207,6 @@ function Header({ fpi }) {
                 className={styles.logo}
                 src={getShopLogoMobile()}
                 alt="name"
-                height="65"
               />
             </FDKLink>
             <div className={styles.right}>

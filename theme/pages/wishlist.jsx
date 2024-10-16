@@ -1,7 +1,6 @@
 import React from "react";
 import useWishlist from "../page-layouts/wishlist/useWishlist";
 import styles from "../styles/wishlist.less";
-import { FETCH_FOLLOWED_PRODUCTS } from "../queries/wishlistQuery";
 import { isLoggedIn } from "../helper/auth-guard";
 import Loader from "../components/loader/loader";
 import Wishlist from "fdk-react-templates/pages/wishlist/wishlist";
@@ -19,14 +18,8 @@ function WishlistPage({ fpi }) {
   );
 }
 
-WishlistPage.serverFetch = async ({ fpi }) => {
-  const payload = {
-    collectionType: "products",
-    pageSize: 12,
-  };
-  return fpi.executeGQL(FETCH_FOLLOWED_PRODUCTS, payload);
-};
-
 WishlistPage.authGuard = isLoggedIn;
+
+export const sections = JSON.stringify([]);
 
 export default WishlistPage;

@@ -75,7 +75,7 @@ function Collections({ fpi }) {
               </div>
             ) : (
               !isLoading &&
-              collections?.length && <EmptyState title="No collection found" />
+              !collections?.length && <EmptyState title="No collection found" />
             )}
           </div>
           <div
@@ -122,5 +122,21 @@ export const settings = JSON.stringify({
     },
   ],
 });
+
+export const sections = JSON.stringify([]);
+
+// Collections.serverFetch = async ({ fpi, props }) => {
+//   try {
+//     const payload = {
+//       slug: props.collection.value,
+//       first: 12,
+//       pageNo: 1,
+//     };
+//     await fpi.executeGQL(FEATURED_COLLECTION, payload).then((res) => {
+//       return fpi.custom.setValue("featuredCollectionData", res);
+//     });
+//   } catch (err) {
+//     console.log(err);
+//   }
 
 export default Collections;

@@ -28,4 +28,6 @@ ShippingPolicy.serverFetch = async ({ fpi }) => {
   }
 };
 
+export const sections = JSON.stringify([]);
+
 export default ShippingPolicy;

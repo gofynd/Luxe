@@ -105,6 +105,7 @@ const useWishlistPage = ({ fpi }) => {
     isBrand: true,
     isSaleBadge: globalConfig?.show_sale_badge,
     isPrice: globalConfig?.show_price,
+    showImageOnHover: globalConfig?.show_image_on_hover,
     isHdimgUsed: false,
     aspectRatio: getProductImgAspectRatio(globalConfig),
     isProductOpenInNewTab: false,

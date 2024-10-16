@@ -6,15 +6,15 @@ import CartIcon from "../assets/images/cart.svg";
 import WishlistIcon from "../assets/images/wishlist.svg";
 import ArrowRight from "../assets/images/arrow-right.svg";
 import TwitterIcon from "../assets/images/twitter.svg";
-import FooterTwitter from "../assets/images/footer-twitter.svg";
-import FooterFacebook from "../assets/images/footer-facebook.svg";
-import FooterGoogle from "../assets/images/footer-google+.svg";
-import FooterVimeo from "../assets/images/footer-vimeo.svg";
-import FooterBlog from "../assets/images/footer-blog.svg";
-import FooterInstagram from "../assets/images/footer-instagram.svg";
-import FooterLinkedin from "../assets/images/footer-linkedin.svg";
-import FooterYoutube from "../assets/images/footer-youtube.svg";
-import FooterPinterest from "../assets/images/footer-pinterest.svg";
+import SocailTwitter from "../assets/images/socail-twitter.svg";
+import SocailFacebook from "../assets/images/socail-facebook.svg";
+import SocailGoogle from "../assets/images/socail-google+.svg";
+import SocailVimeo from "../assets/images/socail-vimeo.svg";
+import SocailBlog from "../assets/images/socail-blog.svg";
+import SocailInstagram from "../assets/images/socail-instagram.svg";
+import SocailLinkedin from "../assets/images/socail-linkedin.svg";
+import SocailYoutube from "../assets/images/socail-youtube.svg";
+import SocailPinterest from "../assets/images/socail-pinterest.svg";
 import ArrowLeft from "../assets/images/arrow-left.svg";
 import SelectedCheckBox from "../assets/images/selected-checkbox.svg";
 import TwoGridIcon from "../assets/images/twogrid.svg";
@@ -105,6 +105,14 @@ import breadcrumbAngle from "../assets/images/breadcrumb-angle.svg";
 import delivery from "../assets/images/delivery.svg";
 import check from "../assets/images/check.svg";
 import videoPlay from "../assets/images/video-play.svg";
+import hotspot from "../assets/images/hotspot.svg";
+import ellipse from "../assets/images/ellipse.svg";
+import glideArrowLeft from "../assets/images/glide-arrow-left.svg";
+import glideArrowRight from "../assets/images/glide-arrow-right.svg";
+import notFound from "../assets/images/not-found.svg";
+import timer from "../assets/images/timer.svg";
+import contactEmail from "../assets/images/at-the-rate.svg";
+import location from "../assets/images/location.svg";
 
 /* eslint-disable  import/prefer-default-export */
 export const svgTitleComponentsMappings = {
@@ -122,15 +130,15 @@ export const svgTitleComponentsMappings = {
   wishlist: WishlistIcon,
   twitter: TwitterIcon,
   "true-check": truecheck,
-  "footer-twitter": FooterTwitter,
-  "footer-facebook": FooterFacebook,
-  "footer-pinterest": FooterPinterest,
-  "footer-google+": FooterGoogle,
-  "footer-blog": FooterBlog,
-  "footer-instagram": FooterInstagram,
-  "footer-youtube": FooterYoutube,
-  "footer-vimeo": FooterVimeo,
-  "footer-linkedin": FooterLinkedin,
+  "socail-twitter": SocailTwitter,
+  "socail-facebook": SocailFacebook,
+  "socail-pinterest": SocailPinterest,
+  "socail-google+": SocailGoogle,
+  "socail-blog": SocailBlog,
+  "socail-instagram": SocailInstagram,
+  "socail-youtube": SocailYoutube,
+  "socail-vimeo": SocailVimeo,
+  "socail-linkedin": SocailLinkedin,
   "selected-checkbox": SelectedCheckBox,
   fourgrid: FourGridIcon,
   twogrid: TwoGridIcon,
@@ -215,4 +223,12 @@ export const svgTitleComponentsMappings = {
   delivery,
   check,
   videoPlay,
+  hotspot,
+  ellipse,
+  glideArrowLeft,
+  glideArrowRight,
+  notFound,
+  timer,
+  contactEmail,
+  location,
 };

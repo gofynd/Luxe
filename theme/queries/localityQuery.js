@@ -17,16 +17,12 @@ export const LOCALITY = `query locality(
     name
     parent_ids
     type
-    parent_uid
-    meta
-    serviceability
     localities {
       id
       name
       display_name
       parent_ids
       type
-      parent_uid
     }
   }
 }`;

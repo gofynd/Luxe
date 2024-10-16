@@ -133,7 +133,7 @@ function BlogDetails({ fpi }) {
               )}
             </div>
           </div>
-          <div lassName={`${styles.blogPost__image}`}>
+          <div className={`${styles.blogPost__image}`}>
             <FyImage
               key={blogDetails?.slug}
               className={`${styles.blogPost__image}`}

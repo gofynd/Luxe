@@ -47,9 +47,8 @@ function ShipmentUpdateItem({ selectedBagId, item }) {
     if (total > item.quantity) {
       //   this.$refs["qty"].resetQuantity(this.item.quantity);
       setShowQuantityError(true);
-    } else if (total <= 0) {
+    } else if (total < 0) {
       setShowQuantityError(true);
-      setcurrQuantity(total);
     } else {
       //   this.$emit("UpdatedQuantity", total);
       setcurrQuantity(total);

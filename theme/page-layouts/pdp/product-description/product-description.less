@@ -1,5 +1,21 @@
 @import "../../../styles/main.less";
 
+.loader {
+  position: relative;
+  height: 90vh;
+  width: 100%;
+
+  .loaderContainer {
+    position: absolute;
+    height: 100%;
+    background: transparent;
+
+    .customLoader {
+      margin-left: 0;
+    }
+  }
+}
+
 .productDescMobileAcc {
   @media @mobile-up {
     display: none;
@@ -133,6 +149,9 @@
             line-height: 37px;
             margin-top: 8px;
           }
+          // @media @mobile {
+          //   font-size: 20px;
+          // }
         }
 
         .taxLabel {
@@ -392,7 +411,7 @@
     .addToCart {
       @media @desktop {
         &:hover {
-          /deep/ svg path {
+          .cartIcon {
             fill: @ButtonSecondary !important;
           }
         }
@@ -402,10 +421,8 @@
         height: 14px;
         width: 13px;
         margin-right: 5px;
-
-        /deep/ svg path {
-          fill: @ButtonPrimary;
-        }
+        fill: @ButtonPrimary;
+        transition: all 0.4s;
       }
     }
 
@@ -572,6 +589,7 @@
 }
 
 .sizeSelection {
+  // margin: 24px 0 16px 0;
   display: grid;
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.5s;

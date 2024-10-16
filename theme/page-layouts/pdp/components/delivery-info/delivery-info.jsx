@@ -11,6 +11,7 @@ function DeliveryInfo({
   pincodeErrorMessage,
   setCurrentPincode,
   checkPincode,
+  setPincodeErrorMessage,
 }) {
   const [postCode, setPostCode] = useState(pincode || "");
   const [tatMessage, setTatMessage] = useState("");
@@ -30,6 +31,8 @@ function DeliveryInfo({
   function changePostCode(e) {
     setPostCode(e?.target?.value);
     setCurrentPincode(e.target.value);
+    setTatMessage("");
+    setPincodeErrorMessage("");
     if (e?.target?.value?.length === 6) {
       checkPincode(e.target.value);
     }
@@ -49,12 +52,13 @@ function DeliveryInfo({
 
     const minDate = convertUTCDateToLocalDate(min, options);
     const maxDate = convertUTCDateToLocalDate(max, options);
-
-    setTatMessage(
-      `Will be delivered ${
-        min === max ? `on ${minDate}` : `between ${minDate} - ${maxDate}`
-      }`
-    );
+    setTimeout(() => {
+      setTatMessage(
+        `Will be delivered ${
+          min === max ? `on ${minDate}` : `between ${minDate} - ${maxDate}`
+        }`
+      );
+    }, 1000);
   };
 
   return (
@@ -92,7 +96,7 @@ function DeliveryInfo({
       )}
       {!pincodeErrorMessage && !selectPincodeError && (
         <div className={styles.deliveryDate}>
-          {postCode?.length === 6 && (
+          {postCode?.length === 6 && tatMessage?.length > 0 && (
             <>
               <SvgWrapper
                 svgSrc="delivery"

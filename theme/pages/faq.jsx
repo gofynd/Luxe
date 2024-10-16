@@ -130,4 +130,6 @@ function Faqs({ fpi }) {
   );
 }
 
+export const sections = JSON.stringify([]);
+
 export default Faqs;

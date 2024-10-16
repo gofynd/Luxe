@@ -7,6 +7,7 @@ import useProductDescription from "../page-layouts/pdp/product-description/usePr
 import PdpImageGallery from "../page-layouts/pdp/components/image-gallery/image-gallery";
 import ProductVariants from "../page-layouts/pdp/components/product-variants/product-variants";
 import SizeGuide from "../page-layouts/pdp/size-guide/size-guide";
+import CheckPincodeModal from "../components/pincode-modal/check-pincode-modal";
 
 export function Component({ props, globalConfig, fpi }) {
   const {
@@ -20,6 +21,8 @@ export function Component({ props, globalConfig, fpi }) {
     tax_label,
   } = props;
 
+  const [slug, setSlug] = useState(product?.value ? product?.value : "");
+
   const {
     productDetails,
     isLoading,
@@ -31,7 +34,13 @@ export function Component({ props, globalConfig, fpi }) {
     addToWishList,
     removeFromWishlist,
     addProductForCheckout,
-  } = useProductDescription(fpi, product?.value);
+    currentPincode,
+    selectPincodeError,
+    pincodeErrorMessage,
+    setCurrentPincode,
+    checkPincode,
+    setPincodeErrorMessage,
+  } = useProductDescription(fpi, slug);
   const priceDataDefault = productMeta?.price;
 
   const isMto = productDetails?.custom_order?.is_custom_order || false;
@@ -91,6 +100,9 @@ export function Component({ props, globalConfig, fpi }) {
       onSizeSelection(sizes?.sizes?.[0]);
     }
   }, [isSizeCollapsed, preSelectFirstOfMany]);
+  useEffect(() => {
+    if (sizes?.sizes?.length > 0) onSizeSelection(sizes?.sizes?.[0]);
+  }, [sizes?.sizes?.length]);
 
   const isSizeGuideAvailable = () => {
     const sizeChartHeader = productMeta?.size_chart?.headers || {};
@@ -100,12 +112,14 @@ export function Component({ props, globalConfig, fpi }) {
   };
 
   const getProductSlug = () => {
-    window.open(`${window.location.href}product/${product?.value}`);
+    window.open(`${window.location.href}product/${slug}`);
   };
+  const [openPincodeModal, setOpenPicodeModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // return bannerImage?.value ? <ImageBanner bannerImage={bannerImage} /> : null;
   return (
-    <div>
+    <div className={styles.featured_product_container}>
       <div className={styles["featured-products-header"]}>
         {Heading?.value && (
           <h2 className={`${styles.title} fontHeader`}>{Heading?.value}</h2>
@@ -121,25 +135,18 @@ export function Component({ props, globalConfig, fpi }) {
           <div className={styles.left}>
             <div className={styles.imgWrap}>
               <PdpImageGallery
-                key={product?.value}
-                images={product?.value && media?.length ? media : images}
+                key={slug}
+                images={slug && media?.length ? media : images}
                 product={productDetails}
                 iconColor={pageConfig?.icon_color || ""}
                 globalConfig={globalConfig}
+                hiddenDots={true}
+                addToWishList={addToWishList}
+                removeFromWishlist={removeFromWishlist}
+                slideTabCentreNone={true}
+                hideImagePreview={true}
+                followed={followed}
               />
-              <button
-                type="button"
-                aria-label="Wishlist"
-                className={styles.wishlistIcon}
-                onClick={(e) =>
-                  followed ? removeFromWishlist(e) : addToWishList(e)
-                }
-              >
-                <SvgWrapper
-                  className={followed ? styles.activeWishlist : ""}
-                  svgSrc={`${followed ? "wishlist-pdp-active" : "wishlist-pdp"}`}
-                />
-              </button>
             </div>
           </div>
           <div className={styles.right}>
@@ -148,25 +155,14 @@ export function Component({ props, globalConfig, fpi }) {
               <h1
                 className={`${styles.product__title} ${styles.h2} ${styles.fontHeader} fontHeader`}
               >
-                {product?.value && name}
+                {slug && name}
               </h1>
               {/* ---------- Product Price ---------- */}
-              {show_price && !isLoading && productMeta?.sellable && (
+              {show_price && productMeta?.sellable && (
                 <div className={styles.product__price}>
-                  {getProductPrice("effective") &&
-                    pageConfig?.mrp_label &&
-                    getProductPrice("effective") ===
-                      getProductPrice("marked") && (
-                      <span
-                        className={`${styles.mrpLabel} ${styles["mrpLabel--effective"]}`}
-                        style={{ marginLeft: 0 }}
-                      >
-                        MRP:
-                      </span>
-                    )}
-                  <h3 className={styles["product__price--effective"]}>
+                  <h4 className={styles["product__price--effective"]}>
                     {getProductPrice("effective")}
-                  </h3>
+                  </h4>
                   {getProductPrice("marked") &&
                     pageConfig?.mrp_label &&
                     getProductPrice("effective") !==
@@ -183,9 +179,9 @@ export function Component({ props, globalConfig, fpi }) {
                       {getProductPrice("marked")}
                     </span>
                   )}
-                  {priceDataBySize?.discount && (
+                  {sizes?.discount && (
                     <span className={styles["product__price--discount"]}>
-                      {priceDataBySize?.discount}
+                      {sizes?.discount}
                     </span>
                   )}
                 </div>
@@ -193,7 +189,7 @@ export function Component({ props, globalConfig, fpi }) {
               {/* ---------- Product Tax Label ---------- */}
               {tax_label?.value && (
                 <div className={`${styles.captionNormal} ${styles.taxLabel}`}>
-                  {tax_label?.value}
+                  ({tax_label?.value})
                 </div>
               )}
 
@@ -202,21 +198,24 @@ export function Component({ props, globalConfig, fpi }) {
                 <p
                   className={`${styles.b2} ${styles.fontBody} ${styles.shortDescription}`}
                 >
-                  {product?.value && short_description}
+                  {slug && short_description}
                 </p>
               )}
               {/* ---------- Product Variants ----------  */}
-              {product?.value && variants?.length > 0 && (
+              {slug && variants?.length > 0 && (
                 <div>
                   <ProductVariants
                     product={productDetails}
                     variants={variants}
-                    currentSlug={product?.value}
+                    currentSlug={slug}
+                    globalConfig={globalConfig}
+                    preventRedirect={true}
+                    setSlug={setSlug}
                   />
                 </div>
               )}
               {/* ---------- Seller Details ---------- */}
-              {show_seller?.value && selectedSize && (
+              {show_seller?.value && (
                 <div className={`${styles.sellerInfo} ${styles.fontBody}`}>
                   <div
                     className={`${styles.storeSeller} ${styles.captionNormal}`}
@@ -400,10 +399,14 @@ export function Component({ props, globalConfig, fpi }) {
                       <button
                         type="button"
                         className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
-                        onClick={(e) =>
-                          addProductForCheckout(e, selectedSize, false)
-                        }
-                        disabled={!product?.value}
+                        onClick={(e) => {
+                          if (localStorage.getItem("pincode")) {
+                            addProductForCheckout(e, selectedSize, false);
+                          } else {
+                            setOpenPicodeModal(!openPincodeModal);
+                          }
+                        }}
+                        disabled={!slug || isLoading}
                       >
                         <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
                         ADD TO CART
@@ -423,10 +426,14 @@ export function Component({ props, globalConfig, fpi }) {
                       <button
                         type="button"
                         className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
-                        onClick={(e) =>
-                          addProductForCheckout(e, selectedSize, true)
-                        }
-                        disabled={!product?.value}
+                        onClick={(e) => {
+                          if (localStorage.getItem("pincode")) {
+                            addProductForCheckout(e, selectedSize, true);
+                          } else {
+                            setOpenPicodeModal(!openPincodeModal);
+                          }
+                        }}
+                        disabled={!slug || isLoading}
                       >
                         <SvgWrapper
                           svgSrc="buy-now"
@@ -445,10 +452,14 @@ export function Component({ props, globalConfig, fpi }) {
                     <button
                       type="button"
                       className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
-                      onClick={(e) =>
-                        addProductForCheckout(e, selectedSize, true)
-                      }
-                      disabled={!product?.value}
+                      onClick={(e) => {
+                        if (localStorage.getItem("pincode")) {
+                          addProductForCheckout(e, selectedSize, true);
+                        } else {
+                          setOpenPicodeModal(!openPincodeModal);
+                        }
+                      }}
+                      disabled={!slug || isLoading}
                     >
                       <SvgWrapper
                         svgSrc="buy-now'"
@@ -460,7 +471,7 @@ export function Component({ props, globalConfig, fpi }) {
                 </div>
               )}
               <div
-                onClick={product?.value && getProductSlug}
+                onClick={slug && getProductSlug}
                 className={styles["view-more"]}
               >
                 View more details
@@ -469,6 +480,20 @@ export function Component({ props, globalConfig, fpi }) {
           </div>
         </div>
       </div>
+      {openPincodeModal && (
+        <CheckPincodeModal
+          setOpenPicodeModal={setOpenPicodeModal}
+          pincode={currentPincode}
+          tat={productPriceBySlug?.delivery_promise}
+          selectPincodeError={selectPincodeError}
+          pincodeErrorMessage={pincodeErrorMessage}
+          setCurrentPincode={setCurrentPincode}
+          setErrorMessage={setErrorMessage}
+          checkPincode={checkPincode}
+          fpi={fpi}
+          setPincodeErrorMessage={setPincodeErrorMessage}
+        />
+      )}
     </div>
   );
 }

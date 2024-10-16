@@ -4,8 +4,12 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAccounts, useWishlist } from "../../helper/hooks";
 import useSortModal from "./useSortModal";
 import useFilterModal from "./useFilterModal";
-import { PRODUCTS } from "../../queries/plpQuery";
-import { getProductImgAspectRatio } from "../../helper/utils";
+import { PLP_PRODUCTS } from "../../queries/plpQuery";
+import {
+  getProductImgAspectRatio,
+  isRunningOnClient,
+} from "../../helper/utils";
+import placeholder from "../../assets/images/placeholder3x4.png";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
@@ -27,13 +31,14 @@ const useProductListing = ({ fpi }) => {
     {};
 
   const productsListData = useGlobalStore(fpi?.getters?.PRODUCTS);
+  const { isPlpSsrFetched } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
 
-  const { filters = [], sortOn, page, items } = productsListData || {};
+  const { filters = [], sort_on: sortOn, page, items } = productsListData || {};
 
   const [productList, setProductList] = useState(items || undefined);
   const currentPage = productsListData?.page?.current ?? 1;
-  const [apiLoading, setApiLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+  const [apiLoading, setApiLoading] = useState(!isPlpSsrFetched);
+  const [isPageLoading, setIsPageLoading] = useState(!isPlpSsrFetched);
 
   const [columnCount, setColumnCount] = useState({
     desktop: Number(pageConfig?.grid_desktop) || 2,
@@ -47,14 +52,17 @@ const useProductListing = ({ fpi }) => {
     []
   );
 
+  const isClient = useMemo(() => isRunningOnClient(), []);
+
   useEffect(() => {
-    setIsClient(true);
+    fpi.custom.setValue("isPlpSsrFetched", false);
   }, []);
 
-  const searchParams = isClient ? new URLSearchParams(location?.search) : null;
-
   useEffect(() => {
-    if (isClient) {
+    if (!isPlpSsrFetched) {
+      const searchParams = isClient
+        ? new URLSearchParams(location?.search)
+        : null;
       const pageNo = Number(searchParams?.get("page_no"));
       const payload = {
         pageType: "number",
@@ -74,13 +82,13 @@ const useProductListing = ({ fpi }) => {
         ) ?? [];
       setIsResetFilterDisable(!resetableFilterKeys?.length);
     }
-  }, [location?.search, isClient]);
+  }, [location?.search]);
 
   const fetchProducts = (payload, append = false) => {
     setApiLoading(true);
 
     fpi
-      .executeGQL(PRODUCTS, payload)
+      .executeGQL(PLP_PRODUCTS, payload)
       .then((res) => {
         if (append) {
           setProductList((prevState) => {
@@ -91,12 +99,16 @@ const useProductListing = ({ fpi }) => {
         }
         setApiLoading(false);
       })
-      .catch((err) => {
+      .finally(() => {
         setApiLoading(false);
+        setIsPageLoading(false);
       });
   };
 
   const handleLoadMoreProducts = () => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     const payload = {
       pageNo: currentPage + 1,
       pageType: "number",
@@ -122,6 +134,9 @@ const useProductListing = ({ fpi }) => {
   }
 
   const handleFilterUpdate = ({ filter, item }) => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     const {
       key: { name, kind },
     } = filter;
@@ -142,6 +157,9 @@ const useProductListing = ({ fpi }) => {
   };
 
   const handleSortUpdate = (value) => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     if (value) {
       searchParams?.set("sort_on", value);
     } else {
@@ -155,6 +173,9 @@ const useProductListing = ({ fpi }) => {
   };
 
   function resetFilters() {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     filters?.forEach((filter) => {
       searchParams?.delete(filter.key.name);
     });
@@ -166,13 +187,16 @@ const useProductListing = ({ fpi }) => {
   }
 
   const getPageUrl = (pageNo) => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     searchParams?.set("page_no", pageNo);
     return `${location?.pathname}?${searchParams?.toString()}`;
   };
 
   const getStartPage = ({ current, totalPageCount }) => {
-    const index = current - PAGE_OFFSET;
-    const lastIndex = totalPageCount - PAGES_TO_SHOW + 1;
+    const index = Math.max(current - PAGE_OFFSET, 1);
+    const lastIndex = Math.max(totalPageCount - PAGES_TO_SHOW + 1, 1);
 
     if (index <= 1) {
       return 1;
@@ -240,37 +264,16 @@ const useProductListing = ({ fpi }) => {
   });
 
   const filterList = useMemo(() => {
-    return (filters ?? [])
-      .map((filter) => {
-        const isNameInQuery =
-          searchParams?.has(filter?.key?.name) ||
-          filter?.values?.some(({ is_selected }) => is_selected);
-        return { ...filter, isOpen: isNameInQuery };
-      })
-      ?.sort((a, b) => {
-        const nameA = a?.key?.name;
-        const nameB = b?.key?.name;
-
-        const isNameAInQuery =
-          searchParams?.has(nameA) ||
-          a?.values?.some(({ is_selected }) => is_selected);
-        const isNameBInQuery =
-          searchParams?.has(nameB) ||
-          b?.values?.some(({ is_selected }) => is_selected);
-
-        const order = ["department", "category", "brand", "collection"];
-
-        const indexA = order.indexOf(nameA);
-        const indexB = order.indexOf(nameB);
-        const normalizedIndexA = indexA === -1 ? order.length : indexA;
-        const normalizedIndexB = indexB === -1 ? order.length : indexB;
-
-        if (isNameAInQuery && !isNameBInQuery) return -1;
-        if (!isNameAInQuery && isNameBInQuery) return 1;
-
-        return normalizedIndexA - normalizedIndexB;
-      });
-  }, [filters, isClient, location?.search]);
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
+    return (filters ?? []).map((filter) => {
+      const isNameInQuery =
+        searchParams?.has(filter?.key?.name) ||
+        filter?.values?.some(({ is_selected }) => is_selected);
+      return { ...filter, isOpen: isNameInQuery };
+    });
+  }, [filters, location?.search]);
 
   const isFilterOpen = filterList.some((filter) => filter.isOpen);
 
@@ -315,6 +318,7 @@ const useProductListing = ({ fpi }) => {
     isWishlistIcon: true,
     followedIdList,
     isProductLoading: apiLoading,
+    isPageLoading,
     listingPrice,
     loadingOption: pageConfig.loading_options,
     paginationProps,
@@ -322,6 +326,8 @@ const useProductListing = ({ fpi }) => {
     filterModalProps,
     isImageFill: globalConfig?.img_fill,
     imageBackgroundColor: globalConfig?.img_container_bg,
+    showImageOnHover: globalConfig?.show_image_on_hover,
+    imagePlaceholder: placeholder,
     onResetFiltersClick: resetFilters,
     onColumnCountUpdate: handleColumnCountUpdate,
     onFilterUpdate: handleFilterUpdate,

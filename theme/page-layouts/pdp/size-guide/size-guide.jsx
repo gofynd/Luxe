@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
 import PropTypes from "prop-types";
 import styles from "./size-guide.less";
 import SvgWrapper from "../../../components/core/svgWrapper/SvgWrapper";
 import FyImage from "../../../components/core/fy-image/fy-image";
 import FyHTMLRenderer from "../../../components/core/fy-html-renderer/fy-html-renderer";
+import Modal from "fdk-react-templates/components/core/modal/modal";
+import "fdk-react-templates/components/core/modal/modal.css";
 
 function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
   const [previewSelectedMetric, setPreviewSelectedMetric] = useState("cm");
@@ -15,7 +17,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
     cm: "cm",
   };
 
-  const headers = Object.entries(productMeta?.size_chart?.headers).filter(
+  const headers = Object.entries(productMeta?.size_chart?.headers ?? {}).filter(
     ([key, val]) => !key?.includes("__") && val !== null
   );
 
@@ -72,36 +74,25 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
     return val;
   };
 
+  const displayStyle = useMemo(() => {
+    let displayStyle = "none";
+    if (activeTab === "measure") {
+      displayStyle = productMeta.size_chart.image ? "block" : "flex";
+    }
+    return displayStyle;
+  }, [activeTab]);
+
   return (
-    <div>
-      {/* Overlay */}
-      {/* eslint-disable jsx-a11y/no-static-element-interactions */}
-      <div
-        className={`${styles.overlay} ${isOpen ? styles.show : ""}`}
-        onClick={() => onCloseDialog()}
-      >
-        &nbsp;
-      </div>
-
+    <Modal
+      modalType="right-modal"
+      isOpen={isOpen}
+      title=""
+      closeDialog={(e) => onCloseDialog(e)}
+      headerClassName={styles.sidebarHeader}
+      bodyClassName={styles.sizeContainer}
+    >
       {/* Size Guide Dialog */}
-      <div
-        className={`${styles.sizeContainer} ${
-          productMeta?.size_chart && isOpen ? "" : styles.hidden
-        }`}
-      >
-        {/* Header */}
-        <div className={styles.sidebarHeader}>
-          <div className={styles.title} />
-          <button
-            type="button"
-            className={styles.closeIcon}
-            onClick={() => onCloseDialog()}
-            aria-label="Close"
-          >
-            <SvgWrapper svgSrc="close" />
-          </button>
-        </div>
-
+      <div>
         {/* Tabs */}
         <div className={styles.sizeTabs}>
           {/* Size Guide Tab */}
@@ -136,7 +127,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
           {/* Left Container */}
           <div
             className={`${styles.leftContainer} ${
-              !productMeta?.size_chart.image ? styles.cstLw : ""
+              !productMeta?.size_chart?.image ? styles.cstLw : ""
             }`}
             style={{ display: activeTab === "size_guide" ? "block" : "none" }}
           >
@@ -147,7 +138,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
               </h4>
               <div className={styles.btnContainer}>
                 {isSizeChartAvailable() &&
-                  Object.entries(values).map(([key, val]) => (
+                  Object.entries(values)?.map(([key, val]) => (
                     <button
                       key={key}
                       type="button"
@@ -196,13 +187,13 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
                 </thead>
 
                 <tbody>
-                  {productMeta?.size_chart?.sizes.map((row, index) => (
+                  {productMeta?.size_chart?.sizes?.map((row, index) => (
                     <tr key={`row_${index}`} className={styles.sizeRow}>
                       {Object.entries(row)
                         .filter(
                           ([key, val]) => !key?.includes("__") && val !== null
                         )
-                        .map(([key, val], index2) => (
+                        ?.map(([key, val], index2) => (
                           <td
                             key={`cell_${key}`}
                             className={`${styles.captionNormal} ${styles.sizeCell}`}
@@ -237,7 +228,9 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
 
           <div
             className={styles.rightContainer}
-            style={{ display: activeTab === "measure" ? "block" : "none" }}
+            style={{
+              display: displayStyle,
+            }}
           >
             {productMeta &&
               productMeta.size_chart &&
@@ -274,7 +267,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
           </div>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 }
 

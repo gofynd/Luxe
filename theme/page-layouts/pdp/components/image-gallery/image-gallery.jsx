@@ -21,10 +21,14 @@ function PdpImageGallery({
   followed,
   removeFromWishlist,
   addToWishList,
+  isLoading,
+  hiddenDots = false,
+  slideTabCentreNone = false,
+  hideImagePreview = false,
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [enableLightBox, setEnableLightBox] = useState(false);
-  const [src, setSrc] = useState(images?.[0]?.url);
+  const [src, setSrc] = useState(images?.[0]?.url || "");
   const [type, setType] = useState(images[0]?.type || "");
   const [alt, setAlt] = useState(images[0]?.alt || "");
   const [isFrameLoading, setIsFrameLoading] = useState(true);
@@ -66,7 +70,9 @@ function PdpImageGallery({
     if (currentImageIndex === 0) {
       return;
     } // cannot move backward
-    itemWrapperRef.current.scrollLeft -= 75;
+    if (!hiddenDots) {
+      itemWrapperRef.current.scrollLeft -= 75;
+    }
     setCurrentImageIndex((prevIndex) => prevIndex - 1);
     setSrc(images[currentImageIndex - 1]?.url || "");
     setType(images[currentImageIndex - 1]?.type || "");
@@ -77,7 +83,9 @@ function PdpImageGallery({
     if (currentImageIndex === images.length - 1) {
       return;
     } // cannot move forward
-    itemWrapperRef.current.scrollLeft += 75;
+    if (!hiddenDots) {
+      itemWrapperRef.current.scrollLeft += 75;
+    }
     setCurrentImageIndex((prevIndex) => prevIndex + 1);
     setSrc(images[currentImageIndex + 1]?.url || "");
     setType(images[currentImageIndex + 1]?.type || "");
@@ -115,6 +123,8 @@ function PdpImageGallery({
               followed={followed}
               removeFromWishlist={removeFromWishlist}
               addToWishList={addToWishList}
+              isLoading={isLoading}
+              hideImagePreview={hideImagePreview}
             />
             {product?.custom_order?.is_custom_order && (
               <div className={`${styles.badge} ${styles.b4}`}>
@@ -135,102 +145,104 @@ function PdpImageGallery({
           </div>
         </div>
 
-        <div
-          className={`${styles.thumbSlider} ${
-            displayThumbnail ? "" : styles.hidden
-          }}`}
-        >
+        {!hiddenDots && (
           <div
-            className={`${styles.thumbWrapper} ${
-              images && images.length < 5 ? styles.removeWidth : ""
-            }`}
+            className={`${styles.thumbSlider} ${
+              displayThumbnail ? "" : styles.hidden
+            }}`}
           >
-            <button
-              type="button"
-              className={`${styles.prevBtn} ${styles.btnNavGallery}`}
-              onClick={prevSlide}
-              aria-label="Prev"
+            <div
+              className={`${styles.thumbWrapper} ${
+                images && images.length < 5 ? styles.removeWidth : ""
+              }`}
             >
-              <SvgWrapper
-                svgSrc="arrow-left"
-                className={`${
-                  currentImageIndex <= 0 ? styles.disableArrow : ""
-                } ${styles.navArrowIcon}`}
-              />
-            </button>
-            <ul
-              ref={itemWrapperRef}
-              className={`${styles.imageGallery__list} ${
-                styles.scrollbarHidden
-              } ${images && images?.length < 5 ? styles.fitContent : ""}`}
-            >
-              {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */}
-              {images.map((item, index) => (
-                <li
-                  key={index}
-                  onClick={(e) => setMainImage(e, index)}
-                  className={`${styles.gap} ${
-                    item.type === "video" ? styles.flexAlign : ""
-                  } ${currentImageIndex === index ? styles.active : ""}`}
-                  style={{ "--icon-color": iconColor }}
-                >
-                  {item.type === "image" && (
-                    <FyImage
-                      customClass={`${styles["imageGallery__list--item"]}`}
-                      src={item?.url}
-                      alt={item?.alt}
-                      aspectRatio={getProductImgAspectRatio(globalConfig)}
-                      sources={[{ width: 100 }]}
-                      globalConfig={globalConfig}
-                    />
-                  )}
-                  {item.type === "video" && (
-                    <div className={styles.videoThumbnailContainer}>
-                      {item.url.includes("youtube") ? (
-                        <img
-                          className={`${styles["imageGallery__list--item"]} ${styles.videoThumbnail}`}
-                          src={getImageURL(item.url)}
-                          alt={item.alt}
-                        />
-                      ) : (
-                        <video
-                          className={`${styles["imageGallery__list--item"]} ${styles.videoThumbnail}`}
-                          src={item?.url}
-                        />
-                      )}
-                      <SvgWrapper
-                        svgSrc="videoPlay"
-                        className={styles.videoPlayIcon}
+              <button
+                type="button"
+                className={`${styles.prevBtn} ${styles.btnNavGallery}`}
+                onClick={prevSlide}
+                aria-label="Prev"
+              >
+                <SvgWrapper
+                  svgSrc="arrow-left"
+                  className={`${
+                    currentImageIndex <= 0 ? styles.disableArrow : ""
+                  } ${styles.navArrowIcon}`}
+                />
+              </button>
+              <ul
+                ref={itemWrapperRef}
+                className={`${styles.imageGallery__list} ${
+                  styles.scrollbarHidden
+                } ${images && images?.length < 5 ? styles.fitContent : ""}`}
+              >
+                {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */}
+                {images.map((item, index) => (
+                  <li
+                    key={index}
+                    onClick={(e) => setMainImage(e, index)}
+                    className={`${styles.gap} ${
+                      item.type === "video" ? styles.flexAlign : ""
+                    } ${currentImageIndex === index ? styles.active : ""}`}
+                    style={{ "--icon-color": iconColor }}
+                  >
+                    {item.type === "image" && (
+                      <FyImage
+                        customClass={`${styles["imageGallery__list--item"]}`}
+                        src={item?.url}
+                        alt={item?.alt}
+                        aspectRatio={getProductImgAspectRatio(globalConfig)}
+                        sources={[{ width: 100 }]}
+                        globalConfig={globalConfig}
                       />
-                    </div>
-                  )}
-                  {item.type === "3d_model" && (
-                    <div
-                      className={`${styles["imageGallery__list--item"]} ${styles.type3dModel}`}
-                    >
-                      <SvgWrapper svgSrc="3D" className={styles.modelIcon} />
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <button
-              type="button"
-              className={`${styles.nextBtn} ${styles.btnNavGallery}`}
-              onClick={nextSlide}
-              aria-label="Next"
-            >
-              <SvgWrapper
-                svgSrc="arrow-right"
-                className={`${
-                  currentImageIndex >= images.length - 1
-                    ? styles.disableArrow
-                    : ""
-                } ${styles.navArrowIcon}`}
-              />
-            </button>
+                    )}
+                    {item.type === "video" && (
+                      <div className={styles.videoThumbnailContainer}>
+                        {item.url.includes("youtube") ? (
+                          <img
+                            className={`${styles["imageGallery__list--item"]} ${styles.videoThumbnail}`}
+                            src={getImageURL(item.url)}
+                            alt={item.alt}
+                          />
+                        ) : (
+                          <video
+                            className={`${styles["imageGallery__list--item"]} ${styles.videoThumbnail}`}
+                            src={item?.url}
+                          />
+                        )}
+                        <SvgWrapper
+                          svgSrc="videoPlay"
+                          className={styles.videoPlayIcon}
+                        />
+                      </div>
+                    )}
+                    {item.type === "3d_model" && (
+                      <div
+                        className={`${styles["imageGallery__list--item"]} ${styles.type3dModel}`}
+                      >
+                        <SvgWrapper svgSrc="3D" className={styles.modelIcon} />
+                      </div>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                className={`${styles.nextBtn} ${styles.btnNavGallery}`}
+                onClick={nextSlide}
+                aria-label="Next"
+              >
+                <SvgWrapper
+                  svgSrc="arrow-right"
+                  className={`${
+                    currentImageIndex >= images.length - 1
+                      ? styles.disableArrow
+                      : ""
+                  } ${styles.navArrowIcon}`}
+                />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       <div className={styles.mobile}>
         <MobileSlider
@@ -243,6 +255,7 @@ function PdpImageGallery({
           removeFromWishlist={removeFromWishlist}
           addToWishList={addToWishList}
           setCurrentImageIndex={setCurrentImageIndex}
+          slideTabCentreNone={slideTabCentreNone}
         />
       </div>
       {enableLightBox && (

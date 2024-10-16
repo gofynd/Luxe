@@ -120,7 +120,7 @@ function ShipmentItem({
               </div>
             )}
 
-            {type === "tracking" && (
+            {/* {type === "tracking" && (
               <FDKLink to={shipment.track_url} className={`${styles.total}`}>
                 {shipment.tracking_no}
               </FDKLink>
@@ -132,7 +132,7 @@ function ShipmentItem({
                   {deliveryAddress?.city} -{deliveryAddress?.pincode}
                 </span>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
-/* eslint-disable no-undef */
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/hero-video.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
+import placeholder from "../assets/images/hero-desktop-placeholder.png";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
 
 export function Component({ props, globalConfig }) {
@@ -17,11 +17,10 @@ export function Component({ props, globalConfig }) {
   } = props;
 
   const [isMobile, setIsMobile] = useState(false);
-  const [showOverlay, setShowOverlay] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(!autoplay?.value);
+  const [ytOverlay, setYtOverlay] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [defaultIcon, setDefaultIcon] = useState(
-    !!(videoFile?.value || videoUrl?.value)
-  );
+  const [isValidUrl, setIsValidUrl] = useState(true);
   const videoRef = useRef(null);
   const ytVideoRef = useRef(null);
   const [windowWidth, setWindowWidth] = useState(
@@ -30,9 +29,12 @@ export function Component({ props, globalConfig }) {
 
   useEffect(() => {
     if (isRunningOnClient()) {
-      const localDetectMobileWidth = () =>
-        document?.getElementsByTagName("body")?.[0]?.getBoundingClientRect()
-          ?.width <= 768;
+      const localDetectMobileWidth = () => {
+        return (
+          document?.getElementsByTagName("body")?.[0]?.getBoundingClientRect()
+            ?.width <= 768
+        );
+      };
 
       const handleResize = () => {
         setWindowWidth(window?.innerWidth);
@@ -45,18 +47,24 @@ export function Component({ props, globalConfig }) {
         window.removeEventListener("resize", handleResize);
       };
     }
-    if (autoplay?.value) {
-      setShowOverlay(false);
-    }
   }, []);
 
+  function isValidURL(url) {
+    try {
+      return Boolean(new URL(url));
+    } catch (e) {
+      return false;
+    }
+  }
+
   function isGdrive() {
+    if (!isValidURL(videoUrl?.value)) return false;
     const urlObj = new URL(videoUrl?.value);
     return urlObj.host.includes("drive.google.com");
   }
 
   function getGdriveVideoUrl() {
-    if (videoUrl) {
+    if (videoUrl && isValidURL(videoUrl?.value)) {
       const urlObj = new URL(videoUrl?.value);
       const v = urlObj.pathname.split("/");
       const fileId = v[v.indexOf("d") + 1];
@@ -91,6 +99,7 @@ export function Component({ props, globalConfig }) {
   }
 
   function getYTVideoID() {
+    if (!isValidURL(videoUrl?.value)) return null;
     const urlObj = new URL(videoUrl?.value);
     const { searchParams } = urlObj;
     let v = searchParams.get("v");
@@ -100,95 +109,24 @@ export function Component({ props, globalConfig }) {
     return v;
   }
 
-  const isYoutube = useCallback(() => {
-    if (!videoUrl?.value) {
+  useEffect(() => {
+    setIsValidUrl(isValidURL(videoUrl?.value));
+  }, [videoUrl]);
+
+  function isYoutube() {
+    if (!videoUrl?.value || !isValidURL(videoUrl?.value)) {
       return false;
     }
     const urlObj = new URL(videoUrl?.value);
-    if (
-      urlObj.host.includes("youtu.be") ||
-      urlObj.host.includes("youtube.com")
-    ) {
-      return true;
+    if (isRunningOnClient()) {
+      return (
+        urlObj.host.includes("youtu.be") || urlObj.host.includes("youtube.com")
+      );
     }
     return false;
-  }, [videoUrl?.value]);
+  }
 
-  const onYouTubeIframeAPIReady = () => {
-    const ytVideo = ytVideoRef.current;
-    window.players = { ...window.players };
-    const { players } = window;
-
-    if (ytVideo) {
-      const videoID = ytVideo.dataset.videoid;
-      if (!players[videoID]) {
-        players[videoID] = {};
-      }
-
-      const videoMeta = JSON.parse(ytVideo.dataset.videometa);
-      const qautoplay = videoMeta?.autoplay?.value ? 1 : 0;
-      const qcontrols = videoMeta?.hidecontrols?.value ? 0 : 1;
-      const qmute = videoMeta?.autoplay?.value;
-      const qloop = videoMeta?.showloop?.value ? 0 : 1;
-
-      players[videoID].onReady = (e) => {
-        if (qmute) {
-          e.target.mute();
-        }
-        if (qautoplay) {
-          e.target.playVideo();
-        }
-        setIsLoading(false);
-      };
-
-      players[videoID].onStateChange = (event) => {
-        const p = window.players;
-        if (
-          event.data === YT.PlayerState.PLAYING ||
-          event.data === YT.PlayerState.BUFFERING
-        ) {
-          setShowOverlay(false);
-        }
-        if (event.data === YT.PlayerState.PAUSED) {
-          setShowOverlay(true);
-        }
-        if (event.data === YT.PlayerState.ENDED) {
-          if (qloop === true) {
-            setShowOverlay(true);
-          } else {
-            p[videoID].inst.playVideo();
-            p[videoID].inst.seekTo(0);
-          }
-        }
-      };
-
-      /* eslint-disable react/no-unknown-property */
-      players[videoID].inst = new YT.Player(`yt-video-${videoID}`, {
-        videoId: videoID,
-        width: "100%",
-        height: "100%",
-        playerVars: {
-          autoplay: qautoplay,
-          controls: qcontrols,
-          modestbranding: 1,
-          mute: qmute,
-          loop: qloop,
-          fs: 0,
-          WebKitPlaysInline: "true",
-          playsinline: 1,
-          cc_load_policty: 0,
-          iv_load_policy: 3,
-          origin: document.location.origin,
-        },
-        events: {
-          onReady: players[videoID].onReady,
-          onStateChange: players[videoID].onStateChange,
-        },
-      });
-    }
-  };
-
-  const loadYTScript = useCallback(() => {
+  const loadYTScript = () => {
     const nodes = document.querySelectorAll("[data-ytscript]");
     if (nodes.length === 0) {
       const tag = document.createElement("script");
@@ -213,24 +151,118 @@ export function Component({ props, globalConfig }) {
       setTimeout(onYouTubeIframeAPIReady, 500);
     }
     setIsLoading(true);
-  }, []);
+  };
 
   const removeYTScript = () => {
     const { players } = window;
+    // Destroy any existing YouTube player instances
     if (players) {
       Object.keys(players).forEach((item) => {
-        if (players[item].inst) players[item].inst.destroy();
+        if (players[item].inst) {
+          players[item].inst.destroy();
+        }
       });
       window.players = null;
     }
+
+    // Find all elements with the "data-ytscript" attribute
     const nodes = document.querySelectorAll("[data-ytscript]");
-    if (nodes.length > 0) {
-      nodes.forEach((element) => {
-        element.parentNode.removeChild(element);
-      });
-    }
-    if (typeof YT !== "undefined") {
+
+    // Safely remove each element, but ensure it is still part of the DOM
+    nodes.forEach((element) => {
+      if (element && element?.parentNode) {
+        try {
+          element?.parentNode?.removeChild(element);
+        } catch (err) {
+          console.warn("Error removing script node:", err);
+        }
+      } else {
+        console.warn(
+          "Script node is not part of the DOM or already removed:",
+          element
+        );
+      }
+    });
+
+    // Unset window.YT if it exists
+    if (typeof window.YT !== "undefined") {
       window.YT = undefined;
+    }
+  };
+
+  const onYouTubeIframeAPIReady = () => {
+    const ytVideo = ytVideoRef.current;
+    window.players = { ...window.players };
+    const { players } = window;
+
+    if (ytVideo) {
+      const videoID = ytVideo.dataset.videoid;
+      if (!players[videoID]) {
+        players[videoID] = {};
+      }
+
+      const videoMeta = JSON.parse(ytVideo.dataset.videometa);
+      const qautoplay = videoMeta?.autoplay?.value ? 1 : 0;
+      const qcontrols = videoMeta?.hidecontrols?.value ? 0 : 1;
+      const qmute = videoMeta?.autoplay?.value;
+      const qloop = !showloop?.value ? 0 : 1;
+
+      players[videoID].onReady = (e) => {
+        if (qmute) {
+          e.target.mute();
+        } else {
+          e.target.unMute();
+        }
+        if (qautoplay) {
+          e.target.playVideo();
+        }
+        setIsLoading(false);
+      };
+
+      players[videoID].onStateChange = (event) => {
+        const p = window.players;
+        if (
+          event.data === window.YT.PlayerState.PLAYING ||
+          event.data === window.YT.PlayerState.BUFFERING
+        ) {
+          setYtOverlay(true);
+          setShowOverlay(false);
+        }
+        if (event.data === window.YT.PlayerState.PAUSED) {
+          setShowOverlay(true);
+        }
+        if (event.data === window.YT.PlayerState.ENDED) {
+          if (qloop === 1) {
+            p[videoID].inst.playVideo(); // Loop the video if qloop is 1
+            p[videoID].inst.seekTo(0);
+          } else {
+            setShowOverlay(true); // End the video without looping
+          }
+        }
+      };
+      // eslint-disable-next-line no-undef
+      players[videoID].inst = new YT.Player(`yt-video-${videoID}`, {
+        videoId: videoID,
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          autoplay: qautoplay,
+          controls: qcontrols,
+          modestbranding: 1,
+          mute: qmute,
+          loop: qloop,
+          fs: 0,
+          WebKitPlaysInline: "true",
+          playsinline: 1,
+          cc_load_policty: 0,
+          iv_load_policy: 3,
+          origin: document.location.origin,
+        },
+        events: {
+          onReady: players[videoID].onReady,
+          onStateChange: players[videoID].onStateChange,
+        },
+      });
     }
   };
 
@@ -265,7 +297,20 @@ export function Component({ props, globalConfig }) {
   };
 
   useEffect(() => {
-    if (isYoutube(videoUrl?.value)) {
+    if (!videoUrl?.value && !videoFile?.value) {
+      setShowOverlay(true);
+    }
+    if (
+      (videoUrl?.value && videoFile?.value) ||
+      (!videoUrl?.value && videoFile?.value)
+    ) {
+      setYtOverlay(true);
+    }
+    if (!videoFile?.value && videoUrl?.value) {
+      setYtOverlay(false);
+    }
+    if (isYoutube(videoUrl?.value) && !videoFile?.value) {
+      setShowOverlay(false);
       removeYTScript();
     }
 
@@ -274,29 +319,73 @@ export function Component({ props, globalConfig }) {
         loadYTScript();
       }
     }, 0);
-  }, [props, isYoutube, loadYTScript, videoUrl?.value]);
+  }, [videoUrl, videoFile, autoplay, hidecontrols, showloop]);
 
-  const phoneClick = () => {
-    if (window.innerWidth < 800 && !showOverlay) {
-      closeVideo();
+  const handleVideoClick = (event) => {
+    event.stopPropagation();
+    if (videoRef.current) {
+      if (!videoRef.current.paused) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
     }
   };
 
   const dynamicStyles = {
-    "--margin_bottom": `${globalConfig.section_margin_bottom}px`,
+    marginBottom: `${globalConfig.section_margin_bottom}px`,
   };
   return (
     <div style={dynamicStyles}>
       {title?.value && (
         <h2 className={`${styles.video_heading} fontHeader`}>{title?.value}</h2>
       )}
-      <div className={`${styles.video_container}`} onClick={phoneClick}>
-        <IntersectionObserverComponent>
+      <noscript>
+        {videoFile?.value ? (
+          <video
+            ref={videoRef}
+            onClick={handleVideoClick}
+            width="100%"
+            poster={coverUrl?.value}
+            autoPlay={autoplay?.value}
+            muted={autoplay?.value}
+            loop={showloop?.value}
+            controls={!hidecontrols?.value}
+            webkitPlaysInline="true"
+            playsInline
+            onPause={() => setShowOverlay(true)}
+            onEnded={() => setShowOverlay(true)}
+            onPlay={() => setShowOverlay(false)}
+            onLoadedData={() => setIsLoading(false)}
+            onProgress={() => setIsLoading(false)}
+            preload="auto"
+            src={getVideoSource()}
+            allowFullScreen
+          ></video>
+        ) : (
+          <>
+            isYoutube() &&
+            <img
+              src={
+                coverUrl?.value ||
+                `https://img.youtube.com/vi/${getYTVideoID(videoUrl?.value)}/hqdefault.jpg` ||
+                placeholder
+              }
+              alt="placeholder"
+              style={{ width: "100%" }}
+            />
+          </>
+        )}
+      </noscript>
+      {/* <IntersectionObserverComponent> */}
+      {isRunningOnClient() && (
+        <div className={`${styles.video_container} `}>
           {videoFile?.value ? (
             <video
               ref={videoRef}
+              onClick={handleVideoClick}
               width="100%"
-              poster={coverUrl?.value?.replace("original", "resize-w:900")}
+              poster={coverUrl?.value}
               autoPlay={autoplay?.value}
               muted={autoplay?.value}
               loop={showloop?.value}
@@ -311,23 +400,26 @@ export function Component({ props, globalConfig }) {
               preload="auto"
               src={getVideoSource()}
               allowFullScreen
-            />
+            ></video>
           ) : (
-            isYoutube() && (
-              /* eslint-disable react/no-unknown-property */
-              <div
-                className={styles.yt_video}
-                ref={ytVideoRef}
-                id={`yt-video-${getYTVideoID(videoUrl?.value)}`}
-                data-videoid={getYTVideoID(videoUrl?.value)}
-                data-videometa={JSON.stringify(props)}
-                allowFullScreen
-              />
+            isYoutube() &&
+            isValidUrl && (
+              <div className={styles.youtube_wrapper}>
+                <div
+                  className={styles.yt_video}
+                  ref={ytVideoRef}
+                  id={`yt-video-${getYTVideoID(videoUrl?.value)}`}
+                  data-videoid={getYTVideoID(videoUrl?.value)}
+                  data-videometa={JSON.stringify(props)}
+                  allowFullScreen
+                ></div>
+              </div>
             )
           )}
 
           {showOverlay && (
             <div
+              onClick={playVideo}
               className={`overlay animated fadein overlay-noimage:${coverUrl?.value} youtube-noimage: ${isYoutube()}`}
             >
               {coverUrl.value && (
@@ -336,34 +428,34 @@ export function Component({ props, globalConfig }) {
                   style={{
                     background: `#ccc url(${coverUrl?.value}) center/cover no-repeat `,
                   }}
-                />
+                ></div>
               )}
               <div className={styles.overlay__content}>
-                <button
+                <div
                   id="play"
-                  onClick={playVideo}
+                  // onClick={playVideo}
                   className={styles.overlay__playButton}
-                  aria-label="Play Video"
-                  type="button"
                 >
                   <SvgWrapper svgSrc="play" />
-                </button>
+                </div>
               </div>
             </div>
           )}
-        </IntersectionObserverComponent>
-        {!showOverlay && (
-          <button
-            className={styles.pauseButton}
-            style={{ display: !defaultIcon && "block" }}
-            onClick={closeVideo}
-            aria-label="Pause Video"
-            type="button"
-          >
-            <SvgWrapper svgSrc="pause" />
-          </button>
-        )}
-      </div>
+          {!showOverlay && ytOverlay && (
+            <div className={styles.pauseButton} onClick={closeVideo}>
+              <SvgWrapper svgSrc="pause" />
+            </div>
+          )}
+          {!videoFile?.value && !videoUrl?.value && (
+            <img
+              src={coverUrl?.value || placeholder}
+              alt="placeholder"
+              style={{ width: "100%" }}
+            />
+          )}
+        </div>
+      )}
+      {/* </IntersectionObserverComponent> */}
     </div>
   );
 }
@@ -408,7 +500,7 @@ export const settings = {
     {
       type: "text",
       id: "title",
-      default: "Put Your Video Section Heading Here",
+      default: "",
       label: "Heading",
     },
     {

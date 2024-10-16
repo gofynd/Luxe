@@ -9,6 +9,10 @@
 .section-title {
   padding-bottom: 16px;
   text-align: center;
+  line-height: normal;
+  @media @tablet {
+    padding-bottom: 8px;
+  }
 }
 
 .section-description {
@@ -17,19 +21,28 @@
 .Trust-marker-image-container {
   padding: 32px 40px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  justify-content: center;
+  @media @tablet {
+    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  }
+  grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
   gap: 20px;
-  align-items: flex-start;
+  align-items: stretch;
+
+  a {
+    background-color: var(--img-background-color);
+  }
   @media @tablet {
     display: grid;
-    gap: 16px;
+    gap: 12px;
+    padding: 24px 16px;
   }
-  @media @mobile {
-    display: flex;
-    padding: 16px;
-    gap: 16px;
-    flex-direction: column;
-  }
+  // @media @mobile {
+  //   display: flex;
+  //   padding: 16px;
+  //   gap: 16px;
+  //   flex-direction: column;
+  // }
 }
 .marker-link {
   display: flex !important;
@@ -37,56 +50,61 @@
   align-items: center;
   padding: 24px;
   width: 100%;
-  border-radius: @ImageRadius;
-  @media @mobile {
-    flex-direction: row;
-    gap: 16px;
-    padding: 16px;
+  // border-radius: @ImageRadius;
+  @media @tablet {
+    padding: 8px;
   }
 }
 .trust_marker_image {
   width: 100px;
   height: 100px;
-  margin: auto;
-  @media @mobile {
-    width: 64px;
-    height: 64px;
-    flex: 0 0 64px;
-    margin: 0;
+  margin: 0 auto;
+  @media @tablet {
+    width: 24px;
+    height: 24px;
+    // margin: 0;
   }
 }
 .trust-marker-data {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 .marker-heading {
   font-size: 20px;
   text-align: center;
-  line-height: 18px;
+  line-height: normal;
   letter-spacing: -0.4px;
   padding-top: 8px;
   text-transform: capitalize;
   color: @TextHeading;
   @media @tablet {
-    padding-top: 16px;
-    font-size: 14px;
-    letter-spacing: -0.28px;
+    font-size: 8px;
+    padding-top: 4px;
+    letter-spacing: -0.16px;
   }
-  @media @mobile {
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: -0.28px;
-    padding-top: 0px;
-    text-align: left;
-  }
+  // @media @mobile {
+  //   font-size: 14px;
+  //   font-weight: 600;
+  //   letter-spacing: -0.28px;
+  //   padding-top: 0px;
+  //   text-align: left;
+  // }
 }
 
 .marker-description {
   color: var(--text-headings, #261a1a);
   text-align: center;
   padding-top: 8px;
-  @media @mobile {
-    text-align: left;
+  @media @desktop {
+    max-width: 180px;
+  }
+  @media @tablet {
+    font-size: 7px;
+    line-height: 9px;
+    letter-spacing: 0.14px;
+    padding-top: 4px;
   }
 }
 .trustMarker {
@@ -97,6 +115,15 @@
     @media @desktop {
       --gap: 24px;
     }
+    a {
+      padding: 24px;
+      @media @tablet {
+        padding: 8px;
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+      }
+    }
 
     :global {
       .slick-list {
@@ -105,24 +132,43 @@
           padding-left: 0 !important;
         }
       }
+      .slick-track {
+        display: flex !important;
+        justify-content: center;
+        align-items: stretch !important;
+        gap: 20px;
+        @media @tablet {
+          gap: 12px;
+        }
+      }
 
       .slick-slide {
-        padding: 0 calc(var(--gap) / 2);
-      }
-      .slick-next {
-        right: 0px;
+        height: auto !important;
+        // padding: 0 calc(var(--gap) / 2);
+        background-color: var(--img-background-color);
       }
     }
     @media @tablet {
-      padding: 0 24px;
+      padding: 24px 16px;
     }
-    @media @mobile {
-      padding: 0px 16px;
-    }
-    .bullet-arrow-container {
-      @media @mobile {
-        display: none;
-      }
+    // @media @mobile {
+    //   padding: 0px 16px;
+    // }
+    // .bullet-arrow-container {
+    //   @media @mobile {
+    //     display: none;
+    //   }
+    // }
+  }
+}
+.stack-view {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: stretch !important;
+  a {
+    max-width: 138px !important;
+    @media @desktop {
+      max-width: 440px !important;
     }
   }
 }

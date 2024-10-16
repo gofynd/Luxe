@@ -1,7 +1,6 @@
 import React from "react";
-import { useGlobalStore } from "fdk-core/utils";
 import ProductListingPage from "../page-layouts/plp/product-listing-page";
-import { PRODUCTS } from "../queries/plpQuery";
+import { PLP_PRODUCTS } from "../queries/plpQuery";
 
 const ProductListing = ({ fpi }) => {
   return <ProductListingPage fpi={fpi} />;
@@ -112,6 +111,8 @@ export const settings = JSON.stringify({
   ],
 });
 
+export const sections = JSON.stringify([]);
+
 ProductListing.serverFetch = async ({ fpi, router }) => {
   let filterQuery = "";
   let sortQuery = "";
@@ -146,7 +147,10 @@ ProductListing.serverFetch = async ({ fpi, router }) => {
     pageType: "number",
   };
   if (pageNo) payload.pageNo = pageNo;
-  return fpi.executeGQL(PRODUCTS, payload);
+
+  fpi.custom.setValue("isPlpSsrFetched", true);
+
+  return fpi.executeGQL(PLP_PRODUCTS, payload);
 };
 
 export default ProductListing;

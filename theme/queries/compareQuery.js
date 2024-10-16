@@ -11,9 +11,10 @@ export const PRODUCT_COMPARISON = `query productComparison($slug: [String]!) {
       discount      
       name
       slug
+      sellable
+      teaser_tag
       brand {
         name
-        slug
       }
       categories {
         name
@@ -23,7 +24,6 @@ export const PRODUCT_COMPARISON = `query productComparison($slug: [String]!) {
             params
             query
             type
-            url
           }
         }
       }
@@ -72,7 +72,6 @@ export const SEARCH_PRODUCT = `query products(
       name
       slug
     }
-    message
   }
 }
 `;

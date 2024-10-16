@@ -142,13 +142,13 @@ const ProfileAddressPage = ({ fpi }) => {
           localityObj?.localities.forEach((locality) => {
             switch (locality.type) {
               case "city":
-                data.city = capitalize(locality.name);
+                data.city = capitalize(locality.display_name);
                 break;
               case "state":
-                data.state = capitalize(locality.name);
+                data.state = capitalize(locality.display_name);
                 break;
               case "country":
-                data.country = capitalize(locality.name);
+                data.country = capitalize(locality.display_name);
                 break;
               default:
                 break;

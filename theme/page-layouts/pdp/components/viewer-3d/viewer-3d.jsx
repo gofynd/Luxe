@@ -1,18 +1,32 @@
-import React from "react";
-import View3D from "@egjs/react-view3d";
+import React, { useEffect, useState } from "react";
 import Loader from "../../../../components/loader/loader";
 import styles from "./viewer-3d.less";
+import { isRunningOnClient } from "../../../../helper/utils";
+import { loadModelViewer } from "./modalViewerLoader";
 
 function Viewer3D({ src, prompt, autoRotate, children }) {
-  return (
-    <View3D
+  const [isModalViewerLoaded, setIsModalViewerLoaded] = useState(false);
+  useEffect(() => {
+    if (isRunningOnClient) {
+      loadModelViewer()
+        .catch(console.error)
+        .finally(() => {
+          setIsModalViewerLoaded(true);
+        })
+        .catch(console.error);
+    }
+  }, []);
+
+  return isModalViewerLoaded ? (
+    <model-viewer
       src={src}
-      autoplay={autoRotate}
-      initialZoom={15}
-      className={styles.canvasClass}
-    >
-      {children}
-    </View3D>
+      camera-controls
+      auto-rotate
+      disable-pan
+      className={styles.viewer3d}
+    />
+  ) : (
+    <Loader />
   );
 }
 

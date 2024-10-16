@@ -240,6 +240,7 @@ export const GET_SHIPMENT_DETAILS = `query shipment(
         status
         time
         value
+        created_ts
         tracking_details {
           is_current
           is_passed

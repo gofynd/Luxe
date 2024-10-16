@@ -1,22 +1,16 @@
 export const USER_DATA_QUERY = `query User {
   user {
-    loggedInUser {
+    logged_in_user {
       id
       account_type
       active
-      application_id
-      created_at
       dob
       first_name
       gender
       last_name
-      meta
       profile_pic_url
-      updated_at
       user_id
       username
-      has_old_password_hash
-      uid
       emails {
         active
         email
@@ -31,86 +25,15 @@ export const USER_DATA_QUERY = `query User {
         verified
       }
     }
-    activeSessions {
-        sessions
-    }
-    hasPassword {
+    has_password {
         result
     }
   }
   followedListing(
     collectionType: "products"
   ) {
-    items {
-      color
-      item_code
-      item_type
-      has_variant
+    items{
       uid
-      attributes
-      custom_config
-      country_of_origin
-      department
-      description
-      discount
-      highlights
-      image_nature
-      is_dependent
-      name
-      product_group_tag
-      product_online_date
-      rating
-      rating_count
-      slug
-      tags
-      teaser_tag
-      tryouts
-      type
-      sellable
-      no_of_boxes
-      promo_meta
-      brand {
-        custom_config
-        description
-        name
-        uid
-        departments
-        discount
-        slug
-        action {
-          type
-        }
-      }
-      media {
-        alt
-        type
-        url
-      }
-      price {
-        effective {
-          currency_code
-          currency_symbol
-          max
-          min
-        }
-        marked {
-          currency_code
-          currency_symbol
-          max
-          min
-        }
-      }
-      variants {
-        display_type
-        group_id
-        header
-        key
-        logo
-        total
-      }
-      action {
-        type
-      }
     }
     page {
       current
@@ -126,15 +49,26 @@ export const USER_DATA_QUERY = `query User {
 
 export const THEME_DATA = `query Theme($themeId: String!, $pageValue: String!){
   theme(themeId: $themeId) {
-    themePageDetail(pageValue: $pageValue) {
+    theme_page_detail(pageValue: $pageValue) {
       id
       path
       props
       sections {
-        blocks
         label
         name
+        id
+        source {
+          type
+          id
+          bundle_name
+        }
+        assets {
+          js
+          css
+        }
+        blocks
         predicate {
+          zones
           route {
             exact_url
             query
@@ -145,13 +79,20 @@ export const THEME_DATA = `query Theme($themeId: String!, $pageValue: String!){
             mobile
             tablet
           }
+
           user {
             anonymous
             authenticated
           }
         }
-        preset
         props
+        preset {
+          blocks {
+            type
+            name
+            props 
+          }
+        }
       }
       sections_meta {
         attributes
@@ -173,7 +114,9 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
     id
     active
     created_at
-    delete_account_consent
+    delete_account_consent {
+      consent_text
+    }
     delete_account_day
     delete_account_reasons {
       reason_id
@@ -222,31 +165,14 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
         level
       }
     }
-    session_config
     skip_captcha
     skip_login
-    social {
-      account_kit
-      apple
-      facebook
-      google
-    }
-    social_tokens {
-      account_kit {
-        app_id
-      }
-      facebook {
-        app_id
-      }
-      google {
-        app_id
-      }
-    }
+
     subtext
     updated_at
   }
   applicationConfiguration {
-    integrationTokens {
+    integration_tokens {
       id
       application
       created_at
@@ -264,7 +190,7 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
         }
       }
     }
-    contactInfo {
+    contact_info {
       id
       address {
         address_line
@@ -355,7 +281,7 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
       updated_at
       version
     }
-    appDetails {
+    app_details {
       id
       banner {
         secure_url
@@ -427,7 +353,7 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
     }
   }
   applicationContent {
-    supportInformation {
+    support_information {
       id
       application
       created

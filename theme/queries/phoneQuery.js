@@ -21,7 +21,6 @@ export const SET_MOBILE_NUMBER_AS_PRIMARY = `mutation setMobileNumberAsPrimary(
           updated_at
           user_id
           username
-          has_old_password_hash
           uid
           external_id
           rr_id
@@ -70,7 +69,6 @@ export const DELETE_MOBILE_NUMBER = `mutation deleteMobileNumber(
         updated_at
         user_id
         username
-        has_old_password_hash
         uid
         external_id
         rr_id

@@ -293,6 +293,9 @@ ProductDescription.serverFetch = async ({ fpi, router }) => {
   const values = {
     slug,
   };
+
+  fpi.custom.setValue("isPdpSsrFetched", true);
+
   return fpi.executeGQL(GET_PRODUCT_DETAILS, values);
 };
 

@@ -4,13 +4,12 @@ export const COLLECTIONS = `query collections($pageNo: Int,$pageSize: Int) {
         uid
         type
         name
-        published
         description
         is_active
         slug
         allow_facets
         allow_sort
-        sortOn
+        sort_on
         priority
         schedule {
           start
@@ -19,13 +18,6 @@ export const COLLECTIONS = `query collections($pageNo: Int,$pageSize: Int) {
             start
             end
           }
-        }
-        seo {
-          description
-          image {
-            url
-          }
-          title
         }
         badge {
           text
@@ -74,14 +66,33 @@ export const COLLECTION = `query collection(
   $slug: String!
 ) {
   collection(slug: $slug) {
-    uid
     type
     name
-    published
     description
     is_active
     slug
-    sortOn
+    sort_on
+    banners {
+      landscape {
+        alt
+        type
+        url
+      }
+      portrait {
+        alt
+        type
+        url
+      }
+    }
+    action {
+      type
+      page {
+        type
+        params {
+          slug
+        }
+      }
+    }
   }
 }
 `;
@@ -131,48 +142,57 @@ export const COLLECTION_ITEMS = `query collectionItems(
       }
     }
     items {
-      item_code
-      item_type
-      has_variant
-      uid
-      discount
-      image_nature
-      is_dependent
-      name
-      product_group_tag
-      rating
-      rating_count
-      slug
-      tags
-      teaser_tag
-      type
-      sellable
-      no_of_boxes
-      promo_meta
       brand {
         name
-        uid
-        slug
-      }
-      media {
-        alt
-        type
-        url
       }
       price {
         effective {
-          currency_code
-          currency_symbol
-          max
-          min
+            currency_code
+            currency_symbol
+            max
+            min
         }
         marked {
-          currency_code
-          currency_symbol
-          max
-          min
+            currency_code
+            currency_symbol
+            max
+            min
         }
       }
+      media {
+          alt
+          type
+          url
+      }
+      variants {
+          display_type
+          header
+          items {
+            _custom_meta {
+              key
+              value
+            }
+            color
+            color_name
+            is_available
+            medias {
+              alt
+              type
+              url
+            }
+            name
+            slug
+            uid
+            value
+          }
+          key
+      }
+      slug
+      uid
+      sellable
+      teaser_tag
+      discount
+      name
     }
     page {
       current
@@ -196,7 +216,6 @@ export const COLLECTION_ITEMS = `query collectionItems(
 
 export const FEATURED_COLLECTION = `query Collection($slug: String!, $first:Int, $pageNo: Int) {
   collection(slug: $slug) {
-    uid
     name
     is_active
     description

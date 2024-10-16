@@ -148,7 +148,11 @@ CollectionListing.serverFetch = async ({ fpi, router }) => {
     fpi.executeGQL(COLLECTION_ITEMS, payload),
   ];
 
+  fpi.custom.setValue("isCollectionsSsrFetched", true);
+
   return Promise.all(promises);
 };
+
+export const sections = JSON.stringify([]);
 
 export default CollectionListing;

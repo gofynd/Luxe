@@ -32,7 +32,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-#app {
+.provider {
   display: grid;
   grid-template-rows: auto 1fr auto;
   min-height: 100vh;
@@ -40,11 +40,11 @@ body {
 
 .fdk-theme-outlet {
   min-height: 0;
-  width: 99vw;
+  width: 100vw;
   background-color: @PageBackground;
   @media @mobile {
     width: 100vw;
-    overflow-x: hidden;
+    min-height: 45vh;
   }
 }
 
@@ -63,6 +63,17 @@ button:focus,
 button:active {
   outline: none;
 }
+
+//SVG fix on cart checkout page
+// .card-container.cart-page-container {
+//   .inline-svg {
+//     width: 24px;
+//     height: 24px;
+//   }
+//   .address-left .inline-svg {
+//     display: inline-block;
+//   }
+// }
 
 .card-item .card-desc .price .effective-price {
   font-size: 0.875rem;
@@ -137,6 +148,16 @@ button:active {
 .justifyEvenly {
   justify-content: space-evenly;
 }
+// .desktop {
+//   @media @tablet {
+//     display: none;
+//   }
+// }
+// .mobile {
+//   @media @desktop {
+//     display: none;
+//   }
+// }
 
 // Topography
 strong {
@@ -357,7 +378,7 @@ button {
   margin-right: none !important;
 }
 
-// Guest checkout
+// guest checkout
 .buttons {
   display: block !important;
   margin-bottom: 8px;
@@ -421,6 +442,14 @@ img::selection {
   @media @mobile {
     margin-top: 24px;
   }
+  // &.view-all-horizontal {
+  //   @media @tablet {
+  //     margin-top: 40px;
+  //   }
+  //   @media @mobile {
+  //     margin-top: 24px;
+  //   }
+  // }
 }
 
 .accent-btn,
@@ -475,13 +504,50 @@ img::selection {
   height: 100%;
 }
 
+//TODO remove before Prod deployment
+// .wrapper-class {
+//   display: block !important;
+// }
+.slick-slider:not(.no-nav) {
+  padding-bottom: 32px;
+  margin-bottom: 31px;
+  @media @tablet {
+    padding-bottom: 24px;
+    margin-bottom: 8px;
+  }
+}
+
+.slick-prev,
+.slick-next {
+  cursor: pointer;
+  position: absolute;
+  top: unset;
+  bottom: 0;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 31px;
+  height: 31px;
+}
+.slick-next {
+  transform: translate(100%, 100%);
+  right: calc(50% - var(--slick-dots) / 2);
+}
+.slick-prev {
+  transform: translate(-100%, 100%);
+  left: calc(50% - var(--slick-dots) / 2);
+}
 .slick-dots {
   font-size: 0;
   position: absolute;
   left: 50%;
   transform: translate(-50%, 100%);
-  bottom: 0;
+  bottom: 0px;
   padding: 13.5px 0;
+  @media @tablet {
+    padding: 0;
+  }
+  width: auto;
   li {
     cursor: pointer;
     display: inline-block;
@@ -521,6 +587,7 @@ img::selection {
     }
   }
 }
+
 :global {
   .snackbar {
     top: 80px !important; /* Remove the top position */

@@ -98,14 +98,12 @@ export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBrea
             currency_symbol
             effective
             marked
-            selling
           }
           converted {
             currency_code
             currency_symbol
             effective
             marked
-            selling
           }
         }
       }
@@ -203,14 +201,12 @@ export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBrea
           currency_symbol
           effective
           marked
-          selling
         }
         converted {
           currency_code
           currency_symbol
           effective
           marked
-          selling
         }
       }
       delivery_promise {
@@ -261,7 +257,6 @@ export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBrea
       raw {
         cod_charge
         convenience_fee
-        promotion
         coupon
         delivery_charge
         discount
@@ -430,14 +425,12 @@ export const FETCH_SHIPMENTS = `query CartShipmentDetails($addressId: String, $i
                             currency_symbol
                             effective
                             marked
-                            selling
                         }
                         converted {
                             currency_code
                             currency_symbol
                             effective
                             marked
-                            selling
                         }
                     }
                     seller {
@@ -448,7 +441,6 @@ export const FETCH_SHIPMENTS = `query CartShipmentDetails($addressId: String, $i
                         name
                         store_code
                         uid
-                        code
                     }
                 }
                 availability {
@@ -483,14 +475,12 @@ export const FETCH_SHIPMENTS = `query CartShipmentDetails($addressId: String, $i
                         currency_symbol
                         effective
                         marked
-                        selling
                     }
                     converted {
                         currency_code
                         currency_symbol
                         effective
                         marked
-                        selling
                     }
                 }
                 price_per_unit {
@@ -556,7 +546,17 @@ export const FETCH_SHIPMENTS = `query CartShipmentDetails($addressId: String, $i
                             item_id
                             item_images_url
                             item_name
-                            item_price_details
+                            item_price_details {
+                              currency
+                              marked {
+                                  min
+                                  max
+                              }
+                              effective {
+                                  min
+                                  max
+                              }
+                            }
                             item_slug
                         }
                     }
@@ -600,7 +600,6 @@ export const FETCH_SHIPMENTS = `query CartShipmentDetails($addressId: String, $i
             raw {
                 cod_charge
                 convenience_fee
-                promotion
                 coupon
                 delivery_charge
                 discount
@@ -637,17 +636,15 @@ export const PAYMENT_AGG = `query AggregatorsConfig {
     }
     juspay {
       api
-      api_domain
-      api_key
       config_type
       key
       merchant_id
       merchant_key
       sdk
       secret
-      signature_key
-      webhook_username
-      webhook_password
+      user_id
+      verify_api
+      pin
     }
     mswipe {
       config_type
@@ -660,14 +657,9 @@ export const PAYMENT_AGG = `query AggregatorsConfig {
       verify_api
     }
     payumoney {
-      api_domain
-      checkout_formpost_url
       config_type
       key
-      is_active
       merchant_id
-      merchant_salt
-      refund_api_domain
       sdk
       secret
     }
@@ -675,21 +667,26 @@ export const PAYMENT_AGG = `query AggregatorsConfig {
       api
       config_type
       key
-      is_active
       sdk
       secret
       vpa
-      webhook_secret
+      pin
+      merchant_key
+      verify_api
+      user_id
+      merchant_id
     }
     rupifi {
       config_type
       key
-      is_active
       merchant_id
-      merchant_secret
-      non_trxn_url
       secret
-      trxn_url
+      user_id
+      verify_api
+      api
+      pin
+      merchant_key
+      sdk
     }
     simpl {
       config_type
@@ -699,20 +696,15 @@ export const PAYMENT_AGG = `query AggregatorsConfig {
     }
     stripe {
       config_type
-      is_active
       key
-      product_id
       sdk
       secret
-      webhook_secret
-    }
-    potlee {
-      companyId
-      config_type
-      domain
-      is_active
-      key
-      secret
+      user_id
+      verify_api
+      merchant_id
+      merchant_key
+      api
+      pin
     }
   }
 }
@@ -999,7 +991,6 @@ export const SELECT_PAYMENT_MODE = `mutation SelectPaymentMode($updateCartPaymen
           name
           store_code
           uid
-          code
         }
       }
       availability {
@@ -1035,7 +1026,6 @@ export const SELECT_PAYMENT_MODE = `mutation SelectPaymentMode($updateCartPaymen
           currency_symbol
           effective
           marked
-          selling
         }
         converted {
           add_on
@@ -1043,7 +1033,6 @@ export const SELECT_PAYMENT_MODE = `mutation SelectPaymentMode($updateCartPaymen
           currency_symbol
           effective
           marked
-          selling
         }
       }
       price_per_unit {
@@ -1165,7 +1154,6 @@ export const CHECKOUT_CART = `mutation CheckoutCart($cartCheckoutDetailRequestIn
         raw {
           cod_charge
           convenience_fee
-          promotion
           coupon
           delivery_charge
           discount
@@ -1234,14 +1222,12 @@ export const CHECKOUT_CART = `mutation CheckoutCart($cartCheckoutDetailRequestIn
               currency_symbol
               effective
               marked
-              selling
             }
             converted {
               currency_code
               currency_symbol
               effective
               marked
-              selling
             }
           }
           seller {
@@ -1302,7 +1288,6 @@ export const CHECKOUT_CART = `mutation CheckoutCart($cartCheckoutDetailRequestIn
             currency_symbol
             effective
             marked
-            selling
           }
           converted {
             add_on
@@ -1310,7 +1295,6 @@ export const CHECKOUT_CART = `mutation CheckoutCart($cartCheckoutDetailRequestIn
             currency_symbol
             effective
             marked
-            selling
           }
         }
         price_per_unit {
@@ -1645,6 +1629,5 @@ export const ORDER_BY_ID = `query Order($orderId: String!) {
       mobile
       name
     }
-    is_validated
   }
 }`;

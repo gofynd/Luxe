@@ -77,7 +77,7 @@
   @media @mobile {
     --gap: 12px;
     padding-left: 16px;
-    padding-right: var(--p-right-mob, 16px);
+    padding: 0 calc(var(--gap) / 2);
   }
 }
 
@@ -87,6 +87,17 @@
     padding: 0 10px;
   }
   @media @mobile {
-    padding: 0;
+    padding-left: 0;
+  }
+  :global {
+    .slick-list {
+      padding-left: 5px !important;
+    }
+  }
+}
+.customSlider {
+  @media @mobile {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
 }

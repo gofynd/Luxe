@@ -1,6 +1,6 @@
 export const FAQ_CATEGORIES = `query ApplicationContent {
     applicationContent {
-        faqCategories {
+        faq_categories {
             categories {
                 custom_json
                 id

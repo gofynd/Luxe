@@ -39,8 +39,8 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
       return;
     }
     verifyIfscCode(value).then((data) => {
-      setBranchName(data.verifyIFSCCode.BRANCH);
-      setBankName(data.verifyIFSCCode.BANK);
+      setBranchName(data.verify_IFSC_code.branch_name);
+      setBankName(data.verify_IFSC_code.bank_name);
       setIsValidIfsc(true);
     });
     return true;

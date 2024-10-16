@@ -12,6 +12,7 @@ const useSortModal = ({ sortOn = [], handleSortUpdate = () => {} }) => {
   };
 
   const handleApplyClick = (sortItem) => {
+    console.log({ sortItem });
     handleSortUpdate(sortItem.value);
     closeModal();
   };

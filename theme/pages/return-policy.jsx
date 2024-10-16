@@ -29,4 +29,6 @@ ReturnPolicy.serverFetch = async ({ fpi }) => {
   }
 };
 
+export const sections = JSON.stringify([]);
+
 export default ReturnPolicy;

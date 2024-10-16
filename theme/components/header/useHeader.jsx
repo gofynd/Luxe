@@ -1,11 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
 import { useEffect, useState } from "react";
-import { GLOBAL_DATA } from "../../queries/libQuery";
-import {
-  CART_ITEMS_COUNT,
-  FOLLOWED_PRODUCTS_IDS,
-} from "../../queries/wishlistQuery";
 import { isRunningOnClient } from "../../helper/utils";
 
 const useHeader = (fpi) => {
@@ -31,12 +26,15 @@ const useHeader = (fpi) => {
       item.orientation.landscape.includes("bottom")
     )?.navigation || [];
 
-  const [buyNowParam, setBuyNowParam] = useState(false);
+  const [buyNowParam, setBuyNowParam] = useState(null);
   const location = useLocation();
   useEffect(() => {
     if (isRunningOnClient()) {
       const queryParams = new URLSearchParams(location.search);
-      setBuyNowParam(queryParams.get("buy_now"));
+      setBuyNowParam((prev) => {
+        if (prev === queryParams.get("buy_now")) return prev;
+        return queryParams.get("buy_now");
+      });
     }
   }, []);
 
@@ -44,7 +42,7 @@ const useHeader = (fpi) => {
     const bNowCount = BUY_NOW?.cart?.user_cart_items_count;
     if (bNowCount && buyNowParam) {
       setCartItemCount(bNowCount);
-    } else if (CART_ITEMS?.cart_items?.items?.length > 0) {
+    } else if (CART_ITEMS?.cart_items?.items?.length >= 0) {
       const totalQuantity = CART_ITEMS?.cart_items?.items?.reduce(
         (acc, item) => {
           return acc + (item.quantity || 0);
@@ -52,12 +50,6 @@ const useHeader = (fpi) => {
         0
       );
       setCartItemCount(totalQuantity);
-    } else {
-      fpi
-        .executeGQL(CART_ITEMS_COUNT, null, { skipStoreUpdate: true })
-        .then((res) =>
-          setCartItemCount(res?.data?.cart?.user_cart_items_count)
-        );
     }
   }, [CART_ITEMS, buyNowParam]);
 

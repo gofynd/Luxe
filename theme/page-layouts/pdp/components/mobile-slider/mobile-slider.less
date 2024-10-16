@@ -1,32 +1,47 @@
 @import "../../../../styles/base.global.less";
 
-.dots {
-  text-align: center;
-  li {
-    display: inline;
-    button {
-      margin: 0 4px;
-      width: 10px;
-      height: 4px;
-      border-radius: 25px;
-      background-color: var(--textSecondary);
-      color: var(--textSecondary);
-      overflow: hidden;
-    }
-  }
-  li.slick-active {
-    button {
-      width: 18px !important;
-      background-color: var(--textSecondary);
-      color: var(--textSecondary);
-    }
-  }
-}
+// .dots {
+//   text-align: center;
+//   li {
+//     display: inline;
+//     button {
+//       margin: 0 4px;
+//       width: 10px;
+//       height: 4px;
+//       border-radius: 25px;
+//       background-color: var(--textSecondary);
+//       color: var(--textSecondary);
+//       overflow: hidden;
+//     }
+//   }
+//   li.slick-active {
+//     button {
+//       width: 18px !important;
+//       background-color: var(--textSecondary);
+//       color: var(--textSecondary);
+//     }
+//   }
+// }
 
 .mobilePdpCarouselBox {
   width: 100%;
 
   :global {
+    .slick-dots {
+      width: 100%;
+      li {
+        margin: 0 2px;
+        button {
+          width: 10px;
+        }
+        &.slick-active {
+          button {
+            background-color: @TextHeading;
+            width: 18px;
+          }
+        }
+      }
+    }
     .slick-list {
       padding-left: 0 !important;
       @media @tablet {
@@ -36,6 +51,11 @@
         min-height: 455px;
       }
     }
+    .slick-slider {
+      padding-bottom: 0px;
+      margin-bottom: 0px;
+    }
+
     .slick-slide {
       border-right: 3px solid #fff;
       @media @mobile {
@@ -89,6 +109,15 @@
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
+
+//   /deep/ .glide__bullet {
+//     margin: 0 2px;
+//     width: 10px !important;
+
+//     &--active {
+//       width: 18px !important;
+//     }
+//   }
 
 .wishlistIcon {
   position: absolute;

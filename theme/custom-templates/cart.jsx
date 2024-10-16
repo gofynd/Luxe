@@ -1,6 +1,6 @@
 import React from "react";
 
-function Cart() {
+function Cart({ fpi }) {
   return (
     <>
       <h1 style={{ color: "red" }}>This is a custom page for Cart in flow</h1>
@@ -9,6 +9,6 @@ function Cart() {
   );
 }
 
-Cart.serverFetch = () => {};
+Cart.serverFetch = ({ router }) => {};
 
 export default Cart;

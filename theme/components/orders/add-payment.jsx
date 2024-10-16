@@ -191,7 +191,7 @@ function AddPayment({ shipment, fpi, getBeneficiaryDetails }) {
                     {!selectedPayment && pageState === 1 && (
                       <PaymentList
                         payments={
-                          activeRefundMode?.activeRefundTransferModes?.data
+                          activeRefundMode?.active_refund_transfer_modes?.data
                         }
                         selectpayment={getoption}
                       ></PaymentList>

@@ -3,6 +3,7 @@ import styles from "./styles/reason-item.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 
 function ReasonItem({ reason, selectedReason, change, otherReason }) {
+  const [reasonOtherText, setReasonOtherText] = useState("");
   return (
     <div className={`${styles.reasonItem}`}>
       <div>
@@ -23,9 +24,10 @@ function ReasonItem({ reason, selectedReason, change, otherReason }) {
           <div className={`${styles.textarea}`}>
             <textarea
               className={`${styles.textarea}`}
-              value={selectedReason?.reason_other_text}
+              value={reasonOtherText}
               placeholder="Enter reason"
-              onChange={(e) => otherReason(e.target.value)}
+              onChange={(e) => setReasonOtherText(e.target.value)}
+              onBlur={() => otherReason(reasonOtherText)}
             ></textarea>
           </div>
         )}

@@ -1,20 +1,26 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FDKLink } from "fdk-core/components";
+import OrdersHeader from "fdk-react-templates/components/order-header/order-header";
+import "fdk-react-templates/components/order-header/order-header.css";
+import ShipmentUpdateItem from "fdk-react-templates/components/shipments-update-item/shipments-update-item";
+import "fdk-react-templates/components/shipments-update-item/shipments-update-item.css";
+import BeneficiaryList from "fdk-react-templates/components/beneficiary-list/beneficiary-list";
+import "fdk-react-templates/components/beneficiary-list/beneficiary-list.css";
+import BeneficiaryItem from "fdk-react-templates/components/beneficiary-list/beneficiary-list-item/beneficiary-list-item";
+import "fdk-react-templates/components/beneficiary-list/beneficiary-list-item/beneficiary-list-item.css";
+import ReasonsList from "fdk-react-templates/components/reasons-list/reasons-list";
+import "fdk-react-templates/components/reasons-list/reasons-list.css";
+import ReasonItem from "fdk-react-templates/components/reasons-list/reason-item/reason-item";
+import "fdk-react-templates/components/reasons-list/reason-item/reason-item.css";
 import styles from "./styles/profile-shipment-update-page.less";
-import SvgWrapper from "../../components/core/svgWrapper/SvgWrapper";
 import useShipmentDetails from "../orders/useShipmentDetails";
-import Loader from "../../components/loader/loader";
-import ProfileRoot from "../../components/profile/profile-root";
-import OrdersHeader from "../../components/orders/order-header";
 import useRefundDetails from "../orders/useRefundDetails";
-import ShipmentUpdateItem from "../../components/orders/shipments-update-item";
-import BeneficiaryList from "../../components/orders/beneficiary-list";
-import BeneficiaryItem from "../../components/orders/beneficiary-list-item";
-import UpateReasons from "../../components/orders/upate-reasons";
-import ReasonItem from "../../components/orders/reason-item";
-import AddPayment from "../../components/orders/add-payment";
 import { useSnackbar } from "../../helper/hooks";
+import EmptyState from "../../components/empty-state/empty-state";
+import Loader from "../../components/loader/loader";
+import SvgWrapper from "../../components/core/svgWrapper/SvgWrapper";
+import ProfileRoot from "../../components/profile/profile-root";
+import AddPayment from "../../components/orders/add-payment";
 
 function ProfileShipmentUpdatePage({ fpi }) {
   const navigate = useNavigate();
@@ -39,6 +45,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
   const [updateError, setUpdateError] = useState(false);
   const [showError, setShowError] = useState(false);
   const [errorText, setErrorText] = useState("Something went wrong");
+  const [reasonOtherText, setReasonOtherText] = useState("");
   const { showSnackbar } = useSnackbar();
   const {
     isLoading,
@@ -186,11 +193,10 @@ function ProfileShipmentUpdatePage({ fpi }) {
   };
 
   const onOtherReason = (event, i) => {
-    // selectedReason[i]["reason_other_text"] = event;
-    // setSelectedReason(selectedReason);
+    setReasonOtherText(event);
   };
   const beneficiaryError = () => {
-    return refundDetails?.userBeneficiariesDetail?.beneficiaries?.length > 0
+    return refundDetails?.user_beneficiaries_detail?.beneficiaries?.length > 0
       ? "Please select any one refund option"
       : "Please add a payment method";
   };
@@ -232,6 +238,11 @@ function ProfileShipmentUpdatePage({ fpi }) {
   }, [shipmentDetails, selectedReason, imageList]);
   const getUpdatedBagsList = () => {
     const arrBags = [];
+
+    // for (let i = 0; i < getBag.length; i++) {
+    //   if (refs?.current[i]?.getUpdatedBags())
+    //     arrBags = arrBags.concat(refs?.current[i]?.getUpdatedBags());
+    // }
     return arrBags;
   };
   const getProductDetails = () => {
@@ -262,7 +273,9 @@ function ProfileShipmentUpdatePage({ fpi }) {
                       {
                         data: {
                           reason_id: reason[selectLast()]?.id,
-                          reason_text: reason[selectLast()]?.reason_other_text,
+                          reason_text:
+                            reason[selectLast()]?.reason_other_text ||
+                            reasonOtherText,
                         },
                         filters: getProducts,
                       },
@@ -296,7 +309,9 @@ function ProfileShipmentUpdatePage({ fpi }) {
                       {
                         data: {
                           reason_id: reason[selectLast()]?.id,
-                          reason_text: reason[selectLast()]?.reason_other_text,
+                          reason_text:
+                            reason[selectLast()]?.reason_other_text ||
+                            reasonOtherText,
                         },
                         filters: getProducts,
                       },
@@ -312,7 +327,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
         order_id: shipmentDetails?.order_id,
         selected_reason: { ...reason[selectLast()] },
         other_reason_text: extraComment,
-        beneficiary_id: refundDetails?.userBeneficiariesDetail
+        beneficiary_id: refundDetails?.user_beneficiaries_detail
           ?.show_beneficiary_details
           ? selectedBeneficary?.beneficiary_id
           : "",
@@ -388,9 +403,25 @@ function ProfileShipmentUpdatePage({ fpi }) {
         );
     }
 
+    // if (!confirmReturn) {
+    //   setConfirmReturn(true);
+    //   return;
+    // }
     if (getStatusForUpdate() === "return_pre_qc") {
       setInProgress(true);
       const imgRes = [];
+      //   const imgRes = Promise.all(
+      //     imageList.map((item) => {
+      //         return media.upload({
+      //           data: item,
+      //           content_type: item.type,
+      //           file_name: item.name,
+      //           size: item.size,
+      //           namespace: "misc",
+      //           params: {},
+      //         });
+      //     })
+      //   );
       setInProgress(false);
       setCdnUrls(
         imgRes.map((item) => {
@@ -402,10 +433,11 @@ function ProfileShipmentUpdatePage({ fpi }) {
     }
 
     const reason = selectedReason;
-    if (
-      reason[0]?.display_name === "Others" &&
-      reason[0]?.reason_other_text.length <= 0
-    ) {
+    // let updateBags = getUpdatedBagsList();
+    // if (updateBags.length === 0) {
+    //   return showUpdateErrorText("No Items to return");
+    // } else
+    if (reason[0]?.display_name === "Others" && reasonOtherText.length <= 0) {
       return showUpdateErrorText(
         "Please write a reason for cancellation, as it will help us serve you better"
       );
@@ -414,7 +446,8 @@ function ProfileShipmentUpdatePage({ fpi }) {
     } else if (
       !selectedBeneficary &&
       shipmentDetails?.can_return &&
-      refundDetails?.userBeneficiariesDetail?.show_beneficiary_details
+      shipmentDetails?.beneficiary_details &&
+      refundDetails?.user_beneficiaries_detail?.show_beneficiary_details
     ) {
       return showUpdateErrorText(beneficiaryError());
     }
@@ -430,10 +463,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
         <div className={`${styles.basePageContainer}`}>
           {!shipmentDetails && (
             <div className={`${styles.error} ${styles.shipment}`}>
-              <span className={`${styles.bold}`}>No results found</span>
-              <FDKLink to="/" className={`${styles.continueShoppingBtn}`}>
-                RETURN TO HOMEPAGE
-              </FDKLink>
+              <EmptyState></EmptyState>
             </div>
           )}
           {shipmentDetails && (
@@ -479,17 +509,18 @@ function ProfileShipmentUpdatePage({ fpi }) {
                       )}
                       <SvgWrapper
                         svgSrc="arrowDropdownBlack"
+                        // onBlur={close}
                         className={`${showReasonsAccordion[i] ? styles.rotate : ""} ${styles.animate}`}
                       />
                     </div>
                     {/* <ukt-accordion> */}
                     {showReasonsAccordion[i] && (
-                      <UpateReasons
+                      <ReasonsList
                         reasons={item}
                         change={(e) => onReasonChange(e, i)}
                         selectedReason={selectedReason[i]}
                         otherReason={(e) => onOtherReason(e, i)}
-                      ></UpateReasons>
+                      ></ReasonsList>
                     )}
                     {/* </ukt-accordion> */}
                     {selectedReason[i]?.id && !showReasonsAccordion[i] && (
@@ -505,13 +536,13 @@ function ProfileShipmentUpdatePage({ fpi }) {
               </div>
               {shipmentDetails?.beneficiary_details &&
                 shipmentDetails?.can_return &&
-                refundDetails?.userBeneficiariesDetail
+                refundDetails?.user_beneficiaries_detail
                   ?.show_beneficiary_details && (
                   <div className={`${styles.divider}`}></div>
                 )}
               {shipmentDetails?.beneficiary_details &&
                 shipmentDetails?.can_return &&
-                refundDetails?.userBeneficiariesDetail
+                refundDetails?.user_beneficiaries_detail
                   ?.show_beneficiary_details && (
                   <div>
                     <div className={`${styles.accordion}`}>
@@ -526,18 +557,20 @@ function ProfileShipmentUpdatePage({ fpi }) {
                         ></OrdersHeader>
                         <SvgWrapper
                           svgSrc="arrowDropdownBlack"
+                          //   onBlur={close}
                           className={`${showBeneficiariesAccordion ? styles.rotate : ""} ${styles.animate}`}
                         />
                       </div>
                     </div>
+                    {/* <ukt-accordion> */}
                     <div>
                       {showBeneficiariesAccordion && (
                         <>
                           <BeneficiaryList
                             className={`${styles.beneficiaryList}`}
                             beneficiaries={
-                              refundDetails?.userBeneficiariesDetail
-                                ?.beneficiaries
+                              refundDetails?.user_beneficiaries_detail
+                                ?.beneficiaries || []
                             }
                             change={onBeneficiariesChange}
                             selectedBeneficiary={selectedBeneficary}
@@ -552,6 +585,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
                         </>
                       )}
                     </div>
+                    {/* // </ukt-accordion> */}
                     {selectedBeneficary && !showBeneficiariesAccordion && (
                       <BeneficiaryItem
                         beneficiary={selectedBeneficary}

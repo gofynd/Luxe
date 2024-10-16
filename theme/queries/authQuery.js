@@ -47,8 +47,6 @@ export const VERIFY_MOBILE_OTP = `mutation verifyMobileOTP(
       updated_at
       user_id
       username
-      has_old_password_hash
-      uid
       emails {
         active
         email
@@ -85,8 +83,6 @@ export const LOGIN_WITH_EMAIL_AND_PASSWORD = `mutation loginWithEmailAndPassword
             updated_at
             user_id
             username
-            has_old_password_hash
-            uid
             external_id
             rr_id
             emails {
@@ -151,8 +147,6 @@ export const UPDATE_PROFILE = `mutation updateProfile(
       updated_at
       user_id
       username
-      has_old_password_hash
-      uid
       external_id
       rr_id
       emails {
@@ -252,8 +246,6 @@ export const VERIFY_EMAIL_OTP = `mutation verifyEmailOTP(
       updated_at
       user_id
       username
-      has_old_password_hash
-      uid
       external_id
       rr_id
       emails {
@@ -322,12 +314,6 @@ export const FORGOT_PASSWORD = `mutation forgotPassword(
       updated_at
       user_id
       username
-      debug {
-        platform
-        source
-      }
-      has_old_password_hash
-      uid
     }
   }
 }`;

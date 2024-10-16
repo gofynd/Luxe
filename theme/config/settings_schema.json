@@ -304,6 +304,14 @@
       "info": "This color will be used as the container background color of the Product/Collection/Category/Brand images wherever applicable"
     },
     {
+      "type": "checkbox",
+      "id": "show_image_on_hover",
+      "category": "Product Card Configuration",
+      "label": "Show image on hover",
+      "info": "This option controls whether an additional image is displayed when hovering over the product card.",
+      "default": false
+    },
+    {
       "type": "header",
       "category": "Other Page Configuration",
       "value": " "
@@ -340,12 +348,12 @@
       "type": "range",
       "category": "Other Page Configuration",
       "id": "section_margin_bottom",
-      "min": 0,
-      "max": 200,
+      "min": 16,
+      "max": 100,
       "step": 1,
       "unit": "px",
       "label": "Bottom Margin",
-      "default": 0,
+      "default": 16,
       "info": "Bottom margin for section"
     },
     {

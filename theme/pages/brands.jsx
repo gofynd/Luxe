@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { FDKLink } from "fdk-core/components";
+// import ProductCard from "../components/product-card/product-card";
 import styles from "../styles/brands.less";
 import useBrandListing from "../page-layouts/brands/useBrandListing";
 import CardList from "../components/card-list/card-list";
@@ -19,6 +20,7 @@ function Brands({ fpi }) {
   useEffect(() => {
     setIsMobile(detectMobileWidth());
   }, []);
+  //   const { page, items = [], loading } = product_lists || {};
 
   return (
     <div
@@ -123,5 +125,7 @@ Brands.serverFetch = async ({ fpi }) => {
     console.log({ error });
   }
 };
+
+export const sections = JSON.stringify([]);
 
 export default Brands;

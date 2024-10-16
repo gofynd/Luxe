@@ -9,43 +9,21 @@ export const FETCH_FOLLOWED_PRODUCTS = `query followedListing(
     pageSize: $pageSize
   ) {
     items {
-      color
-      item_code
-      item_type
-      has_variant
-      uid
-      attributes
-      custom_config
-      country_of_origin
-      department
-      description
-      discount
-      highlights
-      image_nature
-      is_dependent
-      name
-      product_group_tag
-      product_online_date
-      rating
-      rating_count
-      slug
-      tags
-      teaser_tag
-      tryouts
-      type
-      sellable
-      no_of_boxes
-      promo_meta
       brand {
-        custom_config
-        description
         name
-        uid
-        departments
-        discount
-        slug
-        action {
-          type
+      }
+      price {
+        effective {
+            currency_code
+            currency_symbol
+            max
+            min
+        }
+        marked {
+            currency_code
+            currency_symbol
+            max
+            min
         }
       }
       media {
@@ -53,31 +31,35 @@ export const FETCH_FOLLOWED_PRODUCTS = `query followedListing(
         type
         url
       }
-      price {
-        effective {
-          currency_code
-          currency_symbol
-          max
-          min
-        }
-        marked {
-          currency_code
-          currency_symbol
-          max
-          min
-        }
-      }
       variants {
         display_type
-        group_id
         header
+        items {
+          _custom_meta {
+            key
+            value
+          }
+          color
+          color_name
+          is_available
+          medias {
+            alt
+            type
+            url
+          }
+          name
+          slug
+          uid
+          value
+        }
         key
-        logo
-        total
       }
-      action {
-        type
-      }
+      slug
+      uid
+      sellable
+      teaser_tag
+      discount
+      name
     }
     page {
       current

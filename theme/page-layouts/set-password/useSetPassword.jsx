@@ -19,21 +19,23 @@ const useSetPassword = ({ fpi }) => {
         code: query.get("code"),
       },
     };
-    return fpi
-      .executeGQL(SEND_RESET_TOKEN, payload)
-      .then((res) => {
-        if (res?.errors) {
-          throw res?.errors?.[0];
-        }
-        return res?.data?.sendResetToken;
-      })
-      .catch((err) => {
-        const queryParams = new URLSearchParams();
-        navigate({
-          pathname: "/auth/login",
-          search: queryParams.toString(),
+    return () => {
+      fpi
+        .executeGQL(SEND_RESET_TOKEN, payload)
+        .then((res) => {
+          if (res?.errors) {
+            throw res?.errors?.[0];
+          }
+          return res?.data?.sendResetToken;
+        })
+        .catch((err) => {
+          const queryParams = new URLSearchParams();
+          navigate({
+            pathname: "/auth/login",
+            search: queryParams.toString(),
+          });
         });
-      });
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, []);
 

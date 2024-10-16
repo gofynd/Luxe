@@ -17,10 +17,6 @@ export const LOCALITY = `query locality(
       display_name
       parent_ids
       type
-      parent_uid
     }
-    parent_uid
-    meta
-    serviceability
   }
 }`;

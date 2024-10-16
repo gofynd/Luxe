@@ -7,7 +7,6 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
           params
           query
           type
-          url
         }
       }
       description
@@ -18,7 +17,6 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
       }
       name
       uid
-      slug
     }
     color
     item_code
@@ -44,7 +42,6 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
       url
     }
     sizes {
-      slug
       discount
       multi_size
       sellable
@@ -200,14 +197,12 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
         value
       }
       key
-      total
     }
     action {
       page {
         params
         query
         type
-        url
       }
       type
     }
@@ -221,16 +216,13 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
           params
           query
           type
-          url
         }
       }
     }
-    sellable
   }
-  promotionOffers(slug: $slug, pageSize: 30) {
+  promotions(slug: $slug, pageSize: 30) {
     available_promotions {
       buy_rules
-      calculate_on
       description
       discount_rules
       id
@@ -243,21 +235,18 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
         item_id
         item_images_url
         item_name
-        item_price_details
-        item_slug
-      }
-      offer_prices {
-        margin
-        max_quantity
-        min_quantity
-        type
-        price {
-          currency_code
-          currency_symbol
-          effective
-          marked
-          offer_price
+        item_price_details {
+          currency
+          marked {
+              min
+              max
+          }
+          effective {
+              min
+              max
+          }
         }
+        item_slug
       }
     }
   }
@@ -280,14 +269,7 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
       offer_text
       start_date
       sub_title
-      tags
       title
-      medias {
-        alt
-        key
-        type
-        url
-      }
     }
     page {
       current
@@ -300,10 +282,9 @@ export const GET_PRODUCT_DETAILS = `query($slug: String!)  {
 }`;
 
 export const OFFERS = `query Offers($slug: String!) {
-  promotionOffers(slug: $slug, pageSize: 30) {
+  promotions(slug: $slug, pageSize: 30) {
     available_promotions {
       buy_rules
-      calculate_on
       description
       discount_rules
       id
@@ -316,22 +297,20 @@ export const OFFERS = `query Offers($slug: String!) {
         item_id
         item_images_url
         item_name
-        item_price_details
+        item_price_details {
+          currency
+          marked {
+              min
+              max
+          }
+          effective {
+              min
+              max
+          }
+        }
         item_slug
       }
-      offer_prices {
-        margin
-        max_quantity
-        min_quantity
-        type
-        price {
-          currency_code
-          currency_symbol
-          effective
-          marked
-          offer_price
-        }
-      }
+      
     }
   }
   coupons {
@@ -353,14 +332,7 @@ export const OFFERS = `query Offers($slug: String!) {
       offer_text
       start_date
       sub_title
-      tags
       title
-      medias {
-        alt
-        key
-        type
-        url
-      }
     }
     page {
       current
@@ -378,15 +350,12 @@ export const PRODUCT_SIZE_PRICE = `query ProductPrice($slug: String!, $size: Str
     discount
     is_cod
     is_gift
-    is_serviceable
     item_type
     long_lat
     pincode
     quantity
     seller_count
     special_badge
-    tags
-    trader
     price_per_piece {
       currency_code
       currency_symbol
@@ -421,11 +390,8 @@ export const PRODUCT_SIZE_PRICE = `query ProductPrice($slug: String!, $size: Str
       quantity
     }
     store {
-      id
       uid
       name
-      city
-      code
       count
     }
     strategy_wise_listing {
@@ -551,14 +517,12 @@ export const ADD_TO_CART = `mutation AddItemsToCart($buyNow: Boolean,$areaCode:S
               currency_symbol
               effective
               marked
-              selling
             }
             converted {
               currency_code
               currency_symbol
               effective
               marked
-              selling
             }
           }
         }
@@ -579,7 +543,6 @@ export const ADD_TO_CART = `mutation AddItemsToCart($buyNow: Boolean,$areaCode:S
           }
         }
         product {
-          _custom_json
           attributes
           item_code
           name
@@ -656,14 +619,12 @@ export const ADD_TO_CART = `mutation AddItemsToCart($buyNow: Boolean,$areaCode:S
             currency_symbol
             effective
             marked
-            selling
           }
           converted {
             currency_code
             currency_symbol
             effective
             marked
-            selling
           }
         }
         delivery_promise {
@@ -714,7 +675,6 @@ export const ADD_TO_CART = `mutation AddItemsToCart($buyNow: Boolean,$areaCode:S
         raw {
           cod_charge
           convenience_fee
-          promotion
           coupon
           delivery_charge
           discount

@@ -5,7 +5,10 @@ import { useWishlist, useAccounts } from "../../helper/hooks";
 import useSortModal from "./useSortModal";
 import useFilterModal from "./useFilterModal";
 import { COLLECTION, COLLECTION_ITEMS } from "../../queries/collectionsQuery";
-import { getProductImgAspectRatio } from "../../helper/utils";
+import {
+  getProductImgAspectRatio,
+  isRunningOnClient,
+} from "../../helper/utils";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
@@ -31,7 +34,7 @@ const useCollectionListing = ({ fpi }) => {
     {};
 
   const collectionData = useGlobalStore(fpi?.getters?.COLLECTION);
-  // const customValue = useGlobalStore(fpi.getters.CUSTOM_VALUE);
+  const { isCollectionsSsrFetched } = useGlobalStore(fpi.getters.CUSTOM_VALUE);
 
   const { name: collectionName, description: collectionDesc } =
     collectionData?.collection || {};
@@ -45,8 +48,8 @@ const useCollectionListing = ({ fpi }) => {
   const [productList, setProductList] = useState(items || undefined);
   // const [pageNo, setPageNo] = useState(productsListData?.page?.current);
   const currentPage = pageInfo?.current ?? 1;
-  const [apiLoading, setApiLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+  const [apiLoading, setApiLoading] = useState(!isCollectionsSsrFetched);
+  const [isPageLoading, setIsPageLoading] = useState(!isCollectionsSsrFetched);
 
   const [columnCount, setColumnCount] = useState({
     desktop: Number(pageConfig?.grid_desktop) || 2,
@@ -65,22 +68,26 @@ const useCollectionListing = ({ fpi }) => {
     [collectionName]
   );
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const searchParams = isClient ? new URLSearchParams(location?.search) : null;
+  const isClient = useMemo(() => isRunningOnClient(), []);
 
   useEffect(() => {
-    if (isClient) {
+    if (!isCollectionsSsrFetched) {
       fetchCollection({
         slug: collectionSlugRef.current,
       });
     }
-  }, [isClient]);
+  }, []);
 
   useEffect(() => {
-    if (isClient) {
+    fpi.custom.setValue("isCollectionsSsrFetched", false);
+  }, []);
+
+  useEffect(() => {
+    if (!isCollectionsSsrFetched) {
+      const searchParams = isClient
+        ? new URLSearchParams(location?.search)
+        : null;
+
       const pageNo = Number(searchParams?.get("page_no"));
 
       const payload = {
@@ -101,7 +108,7 @@ const useCollectionListing = ({ fpi }) => {
         ) ?? [];
       setIsResetFilterDisable(!resetableFilterKeys?.length);
     }
-  }, [location?.search, isClient]);
+  }, [location?.search]);
 
   const fetchCollection = (payload) => {
     fpi
@@ -128,12 +135,16 @@ const useCollectionListing = ({ fpi }) => {
         }
         setApiLoading(false);
       })
-      .catch((err) => {
+      .finally(() => {
+        setIsPageLoading(false);
         setApiLoading(false);
       });
   };
 
   const handleLoadMoreProducts = () => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     const payload = {
       slug: collectionSlugRef.current,
       pageNo: currentPage + 1,
@@ -160,6 +171,9 @@ const useCollectionListing = ({ fpi }) => {
   }
 
   const handleFilterUpdate = ({ filter, item }) => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     const {
       key: { name, kind },
     } = filter;
@@ -180,6 +194,9 @@ const useCollectionListing = ({ fpi }) => {
   };
 
   const handleSortUpdate = (value) => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     if (value) {
       searchParams?.set("sort_on", value);
     } else {
@@ -193,6 +210,9 @@ const useCollectionListing = ({ fpi }) => {
   };
 
   function resetFilters() {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     filters.forEach((filter) => {
       searchParams?.delete(filter.key.name);
     });
@@ -204,13 +224,16 @@ const useCollectionListing = ({ fpi }) => {
   }
 
   const getPageUrl = (pageNo) => {
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
     searchParams?.set("page_no", pageNo);
     return `${location?.pathname}?${searchParams?.toString()}`;
   };
 
   const getStartPage = ({ current, totalPageCount }) => {
-    const index = current - PAGE_OFFSET;
-    const lastIndex = totalPageCount - PAGES_TO_SHOW + 1;
+    const index = Math.max(current - PAGE_OFFSET, 1);
+    const lastIndex = Math.max(totalPageCount - PAGES_TO_SHOW + 1, 1);
 
     if (index <= 1) {
       return 1;
@@ -273,37 +296,17 @@ const useCollectionListing = ({ fpi }) => {
   };
 
   const filterList = useMemo(() => {
-    return (filters ?? [])
-      .map((filter) => {
-        const isNameInQuery =
-          searchParams?.has(filter?.key?.name) ||
-          filter?.values?.some(({ is_selected }) => is_selected);
-        return { ...filter, isOpen: isNameInQuery };
-      })
-      ?.sort((a, b) => {
-        const nameA = a?.key?.name;
-        const nameB = b?.key?.name;
+    const searchParams = isClient
+      ? new URLSearchParams(location?.search)
+      : null;
 
-        const isNameAInQuery =
-          searchParams?.has(nameA) ||
-          a?.values?.some(({ is_selected }) => is_selected);
-        const isNameBInQuery =
-          searchParams?.has(nameB) ||
-          b?.values?.some(({ is_selected }) => is_selected);
-
-        const order = ["department", "category", "brand", "collection"];
-
-        const indexA = order.indexOf(nameA);
-        const indexB = order.indexOf(nameB);
-        const normalizedIndexA = indexA === -1 ? order.length : indexA;
-        const normalizedIndexB = indexB === -1 ? order.length : indexB;
-
-        if (isNameAInQuery && !isNameBInQuery) return -1;
-        if (!isNameAInQuery && isNameBInQuery) return 1;
-
-        return normalizedIndexA - normalizedIndexB;
-      });
-  }, [filters, location?.search, isClient]);
+    return (filters ?? []).map((filter) => {
+      const isNameInQuery =
+        searchParams?.has(filter?.key?.name) ||
+        filter?.values?.some(({ is_selected }) => is_selected);
+      return { ...filter, isOpen: isNameInQuery };
+    });
+  }, [filters, location?.search]);
 
   const isFilterOpen = filterList.some((filter) => filter.isOpen);
 
@@ -348,6 +351,7 @@ const useCollectionListing = ({ fpi }) => {
     sortList: sortOn,
     productList: productList || items,
     isProductLoading: apiLoading,
+    isPageLoading,
     loadingOption: pageConfig.loading_options,
     listingPrice,
     paginationProps,
@@ -356,6 +360,7 @@ const useCollectionListing = ({ fpi }) => {
     followedIdList,
     isImageFill: globalConfig?.img_fill,
     imageBackgroundColor: globalConfig?.img_container_bg,
+    showImageOnHover: globalConfig?.show_image_on_hover,
     aspectRatio: getProductImgAspectRatio(globalConfig),
     onResetFiltersClick: resetFilters,
     onColumnCountUpdate: handleColumnCountUpdate,

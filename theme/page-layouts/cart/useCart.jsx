@@ -9,6 +9,16 @@ import {
 import { useAccounts, useWishlist, useSnackbar } from "../../helper/hooks";
 import useHeader from "../../components/header/useHeader";
 
+export function fetchCartDetails(fpi) {
+  const payload = {
+    buyNow: false,
+    includeAllItems: true,
+    includeCodCharges: true,
+    includeBreakup: true,
+  };
+  return fpi?.executeGQL?.(CART_DETAILS, payload);
+}
+
 const useCart = (fpi) => {
   const [checkoutMode, setCheckoutMode] = useState("");
   const CART = useGlobalStore(fpi.getters.CART);
@@ -17,6 +27,7 @@ const useCart = (fpi) => {
   const mode = THEME?.config?.list.find(
     (f) => f.name === THEME?.config?.current
   );
+  const globalConfig = mode?.global_config?.custom?.props;
   const pageConfig =
     mode?.page?.find((f) => f.page === "cart-landing")?.settings?.props || {};
   const isLoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
@@ -44,18 +55,12 @@ const useCart = (fpi) => {
     setCheckoutMode(cart_items?.checkoutMode ?? "");
   }, [cart_items]);
 
-  const fetchCartDetails = () => {
-    const payload = {
-      buyNow: false,
-      includeAllItems: true,
-      includeCodCharges: true,
-      includeBreakup: true,
-    };
-    return fpi.executeGQL(CART_DETAILS, payload);
-  };
   useEffect(() => {
+    if (globalConfig?.disable_cart) {
+      navigate("/");
+    }
     setIsLoading(true);
-    fetchCartDetails().then(() => setIsLoading(false));
+    fetchCartDetails(fpi).then(() => setIsLoading(false));
   }, [fpi]);
 
   const isAnonymous = appFeatures?.landing_page?.continue_as_guest;
@@ -135,7 +140,7 @@ const useCart = (fpi) => {
             res?.data?.updateCart?.message || "Cart is updated",
             "success"
           );
-          fetchCartDetails();
+          fetchCartDetails(fpi);
         } else {
           showSnackbar(
             res?.data?.updateCart?.message || "Cart is updated",
