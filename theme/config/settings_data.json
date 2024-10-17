@@ -692,7 +692,7 @@
               },
               "desktop_banner": {
                 "type": "image_picker",
-                "value": "https://cdn.pixelbin.io/v2/falling-surf-7c8bb8/fyndnp/t.resize(w:1500,dpr:1)/x5/organization/64df739677a4faaa9de3819d/theme/assets/aef2342ed425872f93e9.png"
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a5852e8c9c824f3f71bfd6/theme/pictures/free/original/theme-image-1706877310472.jpeg"
               },
               "text_placement_desktop": {
                 "type": "select",
@@ -704,7 +704,7 @@
               },
               "mobile_banner": {
                 "type": "image_picker",
-                "value": "https://cdn.pixelbin.io/v2/falling-surf-7c8bb8/fyndnp/t.resize(w:1500,dpr:1)/x5/organization/64df739677a4faaa9de3819d/theme/assets/aef2342ed425872f93e9.png"
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a5852e8c9c824f3f71bfd6/theme/pictures/free/original/theme-image-1706877310472.jpeg"
               },
               "text_placement_mobile": {
                 "value": "top_left",
@@ -724,7 +724,7 @@
                 "props": {
                   "image": {
                     "type": "image_picker",
-                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyndnp/wrkr/x5/organization/66862a50a16e03aeeaa45ddd/theme/assets/d8ed07f1ed0b9cf220f8.png?dpr=1"
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2031/TLsyapymK2-image-(4).png"
                   },
                   "link": {
                     "type": "url",
@@ -738,7 +738,7 @@
                 "props": {
                   "image": {
                     "type": "image_picker",
-                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyndnp/wrkr/x5/organization/66862a50a16e03aeeaa45ddd/theme/assets/d8ed07f1ed0b9cf220f8.png?dpr=1"
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2023/AsY7QHVFCM-image-(4).png"
                   },
                   "link": {
                     "type": "url",
@@ -752,7 +752,7 @@
                 "props": {
                   "image": {
                     "type": "image_picker",
-                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyndnp/wrkr/x5/organization/66862a50a16e03aeeaa45ddd/theme/assets/d8ed07f1ed0b9cf220f8.png?dpr=1"
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2034/4hK785hTJC-image-(4).png"
                   },
                   "link": {
                     "type": "url",
@@ -766,7 +766,7 @@
                 "props": {
                   "image": {
                     "type": "image_picker",
-                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyndnp/wrkr/x5/organization/66862a50a16e03aeeaa45ddd/theme/assets/d8ed07f1ed0b9cf220f8.png?dpr=1"
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2032/p2s72qBwka-image-(4).png"
                   },
                   "link": {
                     "type": "url",
@@ -1121,11 +1121,11 @@
             "props": {
               "image_desktop": {
                 "type": "image_picker",
-                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/resize-w:500/2031/TLsyapymK2-image-(4).png?dpr=1"
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a3fad6b5bf42ceeae77e6a/theme/pictures/free/original/theme-image-1702633093067.png"
               },
               "image_mobile": {
                 "type": "image_picker",
-                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/resize-w:500/2031/TLsyapymK2-image-(4).png?dpr=1"
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a3fad6b5bf42ceeae77e6a/theme/pictures/free/original/theme-image-1702633093067.png"
               },
               "banner_link": {
                 "type": "url",
