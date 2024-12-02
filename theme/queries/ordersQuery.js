@@ -30,6 +30,7 @@ export const ORDER_LISTING = `query orders(
     }
     items {
       order_created_time
+      order_created_ts
       order_id
       total_shipments_in_order
       shipments {
@@ -117,6 +118,7 @@ export const ORDER_LISTING = `query orders(
           status
           time
           value
+          created_ts
           tracking_details {
             is_current
             is_passed
@@ -165,6 +167,7 @@ export const ORDER_BY_ID = `query order($orderId: String!) {
       value
     }
     order_created_time
+    order_created_ts
     order_id
     shipments {
       awb_no
@@ -262,6 +265,7 @@ export const ORDER_BY_ID = `query order($orderId: String!) {
         status
         time
         value
+        created_ts
         tracking_details {
           is_current
           is_passed

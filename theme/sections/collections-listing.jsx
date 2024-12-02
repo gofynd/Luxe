@@ -133,6 +133,9 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
   };
 
   const collectionsForStackedView = useMemo(() => {
+    if (!isRunningOnClient()) {
+      return collections?.slice(0, per_row?.value);
+    }
     let totalItems = 0;
     if (collections && collections?.length) {
       if (windowWidth <= 480) {
@@ -146,20 +149,22 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
       return collections.slice(0, totalItems);
     }
     return [];
-  }, [collections, windowWidth]);
+  }, [collections, windowWidth, per_row]);
 
   const getPlaceHolder = () => {
     return require("../assets/images/img-placeholder-1.png");
   };
   const collectionsForScrollView = useMemo(() => {
+    if (!isRunningOnClient()) {
+      return collections?.slice(0, per_row?.value);
+    }
     const totalItems = 12;
-
     if (collections && collections?.length) {
       return collections.slice(0, totalItems);
     }
 
     return [];
-  }, [collections]);
+  }, [collections, per_row]);
 
   const showStackedView = () => {
     const hasCollection = (collectionsForStackedView || []).length > 0;
@@ -194,15 +199,6 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
     speed:
       collectionsForScrollView?.length / Number(per_row?.value) > 2 ? 700 : 400,
     lazyLoad: "ondemand",
-    customPaging: (i) => {
-      return <button>{i + 1}</button>;
-    },
-    appendDots: (dots) => (
-      <ul>
-        {/* Show maximum 8 dots */}
-        {dots.slice(0, 8)}
-      </ul>
-    ),
     slidesToShow: Number(per_row?.value),
     slidesToScroll: Number(per_row?.value),
     swipeToSlide: true,

@@ -1,4 +1,6 @@
 import React from "react";
+import { useGlobalStore } from "fdk-core/utils";
+import { SectionRenderer } from "fdk-core/components";
 import { useParams } from "react-router-dom";
 import ProductDescriptionPdp from "../page-layouts/pdp/product-description/product-description";
 import styles from "../styles/main.less";
@@ -6,9 +8,21 @@ import { GET_PRODUCT_DETAILS } from "../queries/pdpQuery";
 
 function ProductDescription({ fpi }) {
   const { slug } = useParams();
+  const page = useGlobalStore(fpi.getters.PAGE) || {};
+  const THEME = useGlobalStore(fpi.getters.THEME);
+  const mode = THEME?.config?.list.find(
+    (f) => f.name === THEME?.config?.current
+  );
+  const globalConfig = mode?.global_config?.custom?.props;
+  const { sections = [], error, isLoading } = page || {};
   return (
     <div className={`${styles.basePageContainer} ${styles.margin0auto}`}>
       <ProductDescriptionPdp fpi={fpi} slug={slug} />
+      <SectionRenderer
+        sections={sections}
+        fpi={fpi}
+        globalConfig={globalConfig}
+      />
     </div>
   );
 }
@@ -19,7 +33,7 @@ export const settings = JSON.stringify({
       type: "checkbox",
       id: "seller_store_selection",
       label: "Seller Store Selection",
-      default: true,
+      default: false,
     },
     {
       type: "checkbox",
@@ -62,7 +76,7 @@ export const settings = JSON.stringify({
       type: "checkbox",
       id: "show_offers",
       label: "Show Offers",
-      default: false,
+      default: true,
     },
     {
       type: "color",
@@ -151,27 +165,27 @@ export const settings = JSON.stringify({
       label: "Show Brand breadcrumb",
       default: true,
     },
-    {
-      type: "extension",
-      id: "extension",
-      label: "Extension Positions",
-      info: "Handle extension in these positions",
-      positions: [
-        {
-          value: "below_price_component",
-          text: "Below Price Component",
-        },
-        {
-          value: "below_product_info",
-          text: "Below Delivery location",
-        },
-        {
-          value: "product_description_bottom",
-          text: "Below Product Description",
-        },
-      ],
-      default: {},
-    },
+    // {
+    //   type: "extension",
+    //   id: "extension",
+    //   label: "Extension Positions",
+    //   info: "Handle extension in these positions",
+    //   positions: [
+    //     {
+    //       value: "below_price_component",
+    //       text: "Below Price Component",
+    //     },
+    //     {
+    //       value: "below_product_info",
+    //       text: "Below Delivery location",
+    //     },
+    //     {
+    //       value: "product_description_bottom",
+    //       text: "Below Product Description",
+    //     },
+    //   ],
+    //   default: {},
+    // },
     {
       type: "image_picker",
       id: "badge_logo_1",
@@ -286,8 +300,13 @@ export const settings = JSON.stringify({
   blocks: [],
 });
 
-export const sections = JSON.stringify([]);
-
+export const sections = JSON.stringify([
+  {
+    attributes: {
+      page: "product-description",
+    },
+  },
+]);
 ProductDescription.serverFetch = async ({ fpi, router }) => {
   const slug = router?.params?.slug;
   const values = {

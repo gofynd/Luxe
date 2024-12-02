@@ -45,7 +45,6 @@ const useProductDescription = (fpi, slug) => {
   const { product_details, product_meta, product_price_by_slug } = PRODUCT;
   const { sizes, loading: productMetaLoading } = product_meta || {};
   const { loading: productDetailsLoading } = product_details || {};
-  const { loading: productPriceBySlugLoading } = product_price_by_slug || null;
   const [isPageLoading, setIsPageLoading] = useState(!isPdpSsrFetched);
 
   const { wishlistIds } = useHeader(fpi);
@@ -86,7 +85,7 @@ const useProductDescription = (fpi, slug) => {
         .then((res) => {
           if (res) {
             setCoupons(res?.data?.coupons?.available_coupon_list || []);
-            setPromotions(res?.data?.promotionOffers?.available_promotions);
+            setPromotions(res?.data?.promotions?.available_promotions);
             setCurrentPincode(localStorage?.getItem("pincode") || "");
             setIsLoading(false);
           }

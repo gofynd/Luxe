@@ -35,7 +35,7 @@ function OrdersList({ fpi }) {
           ></OrdersHeader>
           {orderShipments?.items?.length === 0 && (
             <div className={`${styles.error}`}>
-              <EmptyState></EmptyState>
+              <EmptyState title="No results found"></EmptyState>
             </div>
           )}
           {orderShipments?.items?.length !== 0 && (

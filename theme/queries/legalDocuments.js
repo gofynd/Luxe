@@ -1,17 +1,14 @@
 export const LEGAL_DATA = `
 query applicationContent {
   applicationContent {
-    legalInformation {
+    legal_information {
       id
       application
-      created_at
       policy
       returns
       shipping
       tnc
-      updated_at
     }
-    tags
   }
 }
 

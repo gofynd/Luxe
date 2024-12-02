@@ -1,6 +1,18 @@
 @import "../main.less";
 
 .testimonial {
+  padding: 0 16px;
+  @media @mobile {
+    padding-left: 16px;
+    padding-right: 10px;
+    margin-right: 16px;
+  }
+
+  @media @tablet-strict {
+    padding-left: 24px;
+    padding-right: 12px;
+    margin-right: 24px;
+  }
   &__title {
     margin-bottom: 24px;
     text-align: center;
@@ -17,19 +29,19 @@
 
   &__carousel {
     --gap: 12px;
-    padding-left: 16px;
-    padding-right: var(--p-right-mob);
-    // @media @tablet {
+    // padding-left: 16px;
+    // padding-right: var(--p-right-mob);
+    // // @media @tablet {
+    // //   padding-left: 24px;
+    // // }
+    // @media @mobile-up {
     //   padding-left: 24px;
+    //   padding-right: var(--p-right-tablet);
     // }
-    @media @mobile-up {
-      padding-left: 24px;
-      padding-right: var(--p-right-tablet);
-    }
-    @media @desktop {
-      --gap: 24px;
-      padding: 0 40px;
-    }
+    // @media @desktop {
+    --gap: 24px;
+    //   padding: 0 40px;
+    // }
 
     :global {
       .slick-list {
@@ -59,7 +71,7 @@
 
   &__block {
     display: flex;
-    border-radius: calc(2 * @ImageRadius);
+    border-radius: ~"calc(16px + @{ImageRadius})";
     @media @tablet {
       border-radius: @ImageRadius;
     }
@@ -68,7 +80,7 @@
     height: 100%;
     @media @tablet {
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
     }
 
     @media @desktop {

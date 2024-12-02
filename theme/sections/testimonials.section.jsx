@@ -126,9 +126,8 @@ export function Component({ props, globalConfig, blocks, preset }) {
   };
 
   const dynamicStyles = {
-    padding: `16px 0 ${globalConfig.section_margin_bottom}px`,
-    "--p-right-tablet": `${getTestimonials()?.length < 3 ? "24px" : ""}`,
-    "--p-right-mob": `${getTestimonials()?.length < 2 ? "16px" : ""}`,
+    paddingTop: "16px",
+    paddingBottom: `${globalConfig.section_margin_bottom}px`,
   };
 
   return (

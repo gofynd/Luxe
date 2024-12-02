@@ -45,15 +45,6 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
     autoplaySpeed: 3000,
     cssEase: "linear",
     arrows: false,
-    customPaging: (i) => {
-      return <button>{i + 1}</button>;
-    },
-    appendDots: (dots) => (
-      <ul>
-        {/* Show maximum 8 dots */}
-        {dots.slice(0, 8)}
-      </ul>
-    ),
     // arrows: getGallery.length > item_count?.value,
     nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
     prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
@@ -227,8 +218,9 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
   return (
     <div
       style={{
-        padding: `16px 0 ${globalConfig.section_margin_bottom}px`,
+        padding: windowWidth > 768 ? `16px` : `16px 0`,
         "--bg-color": `${img_container_bg?.value || "#00000000"}`,
+        marginBottom: `${globalConfig.section_margin_bottom}px`,
       }}
     >
       <div>
@@ -295,6 +287,20 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                   </div>
                 ))}
               </Slider>
+              {button_text?.value && (
+                <div
+                  className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
+                >
+                  <FDKLink to="/categories/">
+                    <button
+                      type="button"
+                      className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
+                    >
+                      {button_text?.value}
+                    </button>
+                  </FDKLink>
+                </div>
+              )}
             </div>
           )}
           {showStackedView() && departmentCategories.length && (
@@ -379,20 +385,21 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
             </div>
           )}
         </IntersectionObserverComponent>
-        {button_text?.value && (
-          <div
-            className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
-          >
-            <FDKLink to="/categories/">
-              <button
-                type="button"
-                className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
-              >
-                {button_text?.value}
-              </button>
-            </FDKLink>
-          </div>
-        )}
+        {button_text?.value &&
+          (showStackedView() || !departmentCategories.length) && (
+            <div
+              className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
+            >
+              <FDKLink to="/categories/">
+                <button
+                  type="button"
+                  className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
+                >
+                  {button_text?.value}
+                </button>
+              </FDKLink>
+            </div>
+          )}
       </div>
     </div>
   );

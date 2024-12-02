@@ -578,8 +578,8 @@ function Navigation({
               }}
             >
               <SvgWrapper
-                className={`${styles.wishlist} ${styles.menuIcon}  ${styles.sidebarIcon}`}
-                svgSrc="wishlist"
+                className={`${styles.menuIcon}  ${styles.sidebarIcon}${styles.wishlist}`}
+                svgSrc="single-row-wishlist"
               />
               <span>Wishlist</span>
             </button>

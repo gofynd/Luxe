@@ -124,15 +124,6 @@ export function Component({ props, blocks, globalConfig, preset }) {
     cssEase: "linear",
     arrows: false,
     dots: blocksData.length > 1,
-    customPaging: (i) => {
-      return <button>{i + 1}</button>;
-    },
-    appendDots: (dots) => (
-      <ul>
-        {/* Show maximum 8 dots */}
-        {dots.slice(0, 8)}
-      </ul>
-    ),
     nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
     prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
     responsive: [
@@ -225,7 +216,7 @@ export function Component({ props, blocks, globalConfig, preset }) {
               className={blocksData?.length === 1 ? "no-nav" : ""}
             >
               {blocksData?.map((block, index) => (
-                <IntersectionObserverComponent>
+                <IntersectionObserverComponent key={index}>
                   <MemoizedSlide
                     key={index}
                     block={block.props}

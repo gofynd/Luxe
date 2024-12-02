@@ -9,7 +9,7 @@ import IntersectionObserverComponent from "../components/intersection-observer/i
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
 export function Component({ props, globalConfig, blocks, preset }) {
-  const { title, description, desktop_layout } = props;
+  const { title, description, desktop_layout, card_background } = props;
   const [desktopLayout, setDesktopLayout] = useState(desktop_layout?.value);
   const [mobileScroll, setMobileScroll] = useState(false);
   const [desktopWidth, setDesktopWidth] = useState(false);
@@ -62,7 +62,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
         window.removeEventListener("resize", handleResize);
       };
     }
-  }, []);
+  }, [desktop_layout?.value]);
 
   const slickSetting = () => {
     const trustMarker = getTrustMarker();
@@ -75,15 +75,6 @@ export function Component({ props, globalConfig, blocks, preset }) {
       slidesToShow: trustMarker.length < 5 ? trustMarker.length : 5,
       slidesToScroll: trustMarker.length < 5 ? 1 : 5,
       autoplay: false,
-      customPaging: (i) => {
-        return <button>{i + 1}</button>;
-      },
-      appendDots: (dots) => (
-        <ul>
-          {/* Show maximum 8 dots */}
-          {dots.slice(0, 8)}
-        </ul>
-      ),
       // autoplaySpeed: slide_interval?.value * 1000,
       centerMode: false,
       centerPadding: trustMarker.length === 1 ? "0" : "152px",
@@ -130,7 +121,9 @@ export function Component({ props, globalConfig, blocks, preset }) {
     marginBottom: `
       ${globalConfig.section_margin_bottom}px`,
     maxWidth: "100vw",
-    "--img-background-color": globalConfig?.img_container_bg,
+    "--img-background-color": card_background?.value
+      ? card_background?.value
+      : globalConfig?.img_container_bg,
   };
 
   return (
@@ -331,6 +324,13 @@ export const settings = {
       default: "horizontal",
       label: "Desktop Layout",
       info: "Alignment of content",
+    },
+    {
+      type: "color",
+      id: "card_background",
+      label: "Card Background Color",
+      info: "This color will be used as card background",
+      default: "",
     },
   ],
   blocks: [

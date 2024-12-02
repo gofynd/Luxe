@@ -5,7 +5,8 @@ import { LOCALITY } from "../../queries/logisticsQuery";
 import useAddress from "../address/useAddress";
 import SvgWrapper from "../../components/core/svgWrapper/SvgWrapper";
 import EmptyState from "../../components/empty-state/empty-state";
-import Loader from "../../components/loader/loader";
+import Loader from "fdk-react-templates/components/loader/loader";
+import "fdk-react-templates/components/loader/loader.css";
 import { useSnackbar } from "../../helper/hooks";
 import { capitalize } from "../../helper/utils";
 import styles from "./profile-address-page.less";
@@ -98,6 +99,9 @@ const ProfileAddressPage = ({ fpi }) => {
       } else {
         showSnackbar("Failed to create new address", "error");
       }
+      window.scrollTo({
+        top: 0,
+      });
     });
   };
 
@@ -112,6 +116,9 @@ const ProfileAddressPage = ({ fpi }) => {
       } else {
         showSnackbar("Failed to update an address", "error");
       }
+      window.scrollTo({
+        top: 0,
+      });
     });
   };
 
@@ -126,6 +133,9 @@ const ProfileAddressPage = ({ fpi }) => {
       } else {
         showSnackbar("Failed to delete an address", "error");
       }
+      window.scrollTo({
+        top: 0,
+      });
     });
   };
 
@@ -211,7 +221,12 @@ const ProfileAddressPage = ({ fpi }) => {
   return (
     <div className={styles.main}>
       {isLoading ? (
-        <Loader />
+        <div className={styles.loader}>
+          <Loader
+            containerClassName={styles.loaderContainer}
+            loaderClassName={styles.customLoader}
+          />
+        </div>
       ) : (
         <>
           {!isEditMode && !isCreateMode ? (
@@ -223,7 +238,9 @@ const ProfileAddressPage = ({ fpi }) => {
                     <span
                       className={`${styles.savedAddress} ${styles["bold-xxs"]}`}
                     >
-                      {allAddresses?.length ?? 0} Saved
+                      {allAddresses?.length
+                        ? `${allAddresses?.length} saved`
+                        : ""}{" "}
                     </span>
                   </div>
                   <div

@@ -8,16 +8,25 @@ import CardList from "../components/card-list/card-list";
 import useCategories from "../page-layouts/categories/useCategories";
 import { detectMobileWidth } from "../helper/utils";
 import ScrollToTop from "../components/scroll-to-top/scroll-to-top";
+import EmptyState from "../components/empty-state/empty-state";
 
 function Categories({ fpi }) {
-  const { categories, pageConfig, fetchAllCategories, globalConfig } =
-    useCategories(fpi);
+  const {
+    categories,
+    pageConfig,
+    fetchAllCategories,
+    globalConfig,
+    isLoading,
+  } = useCategories(fpi);
   const [isMobile, setIsMobile] = useState(true);
   useEffect(() => {
     fetchAllCategories();
     setIsMobile(detectMobileWidth());
   }, []);
   //   const { page, items = [], loading } = product_lists || {};
+  if (!isLoading && categories.length == 0) {
+    return <EmptyState />;
+  }
 
   return (
     <div
@@ -31,28 +40,33 @@ function Categories({ fpi }) {
         </span>
         <span className={styles.active}>Categories</span>
       </div>
-      <div>
-        {pageConfig?.heading && (
-          <h1 className={`${styles.categories__title} fontHeader`}>
-            {pageConfig?.heading}
-          </h1>
-        )}
-        {pageConfig?.description && (
-          <div
-            className={`${styles.categories__description} ${isMobile ? styles.b2 : styles.b1}`}
-          >
-            <p>{pageConfig?.description}</p>
+
+      {!isLoading ? (
+        <div>
+          {pageConfig?.heading && (
+            <h1 className={`${styles.categories__title} fontHeader`}>
+              {pageConfig?.heading}
+            </h1>
+          )}
+          {pageConfig?.description && (
+            <div
+              className={`${styles.categories__description} ${isMobile ? styles.b2 : styles.b1}`}
+            >
+              <p>{pageConfig?.description}</p>
+            </div>
+          )}
+          <div className={styles.categories__cards}>
+            <CardList
+              cardList={categories}
+              cardType="CATEGORIES"
+              showOnlyLogo={!!pageConfig.logo_only}
+              globalConfig={globalConfig}
+            />
           </div>
-        )}
-        <div className={styles.categories__cards}>
-          <CardList
-            cardList={categories}
-            cardType="CATEGORIES"
-            showOnlyLogo={!!pageConfig.logo_only}
-            globalConfig={globalConfig}
-          />
         </div>
-      </div>
+      ) : (
+        <Loader />
+      )}
       <div
         className={`${styles.categories__breadcrumbs} ${styles.mobile} ${styles.captionNormal}`}
       >

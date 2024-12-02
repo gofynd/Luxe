@@ -12,7 +12,6 @@ export const SHARED_CART_DETAILS = `query sharedCartDetails($token: String!) {
           coupon_value
           description
           is_applied
-          maximum_discount_value
           message
           minimum_cart_value
           sub_title
@@ -60,7 +59,6 @@ export const SHARED_CART_DETAILS = `query sharedCartDetails($token: String!) {
             name
             store_code
             uid
-            code
           }
         }
         availability {

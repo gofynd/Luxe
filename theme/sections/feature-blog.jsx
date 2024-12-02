@@ -27,15 +27,6 @@ export function Component({ props, globalConfig, fpi }) {
     infinite: blogItems?.length > 3,
     nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
     prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
-    customPaging: (i) => {
-      return <button type="button">{i + 1}</button>;
-    },
-    appendDots: (dots) => (
-      <ul>
-        {/* Show maximum 8 dots */}
-        {dots.slice(0, 8)}
-      </ul>
-    ),
     responsive: [
       {
         breakpoint: 780,

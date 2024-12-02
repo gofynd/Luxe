@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
 import styles from "../styles/sections/featured-product.less";
-import { FDKLink } from "fdk-core/components";
 import OutsideClickHandler from "react-outside-click-handler";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
-import useProductDescription from "../page-layouts/pdp/product-description/useProductDescription";
 import PdpImageGallery from "../page-layouts/pdp/components/image-gallery/image-gallery";
 import ProductVariants from "../page-layouts/pdp/components/product-variants/product-variants";
 import SizeGuide from "../page-layouts/pdp/size-guide/size-guide";
 import CheckPincodeModal from "../components/pincode-modal/check-pincode-modal";
+import {
+  FEATURE_PRODUCT_DETAILS,
+  FEATURE_PRODUCT_SIZE_PRICE,
+} from "../queries/featureProductQuery";
+import { useGlobalStore } from "fdk-core/utils";
+import useFeatureProductDetails from "../components/featured-product/useFeatureProductDetails";
+import { LOCALITY } from "../queries/logisticsQuery";
 
 export function Component({ props, globalConfig, fpi }) {
   const {
@@ -20,34 +25,53 @@ export function Component({ props, globalConfig, fpi }) {
     show_size_guide,
     tax_label,
   } = props;
+  const [slug, setSlug] = useState(product?.value);
 
-  const [slug, setSlug] = useState(product?.value ? product?.value : "");
+  const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const featureProductDetails = `featureProductDetails-${slug}`;
 
-  const {
-    productDetails,
-    isLoading,
-    productPriceBySlug,
-    productMeta,
-    pageConfig,
-    followed,
-    setCurrentSize,
-    addToWishList,
-    removeFromWishlist,
-    addProductForCheckout,
-    currentPincode,
-    selectPincodeError,
-    pincodeErrorMessage,
-    setCurrentPincode,
-    checkPincode,
-    setPincodeErrorMessage,
-  } = useProductDescription(fpi, slug);
-  const priceDataDefault = productMeta?.price;
-
-  const isMto = productDetails?.custom_order?.is_custom_order || false;
+  const isMto =
+    customValues?.[featureProductDetails]?.productDetails?.product?.custom_order
+      ?.is_custom_order || false;
 
   const { show_price, disable_cart, button_options } = globalConfig;
 
-  const { media, name, short_description, variants, sizes } = productDetails;
+  const { media, name, short_description, variants, sizes, uid, moq } =
+    customValues?.[featureProductDetails]?.productDetails?.product || {};
+  const {
+    seller,
+    price_per_piece,
+    delivery_promise,
+    store,
+    article_id,
+    article_assignment,
+  } = customValues?.[featureProductDetails]?.productPrice?.productPrice || {};
+
+  const [selectedSize, setSelectedSize] = useState("");
+  const [showSizeDropdown, setShowSizeDropdown] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [currentPincode, setCurrentPincode] = useState("");
+  const isSizeSelectionBlock = size_selection_style?.value === "block";
+  const isSingleSize = sizes?.sizes?.length === 1;
+  const isSizeCollapsed = hide_single_size?.value && isSingleSize;
+  const {
+    addProductForCheckout,
+    pincodeErrorMessage,
+    setPincodeErrorMessage,
+    followed,
+    removeFromWishlist,
+    addToWishList,
+  } = useFeatureProductDetails({
+    fpi,
+    moq,
+    selectedSize,
+    article_assignment,
+    article_id,
+    uid,
+    seller,
+    store,
+    currentPincode,
+  });
 
   const images = [
     {
@@ -57,33 +81,8 @@ export function Component({ props, globalConfig, fpi }) {
     },
   ];
 
-  const [selectedSize, setSelectedSize] = useState("");
-  const [showSizeDropdown, setShowSizeDropdown] = useState(false);
-  const [showSizeGuide, setShowSizeGuide] = useState(false);
-
-  const priceDataBySize = productPriceBySlug?.price;
-  const isSizeSelectionBlock = size_selection_style?.value === "block";
-  const isSingleSize = sizes?.sizes?.length === 1;
-  const isSizeCollapsed = hide_single_size?.value && isSingleSize;
-  const preSelectFirstOfMany = pageConfig?.preselect_size;
-
   function getProductPrice(key) {
-    if (selectedSize && productPriceBySlug) {
-      if (productPriceBySlug?.set) {
-        return productPriceBySlug?.price_per_piece[key] || "";
-      }
-      const price = productPriceBySlug?.price || "";
-      return `${price?.currency_symbol || ""} ${price?.[key] || ""}`;
-    }
-    if (priceDataDefault) {
-      return priceDataDefault?.[key]?.min !== priceDataDefault?.[key]?.max
-        ? `${priceDataDefault?.[key]?.currency_symbol || ""} ${
-            priceDataDefault?.[key]?.min || ""
-          } - ${priceDataDefault?.[key]?.max || ""}`
-        : `${priceDataDefault?.[key]?.currency_symbol || ""} ${
-            priceDataDefault?.[key]?.max || ""
-          } `;
-    }
+    return `${price_per_piece?.currency_symbol || ""} ${price_per_piece?.[key] || ""}`;
   }
 
   function onSizeSelection(size) {
@@ -91,35 +90,82 @@ export function Component({ props, globalConfig, fpi }) {
       return;
     }
     setSelectedSize(size?.value);
-    setCurrentSize(size);
     setShowSizeDropdown(false);
   }
-
   useEffect(() => {
-    if (isSizeCollapsed || (preSelectFirstOfMany && sizes !== undefined)) {
-      onSizeSelection(sizes?.sizes?.[0]);
+    if (localStorage.getItem("pincode")) {
+      setCurrentPincode(localStorage.getItem("pincode"));
     }
-  }, [isSizeCollapsed, preSelectFirstOfMany]);
-  useEffect(() => {
-    if (sizes?.sizes?.length > 0) onSizeSelection(sizes?.sizes?.[0]);
-  }, [sizes?.sizes?.length]);
+    const fetchProductData = async () => {
+      const values = {
+        slug,
+      };
+      try {
+        const productDetails = await fpi.executeGQL(
+          FEATURE_PRODUCT_DETAILS,
+          values,
+          {
+            skipStoreUpdate: true,
+          }
+        );
+        const { sizes } = productDetails?.data?.product;
+        const payload = {
+          slug,
+          pincode: "",
+          size: sizes?.sizes[0]?.value,
+        };
+        const productPrice = await fpi.executeGQL(
+          FEATURE_PRODUCT_SIZE_PRICE,
+          payload,
+          { skipStoreUpdate: true }
+        );
+
+        return fpi.custom.setValue(`featureProductDetails-${slug}`, {
+          productDetails: productDetails?.data,
+          productPrice: productPrice?.data,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchProductData();
+  }, [slug]);
 
   const isSizeGuideAvailable = () => {
-    const sizeChartHeader = productMeta?.size_chart?.headers || {};
-    return (
-      Object.keys(sizeChartHeader).length > 0 || productMeta?.size_chart?.image
-    );
+    const sizeChartHeader = sizes?.size_chart?.headers || {};
+    return Object.keys(sizeChartHeader).length > 0 || sizes?.size_chart?.image;
   };
 
   const getProductSlug = () => {
     window.open(`${window.location.href}product/${slug}`);
   };
   const [openPincodeModal, setOpenPicodeModal] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
+  const checkPincode = (postCode) => {
+    fpi
+      .executeGQL(LOCALITY, {
+        locality: `pincode`,
+        localityValue: `${postCode}`,
+      })
+      .then((res) => {
+        if (res?.data?.locality) {
+          localStorage?.setItem("pincode", postCode);
+          setCurrentPincode(postCode);
+          setOpenPicodeModal(false);
+        } else {
+          localStorage?.removeItem("pincode");
+          setPincodeErrorMessage(
+            res?.errors?.[0]?.message || "Pincode verification failed"
+          );
+        }
+      });
+  };
   // return bannerImage?.value ? <ImageBanner bannerImage={bannerImage} /> : null;
   return (
-    <div className={styles.featured_product_container}>
+    <div
+      className={styles.featured_product_container}
+      style={{ paddingBottom: `${globalConfig.section_margin_bottom}px` }}
+    >
       <div className={styles["featured-products-header"]}>
         {Heading?.value && (
           <h2 className={`${styles.title} fontHeader`}>{Heading?.value}</h2>
@@ -137,8 +183,9 @@ export function Component({ props, globalConfig, fpi }) {
               <PdpImageGallery
                 key={slug}
                 images={slug && media?.length ? media : images}
-                product={productDetails}
-                iconColor={pageConfig?.icon_color || ""}
+                product={
+                  customValues?.[featureProductDetails]?.productDetails?.product
+                }
                 globalConfig={globalConfig}
                 hiddenDots={true}
                 addToWishList={addToWishList}
@@ -158,13 +205,12 @@ export function Component({ props, globalConfig, fpi }) {
                 {slug && name}
               </h1>
               {/* ---------- Product Price ---------- */}
-              {show_price && productMeta?.sellable && (
+              {show_price && sizes?.sellable && (
                 <div className={styles.product__price}>
                   <h4 className={styles["product__price--effective"]}>
                     {getProductPrice("effective")}
                   </h4>
                   {getProductPrice("marked") &&
-                    pageConfig?.mrp_label &&
                     getProductPrice("effective") !==
                       getProductPrice("marked") && (
                       <span
@@ -205,7 +251,10 @@ export function Component({ props, globalConfig, fpi }) {
               {slug && variants?.length > 0 && (
                 <div>
                   <ProductVariants
-                    product={productDetails}
+                    product={
+                      customValues?.[featureProductDetails]?.productDetails
+                        ?.product
+                    }
                     variants={variants}
                     currentSlug={slug}
                     globalConfig={globalConfig}
@@ -221,29 +270,17 @@ export function Component({ props, globalConfig, fpi }) {
                     className={`${styles.storeSeller} ${styles.captionNormal}`}
                   >
                     <span className={styles.soldByLabel}>Seller :</span>
-                    <div
-                      className={`${styles.nameWrapper} ${
-                        pageConfig?.seller_store_selection && styles.selectable
-                      }`}
-                    >
-                      <p className={styles.storeSellerName}>
-                        {`${productPriceBySlug?.seller?.name || ""}`}
-                      </p>
-                      {productPriceBySlug?.seller?.count > 1 && (
+                    <div className={`${styles.nameWrapper} `}>
+                      <p className={styles.storeSellerName}>{seller?.name}</p>
+                      {seller?.count > 1 && (
                         <span
                           className={`${styles.captionSemiBold} ${styles.otherSellers}`}
                         >
                           &nbsp;&&nbsp;
-                          {`${(productPriceBySlug?.seller?.count ?? 2) - 1} Other${
-                            productPriceBySlug?.seller?.count > 1 > 2 ? "s" : ""
+                          {`${(seller?.count ?? 2) - 1} Other${
+                            seller?.count > 1 > 2 ? "s" : ""
                           }`}
                         </span>
-                      )}
-                      {pageConfig?.seller_store_selection && (
-                        <SvgWrapper
-                          svgSrc="arrow-down"
-                          className={styles.dropdownArrow}
-                        />
                       )}
                     </div>
                   </div>
@@ -299,7 +336,7 @@ export function Component({ props, globalConfig, fpi }) {
                 )}
               </div>
               {/* ---------- Size Guide ---------- */}
-              {isSizeGuideAvailable() && productMeta?.sellable && (
+              {isSizeGuideAvailable() && sizes?.sellable && (
                 <div>
                   {show_size_guide?.value && (
                     <button
@@ -315,7 +352,7 @@ export function Component({ props, globalConfig, fpi }) {
                     <SizeGuide
                       customClass={styles.sizeGuide}
                       isOpen={showSizeGuide}
-                      productMeta={productMeta}
+                      productMeta={sizes}
                       onCloseDialog={() => setShowSizeGuide(false)}
                     />
                   )}
@@ -406,7 +443,7 @@ export function Component({ props, globalConfig, fpi }) {
                             setOpenPicodeModal(!openPincodeModal);
                           }
                         }}
-                        disabled={!slug || isLoading}
+                        disabled={!slug}
                       >
                         <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
                         ADD TO CART
@@ -433,7 +470,7 @@ export function Component({ props, globalConfig, fpi }) {
                             setOpenPicodeModal(!openPincodeModal);
                           }
                         }}
-                        disabled={!slug || isLoading}
+                        disabled={!slug}
                       >
                         <SvgWrapper
                           svgSrc="buy-now"
@@ -459,7 +496,7 @@ export function Component({ props, globalConfig, fpi }) {
                           setOpenPicodeModal(!openPincodeModal);
                         }
                       }}
-                      disabled={!slug || isLoading}
+                      disabled={!slug}
                     >
                       <SvgWrapper
                         svgSrc="buy-now'"
@@ -471,7 +508,9 @@ export function Component({ props, globalConfig, fpi }) {
                 </div>
               )}
               <div
-                onClick={slug && getProductSlug}
+                onClick={() => {
+                  if (slug) getProductSlug();
+                }}
                 className={styles["view-more"]}
               >
                 View more details
@@ -484,11 +523,9 @@ export function Component({ props, globalConfig, fpi }) {
         <CheckPincodeModal
           setOpenPicodeModal={setOpenPicodeModal}
           pincode={currentPincode}
-          tat={productPriceBySlug?.delivery_promise}
-          selectPincodeError={selectPincodeError}
+          tat={delivery_promise}
           pincodeErrorMessage={pincodeErrorMessage}
           setCurrentPincode={setCurrentPincode}
-          setErrorMessage={setErrorMessage}
           checkPincode={checkPincode}
           fpi={fpi}
           setPincodeErrorMessage={setPincodeErrorMessage}
@@ -562,4 +599,31 @@ export const settings = {
       default: "Price inclusive of all tax",
     },
   ],
+};
+
+Component.serverFetch = async ({ fpi, props }) => {
+  const slug = props?.product?.value;
+  const values = {
+    slug,
+  };
+
+  const productDetails = await fpi.executeGQL(FEATURE_PRODUCT_DETAILS, values, {
+    skipStoreUpdate: true,
+  });
+  const { sizes } = productDetails?.data?.product;
+  const payload = {
+    slug,
+    pincode: "",
+    size: sizes?.sizes[0]?.value,
+  };
+  const productPrice = await fpi.executeGQL(
+    FEATURE_PRODUCT_SIZE_PRICE,
+    payload,
+    { skipStoreUpdate: true }
+  );
+
+  return fpi.custom.setValue(`featureProductDetails-${slug}`, {
+    productDetails: productDetails?.data,
+    productPrice: productPrice?.data,
+  });
 };

@@ -126,7 +126,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
     if (isSizeCollapsed || (preSelectFirstOfMany && sizes !== undefined)) {
       onSizeSelection(sizes?.sizes?.[0]);
     }
-  }, [isSizeCollapsed, preSelectFirstOfMany]);
+  }, [isSizeCollapsed, preSelectFirstOfMany, sizes?.sizes]);
 
   // function getReviewRatingInfo() {
   //   const customMeta = productDetails?.custom_meta || [];

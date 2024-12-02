@@ -1,5 +1,20 @@
 @import "../../styles/main.less";
 
+.loader {
+  position: relative;
+  height: 90vh;
+  width: 100%;
+
+  .loaderContainer {
+    position: absolute;
+    height: 100%;
+    background: transparent;
+
+    .customLoader {
+      margin-left: 0;
+    }
+  }
+}
 .bold-md {
   font-weight: 700;
   font-size: 18px;
@@ -18,7 +33,21 @@
 
 .main {
   color: @Mako;
+  .loader {
+    position: relative;
+    height: 81.8vh;
+    width: 100%;
 
+    .loaderContainer {
+      position: absolute;
+      height: 100%;
+      background: transparent;
+
+      .customLoader {
+        margin-left: 0;
+      }
+    }
+  }
   .addressItemContainer {
     padding: 12px;
     .addressItem {

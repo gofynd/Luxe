@@ -13,6 +13,7 @@ import placeholder from "../assets/images/img-placeholder-1.png";
 import { FEATURED_COLLECTION } from "../queries/collectionsQuery";
 import "fdk-react-templates/components/product-card/product-card.css";
 import bannerPlaceholder from "../assets/images/collection-banner-placeholder.png";
+import imagePlaceholder from "../assets/images/placeholder3x4.png";
 
 export function Component({ props, globalConfig, fpi }) {
   const bannerRef = useRef(null);
@@ -348,6 +349,14 @@ export function Component({ props, globalConfig, fpi }) {
                                 isWishlistIcon={false}
                                 isImageFill={img_fill?.value}
                                 isPrice={globalConfig?.show_price}
+                                centerAlign={
+                                  windowWidth <= 480
+                                    ? mobile_layout?.value !==
+                                      "banner_horizontal_scroll"
+                                    : desktop_layout?.value !==
+                                      "banner_horizontal_scroll"
+                                }
+                                imagePlaceholder={imagePlaceholder}
                               />
                             </FDKLink>
                           </div>
@@ -395,6 +404,14 @@ export function Component({ props, globalConfig, fpi }) {
                             isWishlistIcon={false}
                             isImageFill={img_fill?.value}
                             isPrice={globalConfig?.show_price}
+                            centerAlign={
+                              windowWidth <= 480
+                                ? mobile_layout?.value !==
+                                  "banner_horizontal_scroll"
+                                : desktop_layout?.value !==
+                                  "banner_horizontal_scroll"
+                            }
+                            imagePlaceholder={imagePlaceholder}
                           />
                         </FDKLink>
                       </div>
@@ -442,6 +459,14 @@ export function Component({ props, globalConfig, fpi }) {
                             isWishlistIcon={false}
                             isImageFill={img_fill?.value}
                             isPrice={globalConfig?.show_price}
+                            centerAlign={
+                              windowWidth <= 480
+                                ? mobile_layout?.value !==
+                                  "banner_horizontal_scroll"
+                                : desktop_layout?.value !==
+                                  "banner_horizontal_scroll"
+                            }
+                            imagePlaceholder={imagePlaceholder}
                           />
                         </FDKLink>
                       </div>
@@ -541,6 +566,12 @@ export function Component({ props, globalConfig, fpi }) {
                     isWishlistDisplayed={false}
                     isWishlistIcon={false}
                     isImageFill={img_fill?.value}
+                    centerAlign={
+                      windowWidth <= 480
+                        ? mobile_layout?.valuet !== "banner_horizontal_scroll"
+                        : desktop_layout?.value !== "banner_horizontal_scroll"
+                    }
+                    imagePlaceholder={imagePlaceholder}
                   />
                 </FDKLink>
               </div>

@@ -100,7 +100,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
                 <button
                   type="button"
                   className={`${styles.button} ${styles.btnSecondary}`}
-                  onClick={() => compareProducts("reset")}
+                  onClick={() => compareProducts({ action: "reset" })}
                 >
                   Reset
                 </button>
@@ -109,7 +109,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
                 <button
                   type="button"
                   className={`${styles.button} ${styles.btnPrimary} ${styles.btnNoBorder}`}
-                  onClick={() => compareProducts("goToCompare")}
+                  onClick={() => compareProducts({ action: "goToCompare" })}
                 >
                   Go to Compare
                 </button>

@@ -3,15 +3,13 @@ import { FDKLink } from "fdk-core/components";
 
 import FyImage from "../components/core/fy-image/fy-image";
 import styles from "../styles/sections/media-with-text.less";
-import { GET_PRODUCT_DETAILS } from "../queries/pdpQuery";
 import { isRunningOnClient } from "../helper/utils";
 import Hotspot from "../components/hotspot/product-hotspot";
+import { FEATURE_PRODUCT_DETAILS } from "../queries/featureProductQuery";
 
 export function Component({ props, globalConfig, blocks, fpi }) {
-  const [imgLoaded, setImgLoaded] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [products, setProducts] = useState([]);
-  const [productsInfo, setProductsInfo] = useState([]);
   const {
     image_desktop,
     image_mobile,
@@ -21,6 +19,8 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     button_text,
     align_text_desktop,
   } = props;
+
+  // const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
 
   const getMobileImage = () =>
     image_mobile?.value !== ""
@@ -90,7 +90,6 @@ export function Component({ props, globalConfig, blocks, fpi }) {
       },
     ];
   };
-
   const getProductSlugs = () => {
     return (
       blocks?.reduce((acc, block) => {
@@ -103,49 +102,49 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     );
   };
 
-  const fetchProductsData = () => {
-    if (!getProductSlugs()?.length) {
-      return;
-    }
-
-    Promise.all(
-      getProductSlugs()?.map((slug) => {
-        return fpi.executeGQL(GET_PRODUCT_DETAILS, { slug });
-      })
-    )
-      .then((results) => {
-        setProducts(results);
-      })
-      .catch((e) => console.log(e));
-
-    // Promise.all(
-    //   getProductSlugs()?.map((slug) => {
-    //     return fpi.executeGQL(PRODUCT_SIZE_PRICE, { slug });
-    //   })
-    // )
-    //   .then((results) => {
-    //     setProductsInfo(results);
-    //   })
-    //   .catch((e) => console.log(e));
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      const productSlugs = getProductSlugs();
+      if (!productSlugs.length) {
+        return;
+      }
+      try {
+        const results = await Promise.all(
+          productSlugs.map((slug) =>
+            fpi
+              .executeGQL(
+                FEATURE_PRODUCT_DETAILS,
+                { slug },
+                { skipStoreUpdate: true }
+              )
+              .then((result) => ({
+                uid: result?.data?.product?.uid,
+                data: result,
+              }))
+          )
+        );
+        // Aggregate only the data field into a single array
+        const aggregatedResults = results.map(({ data }) => data);
+        setProducts(aggregatedResults);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchData();
+  }, []);
 
   const getFormattedProducts = () => {
     return getProductSlugs()?.reduce((acc, slug, index) => {
       acc[slug] = products?.[index]?.data?.product;
-      acc[slug] = { ...acc[slug], price: productsInfo?.[index]?.price };
       return acc;
     }, {});
   };
-
   const getHotspots = () => {
     return {
       desktop: blocks?.filter((block) => block?.type === "hotspot_desktop"),
       mobile: blocks?.filter((block) => block?.type === "hotspot_mobile"),
     };
   };
-  useEffect(() => {
-    fetchProductsData();
-  }, [JSON.stringify(products)]);
 
   useEffect(() => {
     if (isRunningOnClient()) {
@@ -167,8 +166,7 @@ export function Component({ props, globalConfig, blocks, fpi }) {
   }, []);
 
   const dynamicStyles = {
-    "padding-bottom": "16px",
-    "margin-bottom": `${globalConfig?.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
   };
 
   return (

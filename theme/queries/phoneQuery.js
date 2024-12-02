@@ -21,7 +21,7 @@ export const SET_MOBILE_NUMBER_AS_PRIMARY = `mutation setMobileNumberAsPrimary(
           updated_at
           user_id
           username
-          uid
+          id
           external_id
           rr_id
           phone_numbers {
@@ -69,7 +69,7 @@ export const DELETE_MOBILE_NUMBER = `mutation deleteMobileNumber(
         updated_at
         user_id
         username
-        uid
+        id
         external_id
         rr_id
         phone_numbers {

@@ -5,7 +5,7 @@ import "fdk-react-templates/page-layouts/auth/mobile-number/mobile-number.css";
 import { usePhone } from "./usePhone";
 import { useSnackbar, useAccounts } from "../../helper/hooks";
 import PhonePage from "fdk-react-templates/pages/profile/phone";
-import "fdk-react-templates/pages/profile/phone.css";
+import "fdk-react-templates/pages/profile/phone/phone.css";
 
 function Phone({ fpi }) {
   const { setMobileNumberAsPrimary, deleteMobileNumber, phoneNumbers } =

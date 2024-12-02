@@ -94,17 +94,15 @@ function BlogTabs({
                 <div role="listitem" key={blog?.id}>
                   <FDKLink to={`/blog/${blog.slug}`} title={blog.title}>
                     <div className={`${styles.blogHorizontal}`}>
-                      <div className={`${styles.blogHorizontal__image}`}>
-                        <FyImage
-                          src={
-                            blog?.feature_image?.secure_url || fallback_image
-                          }
-                          alt={blog.title}
-                          isLazyLoaded={false}
-                          sources={[{ width: 80 }]}
-                          placeholder={fallback_image}
-                        />
-                      </div>
+                      <FyImage
+                        src={blog?.feature_image?.secure_url || fallback_image}
+                        alt={blog.title}
+                        isLazyLoaded={false}
+                        sources={[{ width: 80 }]}
+                        placeholder={fallback_image}
+                        aspectRatio="auto"
+                        customClass={`${styles.blogHorizontal__image}`}
+                      />
 
                       <div className={`${styles.blogHorizontal}`}>
                         {blog.title}
@@ -123,17 +121,15 @@ function BlogTabs({
                 <div role="listitem" key={blog?.id}>
                   <FDKLink to={`/blog/${blog.slug}`} title={blog.title}>
                     <div className={`${styles.blogHorizontal}`}>
-                      <div className={`${styles.blogHorizontal__image}`}>
-                        <FyImage
-                          src={
-                            blog?.feature_image?.secure_url || fallback_image
-                          }
-                          alt={blog.title}
-                          isLazyLoaded={false}
-                          sources={[{ width: 80 }]}
-                          placeholder={fallback_image}
-                        />
-                      </div>
+                      <FyImage
+                        src={blog?.feature_image?.secure_url || fallback_image}
+                        alt={blog.title}
+                        isLazyLoaded={false}
+                        sources={[{ width: 80 }]}
+                        placeholder={fallback_image}
+                        aspectRatio="auto"
+                        customClass={`${styles.blogHorizontal__image}`}
+                      />
 
                       <div className={`${styles.blogHorizontal}`}>
                         {blog.title}

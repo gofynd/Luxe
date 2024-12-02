@@ -4,6 +4,7 @@ import { FETCH_FOLLOWED_PRODUCTS } from "../../queries/wishlistQuery";
 import { useWishlist } from "../../helper/hooks/index";
 import EmptyState from "../../components/empty-state/empty-state";
 import { getProductImgAspectRatio } from "../../helper/utils";
+import placeholder from "../../assets/images/placeholder3x4.png";
 
 const useWishlistPage = ({ fpi }) => {
   const followedlList = useGlobalStore(fpi.getters.FOLLOWED_LIST);
@@ -82,7 +83,7 @@ const useWishlistPage = ({ fpi }) => {
   const EmptyStateComponent = () => (
     <EmptyState
       title="You do not have any product added to wishlist"
-      description="Add products to wishilst"
+      description="Add products to wishlist"
       btnTitle="CONTINUE SHOPPING"
     />
   );
@@ -91,8 +92,6 @@ const useWishlistPage = ({ fpi }) => {
   const handleWishistClick = ({ product }) => {
     removeFromWishlist(product, true).then(() => fetchProducts());
   };
-
-  // const getFollowIds = () => fpi.executeGQL(FOLLOWED_PRODUCTS_IDS);
 
   return {
     loading,
@@ -106,6 +105,7 @@ const useWishlistPage = ({ fpi }) => {
     isSaleBadge: globalConfig?.show_sale_badge,
     isPrice: globalConfig?.show_price,
     showImageOnHover: globalConfig?.show_image_on_hover,
+    imagePlaceholder: placeholder,
     isHdimgUsed: false,
     aspectRatio: getProductImgAspectRatio(globalConfig),
     isProductOpenInNewTab: false,

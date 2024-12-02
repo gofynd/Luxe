@@ -15,8 +15,10 @@
   .headerIcon {
     width: 24px;
     height: 24px;
+    g > path {
+      fill: @HeaderIcon;
+    }
     cursor: pointer;
-    fill: @HeaderIcon;
   }
   .desktop {
     @media @tablet {
@@ -73,10 +75,6 @@
     }
     &.single {
       .right__icons--bag {
-        .cart {
-          width: 18px;
-          height: 18px;
-        }
         & > .cart-count {
           width: 14px;
           height: 14px;

@@ -16,11 +16,13 @@ import {
   LOGOUT,
   FORGOT_PASSWORD,
 } from "../../queries/authQuery";
+import { useSnackbar } from "./hooks";
 // import { loginUserInFb } from '../../helper/facebook.utils';
 // import { renderButton } from '../../helper/google.utils';
 
 export const useAccounts = ({ fpi }) => {
   const navigate = useNavigate();
+  const { showSnackbar } = useSnackbar();
   const location = useLocation();
 
   const [facebookUser, setFacebookUser] = useState(null);
@@ -330,7 +332,17 @@ export const useAccounts = ({ fpi }) => {
     };
     return fpi.executeGQL(SEND_RESET_PASSWORD_EMAIL, payload).then((res) => {
       if (res?.errors) {
+        showSnackbar(
+          "Failed to send the reset link to your primary email address.",
+          "error"
+        );
         throw res?.errors?.[0];
+      }
+      if (res?.data?.sendResetPasswordEmail?.status === "success") {
+        showSnackbar(
+          "The reset link has been sent to your primary email address.",
+          "success"
+        );
       }
       return res?.data?.sendResetPasswordEmail;
     });

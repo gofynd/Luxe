@@ -345,13 +345,14 @@ export function Component({ props, globalConfig, blocks }) {
             </p>
           )}
 
-          {button_text?.value && button_link?.value?.length > 1 && (
+          {button_text?.value && (
             <FDKLink to={button_link?.value}>
               <button
                 type="button"
                 className={`${styles.cta_button} fontBody} ${
                   invert_button_color?.value ? "btnSecondary" : "btnPrimary"
                 }`}
+                disabled={!(button_link?.value?.length > 1)}
               >
                 {button_text?.value}
               </button>
@@ -617,7 +618,7 @@ export const settings = {
           text: "Bottom-Right",
         },
       ],
-      default: "top_left",
+      default: "center_left",
       label: "Text Placement (Desktop)",
     },
     {

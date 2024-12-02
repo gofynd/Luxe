@@ -52,7 +52,7 @@ const useCart = (fpi) => {
   const { addToWishList } = useWishlist({ fpi });
 
   useEffect(() => {
-    setCheckoutMode(cart_items?.checkoutMode ?? "");
+    setCheckoutMode(cart_items?.checkout_mode ?? "");
   }, [cart_items]);
 
   useEffect(() => {
@@ -65,7 +65,8 @@ const useCart = (fpi) => {
 
   const isAnonymous = appFeatures?.landing_page?.continue_as_guest;
   const isGstInput = appFeatures?.cart?.gst_input;
-  const isPlacingForCustomer = appFeatures?.cart?.placing_for_customer;
+  // disabling isPlacingForCustomer feature now as flow is not decided yet, please remove && false once need to be enabled.
+  const isPlacingForCustomer = appFeatures?.cart?.placing_for_customer && false;
 
   const cartItemsByItemId = useMemo(() => {
     if (items?.length > 0) {

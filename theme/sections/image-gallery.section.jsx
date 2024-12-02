@@ -36,15 +36,6 @@ export function Component({ props, blocks, globalConfig, preset }) {
     autoplay: false,
     autoplaySpeed: 3000,
     cssEase: "linear",
-    customPaging: (i) => {
-      return <button>{i + 1}</button>;
-    },
-    appendDots: (dots) => (
-      <ul>
-        {/* Show maximum 8 dots */}
-        {dots.slice(0, 8)}
-      </ul>
-    ),
     // arrows: getGallery.length > item_count?.value || false,
     nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
     prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
@@ -163,7 +154,9 @@ export function Component({ props, blocks, globalConfig, preset }) {
 
   function imagesForStackedView() {
     const itemCount = item_count?.value;
-
+    if (!isClient) {
+      return getGallery.slice(0, itemCount);
+    }
     if (!getGallery) return [];
 
     if (windowWidth <= 480) {
@@ -403,7 +396,7 @@ export const settings = {
       ],
       default: "horizontal",
       label: "Desktop Layout",
-      info: "Alignment of content",
+      info: "Items per row should be less than number of blocks to show horizontal scroll",
     },
     {
       type: "text",

@@ -121,6 +121,12 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
 
   const getBrandCount = () => {
     const perRowItem = per_row?.value;
+    if (!isRunningOnClient()) {
+      return brands?.slice(
+        0,
+        logoOnly?.value ? (perRowItem ?? 1 * 2) : perRowItem
+      );
+    }
     if (logoOnly?.value) {
       if (showScrollView()) {
         if (windowWidth >= 768 && windowWidth < 830)
@@ -150,25 +156,26 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
       : card?.data?.brand?.banners?.portrait?.url || getPlaceHolder();
   };
 
+  const SlickNextArrow = ({ currentSlide, slideCount, ...props }) => (
+    <SvgWrapper {...props} svgSrc="glideArrowRight" />
+  );
+
+  const SlickPrevArrow = ({ currentSlide, slideCount, ...props }) => (
+    <SvgWrapper {...props} svgSrc="glideArrowLeft" />
+  );
+
   const [slickSetting, setSlickSettings] = useState({
     dots: brands?.length > per_row?.value,
     arrows: brands?.length > per_row?.value,
-    nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
-    prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
+    nextArrow: <SlickNextArrow />,
+    prevArrow: <SlickPrevArrow />,
     focusOnSelect: true,
     infinite: true,
     speed: 600,
-    customPaging: (i) => {
-      return <button>{i + 1}</button>;
-    },
-    appendDots: (dots) => (
-      <ul>
-        {/* Show maximum 8 dots */}
-        {dots.slice(0, 8)}
-      </ul>
-    ),
-    slidesToShow: brands?.length < 4 ? brands?.length : 4,
-    slidesToScroll: brands?.length < 4 ? brands?.length : 4,
+    slidesToShow:
+      brands?.length < per_row?.value ? brands?.length : Number(per_row?.value),
+    slidesToScroll:
+      brands?.length < per_row?.value ? brands?.length : Number(per_row?.value),
     responsive: [
       {
         breakpoint: 780,
@@ -203,13 +210,6 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
   });
 
   useEffect(() => {
-    if (per_row?.value !== slickSetting.slidesToShow) {
-      setSlickSettings((prevConfig) => ({
-        ...prevConfig,
-        slidesToShow: per_row?.value,
-        slidesToScroll: per_row?.value,
-      }));
-    }
     if (slickSetting.arrows !== brands?.length > per_row?.value) {
       setSlickSettings((prevConfig) => ({
         ...prevConfig,
@@ -227,7 +227,7 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
         }
         return acc;
       }, []) || [];
-    return brands.length === 0;
+    return brands?.length === 0;
   };
 
   const dynamicStyles = {
@@ -324,12 +324,12 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
             ))}
           </div>
         )}
-        {showScrollView() && getBrandCount().length > 0 && (
+        {showScrollView() && getBrandCount()?.length > 0 && (
           <div
             className={`${styles["categories-horizontal"]} ${
               styles[`card-count-${per_row?.value}`]
             } ${logoOnly?.value ? "logoWidth" : ""} ${
-              getBrandCount().length === 1 ? styles["single-card"] : ""
+              getBrandCount()?.length === 1 ? styles["single-card"] : ""
             }`}
             style={{
               "--brand-item": per_row?.value,

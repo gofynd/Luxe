@@ -31,7 +31,7 @@ export const settings = JSON.stringify({
           text: "Pagination",
         },
       ],
-      default: "infinite",
+      default: "pagination",
       label: "Loading Options",
     },
     {

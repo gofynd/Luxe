@@ -5,6 +5,7 @@ import Loader from "../../components/loader/loader";
 import { PRODUCT_COMPARISON, SEARCH_PRODUCT } from "../../queries/compareQuery";
 import { useSnackbar } from "../../helper/hooks";
 import { debounce } from "../../helper/utils";
+import placeholder from "../../assets/images/placeholder3x4.png";
 
 const useCompare = (fpi) => {
   const THEME = useGlobalStore(fpi.getters.THEME);
@@ -170,6 +171,7 @@ const useCompare = (fpi) => {
       isWishlistIcon: false,
       isImageFill: globalConfig?.img_fill,
     },
+    imagePlaceholder: placeholder,
     loader: <Loader />,
     setShowSearch,
     handleAdd,

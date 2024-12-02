@@ -1,3 +1,4 @@
+@import "../../styles/main.less";
 .iconsContainer {
   display: flex;
   align-items: flex-start;
@@ -5,8 +6,11 @@
   gap: 8px;
   align-self: stretch;
   flex-wrap: wrap;
-  img {
-    width: 28px;
-    height: 28px;
+  svg g > path:first-of-type {
+    fill: @TextHeading;
+  }
+  svg > path:nth-of-type(2),
+  svg g > path:nth-of-type(2) {
+    stroke: @TextHeading;
   }
 }

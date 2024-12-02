@@ -1,5 +1,21 @@
 @import "../../styles/main.less";
 
+.loader {
+  position: relative;
+  height: 90vh;
+  width: 100%;
+
+  .loaderContainer {
+    position: absolute;
+    height: 100%;
+    background: transparent;
+
+    .customLoader {
+      margin-left: 0;
+    }
+  }
+}
+
 .imageWrapper {
   &:before {
     content: unset;
@@ -56,6 +72,12 @@
   }
 }
 .blogPost {
+  &__tag {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 15px;
+    text-transform: capitalize;
+  }
   &__header {
     margin-bottom: 20px;
   }
@@ -76,19 +98,18 @@
     }
   }
   &__meta {
-    flex-wrap: wrap;
-    gap: 2rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
     @media @mobile-up {
       margin-top: 24px;
-      gap: 2rem 0.5rem;
     }
-    @media @desktop {
-      gap: 1rem;
-    }
+
     @media @mobile {
-      & > * {
-        flex-basis: 100%;
-      }
+      flex-direction: column;
+      gap: 2rem;
+      align-items: unset;
     }
   }
   &__image {
@@ -101,6 +122,11 @@
   &__content {
     color: @TextBody;
     font-family: var(--fontBody);
+
+    p {
+      margin: 1em 0;
+    }
+
     ::v-deep {
       h1,
       h2,
@@ -138,16 +164,32 @@
     line-height: 15px;
     text-transform: capitalize;
   }
+
+  &__link {
+    display: flex;
+  }
 }
 .author,
 .publishDate {
   gap: 0.31rem;
+  &__label {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
 }
 .social {
   gap: 0.5rem;
   flex-wrap: wrap;
+  display: flex;
+  align-items: center;
   @media @desktop {
     gap: 0.75rem;
+  }
+  &__label {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
   }
   &__icon {
     border-radius: 100%;

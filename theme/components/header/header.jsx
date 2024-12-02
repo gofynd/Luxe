@@ -228,11 +228,7 @@ function Header({ fpi }) {
                 >
                   <SvgWrapper
                     className={`${styles.cart} ${styles.mobileIcon} ${styles.headerIcon}`}
-                    svgSrc={
-                      globalConfig?.header_layout === "double"
-                        ? "cart"
-                        : "single-row-cart"
-                    }
+                    svgSrc="single-row-cart"
                   />
                   <span
                     className={styles.cartCount}

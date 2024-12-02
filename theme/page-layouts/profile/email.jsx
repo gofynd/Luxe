@@ -4,7 +4,7 @@ import ProfileRoot from "../../components/profile/profile-root";
 import { useSnackbar } from "../../helper/hooks";
 import { useEmail } from "./useEmail";
 import EmailPage from "fdk-react-templates/pages/profile/email";
-import "fdk-react-templates/pages/profile/email.css";
+import "fdk-react-templates/pages/profile/email/email.css";
 
 function Email({ fpi }) {
   const { showSnackbar } = useSnackbar();

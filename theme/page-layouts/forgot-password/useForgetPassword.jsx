@@ -15,7 +15,10 @@ const useForgetPassword = ({ fpi }) => {
       })
       .catch((err) => {
         setIsFormSubmitSuccess(false);
-        setError({ message: err?.message || "Something went wrong" });
+        setError({
+          message:
+            err?.details?.error || err?.message || "Something went wrong",
+        });
       });
   };
 

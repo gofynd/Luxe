@@ -353,6 +353,21 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
     }
   }
   applicationContent {
+    seo_configuration {
+      id
+      cannonical_enabled
+      robots_txt
+      sitemap_enabled
+      additonal_sitemap
+    }
+    legal_information {
+      id
+      application
+      policy
+      returns
+      shipping
+      tnc
+    }
     support_information {
       id
       application

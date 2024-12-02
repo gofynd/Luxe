@@ -39,12 +39,14 @@ const useProductListing = ({ fpi }) => {
   const currentPage = productsListData?.page?.current ?? 1;
   const [apiLoading, setApiLoading] = useState(!isPlpSsrFetched);
   const [isPageLoading, setIsPageLoading] = useState(!isPlpSsrFetched);
-
-  const [columnCount, setColumnCount] = useState({
-    desktop: Number(pageConfig?.grid_desktop) || 2,
-    tablet: Number(pageConfig?.grid_tablet) || 3,
-    mobile: Number(pageConfig?.grid_mob) || 1,
-  });
+  const { user_plp_columns } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE) ?? {};
+  const [columnCount, setColumnCount] = useState(
+    user_plp_columns ?? {
+      desktop: Number(pageConfig?.grid_desktop) || 2,
+      tablet: Number(pageConfig?.grid_tablet) || 3,
+      mobile: Number(pageConfig?.grid_mob) || 1,
+    }
+  );
   const [isResetFilterDisable, setIsResetFilterDisable] = useState(false);
 
   const breadcrumb = useMemo(
@@ -241,20 +243,15 @@ const useProductListing = ({ fpi }) => {
   }, [productsListData?.page]);
 
   useEffect(() => {
-    const savedColumnCount = localStorage?.getItem("user_plp_columns");
-    if (savedColumnCount) {
-      setColumnCount(JSON?.parse(savedColumnCount));
+    if (user_plp_columns) {
+      setColumnCount(user_plp_columns);
     }
-  }, []);
+  }, [user_plp_columns]);
 
   const handleColumnCountUpdate = ({ screen, count }) => {
-    setColumnCount((prev) => {
-      const updatedColumnCount = { ...prev, [screen]: count };
-      localStorage?.setItem?.(
-        "user_plp_columns",
-        JSON?.stringify(updatedColumnCount)
-      );
-      return updatedColumnCount;
+    fpi.custom.setValue("user_plp_columns", {
+      ...columnCount,
+      [screen]: count,
     });
   };
 

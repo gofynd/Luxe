@@ -13,33 +13,48 @@ const useCategories = (fpi) => {
 
   const [departmentCategories, setDepartmentCategories] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [isLoading, setIsloading] = useState(false);
 
   function fetchAllCategories() {
-    fpi.executeGQL(CATEGORIES_LISTING).then((res) => {
+    setIsloading(true);
+    try {
+      fpi.executeGQL(CATEGORIES_LISTING).then((res) => {
+        if (res?.data?.categories?.data?.length > 0) {
+          const data = res?.data?.categories?.data;
+          const categoriesList = data
+            .flatMap((item) => item?.items?.map((m) => m.childs))
+            .flat()
+            .flatMap((i) => i?.childs);
+          setCategories(categoriesList);
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsloading(false);
+    }
+  }
+
+  const getCategoriesByDepartment = async (department) => {
+    setIsloading(true);
+    try {
+      const res = await fpi.executeGQL(CATEGORIES_LISTING, { department });
+
       if (res?.data?.categories?.data?.length > 0) {
         const data = res?.data?.categories?.data;
         const categoriesList = data
           .flatMap((item) => item?.items?.map((m) => m.childs))
           .flat()
           .flatMap((i) => i?.childs);
-        setCategories(categoriesList);
+
+        return categoriesList;
       }
-    });
-  }
-
-  const getCategoriesByDepartment = async (department) => {
-    const res = await fpi.executeGQL(CATEGORIES_LISTING, { department });
-
-    if (res?.data?.categories?.data?.length > 0) {
-      const data = res?.data?.categories?.data;
-      const categoriesList = data
-        .flatMap((item) => item?.items?.map((m) => m.childs))
-        .flat()
-        .flatMap((i) => i?.childs);
-
-      return categoriesList;
+      return [];
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsloading(false);
     }
-    return [];
   };
 
   return {
@@ -50,6 +65,7 @@ const useCategories = (fpi) => {
     setDepartmentCategories,
     fetchAllCategories,
     getCategoriesByDepartment,
+    isLoading,
   };
 };
 

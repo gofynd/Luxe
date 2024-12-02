@@ -113,6 +113,7 @@ import notFound from "../assets/images/not-found.svg";
 import timer from "../assets/images/timer.svg";
 import contactEmail from "../assets/images/at-the-rate.svg";
 import location from "../assets/images/location.svg";
+import callSupport from "../assets/images/call-support.svg";
 
 /* eslint-disable  import/prefer-default-export */
 export const svgTitleComponentsMappings = {
@@ -231,4 +232,5 @@ export const svgTitleComponentsMappings = {
   timer,
   contactEmail,
   location,
+  callSupport,
 };

@@ -1,5 +1,28 @@
 @import "../styles/main.less";
 
+.loader {
+  position: relative;
+  height: 90vh;
+  width: 100%;
+
+  .loaderContainer {
+    position: absolute;
+    height: 100%;
+    background: transparent;
+
+    .customLoader {
+      margin-left: 0;
+    }
+  }
+}
+
+.paginationWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 24px;
+}
+
 .imageWrapper {
   &:before {
     content: unset;
@@ -64,9 +87,9 @@
     @media @desktop {
       grid-template-columns: 0.85fr 0.4fr;
     }
-    &--full {
+    &Full {
       grid-template-columns: 1fr;
-      .blog-container__grid {
+      .blogContainer__grid {
         grid-template-columns: repeat(4, 1fr);
         @media @tablet {
           grid-template-columns: repeat(3, 1fr);
@@ -117,6 +140,11 @@
     cursor: auto;
     user-select: auto;
     display: flex;
+    --gap: 24px;
+    margin-right: 0 calc(var(--gap) / 2);
+    @media @tablet {
+      --gap: 16px;
+    }
     @media @desktop {
       flex-direction: row;
       justify-content: space-between;
@@ -127,6 +155,8 @@
     }
     @media @mobile {
       align-items: stretch;
+      --gap: 12px;
+      margin-right: var(--p-right-mob, 12px);
     }
     &__info {
       padding: 0 1rem 1rem;
@@ -138,6 +168,7 @@
     &__meta {
       margin-bottom: 8px;
       @media @mobile {
+        display: flex;
         justify-content: space-between;
       }
       .divider {
@@ -159,6 +190,7 @@
     &__image {
       width: 100%;
       height: 200px;
+
       @media @mobile-up {
         width: 100%;
         height: 300px;
@@ -335,20 +367,17 @@
       color: @ButtonSecondary;
     }
   }
+  &__highlight {
+    background-color: @ButtonPrimary;
+    color: @ButtonSecondary;
+  }
   &__image {
     height: 180px;
-    background-position: 50%;
-    background-repeat: no-repeat;
-    background-size: 70%;
+    transition: 300ms transform ease;
     overflow: hidden;
-    ::v-deep {
-      picture {
-        background-color: transparent;
-      }
-      img {
-        transition: 300ms transform ease;
-      }
+
+    &:hover {
+      transform: scale(1.1);
     }
-    // transition: trans;
   }
 }

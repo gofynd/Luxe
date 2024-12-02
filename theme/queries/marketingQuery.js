@@ -1,7 +1,5 @@
 export const GET_PAGE = `query Page($slug: String!) {
   customPage: page(slug: $slug) {
-    custom_json
-    id
     schedule {
       cron
       duration
@@ -23,7 +21,6 @@ export const GET_PAGE = `query Page($slug: String!) {
     description
     feature_image {
       aspect_ratio
-      _id
       secure_url
     }
     orientation

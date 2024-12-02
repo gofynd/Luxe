@@ -2,9 +2,21 @@
 
 .featured_product_container {
   position: relative;
+  padding-top: 16px;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  @media @tablet {
+    padding-left: 1.5rem;
+    padding-right: 0.75rem;
+    margin-right: 1.5rem;
+  }
+  @media @mobile {
+    padding-left: 16px;
+    padding-right: 16px;
+    margin-right: 0;
+  }
 }
 .featured-products-header {
-  margin-top: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -123,16 +135,8 @@
 }
 
 .mainContainer {
-  padding: 1rem 2.5rem 0;
   color: @TextBody;
-  margin-bottom: 3rem;
-  @media @mobile {
-    padding: 1rem 1.75rem;
-  }
 
-  @media @tablet {
-    padding: 2rem 1.5rem;
-  }
   .productDescContainer {
     display: flex;
     justify-content: space-between;
@@ -447,7 +451,7 @@
       box-shadow:
         0px 4px 4px rgba(0, 0, 0, 0.15),
         0px 12px 16px rgba(0, 0, 0, 0.16);
-      border-radius: 8px;
+      border-radius: @ButtonRadius;
       padding: 0.5rem;
       z-index: 1;
 
