@@ -1,33 +1,199 @@
-# Luxe
+# FDK React Theme
 
-[Getting started](#getting-started) |
-[Developer tools](#developer-tools) |
-[Theme Marketplace submission](#theme-marketplace-submission) |
+## Overview
 
+FDK React Theme is a React Theme designed specifically for Fynd Commerce. It includes a collection of reusable components, tools, and utilities to streamline the development process. Its is built with Webpack to handle JavaScript, TypeScript, CSS, and other assets, making it efficient and easy to maintain.
 
-Luxe represents a HTML-first, JavaScript-only-as-needed approach to theme development. It's Fynd Platform's first source available theme with performance, flexibility, and [Fynd Platform features](https://platform.fynd.com/help/docs/introduction/what-is-fp) built-in and acts as a reference for building Fynd Platform themes.
+## Features
 
-* **Web-native in its purest form:** Themes run on the [evergreen web](https://www.w3.org/2001/tag/doc/evergreen-web/). We leverage the latest web browsers to their fullest, while maintaining support for the older ones through progressive enhancement—not polyfills.
-* **Lean, fast, and reliable:** Functionality and design defaults to “no” until it meets this requirement. Code ships on quality. Themes must be built with purpose. They shouldn’t support each and every feature in Fynd Platform.
-* **Server-rendered:** HTML must be rendered by Fynd Platform servers using React. Business logic and platform primitives such as translations and money formatting don’t belong on the client. Async and on-demand rendering of parts of the page is OK, but we do it sparingly as a progressive enhancement.
-* **SPA (Single Page Application):** The architecture should follow SPA principles, ensuring smooth transitions between views without full page reloads. This enhances user experience by making the application feel faster and more responsive.
-* **Functional, not pixel-perfect:** The Web doesn’t require each page to be rendered pixel-perfect by each browser engine. Using semantic markup, progressive enhancement, and clever design, we ensure that themes remain functional regardless of the browser.
+- **Dynamic Entry Points:** Automatically includes all `.jsx` files from the `src` directory.
+- **Support for CSS and Less:** Handles both CSS modules and global CSS, as well as Less files.
+- **Comprehensive Asset Management:** Supports various asset types including fonts and SVGs.
+- **Powerful Plugins:** Utilizes `MiniCssExtractPlugin` for efficient build processes.
+- **Advanced Optimization:** Configured with `CssMinimizerPlugin` for CSS minification and faster load times in production.
 
-## Getting started
-We recommend using Fynd Platform as a starting point for theme development. [Learn more on partners.fynd.com](https://partners.fynd.com/help/docs/partners/themes/vuejs/getting-started).
+## Installation
 
-> If you're building a theme for the Fynd Theme Marketplace, then you can use Luxe as a starting point. However, the theme that you submit needs to be [substantively different from Luxe]https://partners.fynd.com/help/docs/partners/themes/vuejs/theme-mp) so that it provides added value for merchants.
+### Prerequisites
 
-## Developer tools
+- Node.js (v18 or later recommended)
+- npm (v8 or later)
+- fdk-cli
+- All the packages in themes node modules
 
-### FDK CLI
+### Installation Steps For development
 
-[FDK CLI](https://github.com/gofynd/fdk-cli) helps you build Fynd Platform themes and is used to enhance your local development workflow. It comes bundled with a suite of commands for developing Fynd Platform themes - everything from working with themes on [Fynd Themes](https://themes.fynd.com) (e.g. creating new theme, initializing exisiting theme, publishing new theme, switching between themes) or launching a development server for local theme development.
+1. Clone the repository:
 
-You can follow this [quick start guide for theme developers](https://partners.fynd.com/help/docs/partners/themes/vuejs/fdk-cli) to get started.
+   ```bash
+   git clone https://GoFynd@dev.azure.com/GoFynd/PlatformThemes/_git/react-starter
+   cd react-starter
+   ```
 
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-## Theme Marketplace submission
+### Development
 
-The [Fynd Theme Marketplace](https://themes.fynd.com) is the place where Fynd Platform merchants find the themes that they'll use to showcase and support their business. As a theme partner, you can create themes for the Fynd Platform Theme Store and reach an international audience of an ever-growing number of entrepreneurs.
->>>>>>> development
+For development, use:
+To test locally package in your local system
+
+1. Login to the Fynd Platform and select the desired company on which the theme is published
+
+```bash
+    fdk login
+```
+
+2. Serve the theme locally
+
+```bash
+    fdk theme serve
+```
+
+## Project Structure
+
+- **theme/**: Source files including JavaScript/TypeScript, CSS, Less, and assets.
+- **webpack.config.js**: Webpack configuration file.
+
+## Webpack Configuration
+
+### Entry Points
+
+The entry points are dynamically generated by including all `.jsx` files from the `src` directory:
+
+```javascript
+entry: () => {
+    const entryFiles = glob.sync('./src/**/*.jsx');
+    const entry = {};
+    entryFiles.forEach(file => {
+        entry[file.replace('src', '')] = file;
+    });
+    return entry;
+},
+```
+
+### Output
+
+This specifies that the entry point for the Webpack build process is the `index.jsx` file located in the theme directory.:
+
+```javascript
+entry: {
+  themeBundle: [path.resolve(context, "theme/index.jsx")],
+}
+```
+
+### Plugins
+
+The configuration includes several plugins to enhance the build process:
+
+- `MiniCssExtractPlugin`:Extracts CSS into separate files, allowing for parallel loading of CSS and JavaScript.
+- `NodeJSPolyfill`: Adds polyfills for Node.js features to ensure compatibility in the browser environment.
+- `Overlay`: Provides a development overlay for React hydration, useful for debugging during development.
+
+### Loaders
+
+Various loaders are configured to handle different types of files:
+
+- `babel-loader`: Transpiles JavaScript and TypeScript files using Babel presets.
+- `css-loader`: Handles CSS files with support for CSS modules.
+- `MiniCssExtractPlugin.loader`: Extracts CSS into separate files, enabling CSS to be loaded in parallel with JavaScript.
+- `less-loader`: Compiles Less files, with support for both modules and global styles.
+- `@svgr/webpack`: Processes SVG files to be used as React components.
+- `asset/resource`: Manages font files and other static assets.
+
+### Optimization
+
+The project uses `CssMinimizerPlugin to minimize CSS files, reducing their size for faster load times in production:
+
+```javascript
+  optimization: {
+      minimizer: [`...`, new CssMinimizerPlugin()],
+    },
+```
+
+## Global Configuration
+
+The following table provides a detailed overview of all **Global Configurations** available for this component. These configurations allow for customization of typography, header, footer, product cards, and other storefront design elements. The settings are grouped into categories for easy reference and can be modified via the Fynd Platform.
+
+| **Configuration**       | **Type**       | **Default Value**    | **Category**                | **Description**                                                                                                                         |
+| ----------------------- | -------------- | -------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `font_header`           | `font`         | `false`              | Typography                  | Defines the font styling for header elements across the site.                                                                           |
+| `font_body`             | `font`         | `false`              | Typography                  | Defines the font styling for body text content.                                                                                         |
+| `header_layout`         | `select`       | `"single"`           | Header                      | Configures the layout of the header. Options include: **Single Row Navigation** and **Double Row Navigation**.                          |
+| `logo_menu_alignment`   | `select`       | `"layout_1"`         | Header                      | Determines the alignment of the logo and menu on desktop. Options include: logo left/menu center, menu left, or menu right.             |
+| `header_mega_menu`      | `checkbox`     | `false`              | Header                      | Enables the mega menu layout for navigation. This option is applicable only when the header layout is set to **Double Row Navigation**. |
+| `extension`             | `extension`    | `{}`                 | Header                      | Allows you to add and manage extensions in specific positions within the header, such as before or after header icons.                  |
+| `is_hyperlocal`         | `checkbox`     | `false`              | Header                      | Activates hyperlocal functionality to personalize content based on the user's location.                                                 |
+| `is_delivery_minutes`   | `checkbox`     | `false`              | Header                      | Displays the delivery promise in terms of minutes on applicable pages.                                                                  |
+| `max_delivery_min`      | `text`         | `"60"`               | Header                      | Specifies the threshold value (in minutes) for displaying the delivery promise.                                                         |
+| `is_delivery_hours`     | `checkbox`     | `false`              | Header                      | Displays the delivery promise in terms of hours on applicable pages.                                                                    |
+| `max_delivery_hours`    | `text`         | `"2"`                | Header                      | Specifies the threshold value (in hours) for displaying the delivery promise.                                                           |
+| `is_delivery_day`       | `checkbox`     | `false`              | Header                      | Shows delivery promise as a simple **Today/Tomorrow** format.                                                                           |
+| `is_delivery_date`      | `checkbox`     | `false`              | Header                      | Displays delivery promise as a date range. Useful for deliveries expected over multiple days.                                           |
+| `logo`                  | `image_picker` | `""`                 | Footer                      | Allows uploading a custom logo for display in the footer.                                                                               |
+| `footer_description`    | `text`         | `""`                 | Footer                      | Adds a text description in the footer area, typically used for branding or additional information.                                      |
+| `payments_logo`         | `image_picker` | `""`                 | Footer                      | Allows adding an image in the footer to showcase payment options or any relevant footer image.                                          |
+| `footer_image`          | `checkbox`     | `false`              | Footer                      | Enables an image to be displayed within the footer section.                                                                             |
+| `footer_image_desktop`  | `image_picker` | `""`                 | Footer                      | Specifies an image to display in the footer for desktop devices.                                                                        |
+| `footer_image_mobile`   | `image_picker` | `""`                 | Footer                      | Specifies an image to display in the footer for mobile and tablet devices.                                                              |
+| `disable_cart`          | `checkbox`     | `false`              | Cart & Button Configuration | Disables the shopping cart and checkout functionality across the site.                                                                  |
+| `show_price`            | `checkbox`     | `true`               | Cart & Button Configuration | Toggles the visibility of product prices on Product Cards, Product Details Pages (PDP), and Featured Product sections.                  |
+| `button_options`        | `select`       | `"addtocart_buynow"` | Cart & Button Configuration | Configures the available options for product action buttons. Options include combinations of Add to Cart, Buy Now, or custom buttons.   |
+| `custom_button_text`    | `text`         | `"Enquire now"`      | Cart & Button Configuration | Specifies the text to display on a custom button for specific product actions.                                                          |
+| `custom_button_link`    | `url`          | `""`                 | Cart & Button Configuration | Adds a URL that the custom button will redirect to when clicked.                                                                        |
+| `custom_button_icon`    | `image_picker` | `""`                 | Cart & Button Configuration | Allows uploading an icon for the custom button, applicable to Product Details Pages (PDP) and Featured Product sections.                |
+| `product_img_width`     | `text`         | `""`                 | Product Card Configuration  | Configures the width of product card images. Applicable to product listing, detail, and featured sections.                              |
+| `product_img_height`    | `text`         | `""`                 | Product Card Configuration  | Configures the height of product card images, maintaining their aspect ratio.                                                           |
+| `show_sale_badge`       | `checkbox`     | `true`               | Product Card Configuration  | Displays a **Sale** badge on discounted products.                                                                                       |
+| `image_border_radius`   | `range`        | `24`                 | Product Card Configuration  | Sets the corner radius for product images, enhancing the visual style.                                                                  |
+| `img_fill`              | `checkbox`     | `false`              | Product Card Configuration  | Ensures the image fully fits its container by clipping parts of the image if necessary.                                                 |
+| `img_container_bg`      | `color`        | `""`                 | Product Card Configuration  | Specifies the background color of image containers for products, collections, and categories.                                           |
+| `show_image_on_hover`   | `checkbox`     | `false`              | Product Card Configuration  | Displays an additional image of the product when hovering over the product card.                                                        |
+| `img_hd`                | `checkbox`     | `false`              | Other Page Configuration    | Enhances image quality by upscaling, which may affect page performance. Applicable on the homepage.                                     |
+| `section_margin_bottom` | `range`        | `16`                 | Other Page Configuration    | Sets the bottom margin for page sections, useful for spacing adjustments.                                                               |
+| `button_border_radius`  | `range`        | `4`                  | Other Page Configuration    | Defines the corner radius for buttons, improving their visual style and user experience.                                                |
+
+### Steps to Modify Global Configuration via Fynd Platform
+
+1. **Log in to the Fynd Platform:**
+
+   - Go to [Fynd Platform](https://platform.fynd.com) and log in with your credentials.
+
+2. **Navigate to Your Company:**
+
+   - Once logged in, select your compay from the list.
+
+3. **Select the Theme**
+
+   - In the sidebar, under **Sales Channel**, select your sales channel.
+   - Then, under **Appearance**, click on **Themes**.
+   - In the current theme, click on **Edit**. Here, you can preview and configure the theme.  
+     Here's a sample [theme](https://platform.fynd.com/company/5178/application/668765e1c984016d78222a21/themes/668768e7e21c099a562b5d56/edit).
+
+4. **Locate Global Configuration Section:**
+
+   - Within the Theme, find the **Settings** section under **Configuration**. This is where the configurations described are accessible.
+
+5. **Modify Configurations:**
+
+   - Select and update the configurations based on your requirements, such as:
+     - Fonts under **Typography**.
+     - Header layouts under **Header**.
+     - Button styles under **Cart & Button Configuration**.
+
+6. **Preview Changes:**
+
+   - Preview the updates made to the page in real time to ensure they look and function as expected.
+
+7. **Save and Publish:**
+
+   - After confirming your changes, click on **Save**. This will publish the updated configurations.
+
+8. **Test Your Storefront:**
+   - Visit your store's live URL to confirm the updates are functioning as expected.
+
+---
+
+This README provides a detailed overview of the FDK React Theme, including installation, usage, and configuration details. Ensure to update any placeholders with actual information specific to your project.
