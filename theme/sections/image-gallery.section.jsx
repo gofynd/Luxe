@@ -198,7 +198,8 @@ export function Component({ props, blocks, globalConfig, preset }) {
   function showScrollView() {
     if (windowWidth <= 768 && getGallery?.length > 1) {
       return mobile_layout?.value === "horizontal";
-    } else if (item_count?.value < getGallery?.length) {
+    }
+    if (item_count?.value < getGallery?.length) {
       return desktop_layout?.value === "horizontal";
     }
   }
@@ -249,85 +250,83 @@ export function Component({ props, blocks, globalConfig, preset }) {
           </div>
         </noscript>
         {isClient && (
-          <>
-            <IntersectionObserverComponent>
-              {showScrollView() && (
-                <div
-                  className={`${imagesForScrollView().length < 3 && styles["single-card-view"]}  ${styles.slideWrap}`}
-                  style={{
-                    "--slick-dots": `${Math.ceil(imagesForScrollView()?.length / item_count?.value) * 22 + 10}px`,
-                  }}
+          <IntersectionObserverComponent>
+            {showScrollView() && (
+              <div
+                className={`${imagesForScrollView().length < 3 && styles["single-card-view"]}  ${styles.slideWrap}`}
+                style={{
+                  "--slick-dots": `${Math.ceil(imagesForScrollView()?.length / item_count?.value) * 22 + 10}px`,
+                }}
+              >
+                <Slider
+                  {...config}
+                  className={`
+                    ${
+                      imagesForScrollView()?.length / item_count?.value === 0 ||
+                      imagesForScrollView()?.length < item_count?.value
+                        ? "no-nav"
+                        : ""
+                    } ${styles.customSlider}`}
                 >
-                  <Slider
-                    {...config}
-                    className={`
-                      ${
-                        imagesForScrollView()?.length / item_count?.value ===
-                          0 || imagesForScrollView()?.length < item_count?.value
-                          ? "no-nav"
-                          : ""
-                      } ${styles.customSlider}`}
-                  >
-                    {imagesForScrollView()?.map(({ props: block }, index) => (
-                      <div key={index} className={styles.sliderView}>
-                        {block?.link?.value?.length > 0 ? (
-                          <FDKLink to={block?.link?.value}>
-                            {getDesktopImage(block).length > 0 && (
-                              <div className={styles.imgBlock}>
-                                <FyImage
-                                  customClass={styles.imageGallery}
-                                  src={getDesktopImage(block, index)}
-                                  sources={getImgSrcSet()}
-                                  globalConfig={globalConfig}
-                                />
-                              </div>
-                            )}
-                          </FDKLink>
-                        ) : (
-                          <div className={styles.imgBlock}>
-                            <FyImage
-                              customClass={styles.imageGallery}
-                              src={getDesktopImage(block, index)}
-                              sources={getImgSrcSet()}
-                              globalConfig={globalConfig}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </Slider>
-                </div>
-              )}
-              {showStackedView() && (
-                <div
-                  className={`${styles.imageGrid}  ${
-                    item_count?.value > getGallery?.length && styles.singleItem
-                  }`}
-                  style={{
-                    "--per_row": item_count?.value,
-                    "--brand-item": getWidthByCount() || 1,
-                  }}
-                >
-                  {imagesForStackedView().map(({ props: block }, index) => (
-                    <div key={index}>
-                      <FDKLink to={block?.link?.value}>
-                        {getDesktopImage(block).length > 0 && (
-                          <div className={styles.imgBlock}>
-                            <FyImage
-                              customClass={styles.imageGallery}
-                              src={getDesktopImage(block)}
-                              sources={getImgSrcSet()}
-                              globalConfig={globalConfig}
-                            />
-                          </div>
-                        )}
-                      </FDKLink>
+                  {imagesForScrollView()?.map(({ props: block }, index) => (
+                    <div key={index} className={styles.sliderView}>
+                      {block?.link?.value?.length > 0 ? (
+                        <FDKLink to={block?.link?.value}>
+                          {getDesktopImage(block).length > 0 && (
+                            <div className={styles.imgBlock}>
+                              <FyImage
+                                customClass={styles.imageGallery}
+                                src={getDesktopImage(block, index)}
+                                sources={getImgSrcSet()}
+                                globalConfig={globalConfig}
+                              />
+                            </div>
+                          )}
+                        </FDKLink>
+                      ) : (
+                        <div className={styles.imgBlock}>
+                          <FyImage
+                            customClass={styles.imageGallery}
+                            src={getDesktopImage(block, index)}
+                            sources={getImgSrcSet()}
+                            globalConfig={globalConfig}
+                          />
+                        </div>
+                      )}
                     </div>
                   ))}
-                </div>
-              )}
-            </IntersectionObserverComponent>
-          </>
+                </Slider>
+              </div>
+            )}
+            {showStackedView() && (
+              <div
+                className={`${styles.imageGrid}  ${
+                  item_count?.value > getGallery?.length && styles.singleItem
+                }`}
+                style={{
+                  "--per_row": item_count?.value,
+                  "--brand-item": getWidthByCount() || 1,
+                }}
+              >
+                {imagesForStackedView().map(({ props: block }, index) => (
+                  <div key={index}>
+                    <FDKLink to={block?.link?.value}>
+                      {getDesktopImage(block).length > 0 && (
+                        <div className={styles.imgBlock}>
+                          <FyImage
+                            customClass={styles.imageGallery}
+                            src={getDesktopImage(block)}
+                            sources={getImgSrcSet()}
+                            globalConfig={globalConfig}
+                          />
+                        </div>
+                      )}
+                    </FDKLink>
+                  </div>
+                ))}
+              </div>
+            )}
+          </IntersectionObserverComponent>
         )}
       </div>
     </div>

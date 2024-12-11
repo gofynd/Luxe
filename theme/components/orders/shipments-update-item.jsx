@@ -65,6 +65,7 @@ function ShipmentUpdateItem({ selectedBagId, item }) {
   //   }));
 
   return (
+    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {item?.bag_ids?.includes(selectedBagId) && (
         <div className={`${styles.updateItem}`}>

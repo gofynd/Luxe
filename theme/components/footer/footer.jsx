@@ -53,145 +53,143 @@ function Footer({ fpi }) {
 
   return (
     <footer className={`${styles.footer} fontBody`} style={getArtWork()}>
-      <>
-        <div className={styles.footer__top}>
-          <div className={styles.footerContainer}>
-            <div className={`${styles["footer__top--wrapper"]}`}>
-              <div className={styles["footer__top--info"]}>
-                <IntersectionObserverComponent>
-                  {getLogo?.length > 0 && (
-                    <div className={styles.logo}>
-                      <img
-                        src={getLogo}
-                        loading="lazy"
-                        alt="Footer Logo"
-                        fetchpriority="low"
-                      />
-                    </div>
-                  )}
-                </IntersectionObserverComponent>
-                <p
-                  className={`${styles.description} ${styles.b1} ${styles.fontBody}`}
-                >
-                  {globalConfig?.footer_description}
-                </p>
-              </div>
-              <div className={`${styles["footer__top--menu"]}`}>
-                {FooterNavigation?.slice(0, 3)?.map((item, index) => (
-                  <div className={styles.linkBlock} key={index}>
-                    <h5 className={`${styles.menuTitle} ${styles.fontBody}`}>
-                      {convertActionToUrl(item?.action)?.length > 0 ? (
-                        <FDKLink to={convertActionToUrl(item?.action)}>
-                          {item.display}
-                        </FDKLink>
-                      ) : (
-                        <p>{item.display}</p>
-                      )}
-                    </h5>
-                    <ul className={styles.list}>
-                      {item?.sub_navigation?.map((subItem, subIndex) =>
-                        subItem?.active ? (
-                          <li
-                            className={`${styles.menuItem} ${styles.b1} ${styles.fontBody}`}
-                            key={subIndex}
-                          >
-                            {convertActionToUrl(subItem?.action).length > 0 ? (
-                              <FDKLink to={convertActionToUrl(subItem?.action)}>
-                                {subItem.display}
-                              </FDKLink>
-                            ) : (
-                              <p>{subItem.display}</p>
-                            )}
-                          </li>
-                        ) : null
-                      )}
-                    </ul>
+      <div className={styles.footer__top}>
+        <div className={styles.footerContainer}>
+          <div className={`${styles["footer__top--wrapper"]}`}>
+            <div className={styles["footer__top--info"]}>
+              <IntersectionObserverComponent>
+                {getLogo?.length > 0 && (
+                  <div className={styles.logo}>
+                    <img
+                      src={getLogo}
+                      loading="lazy"
+                      alt="Footer Logo"
+                      fetchPriority="low"
+                    />
                   </div>
-                ))}
-                {FooterNavigation?.length === 1 && (
-                  <div className={styles.lineBlock} />
                 )}
-                {FooterNavigation?.length === 2 && (
-                  <div className={styles.lineBlock} />
-                )}
-              </div>
+              </IntersectionObserverComponent>
+              <p
+                className={`${styles.description} ${styles.b1} ${styles.fontBody}`}
+              >
+                {globalConfig?.footer_description}
+              </p>
             </div>
-            {hasOne() && (
-              <div className={`${styles["footer__top--contactInfo"]}`}>
-                {phoneActive && phoneArray?.[0]?.number && (
-                  <div className={styles.list}>
-                    <h5
-                      className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
-                    >
-                      Contact Us
-                    </h5>
-                    <a
-                      href={`tel:${phoneArray?.[0]?.number}`}
-                      className={`${styles.detail} ${styles.b1} ${styles.fontBody}`}
-                    >
-                      {`${
-                        phoneArray?.[0]?.code
-                          ? `+ ${phoneArray?.[0]?.code} -`
-                          : ""
-                      } ${phoneArray?.[0]?.number}`}
-                    </a>
-                  </div>
-                )}
-                {emailActive && emailArray?.[0]?.value && (
-                  <div className={styles.list}>
-                    <h5
-                      className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
-                    >
-                      Email ID
-                    </h5>
-                    <a
-                      href={`mailto:${emailArray?.[0]?.value}`}
-                      className={`${styles.detail} ${styles.b1} ${styles.fontBody}`}
-                    >
-                      {emailArray?.[0]?.value}
-                    </a>
-                  </div>
-                )}
-                <div className={styles.list}>
-                  {isSocialLinks && (
-                    <>
-                      <h5
-                        className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
-                      >
-                        Social Media
-                      </h5>
-                      <span>
-                        <SocailMedia social_links={contactInfo?.social_links} />
-                      </span>
-                    </>
-                  )}
+            <div className={`${styles["footer__top--menu"]}`}>
+              {FooterNavigation?.slice(0, 3)?.map((item, index) => (
+                <div className={styles.linkBlock} key={index}>
+                  <h5 className={`${styles.menuTitle} ${styles.fontBody}`}>
+                    {convertActionToUrl(item?.action)?.length > 0 ? (
+                      <FDKLink to={convertActionToUrl(item?.action)}>
+                        {item.display}
+                      </FDKLink>
+                    ) : (
+                      <p>{item.display}</p>
+                    )}
+                  </h5>
+                  <ul className={styles.list}>
+                    {item?.sub_navigation?.map((subItem, subIndex) =>
+                      subItem?.active ? (
+                        <li
+                          className={`${styles.menuItem} ${styles.b1} ${styles.fontBody}`}
+                          key={subIndex}
+                        >
+                          {convertActionToUrl(subItem?.action).length > 0 ? (
+                            <FDKLink to={convertActionToUrl(subItem?.action)}>
+                              {subItem.display}
+                            </FDKLink>
+                          ) : (
+                            <p>{subItem.display}</p>
+                          )}
+                        </li>
+                      ) : null
+                    )}
+                  </ul>
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className={styles.footer__bottom}>
-          <div className={styles.footerContainer}>
-            <div
-              className={`${styles.copyright} ${styles.b1} ${styles.fontBody}`}
-            >
-              {contactInfo?.copyright_text}
+              ))}
+              {FooterNavigation?.length === 1 && (
+                <div className={styles.lineBlock} />
+              )}
+              {FooterNavigation?.length === 2 && (
+                <div className={styles.lineBlock} />
+              )}
             </div>
-            <IntersectionObserverComponent>
-              {globalConfig?.payments_logo && (
-                <div className={styles.paymentLogo}>
-                  <img
-                    src={globalConfig?.payments_logo}
-                    alt="Payment Logo"
-                    loading="lazy"
-                    fetchpriority="low"
-                  />
+          </div>
+          {hasOne() && (
+            <div className={`${styles["footer__top--contactInfo"]}`}>
+              {phoneActive && phoneArray?.[0]?.number && (
+                <div className={styles.list}>
+                  <h5
+                    className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
+                  >
+                    Contact Us
+                  </h5>
+                  <a
+                    href={`tel:${phoneArray?.[0]?.number}`}
+                    className={`${styles.detail} ${styles.b1} ${styles.fontBody}`}
+                  >
+                    {`${
+                      phoneArray?.[0]?.code
+                        ? `+ ${phoneArray?.[0]?.code} -`
+                        : ""
+                    } ${phoneArray?.[0]?.number}`}
+                  </a>
                 </div>
               )}
-            </IntersectionObserverComponent>
-          </div>
+              {emailActive && emailArray?.[0]?.value && (
+                <div className={styles.list}>
+                  <h5
+                    className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
+                  >
+                    Email ID
+                  </h5>
+                  <a
+                    href={`mailto:${emailArray?.[0]?.value}`}
+                    className={`${styles.detail} ${styles.b1} ${styles.fontBody}`}
+                  >
+                    {emailArray?.[0]?.value}
+                  </a>
+                </div>
+              )}
+              <div className={styles.list}>
+                {isSocialLinks && (
+                  <>
+                    <h5
+                      className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
+                    >
+                      Social Media
+                    </h5>
+                    <span>
+                      <SocailMedia social_links={contactInfo?.social_links} />
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-      </>
+      </div>
+      <div className={styles.footer__bottom}>
+        <div className={styles.footerContainer}>
+          <div
+            className={`${styles.copyright} ${styles.b1} ${styles.fontBody}`}
+          >
+            {contactInfo?.copyright_text}
+          </div>
+          <IntersectionObserverComponent>
+            {globalConfig?.payments_logo && (
+              <div className={styles.paymentLogo}>
+                <img
+                  src={globalConfig?.payments_logo}
+                  alt="Payment Logo"
+                  loading="lazy"
+                  fetchPriority="low"
+                />
+              </div>
+            )}
+          </IntersectionObserverComponent>
+        </div>
+      </div>
     </footer>
   );
 }

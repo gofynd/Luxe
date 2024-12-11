@@ -1,7 +1,7 @@
 import React from "react";
+import Compare from "fdk-react-templates/page-layouts/compare/compare";
 import useCompare from "./useCompare";
 import styles from "./compare.less";
-import Compare from "fdk-react-templates/page-layouts/compare/compare";
 import "fdk-react-templates/page-layouts/compare/compare.css";
 
 function CompareProducts({ fpi }) {

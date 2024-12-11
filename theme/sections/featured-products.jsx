@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import styles from "../styles/sections/featured-product.less";
 import OutsideClickHandler from "react-outside-click-handler";
+import { useGlobalStore } from "fdk-core/utils";
+import styles from "../styles/sections/featured-product.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import PdpImageGallery from "../page-layouts/pdp/components/image-gallery/image-gallery";
 import ProductVariants from "../page-layouts/pdp/components/product-variants/product-variants";
@@ -10,7 +11,6 @@ import {
   FEATURE_PRODUCT_DETAILS,
   FEATURE_PRODUCT_SIZE_PRICE,
 } from "../queries/featureProductQuery";
-import { useGlobalStore } from "fdk-core/utils";
 import useFeatureProductDetails from "../components/featured-product/useFeatureProductDetails";
 import { LOCALITY } from "../queries/logisticsQuery";
 

@@ -82,6 +82,7 @@ function ProdDesc({ product, pageConfig, customClass }) {
                 {productDescription.details && (
                   <div
                     className={`${styles.b2} ${styles.pdpDetail}`}
+                    // eslint-disable-next-line react/no-danger
                     dangerouslySetInnerHTML={{
                       __html: productDescription.details,
                     }}
@@ -121,6 +122,7 @@ function ProdDesc({ product, pageConfig, customClass }) {
                           </span>
                           <span
                             className={styles.val}
+                            // eslint-disable-next-line react/no-danger
                             dangerouslySetInnerHTML={{ __html: property.value }}
                           />
                         </li>

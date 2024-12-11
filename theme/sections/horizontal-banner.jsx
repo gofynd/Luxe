@@ -1,6 +1,6 @@
 import React from "react";
-import FyImage from "../components/core/fy-image/fy-image";
 import { FDKLink } from "fdk-core/components";
+import FyImage from "../components/core/fy-image/fy-image";
 import styles from "../styles/sections/horizontal-banner.less";
 
 export function Component({ props, globalConfig }) {

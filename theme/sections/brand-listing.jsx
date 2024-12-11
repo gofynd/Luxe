@@ -1,15 +1,23 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { isRunningOnClient } from "../helper/utils";
-import styles from "../styles/sections/brand-listing.less";
 import Slider from "react-slick";
 import { FDKLink } from "fdk-core/components";
+import { useGlobalStore } from "fdk-core/utils";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import { isRunningOnClient } from "../helper/utils";
+import styles from "../styles/sections/brand-listing.less";
 import { BRAND_DETAILS } from "../queries/brandsQuery";
 import placeHolder1X1 from "../assets/images/brand-small-placeholder.png";
 import placeHolder9X16 from "../assets/images/brand-placeholder-1.png";
-import { useGlobalStore } from "fdk-core/utils";
-import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
 import "fdk-react-templates/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
+
+const SlickNextArrow = ({ currentSlide, slideCount, ...props }) => (
+  <SvgWrapper {...props} svgSrc="glideArrowRight" />
+);
+
+const SlickPrevArrow = ({ currentSlide, slideCount, ...props }) => (
+  <SvgWrapper {...props} svgSrc="glideArrowLeft" />
+);
 
 export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
   const {
@@ -114,7 +122,8 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
   const showScrollView = () => {
     if (windowWidth <= 768 && brands?.length > 1) {
       return layout_mobile?.value === "horizontal";
-    } else if (per_row?.value < brands?.length) {
+    }
+    if (per_row?.value < brands?.length) {
       return layout_desktop?.value === "horizontal";
     }
   };
@@ -133,7 +142,8 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
           return brands?.slice(0, 12);
         if (windowWidth < 768) return brands?.slice(0, 12);
         return brands?.slice(0, perRowItem * 4);
-      } else if (showStackedView()) {
+      }
+      if (showStackedView()) {
         if (windowWidth >= 768 && windowWidth < 830) return brands?.slice(0, 9);
         if (windowWidth < 768) return brands?.slice(0, 9);
         return brands?.slice(0, perRowItem * 2);
@@ -155,14 +165,6 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
       ? card?.data?.brand?.logo?.url
       : card?.data?.brand?.banners?.portrait?.url || getPlaceHolder();
   };
-
-  const SlickNextArrow = ({ currentSlide, slideCount, ...props }) => (
-    <SvgWrapper {...props} svgSrc="glideArrowRight" />
-  );
-
-  const SlickPrevArrow = ({ currentSlide, slideCount, ...props }) => (
-    <SvgWrapper {...props} svgSrc="glideArrowLeft" />
-  );
 
   const [slickSetting, setSlickSettings] = useState({
     dots: brands?.length > per_row?.value,

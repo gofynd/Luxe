@@ -1,14 +1,13 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
-
 import Slider from "react-slick";
+import { useGlobalStore } from "fdk-core/utils";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
 import styles from "../styles/sections/collections-listing.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient, throttle } from "../helper/utils";
 import { COLLECTION } from "../queries/collectionsQuery";
-import { useGlobalStore } from "fdk-core/utils";
-import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
 import "fdk-react-templates/components/core/fy-image/fy-image.css";
 
 export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
@@ -316,132 +315,130 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
             ))}
           </div>
         )}
-        {!isLoading && showScrollView() && collectionsForScrollView?.length && (
-          <>
-            {collectionsForScrollView?.length > per_row?.value ? (
+        {!isLoading &&
+          showScrollView() &&
+          collectionsForScrollView?.length &&
+          (collectionsForScrollView?.length > per_row?.value ? (
+            <div
+              className={`${styles["collection-horizontal"]} ${collectionsForScrollView?.length === 1 && styles["single-card"]}`}
+            >
               <div
-                className={`${styles["collection-horizontal"]} ${collectionsForScrollView?.length === 1 && styles["single-card"]}`}
+                style={{
+                  "--slick-dots": `${Math.ceil(collectionsForScrollView?.length / per_row?.value) * 22 + 10}px`,
+                }}
               >
-                <div
-                  style={{
-                    "--slick-dots": `${Math.ceil(collectionsForScrollView?.length / per_row?.value) * 22 + 10}px`,
-                  }}
+                <Slider
+                  {...config}
+                  className={`${styles["custom-slick-list"]} ${collectionsForScrollView?.length <= per_row?.value ? "no-nav" : ""}`}
                 >
-                  <Slider
-                    {...config}
-                    className={`${styles["custom-slick-list"]} ${collectionsForScrollView?.length <= per_row?.value ? "no-nav" : ""}`}
-                  >
-                    {collectionsForScrollView?.map((card, index) => (
-                      <div
-                        key={`COLLECTIONS${index}`}
-                        className={`${styles["collection-block"]} ${styles["custom-slick-slide"]}`}
-                        style={{ "--delay": `${150 * (index + 1)}ms` }}
-                      >
-                        <div
-                          data-cardtype="COLLECTIONS"
-                          className={`${styles["pos-relative"]} ${collectionsForScrollView?.length < 3 && styles["single-card-view"]}`}
-                        >
-                          <FDKLink
-                            to={convertActionToUrl(
-                              card?.data?.collection?.action
-                            )}
-                            key={index}
-                          >
-                            <FyImage
-                              backgroundColor={img_container_bg?.value}
-                              isImageFill={img_fill?.value}
-                              aspectRatio={0.8}
-                              mobileAspectRatio={0.8}
-                              customClass={styles.imageGallery}
-                              src={
-                                card?.data?.collection?.banners?.portrait?.url
-                                  ? card?.data?.collection?.banners?.portrait
-                                      ?.url
-                                  : getPlaceHolder()
-                              }
-                              sources={getImgSrcSet()}
-                            />
-                            <div className={styles["collection-title-block"]}>
-                              <div className={styles.background}></div>
-                              <h3
-                                className={`${styles["collection-title"]}`}
-                                title={card?.data?.collection?.name}
-                              >
-                                {card?.data?.collection?.name}
-                              </h3>
-                              {button_text?.value?.length > 0 && (
-                                <span
-                                  title={button_text?.value}
-                                  className={`${styles["collection-button"]}`}
-                                >
-                                  {button_text?.value}
-                                </span>
-                              )}
-                            </div>
-                          </FDKLink>
-                        </div>
-                      </div>
-                    ))}
-                  </Slider>
-                </div>
-              </div>
-            ) : (
-              <div className={styles["collection-grid"]} style={getColumns()}>
-                {collectionsForScrollView?.map((card, index) => (
-                  <div
-                    key={`COLLECTIONS${index}`}
-                    className={styles["collection-block"]}
-                    style={{ "--delay": `${150 * (index + 1)}ms` }}
-                  >
+                  {collectionsForScrollView?.map((card, index) => (
                     <div
-                      className={styles["card-img"]}
-                      data-cardtype="COLLECTIONS"
+                      key={`COLLECTIONS${index}`}
+                      className={`${styles["collection-block"]} ${styles["custom-slick-slide"]}`}
+                      style={{ "--delay": `${150 * (index + 1)}ms` }}
                     >
-                      <FDKLink
-                        to={convertActionToUrl(card?.data?.collection?.action)}
-                        className={styles["button-font"]}
+                      <div
+                        data-cardtype="COLLECTIONS"
+                        className={`${styles["pos-relative"]} ${collectionsForScrollView?.length < 3 && styles["single-card-view"]}`}
                       >
-                        <FyImage
-                          backgroundColor={img_container_bg?.value}
-                          isImageFill={img_fill?.value}
-                          src={
-                            card?.data?.collection?.banners?.portrait?.url
-                              ? card?.data?.collection?.banners?.portrait?.url
-                              : getPlaceHolder()
-                          }
-                          aspectRatio={0.8}
-                          mobileAspectRatio={0.8}
-                          customClass={styles.imageGallery}
-                          sources={getImgSrcSet()}
-                          alt=""
-                        />
-                        <div className={styles["collection-title-block"]}>
-                          <div className={styles.background}></div>
-                          {card?.data?.collection?.name && (
+                        <FDKLink
+                          to={convertActionToUrl(
+                            card?.data?.collection?.action
+                          )}
+                          key={index}
+                        >
+                          <FyImage
+                            backgroundColor={img_container_bg?.value}
+                            isImageFill={img_fill?.value}
+                            aspectRatio={0.8}
+                            mobileAspectRatio={0.8}
+                            customClass={styles.imageGallery}
+                            src={
+                              card?.data?.collection?.banners?.portrait?.url
+                                ? card?.data?.collection?.banners?.portrait?.url
+                                : getPlaceHolder()
+                            }
+                            sources={getImgSrcSet()}
+                          />
+                          <div className={styles["collection-title-block"]}>
+                            <div className={styles.background}></div>
                             <h3
-                              className={styles["collection-title"]}
+                              className={`${styles["collection-title"]}`}
                               title={card?.data?.collection?.name}
                             >
                               {card?.data?.collection?.name}
                             </h3>
-                          )}
-                          {button_text?.value?.length > 0 && (
-                            <span
-                              title={button_text?.value}
-                              className={`${styles["collection-button"]}`}
-                            >
-                              {button_text?.value}
-                            </span>
-                          )}
-                        </div>
-                      </FDKLink>
+                            {button_text?.value?.length > 0 && (
+                              <span
+                                title={button_text?.value}
+                                className={`${styles["collection-button"]}`}
+                              >
+                                {button_text?.value}
+                              </span>
+                            )}
+                          </div>
+                        </FDKLink>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </Slider>
               </div>
-            )}
-          </>
-        )}
+            </div>
+          ) : (
+            <div className={styles["collection-grid"]} style={getColumns()}>
+              {collectionsForScrollView?.map((card, index) => (
+                <div
+                  key={`COLLECTIONS${index}`}
+                  className={styles["collection-block"]}
+                  style={{ "--delay": `${150 * (index + 1)}ms` }}
+                >
+                  <div
+                    className={styles["card-img"]}
+                    data-cardtype="COLLECTIONS"
+                  >
+                    <FDKLink
+                      to={convertActionToUrl(card?.data?.collection?.action)}
+                      className={styles["button-font"]}
+                    >
+                      <FyImage
+                        backgroundColor={img_container_bg?.value}
+                        isImageFill={img_fill?.value}
+                        src={
+                          card?.data?.collection?.banners?.portrait?.url
+                            ? card?.data?.collection?.banners?.portrait?.url
+                            : getPlaceHolder()
+                        }
+                        aspectRatio={0.8}
+                        mobileAspectRatio={0.8}
+                        customClass={styles.imageGallery}
+                        sources={getImgSrcSet()}
+                        alt=""
+                      />
+                      <div className={styles["collection-title-block"]}>
+                        <div className={styles.background}></div>
+                        {card?.data?.collection?.name && (
+                          <h3
+                            className={styles["collection-title"]}
+                            title={card?.data?.collection?.name}
+                          >
+                            {card?.data?.collection?.name}
+                          </h3>
+                        )}
+                        {button_text?.value?.length > 0 && (
+                          <span
+                            title={button_text?.value}
+                            className={`${styles["collection-button"]}`}
+                          >
+                            {button_text?.value}
+                          </span>
+                        )}
+                      </div>
+                    </FDKLink>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
         {!isLoading && isDemoBlock() && (
           <div className={styles.defaultGrid}>
             {["Featured Products", "New Arrivals", "Best Sellers"].map(

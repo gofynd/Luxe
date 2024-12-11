@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { useGlobalStore } from "fdk-core/utils";
+import dayjs from "dayjs";
 import { ORDER_LISTING, ORDER_BY_ID } from "../../queries/ordersQuery";
 import { ADD_TO_CART } from "../../queries/pdpQuery";
 import { CART_ITEMS_COUNT } from "../../queries/wishlistQuery";
 import { fetchCartDetails } from "../cart/useCart";
-import { useGlobalStore } from "fdk-core/utils";
-import dayjs from "dayjs";
 import { useSnackbar } from "../../helper/hooks";
 
 const useOrdersListing = (fpi) => {
@@ -24,7 +24,7 @@ const useOrdersListing = (fpi) => {
   const [orderShipments, setOrderShipments] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const getDateRange = function (days) {
+  const getDateRange = function getDateRange(days) {
     const fromDate = dayjs().subtract(days, "days").format("MM-DD-YYYY");
     const toDate = dayjs().add(1, "days").format("MM-DD-YYYY");
     return {

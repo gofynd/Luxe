@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useFPI, useGlobalStore } from "fdk-core/utils";
+// eslint-disable-next-line import/no-unresolved
 import { Helmet } from "react-helmet-async";
 
 export function ThemeProvider({ children }) {

@@ -1,9 +1,9 @@
 import React from "react";
+import OrdersHeader from "fdk-react-templates/components/order-header/order-header";
+import OrderShipment from "fdk-react-templates/components/order-shipment/order-shipment";
 import styles from "../styles/order-list.less";
 import useOrdersListing from "../page-layouts/orders/useOrdersListing";
-import OrdersHeader from "fdk-react-templates/components/order-header/order-header";
 import "fdk-react-templates/components/order-header/order-header.css";
-import OrderShipment from "fdk-react-templates/components/order-shipment/order-shipment";
 import "fdk-react-templates/components/order-shipment/order-shipment.css";
 import Loader from "../components/loader/loader";
 import ProfileRoot from "../components/profile/profile-root";
@@ -16,9 +16,8 @@ function OrdersList({ fpi }) {
   const getOrdersCount = () => {
     if (orderShipments?.page?.item_total) {
       return `${orderShipments.page.item_total} Orders`;
-    } else {
-      return `0 Order`;
     }
+    return `0 Order`;
   };
 
   return (

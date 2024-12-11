@@ -11,6 +11,7 @@ export function Component({ props, globalConfig }) {
   return !code?.value ? null : (
     <div
       className="basePageContainer margin0auto"
+      // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: code.value }}
       style={{ marginBottom: `${margin_bottom}px` }}
     />

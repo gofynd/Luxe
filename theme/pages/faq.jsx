@@ -1,6 +1,6 @@
 import React from "react";
-import useFaq from "../page-layouts/faq/useFaq";
 import FaqPage from "fdk-react-templates/pages/faq";
+import useFaq from "../page-layouts/faq/useFaq";
 import "fdk-react-templates/pages/faq/faq.css";
 
 function Faqs({ fpi }) {

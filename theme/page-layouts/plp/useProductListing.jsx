@@ -202,11 +202,11 @@ const useProductListing = ({ fpi }) => {
 
     if (index <= 1) {
       return 1;
-    } else if (index > lastIndex) {
-      return lastIndex;
-    } else {
-      return index;
     }
+    if (index > lastIndex) {
+      return lastIndex;
+    }
+    return index;
   };
 
   const paginationProps = useMemo(() => {

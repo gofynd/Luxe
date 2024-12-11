@@ -118,41 +118,36 @@ function ShipmentTracking({
               {item?.status === "In Transit" &&
                 (item?.is_current.toString() || item?.is_passed.toString()) && (
                   <div className={`${styles.inTransitItem}`}>
-                    <>
-                      <div className={`${styles.trackingDetails}`}>
-                        <div>
-                          <SvgWrapper svgSrc="tick-black-active" />
-                        </div>
-                        <div className={`${styles.trackInfo}`}>
-                          <div className={`${styles.boldsm}`}>
-                            {item?.status}
+                    <div className={`${styles.trackingDetails}`}>
+                      <div>
+                        <SvgWrapper svgSrc="tick-black-active" />
+                      </div>
+                      <div className={`${styles.trackInfo}`}>
+                        <div className={`${styles.boldsm}`}>{item?.status}</div>
+                        {item.time && (
+                          <div className={`${styles.time} ${styles.lightxxs}`}>
+                            {getTime(item?.time)}
                           </div>
-                          {item.time && (
-                            <div
-                              className={`${styles.time} ${styles.lightxxs}`}
-                            >
-                              {getTime(item?.time)}
-                            </div>
-                          )}
-                        </div>
-                        {!(
-                          (item.is_current || item.is_passed) &&
-                          showDetailedTracking
-                        ) && (
+                        )}
+                      </div>
+                      {!(
+                        (item.is_current || item.is_passed) &&
+                        showDetailedTracking
+                      ) && (
+                        <SvgWrapper
+                          className={`${styles.dropdownaArow}`}
+                          svgSrc="dropdown-arrow"
+                        />
+                      )}
+                      {(item.is_current || item.is_passed) &&
+                        showDetailedTracking && (
                           <SvgWrapper
                             className={`${styles.dropdownaArow}`}
-                            svgSrc="dropdown-arrow"
+                            svgSrc="arrow-top-black"
                           />
                         )}
-                        {(item.is_current || item.is_passed) &&
-                          showDetailedTracking && (
-                            <SvgWrapper
-                              className={`${styles.dropdownaArow}`}
-                              svgSrc="arrow-top-black"
-                            />
-                          )}
-                      </div>
-                      {/* <ukt-accordion>
+                    </div>
+                    {/* <ukt-accordion>
                             <ul v-if="showDetailedTracking">
                                 <li
                                     v-for="(detail, index) in detailedTracking"
@@ -177,7 +172,6 @@ function ShipmentTracking({
                                 </li>
                             </ul>
                         </ukt-accordion> */}
-                    </>
                   </div>
                 )}
               {item?.status !== "In Transit" &&
@@ -202,29 +196,25 @@ function ShipmentTracking({
         <div className={`${styles.links}`}>
           {getLinks()?.map((item, index) => (
             <>
-              <>
-                {item.type === "internal" && (
-                  <div
-                    key={index}
-                    onClick={() => update(item)}
-                    className={`${styles.regularsm}`}
-                  >
-                    {" "}
-                    {item.text}
-                  </div>
-                )}
-              </>
-              <>
-                {item.type !== "internal" && (
-                  <a
-                    key={index}
-                    href={`${item.link}`}
-                    className={`${styles.regularsm}`}
-                  >
-                    {item.text}
-                  </a>
-                )}
-              </>
+              {item.type === "internal" && (
+                <div
+                  key={index}
+                  onClick={() => update(item)}
+                  className={`${styles.regularsm}`}
+                >
+                  {" "}
+                  {item.text}
+                </div>
+              )}
+              {item.type !== "internal" && (
+                <a
+                  key={index}
+                  href={`${item.link}`}
+                  className={`${styles.regularsm}`}
+                >
+                  {item.text}
+                </a>
+              )}
             </>
           ))}
         </div>

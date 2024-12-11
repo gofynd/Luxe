@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
 import PropTypes from "prop-types";
+import Modal from "fdk-react-templates/components/core/modal/modal";
 import styles from "./size-guide.less";
 import SvgWrapper from "../../../components/core/svgWrapper/SvgWrapper";
 import FyImage from "../../../components/core/fy-image/fy-image";
 import FyHTMLRenderer from "../../../components/core/fy-html-renderer/fy-html-renderer";
-import Modal from "fdk-react-templates/components/core/modal/modal";
 import "fdk-react-templates/components/core/modal/modal.css";
 
 function SizeGuide({ isOpen, productMeta, onCloseDialog }) {

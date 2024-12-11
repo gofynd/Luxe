@@ -1,6 +1,6 @@
 import React from "react";
-import { useEmail } from "../page-layouts/profile/useEmail";
 import VerifyEmailPage from "fdk-react-templates/pages/verify-email";
+import { useEmail } from "../page-layouts/profile/useEmail";
 
 function VerifyEmail({ fpi }) {
   const { verifyEmail } = useEmail({ fpi });

@@ -1,8 +1,8 @@
 import React from "react";
 import { FDKLink } from "fdk-core/components";
+import FyButton from "fdk-react-templates/components/core/fy-button/fy-button";
 import styles from "./page-not-found.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
-import FyButton from "fdk-react-templates/components/core/fy-button/fy-button";
 import "fdk-react-templates/components/core/fy-button/fy-button.css";
 
 function PageNotFound({ title }) {

@@ -23,8 +23,7 @@ function Categories({ fpi }) {
     fetchAllCategories();
     setIsMobile(detectMobileWidth());
   }, []);
-  //   const { page, items = [], loading } = product_lists || {};
-  if (!isLoading && categories.length == 0) {
+  if (!isLoading && categories.length === 0) {
     return <EmptyState />;
   }
 

@@ -32,7 +32,8 @@ function WalletForm({ fpi, addWalletAccount, loadSpinner }) {
   const validPhone = (value) => {
     if (value.length === 0) {
       return false;
-    } else if (value.length !== 10) {
+    }
+    if (value.length !== 10) {
       return false;
     }
     setMobile(value);

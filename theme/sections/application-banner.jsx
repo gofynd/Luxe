@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { FDKLink } from "fdk-core/components";
 import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
-import { FDKLink } from "fdk-core/components";
 import styles from "../styles/sections/application-banner.less";
 import { isRunningOnClient } from "../helper/utils";
 
@@ -302,10 +302,9 @@ export function Component({ props, blocks, globalConfig }) {
                 </div>
               </div>
             );
-          } else {
-            // Return null if condition is not met
-            return null;
           }
+          // Return null if condition is not met
+          return null;
         })}
     </div>
   );

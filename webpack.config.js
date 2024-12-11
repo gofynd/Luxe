@@ -1,9 +1,9 @@
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require("path");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const NodeJSPolyfill = require("./plugin");
 const { readFileSync } = require("node:fs");
 const { Overlay } = require("react-hydration-overlay");
+const NodeJSPolyfill = require("./plugin");
 
 const polyfillCodePath = path.join(__dirname, "./polyfill.js");
 const polyfillCode = readFileSync(polyfillCodePath, { encoding: "utf-8" });

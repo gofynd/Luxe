@@ -121,7 +121,8 @@ const useCompare = (fpi) => {
     let value = cProduct?.attributes?.[attribute?.key];
     if (!value) {
       return "---";
-    } else if (Array.isArray(value)) {
+    }
+    if (Array.isArray(value)) {
       value = value.join(", ");
     }
     return value;

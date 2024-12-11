@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { FDKLink } from "fdk-core/components";
 import OutsideClickHandler from "react-outside-click-handler";
+import FyButton from "fdk-react-templates/components/core/fy-button/fy-button";
+import Loader from "fdk-react-templates/components/loader/loader";
 import styles from "./product-description.less";
 
 import SvgWrapper from "../../../components/core/svgWrapper/SvgWrapper";
@@ -17,8 +19,6 @@ import Badges from "../components/badges/badges";
 import ProductCompareButton from "../../compare/product-compare-button";
 import StickyAddToCart from "../components/sticky-addtocart/sticky-addtocart";
 import { isEmptyOrNull, isRunningOnClient } from "../../../helper/utils";
-import FyButton from "fdk-react-templates/components/core/fy-button/fy-button";
-import Loader from "fdk-react-templates/components/loader/loader";
 import "fdk-react-templates/components/loader/loader.css";
 import MoreOffers from "../components/offers/more-offers";
 

@@ -28,39 +28,38 @@ function ShipmentBreakup({ fpi, breakup, shipmentInfo }) {
   return (
     <div className={`${styles.billing} ${styles.lightsm}`}>
       <div className={`${styles.title} ${styles.boldsm}`}>BILLING</div>
-      <>
-        {breakupValues()?.map((item, index) => (
-          <div key={index} className={`${styles.breakupItem}`}>
-            {((index !== breakup.length - 1 && item.value !== "0") ||
-              (index === breakup.length - 1 && item.value !== "0")) && (
-              <>
-                {index !== breakup.length - 1 && (
-                  <span>
-                    <span>{item.display}</span>
-                    <span className={`${styles.values}`}>
-                      {getPriceFormat(
-                        item.currency_symbol,
-                        Number(item.value.toString().replace(/,/g, ""))
-                      )}
-                    </span>
+      {breakupValues()?.map((item, index) => (
+        <div key={index} className={`${styles.breakupItem}`}>
+          {((index !== breakup.length - 1 && item.value !== "0") ||
+            (index === breakup.length - 1 && item.value !== "0")) && (
+            <>
+              {index !== breakup.length - 1 && (
+                <span>
+                  <span>{item.display}</span>
+                  <span className={`${styles.values}`}>
+                    {getPriceFormat(
+                      item.currency_symbol,
+                      Number(item.value.toString().replace(/,/g, ""))
+                    )}
                   </span>
-                )}
-                {index === breakup.length - 1 && (
-                  <span>
-                    <span>{item.display}</span>
-                    <span className={`${styles.values}`}>
-                      {getPriceFormat(
-                        item.currency_symbol,
-                        Number(item.value.toString().replace(/,/g, ""))
-                      )}
-                    </span>
+                </span>
+              )}
+              {index === breakup.length - 1 && (
+                <span>
+                  <span>{item.display}</span>
+                  <span className={`${styles.values}`}>
+                    {getPriceFormat(
+                      item.currency_symbol,
+                      Number(item.value.toString().replace(/,/g, ""))
+                    )}
                   </span>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-        {/* {isLoggedIn && type !== "tracking" && (
+                </span>
+              )}
+            </>
+          )}
+        </div>
+      ))}
+      {/* {isLoggedIn && type !== "tracking" && (
           <div className={`${styles.paymentDetails}`}>
             {shipmentInfo?.payment && (
               <div className={`${styles.paymentLogo} `}>
@@ -80,7 +79,6 @@ function ShipmentBreakup({ fpi, breakup, shipmentInfo }) {
             )}
           </div>
         )} */}
-      </>
     </div>
   );
 }

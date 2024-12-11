@@ -110,7 +110,7 @@ function OrderShipment({
                     />
                     {item?.bags?.length > 1 && (
                       <div id="total-item">
-                        <>+</> {(item?.bags?.length || 0) - 1 || 0}
+                        + {(item?.bags?.length || 0) - 1 || 0}
                         more
                       </div>
                     )}

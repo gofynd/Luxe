@@ -2,7 +2,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import styles from "./StoreItem.less";
+import styles from "./store-item.less";
 import { currencyFormat } from "../../../../helper/utils";
 
 function StoreItem({

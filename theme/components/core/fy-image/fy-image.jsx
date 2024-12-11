@@ -79,9 +79,8 @@ const FyImage = ({
 
     if (isError) {
       return placeholder;
-    } else {
-      return transformImage(src);
     }
+    return transformImage(src);
   };
 
   function getImageType() {
@@ -145,12 +144,10 @@ const FyImage = ({
 
       if (min && max) {
         return `${min} and ${max}`;
-      } else {
-        return min || max;
       }
-    } else {
-      return "";
+      return min || max;
     }
+    return "";
   };
 
   const getUrl = (width, url = src) => {

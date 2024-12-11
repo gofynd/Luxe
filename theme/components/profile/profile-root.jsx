@@ -1,7 +1,7 @@
 import React from "react";
 import { useGlobalStore } from "fdk-core/utils";
-import { useAccounts } from "../../helper/hooks";
 import ProfileNavigation from "fdk-react-templates/components/profile-navigation/profile-navigation";
+import { useAccounts } from "../../helper/hooks";
 import "fdk-react-templates/components/profile-navigation/profile-navigation.css";
 
 function ProfileRoot({ children, fpi }) {

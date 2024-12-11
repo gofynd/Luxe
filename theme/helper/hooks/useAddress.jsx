@@ -69,15 +69,14 @@ export const useAddress = ({ fpi, pageName }) => {
           });
 
           return data;
-        } else {
-          showSnackbar(
-            res?.errors?.[0]?.message || "Pincode verification failed"
-          );
-          data.showError = true;
-          data.errorMsg =
-            res?.errors?.[0]?.message || "Pincode verification failed";
-          return data;
         }
+        showSnackbar(
+          res?.errors?.[0]?.message || "Pincode verification failed"
+        );
+        data.showError = true;
+        data.errorMsg =
+          res?.errors?.[0]?.message || "Pincode verification failed";
+        return data;
       });
   };
 

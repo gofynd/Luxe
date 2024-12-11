@@ -56,25 +56,22 @@ export const useWishlist = ({ fpi }) => {
         setIsLoading(false);
         showSnackbar("Products Removed From Wishlist", "success");
       });
-    } else {
-      return fpi
-        .executeGQL(REMOVE_WISHLIST, payload)
-        .then((res) => {
-          if (res?.data?.unfollowById?.message) {
-            showSnackbar(
-              res?.data?.unfollowById?.message ||
-                "Products Removed From Wishlist",
-              "success"
-            );
-            return fetchFollowedProductsId().then(
-              () => res?.data?.unfollowById
-            );
-          }
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
     }
+    return fpi
+      .executeGQL(REMOVE_WISHLIST, payload)
+      .then((res) => {
+        if (res?.data?.unfollowById?.message) {
+          showSnackbar(
+            res?.data?.unfollowById?.message ||
+              "Products Removed From Wishlist",
+            "success"
+          );
+          return fetchFollowedProductsId().then(() => res?.data?.unfollowById);
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }
 
   function toggleWishlist({ product, isFollowed }) {

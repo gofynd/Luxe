@@ -487,10 +487,9 @@ export function Component({ props, globalConfig, blocks }) {
                   </div>
                 </div>
               );
-            } else {
-              // Return null if condition is not met
-              return null;
             }
+            // Return null if condition is not met
+            return null;
           })}
       </IntersectionObserverComponent>
       <noscript>

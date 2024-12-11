@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useGlobalStore } from "fdk-core/utils";
+import { useNavigate } from "react-router-dom";
 import { ADD_TO_CART } from "../../queries/pdpQuery";
 import {
   ADD_WISHLIST,
@@ -6,10 +8,8 @@ import {
   FOLLOWED_PRODUCTS_IDS,
 } from "../../queries/wishlistQuery";
 import useHeader from "../header/useHeader";
-import { useGlobalStore } from "fdk-core/utils";
 import { useSnackbar } from "../../helper/hooks";
 import { fetchCartDetails } from "../../page-layouts/cart/useCart";
-import { useNavigate } from "react-router-dom";
 
 const useFeatureProductDetails = ({
   fpi,

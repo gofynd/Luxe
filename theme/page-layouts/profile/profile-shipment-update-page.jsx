@@ -62,7 +62,8 @@ function ProfileShipmentUpdatePage({ fpi }) {
     if (shipmentDetails) {
       if (shipmentDetails?.can_cancel) {
         return "Cancel";
-      } else if (shipmentDetails?.can_return) {
+      }
+      if (shipmentDetails?.can_return) {
         return "Return";
       }
       return "";
@@ -134,7 +135,8 @@ function ProfileShipmentUpdatePage({ fpi }) {
   const getStatusForUpdate = () => {
     if (shipmentDetails?.can_cancel) {
       return "cancelled_customer";
-    } else if (shipmentDetails?.can_return) {
+    }
+    if (shipmentDetails?.can_return) {
       return selectedReason[selectLast()].qc_type.includes("pre_qc")
         ? "return_pre_qc"
         : "return_initiated";
@@ -292,49 +294,48 @@ function ProfileShipmentUpdatePage({ fpi }) {
         selected_reason: { ...reason[selectLast()] },
         other_reason_text: extraComment,
       };
-    } else {
-      return {
-        shipmentId: shipmentDetails?.shipment_id,
-        updateShipmentStatusRequestInput: {
-          force_transition: true,
-
-          statuses: [
-            {
-              shipments: [
-                {
-                  identifier: shipmentDetails?.shipment_id,
-                  products: getProducts,
-                  reasons: {
-                    products: [
-                      {
-                        data: {
-                          reason_id: reason[selectLast()]?.id,
-                          reason_text:
-                            reason[selectLast()]?.reason_other_text ||
-                            reasonOtherText,
-                        },
-                        filters: getProducts,
-                      },
-                    ],
-                  },
-                },
-              ],
-              status: "return_initiated",
-            },
-          ],
-        },
-        shimpment_id: shipmentDetails?.shipment_id,
-        order_id: shipmentDetails?.order_id,
-        selected_reason: { ...reason[selectLast()] },
-        other_reason_text: extraComment,
-        beneficiary_id: refundDetails?.user_beneficiaries_detail
-          ?.show_beneficiary_details
-          ? selectedBeneficary?.beneficiary_id
-          : "",
-        qc_image_urls: cdn_urls,
-        products: getProducts,
-      };
     }
+    return {
+      shipmentId: shipmentDetails?.shipment_id,
+      updateShipmentStatusRequestInput: {
+        force_transition: true,
+
+        statuses: [
+          {
+            shipments: [
+              {
+                identifier: shipmentDetails?.shipment_id,
+                products: getProducts,
+                reasons: {
+                  products: [
+                    {
+                      data: {
+                        reason_id: reason[selectLast()]?.id,
+                        reason_text:
+                          reason[selectLast()]?.reason_other_text ||
+                          reasonOtherText,
+                      },
+                      filters: getProducts,
+                    },
+                  ],
+                },
+              },
+            ],
+            status: "return_initiated",
+          },
+        ],
+      },
+      shimpment_id: shipmentDetails?.shipment_id,
+      order_id: shipmentDetails?.order_id,
+      selected_reason: { ...reason[selectLast()] },
+      other_reason_text: extraComment,
+      beneficiary_id: refundDetails?.user_beneficiaries_detail
+        ?.show_beneficiary_details
+        ? selectedBeneficary?.beneficiary_id
+        : "",
+      qc_image_urls: cdn_urls,
+      products: getProducts,
+    };
   };
 
   const setUpdatedOrders = (obj) => {
@@ -441,9 +442,11 @@ function ProfileShipmentUpdatePage({ fpi }) {
       return showUpdateErrorText(
         "Please write a reason for cancellation, as it will help us serve you better"
       );
-    } else if (!reason) {
+    }
+    if (!reason) {
       return showUpdateErrorText("Please select any one of the below reason");
-    } else if (
+    }
+    if (
       !selectedBeneficary &&
       shipmentDetails?.can_return &&
       shipmentDetails?.beneficiary_details &&

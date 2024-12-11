@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
+import EmailPage from "fdk-react-templates/pages/profile/email";
 import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
 import { useSnackbar } from "../../helper/hooks";
 import { useEmail } from "./useEmail";
-import EmailPage from "fdk-react-templates/pages/profile/email";
 import "fdk-react-templates/pages/profile/email/email.css";
 
 function Email({ fpi }) {

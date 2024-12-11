@@ -39,9 +39,8 @@ function ShipmentItem({
         no = ` - ${no}`;
       }
       return no;
-    } else {
-      return 0;
     }
+    return 0;
   };
 
   const priceFormatCurrencySymbol = (symbol, price) => {

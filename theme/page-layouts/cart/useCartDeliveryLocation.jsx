@@ -126,21 +126,21 @@ const useCartDeliveryLocation = ({ fpi }) => {
   const selectedAddressString = useMemo(() => {
     if (selectedAddress) {
       return getFormattedAddress(selectedAddress);
-    } else if (defaultAddress?.id) {
-      return getFormattedAddress(defaultAddress);
-    } else {
-      return "";
     }
+    if (defaultAddress?.id) {
+      return getFormattedAddress(defaultAddress);
+    }
+    return "";
   }, [selectedAddress, defaultAddress]);
 
   const personName = useMemo(() => {
     if (selectedAddress) {
       return selectedAddress.name;
-    } else if (defaultAddress?.id) {
-      return defaultAddress.name;
-    } else {
-      return "";
     }
+    if (defaultAddress?.id) {
+      return defaultAddress.name;
+    }
+    return "";
   }, [selectedAddress, defaultAddress]);
 
   const selectAddress = (id = "") => {

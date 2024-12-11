@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import StoreItem from "./store-item";
+// eslint-disable-next-line import/no-unresolved
 import styles from "./StoreModal.module.css"; // Import the module CSS file
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 

@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
+import Loader from "fdk-react-templates/components/loader/loader";
+import AddressForm from "fdk-react-templates/components/address-form/address-form";
+import AddressItem from "fdk-react-templates/components/address-item/address-item";
 import { LOCALITY } from "../../queries/logisticsQuery";
 import useAddress from "../address/useAddress";
 import SvgWrapper from "../../components/core/svgWrapper/SvgWrapper";
 import EmptyState from "../../components/empty-state/empty-state";
-import Loader from "fdk-react-templates/components/loader/loader";
 import "fdk-react-templates/components/loader/loader.css";
 import { useSnackbar } from "../../helper/hooks";
 import { capitalize } from "../../helper/utils";
 import styles from "./profile-address-page.less";
-import AddressForm from "fdk-react-templates/components/address-form/address-form";
-import AddressItem from "fdk-react-templates/components/address-item/address-item";
 import "fdk-react-templates/components/address-form/address-form.css";
 import "fdk-react-templates/components/address-item/address-item.css";
 
@@ -166,15 +166,14 @@ const ProfileAddressPage = ({ fpi }) => {
           });
 
           return data;
-        } else {
-          showSnackbar(
-            res?.errors?.[0]?.message || "Pincode verification failed"
-          );
-          data.showError = true;
-          data.errorMsg =
-            res?.errors?.[0]?.message || "Pincode verification failed";
-          return data;
         }
+        showSnackbar(
+          res?.errors?.[0]?.message || "Pincode verification failed"
+        );
+        data.showError = true;
+        data.errorMsg =
+          res?.errors?.[0]?.message || "Pincode verification failed";
+        return data;
       });
   };
 
@@ -217,102 +216,100 @@ const ProfileAddressPage = ({ fpi }) => {
       )}
     </div>
   );
+  let Content = "";
+  if (isLoading) {
+    Content = (
+      <div className={styles.loader}>
+        <Loader
+          containerClassName={styles.loaderContainer}
+          loaderClassName={styles.customLoader}
+        />
+      </div>
+    );
+  } else if (!isEditMode && !isCreateMode) {
+    Content = (
+      <div>
+        <div className={styles.addressContainer}>
+          <div className={styles.addressHeader}>
+            <div className={`${styles.title} ${styles["bold-md"]}`}>
+              MY ADDRESSES
+              <span className={`${styles.savedAddress} ${styles["bold-xxs"]}`}>
+                {allAddresses?.length ? `${allAddresses?.length} saved` : ""}{" "}
+              </span>
+            </div>
+            <div
+              className={`${styles.addAddr} ${styles["bold-md"]}`}
+              onClick={onCreateClick}
+            >
+              ADD NEW ADDRESS
+            </div>
+          </div>
+        </div>
+        {allAddresses.length > 0 && (
+          <div className={styles.addressItemContainer}>
+            {allAddresses.map((item, index) => (
+              <AddressItem
+                key={index}
+                onAddressSelect={onEditClick}
+                addressItem={item}
+                headerRightSlot={item?.is_default_address && <DefaultAddress />}
+                containerClassName={styles.addressItem}
+                style={{ border: "none" }}
+              />
+            ))}
+          </div>
+        )}
+
+        {allAddresses && allAddresses.length === 0 && (
+          <div>
+            <EmptyState title="No address available" />
+          </div>
+        )}
+      </div>
+    );
+  } else {
+    Content = (
+      <div>
+        <div className={styles.addressContainer}>
+          <div className={styles.addressHeader}>
+            {!isEditMode ? (
+              <div className={`${styles.title} ${styles["bold-md"]}`}>
+                Add New Address
+              </div>
+            ) : (
+              <div className={`${styles.title} ${styles["bold-md"]}`}>
+                Update Address
+              </div>
+            )}
+          </div>
+        </div>
+        {isEditMode && !selectedAddress ? (
+          <EmptyState
+            title="Address not found!"
+            btnTitle="RETURN TO MY ADDRESS"
+            btnLink={location.pathname}
+          />
+        ) : (
+          <div className={styles.addressFormWrapper}>
+            <AddressForm
+              addressItem={selectedAddress}
+              showGoogleMap={!!mapApiKey?.length}
+              mapApiKey={mapApiKey}
+              isNewAddress={isCreateMode}
+              onAddAddress={addAddressHandler}
+              onUpdateAddress={updateAddressHandler}
+              onGetLocality={getLocality}
+              customFooter={customFooter}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={styles.main}>
-      {isLoading ? (
-        <div className={styles.loader}>
-          <Loader
-            containerClassName={styles.loaderContainer}
-            loaderClassName={styles.customLoader}
-          />
-        </div>
-      ) : (
-        <>
-          {!isEditMode && !isCreateMode ? (
-            <div>
-              <div className={styles.addressContainer}>
-                <div className={styles.addressHeader}>
-                  <div className={`${styles.title} ${styles["bold-md"]}`}>
-                    MY ADDRESSES
-                    <span
-                      className={`${styles.savedAddress} ${styles["bold-xxs"]}`}
-                    >
-                      {allAddresses?.length
-                        ? `${allAddresses?.length} saved`
-                        : ""}{" "}
-                    </span>
-                  </div>
-                  <div
-                    className={`${styles.addAddr} ${styles["bold-md"]}`}
-                    onClick={onCreateClick}
-                  >
-                    ADD NEW ADDRESS
-                  </div>
-                </div>
-              </div>
-              {allAddresses.length > 0 && (
-                <div className={styles.addressItemContainer}>
-                  {allAddresses.map((item, index) => (
-                    <AddressItem
-                      key={index}
-                      onAddressSelect={onEditClick}
-                      addressItem={item}
-                      headerRightSlot={
-                        item?.is_default_address && <DefaultAddress />
-                      }
-                      containerClassName={styles.addressItem}
-                      style={{ border: "none" }}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {allAddresses && allAddresses.length === 0 && (
-                <div>
-                  <EmptyState title="No address available" />
-                </div>
-              )}
-            </div>
-          ) : (
-            <div>
-              <div className={styles.addressContainer}>
-                <div className={styles.addressHeader}>
-                  {!isEditMode ? (
-                    <div className={`${styles.title} ${styles["bold-md"]}`}>
-                      Add New Address
-                    </div>
-                  ) : (
-                    <div className={`${styles.title} ${styles["bold-md"]}`}>
-                      Update Address
-                    </div>
-                  )}
-                </div>
-              </div>
-              {isEditMode && !selectedAddress ? (
-                <EmptyState
-                  title="Address not found!"
-                  btnTitle="RETURN TO MY ADDRESS"
-                  btnLink={location.pathname}
-                />
-              ) : (
-                <div className={styles.addressFormWrapper}>
-                  <AddressForm
-                    addressItem={selectedAddress}
-                    showGoogleMap={!!mapApiKey?.length}
-                    mapApiKey={mapApiKey}
-                    isNewAddress={isCreateMode}
-                    onAddAddress={addAddressHandler}
-                    onUpdateAddress={updateAddressHandler}
-                    onGetLocality={getLocality}
-                    customFooter={customFooter}
-                  />
-                </div>
-              )}
-            </div>
-          )}
-        </>
-      )}
+      <Content />
     </div>
   );
 };

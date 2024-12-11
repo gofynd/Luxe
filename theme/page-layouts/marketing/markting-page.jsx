@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
+import { useGlobalStore } from "fdk-core/utils";
 import { HTMLContent } from "./HTMLContent";
 import { GET_PAGE } from "../../queries/marketingQuery";
 import styles from "../../styles/main.less";
 import PageNotFound from "../../components/page-not-found/page-not-found";
 import Loader from "../../components/loader/loader";
-import { useGlobalStore } from "fdk-core/utils";
 
 function MarketingPage({ fpi, defaultSlug, id: sectionId }) {
   let { slug } = useParams();

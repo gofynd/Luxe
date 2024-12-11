@@ -104,18 +104,16 @@ const StickyAddToCart = ({
                   : "SELECT SIZE"}
               </span>
               {isSizeGuideAvailable && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSizeGuide(true);
-                    }}
-                    className={styles["product__size--guide"]}
-                  >
-                    <span>SIZE GUIDE</span>
-                    <SvgWrapper svgSrc="scale" className={styles.scaleIcon} />
-                  </button>
-                </>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowSizeGuide(true);
+                  }}
+                  className={styles["product__size--guide"]}
+                >
+                  <span>SIZE GUIDE</span>
+                  <SvgWrapper svgSrc="scale" className={styles.scaleIcon} />
+                </button>
               )}
             </div>
 

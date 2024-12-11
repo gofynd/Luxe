@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { FDKLink } from "fdk-core/components";
 import Slider from "react-slick";
+import { useGlobalStore } from "fdk-core/utils";
 import styles from "../styles/sections/feature-blog.less";
 import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient, throttle } from "../helper/utils";
 import { FETCH_BLOGS_LIST } from "../queries/blogQuery";
-import { useGlobalStore } from "fdk-core/utils";
 
 export function Component({ props, globalConfig, fpi }) {
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);

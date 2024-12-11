@@ -1,7 +1,7 @@
 import React from "react";
 import { useGlobalStore } from "fdk-core/utils";
-import { useAccounts } from "../../helper/hooks";
 import AccountLockedPage from "fdk-react-templates/page-layouts/auth/account-locked/account-locked";
+import { useAccounts } from "../../helper/hooks";
 import "fdk-react-templates/page-layouts/auth/account-locked/account-locked.css";
 import AuthContainer from "../auth/auth-container/auth-container";
 

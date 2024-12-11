@@ -29,7 +29,8 @@ function ProductVariants({
   const isVariantSelected = (item) => {
     if (currentSlug) {
       return currentSlug?.includes(item.slug);
-    } else if (isRunningOnClient()) {
+    }
+    if (isRunningOnClient()) {
       return window?.location?.pathname.includes(item.slug);
     }
   };
