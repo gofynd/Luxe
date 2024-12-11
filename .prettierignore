@@ -1,0 +1,6 @@
+node_modules/
+.fdk/
+.husky
+build/
+theme/sections/index.js
+theme/config/*

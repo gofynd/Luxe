@@ -1,3 +1,3 @@
-package-lock.json
-azure-pipelines.yml
+.fdk
 node_modules
+.husky

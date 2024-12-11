@@ -1,0 +1,49 @@
+trigger:
+  branches:
+    include:
+      - "main"
+      - "main-fix"
+
+resources:
+  containers:
+    - container: node18
+      image: node:18-buster
+
+pool:
+  docker
+
+variables:
+- group: pipeline
+
+jobs:
+- job: GitHubSync
+  container: node18
+  steps:
+  - checkout: self
+
+  - script: |
+
+      echo "This is a main branch merge. Sync starting..."
+      BRANCH_NAME=main
+
+      git config --global user.email "jigar.dafda@gmail.com"
+      git config --global user.name "Jigar Dafda"
+
+      git clone https://$(GITHUB_USERNAME):$(GITHUB_PERSONAL_TOKEN)@github.com/gofynd/Luxe.git
+      cd Luxe
+      git checkout $BRANCH_NAME || git checkout -b $BRANCH_NAME
+      rm -rf ./*
+      cd ..
+
+      cp -R `ls | grep -v "Luxe"` ./Luxe
+      cp .gitignore.ci ./Luxe/.gitignore
+      find . -maxdepth 1 -name '.*' ! -name '.' ! -name '..' -exec cp {} Luxe \;
+
+
+      cd Luxe
+
+      git add .
+      git commit -m "[Auto Generated]"
+      git push origin $BRANCH_NAME
+
+    displayName: 'Sync with GitHub'
