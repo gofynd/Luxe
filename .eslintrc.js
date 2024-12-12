@@ -29,6 +29,7 @@ module.exports = {
           "^fdk-core/components$",
           "^fdk-core/utils$",
           "^fdk-react-templates",
+          "react-router-dom",
         ], // Regular expressions
       },
     ],
