@@ -11,8 +11,8 @@ import Footer from "./components/footer/footer";
 import { ThemeProvider } from "./providers/global-provider";
 
 export default async ({
-  applicationID,
-  applicationToken,
+  applicationID ,
+  applicationToken ,
   domain,
   storeInitialData,
 }) => {
