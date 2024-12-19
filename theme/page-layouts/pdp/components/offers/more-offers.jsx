@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import Modal from "fdk-react-templates/components/core/modal/modal";
+import Modal from "@gofynd/theme-template/components/core/modal/modal";
 import styles from "./more-offers.less";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import { HTMLContent } from "../../../marketing/HTMLContent";
-import "fdk-react-templates/components/core/modal/modal.css";
+import "@gofynd/theme-template/components/core/modal/modal.css";
 
 function MoreOffers({
   isOpen,

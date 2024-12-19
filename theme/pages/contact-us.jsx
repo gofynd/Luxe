@@ -2,12 +2,12 @@ import React from "react";
 import Base64 from "crypto-js/enc-base64";
 import Utf8 from "crypto-js/enc-utf8";
 import { useGlobalStore } from "fdk-core/utils";
-import ContactPage from "fdk-react-templates/pages/contact-us/contact-us";
+import ContactPage from "@gofynd/theme-template/pages/contact-us/contact-us";
 import { useSnackbar } from "../helper/hooks";
 import { CREATE_TICKET } from "../queries/supportQuery";
 import useHeader from "../components/header/useHeader";
 import SocailMedia from "../components/socail-media/socail-media";
-import "fdk-react-templates/pages/contact-us/contact-us.css";
+import "@gofynd/theme-template/pages/contact-us/contact-us.css";
 
 function ContactUs({ fpi }) {
   const { contactInfo, supportInfo, appInfo } = useHeader(fpi);

@@ -3,7 +3,7 @@ import { FDKLink } from "fdk-core/components";
 import { useGlobalStore } from "fdk-core/utils";
 
 import Slider from "react-slick";
-import ProductCard from "fdk-react-templates/components/product-card/product-card";
+import ProductCard from "@gofynd/theme-template/components/product-card/product-card";
 import styles from "../styles/sections/featured-collection.less";
 import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
@@ -11,7 +11,7 @@ import { isRunningOnClient, throttle } from "../helper/utils";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
 import placeholder from "../assets/images/img-placeholder-1.png";
 import { FEATURED_COLLECTION } from "../queries/collectionsQuery";
-import "fdk-react-templates/components/product-card/product-card.css";
+import "@gofynd/theme-template/components/product-card/product-card.css";
 import bannerPlaceholder from "../assets/images/collection-banner-placeholder.png";
 import imagePlaceholder from "../assets/images/placeholder3x4.png";
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Modal from "fdk-react-templates/components/core/modal/modal";
-import "fdk-react-templates/components/core/modal/modal.css";
+import Modal from "@gofynd/theme-template/components/core/modal/modal";
+import "@gofynd/theme-template/components/core/modal/modal.css";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import DeliveryInfo from "../delivery-info/delivery-info";
 import SizeGuide from "../../size-guide/size-guide";

@@ -1,6 +1,6 @@
 import React from "react";
-import BlogList from "fdk-react-templates/pages/blog/blog";
-import "fdk-react-templates/pages/blog/blog.css";
+import BlogList from "@gofynd/theme-template/pages/blog/blog";
+import "@gofynd/theme-template/pages/blog/blog.css";
 import { FETCH_BLOGS_LIST } from "../queries/blogQuery";
 import useBlog from "../page-layouts/blog/useBlog";
 

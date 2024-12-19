@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useGlobalStore } from "fdk-core/utils";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import CheckoutPage from "fdk-react-templates/pages/checkout/checkout";
-import "fdk-react-templates/pages/checkout/checkout.css";
-// import PriceBreakup from "fdk-react-templates/components/price-breakup/price-breakup";
-// import "fdk-react-templates/components/price-breakup/price-breakup.css";
+import CheckoutPage from "@gofynd/theme-template/pages/checkout/checkout";
+import "@gofynd/theme-template/pages/checkout/checkout.css";
+// import PriceBreakup from "@gofynd/theme-template/components/price-breakup/price-breakup";
+// import "@gofynd/theme-template/components/price-breakup/price-breakup.css";
 
 import { CHECKOUT_LANDING, PAYMENT_OPTIONS } from "../queries/checkoutQuery";
 import useAddress from "../page-layouts/single-checkout/address/useAddress";

@@ -1,11 +1,11 @@
 import React, { useCallback } from "react";
-import PhonePage from "fdk-react-templates/pages/profile/phone";
+import PhonePage from "@gofynd/theme-template/pages/profile/phone";
 import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
-import "fdk-react-templates/page-layouts/auth/mobile-number/mobile-number.css";
+import "@gofynd/theme-template/page-layouts/auth/mobile-number/mobile-number.css";
 import { usePhone } from "./usePhone";
 import { useSnackbar, useAccounts } from "../../helper/hooks";
-import "fdk-react-templates/pages/profile/phone/phone.css";
+import "@gofynd/theme-template/pages/profile/phone/phone.css";
 
 function Phone({ fpi }) {
   const { setMobileNumberAsPrimary, deleteMobileNumber, phoneNumbers } =

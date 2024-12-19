@@ -1,9 +1,9 @@
 import React from "react";
-import CartNew from "fdk-react-templates/pages/cart/cart";
+import CartNew from "@gofynd/theme-template/pages/cart/cart";
 import styles from "./cart.less";
-import "fdk-react-templates/pages/cart/cart.css";
-// import PriceBreakup from "fdk-react-templates/components/price-breakup.js";
-// import "fdk-react-templates/components/price-breakup.css";
+import "@gofynd/theme-template/pages/cart/cart.css";
+// import PriceBreakup from "@gofynd/theme-template/components/price-breakup.js";
+// import "@gofynd/theme-template/components/price-breakup.css";
 import Loader from "../../components/loader/loader";
 import EmptyState from "../../components/empty-state/empty-state";
 import useCart from "./useCart";

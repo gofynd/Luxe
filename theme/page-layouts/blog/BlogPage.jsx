@@ -1,6 +1,6 @@
 import React from "react";
-import BlogPage from "fdk-react-templates/components/blog-page/blog-page";
-import "fdk-react-templates/components/blog-page/blog-page.css";
+import BlogPage from "@gofynd/theme-template/components/blog-page/blog-page";
+import "@gofynd/theme-template/components/blog-page/blog-page.css";
 import useBlog from "./useBlog";
 import { GET_BLOG } from "../../queries/blogQuery";
 

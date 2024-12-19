@@ -1,10 +1,10 @@
 import React, { useCallback } from "react";
-import EmailPage from "fdk-react-templates/pages/profile/email";
+import EmailPage from "@gofynd/theme-template/pages/profile/email";
 import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
 import { useSnackbar } from "../../helper/hooks";
 import { useEmail } from "./useEmail";
-import "fdk-react-templates/pages/profile/email/email.css";
+import "@gofynd/theme-template/pages/profile/email/email.css";
 
 function Email({ fpi }) {
   const { showSnackbar } = useSnackbar();

@@ -1,5 +1,5 @@
 import React from "react";
-import VerifyEmailPage from "fdk-react-templates/pages/verify-email";
+import VerifyEmailPage from "@gofynd/theme-template/pages/verify-email";
 import { useEmail } from "../page-layouts/profile/useEmail";
 
 function VerifyEmail({ fpi }) {

@@ -1,10 +1,10 @@
 import React from "react";
-import OrdersHeader from "fdk-react-templates/components/order-header/order-header";
-import OrderShipment from "fdk-react-templates/components/order-shipment/order-shipment";
+import OrdersHeader from "@gofynd/theme-template/components/order-header/order-header";
+import OrderShipment from "@gofynd/theme-template/components/order-shipment/order-shipment";
 import styles from "../styles/order-list.less";
 import useOrdersListing from "../page-layouts/orders/useOrdersListing";
-import "fdk-react-templates/components/order-header/order-header.css";
-import "fdk-react-templates/components/order-shipment/order-shipment.css";
+import "@gofynd/theme-template/components/order-header/order-header.css";
+import "@gofynd/theme-template/components/order-shipment/order-shipment.css";
 import Loader from "../components/loader/loader";
 import ProfileRoot from "../components/profile/profile-root";
 import EmptyState from "../components/empty-state/empty-state";

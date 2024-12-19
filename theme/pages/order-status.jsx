@@ -2,12 +2,12 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { FDKLink } from "fdk-core/components";
 
-import OrderStatusPage from "fdk-react-templates/pages/order-status/order-status";
+import OrderStatusPage from "@gofynd/theme-template/pages/order-status/order-status";
 import { useLoggedInUser } from "../helper/hooks";
 import empty from "../assets/images/empty_state.png";
 import { ORDER_BY_ID } from "../queries/checkoutQuery";
 
-import "fdk-react-templates/pages/order-status/order-status.css";
+import "@gofynd/theme-template/pages/order-status/order-status.css";
 import Loader from "../components/loader/loader";
 import cartClock from "../assets/images/cart-clock.png";
 import FyImage from "../components/core/fy-image/fy-image";

@@ -1,7 +1,7 @@
 import React from "react";
-import FaqPage from "fdk-react-templates/pages/faq";
+import FaqPage from "@gofynd/theme-template/pages/faq";
 import useFaq from "../page-layouts/faq/useFaq";
-import "fdk-react-templates/pages/faq/faq.css";
+import "@gofynd/theme-template/pages/faq/faq.css";
 
 function Faqs({ fpi }) {
   const faqProps = useFaq({ fpi });

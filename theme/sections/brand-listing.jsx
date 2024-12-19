@@ -2,13 +2,13 @@ import React, { useState, useEffect, useMemo, useRef } from "react";
 import Slider from "react-slick";
 import { FDKLink } from "fdk-core/components";
 import { useGlobalStore } from "fdk-core/utils";
-import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
 import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/brand-listing.less";
 import { BRAND_DETAILS } from "../queries/brandsQuery";
 import placeHolder1X1 from "../assets/images/brand-small-placeholder.png";
 import placeHolder9X16 from "../assets/images/brand-placeholder-1.png";
-import "fdk-react-templates/components/core/fy-image/fy-image.css";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
 const SlickNextArrow = ({ currentSlide, slideCount, ...props }) => (

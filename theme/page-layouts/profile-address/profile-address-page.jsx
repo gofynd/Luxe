@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
-import Loader from "fdk-react-templates/components/loader/loader";
-import AddressForm from "fdk-react-templates/components/address-form/address-form";
-import AddressItem from "fdk-react-templates/components/address-item/address-item";
+import Loader from "@gofynd/theme-template/components/loader/loader";
+import AddressForm from "@gofynd/theme-template/components/address-form/address-form";
+import AddressItem from "@gofynd/theme-template/components/address-item/address-item";
 import { LOCALITY } from "../../queries/logisticsQuery";
 import useAddress from "../address/useAddress";
 import SvgWrapper from "../../components/core/svgWrapper/SvgWrapper";
 import EmptyState from "../../components/empty-state/empty-state";
-import "fdk-react-templates/components/loader/loader.css";
+import "@gofynd/theme-template/components/loader/loader.css";
 import { useSnackbar } from "../../helper/hooks";
 import { capitalize } from "../../helper/utils";
 import styles from "./profile-address-page.less";
-import "fdk-react-templates/components/address-form/address-form.css";
-import "fdk-react-templates/components/address-item/address-item.css";
+import "@gofynd/theme-template/components/address-form/address-form.css";
+import "@gofynd/theme-template/components/address-item/address-item.css";
 
 const DefaultAddress = () => {
   return <span className={styles.defaultAdd}>Default</span>;

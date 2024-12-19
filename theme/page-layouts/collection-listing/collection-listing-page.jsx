@@ -1,6 +1,6 @@
 import React from "react";
-import ProductListing from "fdk-react-templates/pages/product-listing/product-listing";
-import "fdk-react-templates/pages/product-listing/index.css";
+import ProductListing from "@gofynd/theme-template/pages/product-listing/product-listing";
+import "@gofynd/theme-template/pages/product-listing/index.css";
 import styles from "./collection-listing-page.less";
 import useCollectionListing from "./useCollectionListing";
 

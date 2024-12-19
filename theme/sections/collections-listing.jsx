@@ -3,12 +3,12 @@ import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
 import Slider from "react-slick";
 import { useGlobalStore } from "fdk-core/utils";
-import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
 import styles from "../styles/sections/collections-listing.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient, throttle } from "../helper/utils";
 import { COLLECTION } from "../queries/collectionsQuery";
-import "fdk-react-templates/components/core/fy-image/fy-image.css";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 
 export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
   const {

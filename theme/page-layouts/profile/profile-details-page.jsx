@@ -1,6 +1,6 @@
 import React from "react";
-import ProfileDetails from "fdk-react-templates/pages/profile";
-import "fdk-react-templates/pages/profile/profile-details.css";
+import ProfileDetails from "@gofynd/theme-template/pages/profile";
+import "@gofynd/theme-template/pages/profile/profile-details.css";
 import { useGlobalStore } from "fdk-core/utils";
 import { useAccounts, useSnackbar } from "../../helper/hooks";
 

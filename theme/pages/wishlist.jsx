@@ -1,10 +1,10 @@
 import React from "react";
-import Wishlist from "fdk-react-templates/pages/wishlist/wishlist";
+import Wishlist from "@gofynd/theme-template/pages/wishlist/wishlist";
 import useWishlist from "../page-layouts/wishlist/useWishlist";
 import styles from "../styles/wishlist.less";
 import { isLoggedIn } from "../helper/auth-guard";
 import Loader from "../components/loader/loader";
-import "fdk-react-templates/pages/wishlist/wishlist.css";
+import "@gofynd/theme-template/pages/wishlist/wishlist.css";
 
 function WishlistPage({ fpi }) {
   const { loading, ...wishlistProps } = useWishlist({ fpi });
