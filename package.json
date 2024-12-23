@@ -54,7 +54,7 @@
     "@babel/preset-react": "^7.18.6",
     "@emotion/is-prop-valid": "^1.3.1",
     "@gofynd/fdk-client-javascript": "^1.4.5",
-    "@gofynd/fdk-store-gql": "^3.0.39",
+    "@gofynd/fdk-store-gql": "^3.0.40",
     "@gofynd/theme-template": "^0.0.114",
     "@google/model-viewer": "^3.5.0",
     "@pixelbin/core": "^6.1.0",
