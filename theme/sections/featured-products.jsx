@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import OutsideClickHandler from "react-outside-click-handler";
-import { useGlobalStore } from "fdk-core/utils";
 import styles from "../styles/sections/featured-product.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import PdpImageGallery from "../page-layouts/pdp/components/image-gallery/image-gallery";
@@ -11,10 +10,11 @@ import {
   FEATURE_PRODUCT_DETAILS,
   FEATURE_PRODUCT_SIZE_PRICE,
 } from "../queries/featureProductQuery";
+import { useGlobalStore, useFPI } from "fdk-core/utils";
 import useFeatureProductDetails from "../components/featured-product/useFeatureProductDetails";
 import { LOCALITY } from "../queries/logisticsQuery";
 
-export function Component({ props, globalConfig, fpi }) {
+export function Component({ props, globalConfig = {} }) {
   const {
     size_selection_style,
     hide_single_size,
@@ -26,6 +26,7 @@ export function Component({ props, globalConfig, fpi }) {
     tax_label,
   } = props;
   const [slug, setSlug] = useState(product?.value);
+  const fpi = useFPI();
 
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
   const featureProductDetails = `featureProductDetails-${slug}`;
@@ -51,6 +52,7 @@ export function Component({ props, globalConfig, fpi }) {
   const [showSizeDropdown, setShowSizeDropdown] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [currentPincode, setCurrentPincode] = useState("");
+  const [showShareIcon, setShowShareIcon] = useState(false);
   const isSizeSelectionBlock = size_selection_style?.value === "block";
   const isSingleSize = sizes?.sizes?.length === 1;
   const isSizeCollapsed = hide_single_size?.value && isSingleSize;
@@ -164,7 +166,7 @@ export function Component({ props, globalConfig, fpi }) {
   return (
     <div
       className={styles.featured_product_container}
-      style={{ paddingBottom: `${globalConfig.section_margin_bottom}px` }}
+      style={{ paddingBottom: `${globalConfig?.section_margin_bottom}px` }}
     >
       <div className={styles["featured-products-header"]}>
         {Heading?.value && (
@@ -193,6 +195,7 @@ export function Component({ props, globalConfig, fpi }) {
                 slideTabCentreNone={true}
                 hideImagePreview={true}
                 followed={followed}
+                showShareIcon={showShareIcon}
               />
             </div>
           </div>
@@ -200,7 +203,7 @@ export function Component({ props, globalConfig, fpi }) {
             <div className={styles.product}>
               {/* ---------- Product Name ----------  */}
               <h1
-                className={`${styles.product__title} ${styles.h2} ${styles.fontHeader} fontHeader`}
+                className={`${styles.product__title} h2 ${styles.fontHeader} fontHeader`}
               >
                 {slug && name}
               </h1>
@@ -234,7 +237,7 @@ export function Component({ props, globalConfig, fpi }) {
               )}
               {/* ---------- Product Tax Label ---------- */}
               {tax_label?.value && (
-                <div className={`${styles.captionNormal} ${styles.taxLabel}`}>
+                <div className={`captionNormal ${styles.taxLabel}`}>
                   ({tax_label?.value})
                 </div>
               )}
@@ -242,7 +245,7 @@ export function Component({ props, globalConfig, fpi }) {
               {/* ---------- Short Description ----------  */}
               {short_description?.length > 0 && (
                 <p
-                  className={`${styles.b2} ${styles.fontBody} ${styles.shortDescription}`}
+                  className={`b2 ${styles.fontBody} ${styles.shortDescription}`}
                 >
                   {slug && short_description}
                 </p>
@@ -266,15 +269,13 @@ export function Component({ props, globalConfig, fpi }) {
               {/* ---------- Seller Details ---------- */}
               {show_seller?.value && (
                 <div className={`${styles.sellerInfo} ${styles.fontBody}`}>
-                  <div
-                    className={`${styles.storeSeller} ${styles.captionNormal}`}
-                  >
+                  <div className={`${styles.storeSeller} captionNormal`}>
                     <span className={styles.soldByLabel}>Seller :</span>
                     <div className={`${styles.nameWrapper} `}>
                       <p className={styles.storeSellerName}>{seller?.name}</p>
                       {seller?.count > 1 && (
                         <span
-                          className={`${styles.captionSemiBold} ${styles.otherSellers}`}
+                          className={`captionSemiBold ${styles.otherSellers}`}
                         >
                           &nbsp;&&nbsp;
                           {`${(seller?.count ?? 2) - 1} Other${
@@ -295,9 +296,7 @@ export function Component({ props, globalConfig, fpi }) {
                     }`}
                   >
                     <div>
-                      <p
-                        className={`${styles.b2} ${styles.sizeSelection__label}`}
-                      >
+                      <p className={`b2 ${styles.sizeSelection__label}`}>
                         <span>Size :</span>
                       </p>
 
@@ -306,9 +305,7 @@ export function Component({ props, globalConfig, fpi }) {
                           <button
                             type="button"
                             key={`${size?.display}`}
-                            className={`${styles.b2} ${
-                              styles.sizeSelection__block
-                            } ${
+                            className={`b2 ${styles.sizeSelection__block} ${
                               size.quantity === 0 &&
                               !isMto &&
                               styles["sizeSelection__block--disable"]
@@ -435,7 +432,7 @@ export function Component({ props, globalConfig, fpi }) {
                     {!disable_cart && (
                       <button
                         type="button"
-                        className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
+                        className={`${styles.button} btnSecondary ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
                         onClick={(e) => {
                           if (localStorage.getItem("pincode")) {
                             addProductForCheckout(e, selectedSize, false);
@@ -462,7 +459,7 @@ export function Component({ props, globalConfig, fpi }) {
                     {!disable_cart && (
                       <button
                         type="button"
-                        className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
+                        className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
                         onClick={(e) => {
                           if (localStorage.getItem("pincode")) {
                             addProductForCheckout(e, selectedSize, true);
@@ -473,7 +470,7 @@ export function Component({ props, globalConfig, fpi }) {
                         disabled={!slug}
                       >
                         <SvgWrapper
-                          svgSrc="buy-now"
+                          svgSrc="buyNow"
                           className={styles.buyNow__icon}
                         />
                         BUY NOW
@@ -488,7 +485,7 @@ export function Component({ props, globalConfig, fpi }) {
                   {!disable_cart && (
                     <button
                       type="button"
-                      className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
+                      className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
                       onClick={(e) => {
                         if (localStorage.getItem("pincode")) {
                           addProductForCheckout(e, selectedSize, true);
@@ -499,7 +496,7 @@ export function Component({ props, globalConfig, fpi }) {
                       disabled={!slug}
                     >
                       <SvgWrapper
-                        svgSrc="buy-now'"
+                        svgSrc="buyNow"
                         className={styles.buyNow__icon}
                       />
                       BUY NOW
@@ -627,3 +624,4 @@ Component.serverFetch = async ({ fpi, props }) => {
     productPrice: productPrice?.data,
   });
 };
+export default Component;

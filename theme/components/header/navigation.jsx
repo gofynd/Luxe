@@ -164,24 +164,44 @@ function Navigation({
               {getNavigation?.map((l1nav, index) => (
                 <li
                   key={index}
-                  className={`${styles.l1NavigationList__item} ${styles.h5} ${styles.flexAlignCenter} ${styles.fontBody}`}
+                  className={`${styles.l1NavigationList__item} h5 ${styles.flexAlignCenter} ${styles.fontBody}`}
                   onMouseEnter={() => handleMouseEnter(index)}
                   onMouseLeave={handleMouseLeave}
                 >
-                  <FDKLink to={convertActionToUrl(l1nav?.action)}>
-                    <span
-                      className={`${styles.menuTitle} ${styles.flexAlignCenter} `}
+                  {l1nav?.action?.page?.type === "external" ? (
+                    <a
+                      href={l1nav?.action?.page?.query?.url[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                      <span>{l1nav.display}</span>
-                      {l1nav.sub_navigation &&
-                        l1nav.sub_navigation.length > 0 && (
+                      <span
+                        className={`${styles.menuTitle} ${styles.flexAlignCenter}`}
+                      >
+                        <span>{l1nav.display}</span>
+                        {l1nav.sub_navigation?.length > 0 && (
                           <SvgWrapper
                             className={`${styles.menuIcon} ${styles.dropdownIcon}`}
                             svgSrc="arrow-down"
                           />
                         )}
-                    </span>
-                  </FDKLink>
+                      </span>
+                    </a>
+                  ) : (
+                    <FDKLink to={convertActionToUrl(l1nav?.action)}>
+                      <span
+                        className={`${styles.menuTitle} ${styles.flexAlignCenter}`}
+                      >
+                        <span>{l1nav.display}</span>
+                        {l1nav.sub_navigation?.length > 0 && (
+                          <SvgWrapper
+                            className={`${styles.menuIcon} ${styles.dropdownIcon}`}
+                            svgSrc="arrow-down"
+                          />
+                        )}
+                      </span>
+                    </FDKLink>
+                  )}
+
                   <AnimatePresence>
                     {l1nav?.sub_navigation?.length > 0 && (
                       <motion.ul
@@ -194,65 +214,73 @@ function Navigation({
                         {l1nav.sub_navigation.map((l2nav, l2Index) => (
                           <li
                             key={l2nav.display}
-                            className={`${styles.l2NavigationList__item} ${styles.b1} ${styles.fontBody}`}
+                            className={`${styles.l2NavigationList__item} b1 ${styles.fontBody}`}
                             onMouseEnter={() => setHoveredL2Index(l2Index)}
                             onMouseLeave={() => setHoveredL2Index(null)}
                           >
-                            <FDKLink
-                              to={convertActionToUrl(l2nav?.action)}
+                            <div
                               className={
-                                styles["l2NavigationList__item--wrapper"]
+                                styles["l2NavigationList__item--container"]
                               }
                             >
-                              <span
-                                className={`${styles.flexAlignCenter} ${styles.justifyBetween}`}
+                              <FDKLink
+                                to={convertActionToUrl(l2nav?.action)}
+                                className={
+                                  styles["l2NavigationList__item--wrapper"]
+                                }
                               >
-                                <span>{l2nav.display}</span>
-                                {l2nav.sub_navigation &&
-                                  l2nav.sub_navigation.length > 0 && (
-                                    <SvgWrapper
-                                      className={`${styles.menuIcon} ${styles.arrowRightIcon}`}
-                                      svgSrc="arrow-down"
-                                    />
-                                  )}
-                              </span>
-                            </FDKLink>
-                            <AnimatePresence>
-                              {l2nav.sub_navigation.length > 0 &&
-                                hoveredL2Index === l2Index && (
-                                  <motion.ul
-                                    className={styles.l3NavigationList}
-                                    initial={
-                                      isClient ? { opacity: 0, x: -20 } : null
-                                    }
-                                    animate={
-                                      isClient ? { opacity: 1, x: 0 } : null
-                                    }
-                                    exit={
-                                      isClient ? { opacity: 0, x: -20 } : null
-                                    }
-                                    transition={{ duration: 0.3 }}
-                                  >
-                                    {l2nav.sub_navigation.map((l3nav) => (
-                                      <li
-                                        key={`${l3nav.display}`}
-                                        className={`${styles.l3NavigationList__item} ${styles.b1} ${styles.fontBody}`}
-                                      >
-                                        <FDKLink
-                                          to={convertActionToUrl(l3nav?.action)}
-                                          className={`${styles["l3NavigationList__item--wrapper"]}`}
+                                <span
+                                  className={`${styles.flexAlignCenter} ${styles.justifyBetween}`}
+                                >
+                                  <span>{l2nav.display}</span>
+                                  {l2nav.sub_navigation &&
+                                    l2nav.sub_navigation.length > 0 && (
+                                      <SvgWrapper
+                                        className={`${styles.menuIcon} ${styles.arrowRightIcon}`}
+                                        svgSrc="arrow-down"
+                                      />
+                                    )}
+                                </span>
+                              </FDKLink>
+                              <AnimatePresence>
+                                {l2nav.sub_navigation.length > 0 &&
+                                  hoveredL2Index === l2Index && (
+                                    <motion.ul
+                                      className={styles.l3NavigationList}
+                                      initial={
+                                        isClient ? { opacity: 0, x: -20 } : null
+                                      }
+                                      animate={
+                                        isClient ? { opacity: 1, x: 0 } : null
+                                      }
+                                      exit={
+                                        isClient ? { opacity: 0, x: -20 } : null
+                                      }
+                                      transition={{ duration: 0.3 }}
+                                    >
+                                      {l2nav.sub_navigation.map((l3nav) => (
+                                        <li
+                                          key={`${l3nav.display}`}
+                                          className={`${styles.l3NavigationList__item} b1 ${styles.fontBody}`}
                                         >
-                                          <span
-                                            className={styles.flexAlignCenter}
+                                          <FDKLink
+                                            to={convertActionToUrl(
+                                              l3nav?.action
+                                            )}
+                                            className={`${styles["l3NavigationList__item--wrapper"]}`}
                                           >
-                                            {l3nav.display}
-                                          </span>
-                                        </FDKLink>
-                                      </li>
-                                    ))}
-                                  </motion.ul>
-                                )}
-                            </AnimatePresence>
+                                            <span
+                                              className={styles.flexAlignCenter}
+                                            >
+                                              {l3nav.display}
+                                            </span>
+                                          </FDKLink>
+                                        </li>
+                                      ))}
+                                    </motion.ul>
+                                  )}
+                              </AnimatePresence>
+                            </div>
                           </li>
                         ))}
                       </motion.ul>
@@ -288,11 +316,7 @@ function Navigation({
         </div>
       )}
       {/* Sidebar If */}
-      <div
-        className={` ${
-          globalConfig?.header_layout === "double" ? "" : styles.single
-        }`}
-      >
+      <div>
         <motion.div
           className={`${styles.sidebar}`}
           initial={{ x: "-100%" }} // Start off-screen to the left
@@ -300,10 +324,7 @@ function Navigation({
           transition={{ duration: 0.3, ease: "easeInOut" }}
           style={{
             position: "fixed",
-            top:
-              globalConfig?.header_layout === "double"
-                ? 0
-                : "var(--headerHeight)",
+            top: 0,
             left: 0,
             height: "100%",
           }}
@@ -311,8 +332,7 @@ function Navigation({
           <div
             className={`${styles.sidebar__header} ${styles.flexAlignCenter} ${styles.justifyBetween}`}
             style={{
-              display:
-                globalConfig?.header_layout === "double" ? "flex" : "none",
+              display: "flex",
             }}
           >
             <FDKLink link="/">
@@ -344,9 +364,22 @@ function Navigation({
               {navigationList.map((nav, index) => (
                 <li
                   key={`${nav.display}-${index}`}
-                  className={`${styles["sidebar__navigation--item"]} ${styles.flexAlignCenter} ${styles.justifyBetween} ${styles.fontBody} ${styles.h5}`}
+                  className={`${styles["sidebar__navigation--item"]} ${styles.flexAlignCenter} ${styles.justifyBetween} ${styles.fontBody} h5`}
                 >
-                  {convertActionToUrl(nav?.action) ? (
+                  {nav?.action?.page?.type === "external" ? (
+                    <a
+                      href={nav?.action?.page?.query?.url[0]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.navLink}
+                      onClick={() => {
+                        setShowSidebar(false);
+                        closeSidebarNav();
+                      }}
+                    >
+                      {nav.display}
+                    </a>
+                  ) : convertActionToUrl(nav?.action) ? (
                     <FDKLink
                       className={styles.navLink}
                       to={convertActionToUrl(nav?.action)}
@@ -360,7 +393,7 @@ function Navigation({
                   ) : (
                     <span
                       onClick={() => {
-                        if (nav.sub_navigation.length > 0) {
+                        if (nav.sub_navigation?.length > 0) {
                           redirectToMenu(nav, "l2");
                         } else {
                           setShowSidebar(false);
@@ -377,20 +410,7 @@ function Navigation({
                         className={`${styles.arrowRightIcon} ${styles.sidebarIcon} ${styles.menuIcon}`}
                         svgSrc="arrow-down"
                         style={{
-                          display:
-                            globalConfig?.header_layout === "double"
-                              ? "block"
-                              : "none",
-                        }}
-                      />
-                      <SvgWrapper
-                        className={`${styles.arrowIcon} ${styles.sidebarIcon} ${styles.menuIcon}`}
-                        svgSrc="arrow-left-long"
-                        style={{
-                          display:
-                            globalConfig?.header_layout !== "double"
-                              ? "block"
-                              : "none",
+                          display: "block",
                         }}
                       />
                     </div>
@@ -406,14 +426,12 @@ function Navigation({
                     styles.title
                   } ${styles.flexAlignCenter} ${styles.justifyStart} ${
                     styles.fontBody
-                  } ${isDoubleRowHeader ? styles.b1 : styles.h5}`}
+                  } b1`}
                   style={{ display: sidebarl2Nav.title ? "flex" : "none" }}
                 >
                   <SvgWrapper
                     className={`${styles.arrowLeftIcon} ${styles.sidebarIcon} ${styles.menuIcon}`}
-                    svgSrc={
-                      isDoubleRowHeader ? "arrow-down" : "arrow-left-long"
-                    }
+                    svgSrc="arrow-down"
                   />
                   <span>{sidebarl2Nav.title}</span>
                 </li>
@@ -422,9 +440,7 @@ function Navigation({
                     key={index}
                     className={`${styles["sidebar__navigation--item"]} ${
                       styles.flexAlignCenter
-                    } ${styles.justifyBetween} ${styles.fontBody} ${
-                      isDoubleRowHeader ? styles.h5 : styles.b1
-                    }`}
+                    } ${styles.justifyBetween} ${styles.fontBody} h5`}
                   >
                     {convertActionToUrl(nav?.action) ? (
                       <FDKLink
@@ -457,20 +473,7 @@ function Navigation({
                           className={`${styles.arrowRightIcon} ${styles.sidebarIcon} ${styles.menuIcon}`}
                           svgSrc="arrow-down"
                           style={{
-                            display:
-                              globalConfig?.header_layout === "double"
-                                ? "block"
-                                : "none",
-                          }}
-                        />
-                        <SvgWrapper
-                          className={`${styles.arrowIcon} ${styles.sidebarIcon} ${styles.menuIcon}`}
-                          svgSrc="arrow-left-long"
-                          style={{
-                            display:
-                              globalConfig?.header_layout !== "double"
-                                ? "block"
-                                : "none",
+                            display: "block",
                           }}
                         />
                       </div>
@@ -487,29 +490,17 @@ function Navigation({
                     styles.title
                   } ${styles.flexAlignCenter} ${styles.justifyStart} ${
                     styles.fontBody
-                  } ${isDoubleRowHeader ? styles.b1 : styles.h5}`}
+                  } b1`}
                   style={{ display: sidebarl3Nav.title ? "flex" : "none" }}
                 >
                   <SvgWrapper
                     className={`${styles.arrowLeftIcon} ${styles.sidebarIcon} ${styles.menuIcon}`}
                     svgSrc="arrow-down"
                     style={{
-                      display:
-                        globalConfig?.header_layout === "double"
-                          ? "block"
-                          : "none",
+                      display: "block",
                     }}
                   />
-                  <SvgWrapper
-                    className={`${styles.arrowLeftIcon} ${styles.sidebarIcon} ${styles.menuIcon}`}
-                    svgSrc="arrow-left-long"
-                    style={{
-                      display:
-                        globalConfig?.header_layout !== "double"
-                          ? "block"
-                          : "none",
-                    }}
-                  />
+
                   <span>{sidebarl3Nav.title}</span>
                 </li>
                 {sidebarl3Nav.navigation.map((nav, index) => (
@@ -517,9 +508,7 @@ function Navigation({
                     key={index}
                     className={`${styles["sidebar__navigation--item"]} ${
                       styles.flexAlignCenter
-                    } ${styles.justifyBetween} ${styles.fontBody} ${
-                      isDoubleRowHeader ? styles.h5 : styles.b1
-                    }`}
+                    } ${styles.justifyBetween} ${styles.fontBody} h5`}
                   >
                     {convertActionToUrl(nav?.action) ? (
                       <FDKLink
@@ -552,8 +541,8 @@ function Navigation({
           <div className={styles.sidebar__footer}>
             <button
               type="button"
-              className={`${styles["sidebar__footer--item"]} ${styles.account} ${styles.flexAlignCenter} ${styles.fontBody} ${styles.h5}`}
-              style={{ display: isDoubleRowHeader ? "flex" : "none" }}
+              className={`${styles["sidebar__footer--item"]} ${styles.account} ${styles.flexAlignCenter} ${styles.fontBody} h5`}
+              style={{ display: "flex" }}
               onClick={() => {
                 checkLogin("profile_mobile");
                 setShowSidebar(false);
@@ -569,9 +558,7 @@ function Navigation({
               type="button"
               className={`${styles["sidebar__footer--item"]} ${
                 styles.wishlist
-              } ${styles.flexAlignCenter} ${styles.fontBody} ${
-                isDoubleRowHeader ? styles.h5 : styles.b1
-              }`}
+              } ${styles.flexAlignCenter} ${styles.fontBody} h5`}
               onClick={() => {
                 checkLogin("wishlist");
                 setShowSidebar(false);
@@ -583,60 +570,12 @@ function Navigation({
               />
               <span>Wishlist</span>
             </button>
-            <button
-              type="button"
-              className={`${styles["sidebar__footer--item"]} ${
-                styles.login
-              } ${styles.flexAlignCenter} ${styles.fontBody} ${
-                !isDoubleRowHeader ? styles.b1 : ""
-              }`}
-              style={{ display: !isDoubleRowHeader ? "flex" : "none" }}
-              onClick={() => {
-                checkLogin(LoggedIn ? "profile_mobile" : "logout");
-                setShowSidebar(false);
-              }}
-            >
-              <SvgWrapper
-                className={`${styles.user} ${styles.sidebarIcon} ${styles.menuIcon}`}
-                svgSrc="user"
-              />
-              <span>{LoggedIn ? "Account" : "Log in"}</span>
-            </button>
-            <ul
-              className={`${styles.social} ${styles.flexAlignCenter}`}
-              style={{
-                display:
-                  globalConfig?.header_layout === "single" && isSocialLinks
-                    ? "flex"
-                    : "none",
-              }}
-            >
-              {Object.entries(contactInfo?.social_links || {}).map(
-                ([key, item], index) =>
-                  item.link && (
-                    <li key={index} className={styles.socialIcon} title={key}>
-                      <FDKLink
-                        to={item.link}
-                        target="_blank"
-                        title={item.title}
-                      >
-                        <SvgWrapper
-                          className={styles.icon}
-                          svgSrc={`nav-${key}`}
-                        />
-                      </FDKLink>
-                    </li>
-                  )
-              )}
-            </ul>
           </div>
         </motion.div>
       </div>
       {/* eslint-disable jsx-a11y/no-static-element-interactions */}
       <div
-        className={`${styles.overlay} ${showSidebar ? styles.show : ""} ${
-          globalConfig?.header_layout === "double" ? "" : styles.overlaySingle
-        }`}
+        className={`${styles.overlay} ${showSidebar ? styles.show : ""} `}
         onClick={closeSidebarNav}
       />
     </div>

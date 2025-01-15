@@ -1,12 +1,14 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FDKLink } from "fdk-core/components";
-import FyImage from "../components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/hero-image.less";
 import desktopPlaceholder from "../assets/images/hero-desktop-placeholder.png";
 import mobilePlaceholder from "../assets/images/hero-mobile-placeholder.png";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
+import Hotspot from "../components/hotspot/product-hotspot";
 
 export function Component({ props, globalConfig, blocks }) {
   const {
@@ -27,11 +29,10 @@ export function Component({ props, globalConfig, blocks }) {
     isRunningOnClient() ? window?.innerWidth : 400
   );
   const [isMobile, setIsMobile] = useState(false);
-  const [showTooltip, setShowTooltip] = useState({});
-  const [tooltipHeight, setTooltipHeight] = useState(0);
-  const [tooltipWidth, setTooltipWidth] = useState(0);
   const [interval, setInterval] = useState([]);
   const [isClient, setIsClient] = useState(false);
+  const [tooltipHeight, setTooltipHeight] = useState(0);
+  const [tooltipWidth, setTooltipWidth] = useState(0);
 
   useEffect(() => {
     if (isRunningOnClient()) {
@@ -48,13 +49,34 @@ export function Component({ props, globalConfig, blocks }) {
       window?.addEventListener("resize", handleResize);
 
       return () => {
-        window.removeEventListener("resize", handleResize);
+        window?.removeEventListener("resize", handleResize);
       };
     }
     if (blocks?.length) {
       setInterval(blocks?.length);
     }
   }, []);
+
+  useEffect(() => {
+    const updateTooltipDimensions = () => {
+      const tooltip = document.querySelector(
+        `.${styles["application-banner-container"]} .${styles["tooltip-visible"]}`
+      );
+      if (tooltip) {
+        const newHeight = tooltip.clientHeight - 20;
+        const newWidth = tooltip.clientWidth;
+        if (newHeight !== tooltipHeight) {
+          setTooltipHeight(newHeight);
+        }
+        if (newWidth !== tooltipWidth) {
+          setTooltipWidth(newWidth);
+        }
+      }
+    };
+
+    updateTooltipDimensions();
+  }, [tooltipHeight, tooltipWidth]);
+
   const getMobileUrl = () => {
     return mobile_banner?.value !== ""
       ? mobile_banner?.value
@@ -72,7 +94,7 @@ export function Component({ props, globalConfig, blocks }) {
         { breakpoint: { min: 1400 }, width: 2500 },
         { breakpoint: { min: 1023 }, width: 2200 },
         {
-          breakpoint: { max: 780 },
+          breakpoint: { max: 480 },
           width: 900,
           url: getMobileUrl(),
         },
@@ -80,9 +102,9 @@ export function Component({ props, globalConfig, blocks }) {
     }
     return [
       { breakpoint: { min: 1400 }, width: 1500 },
-      { breakpoint: { min: 1023 }, width: 1200 },
+      { breakpoint: { min: 1023 }, width: 1024 },
       {
-        breakpoint: { max: 780 },
+        breakpoint: { max: 480 },
         width: 500,
         url: getMobileUrl(),
       },
@@ -249,68 +271,21 @@ export function Component({ props, globalConfig, blocks }) {
     return positions;
   };
 
-  useEffect(() => {
-    const updateTooltipDimensions = () => {
-      const tooltip = document.querySelector(
-        `.${styles["application-banner-container"]} .${styles["tooltip-visible"]}`
-      );
-      if (tooltip) {
-        const newHeight = tooltip.clientHeight - 20;
-        const newWidth = tooltip.clientWidth;
-        if (newHeight !== tooltipHeight) {
-          setTooltipHeight(newHeight);
-        }
-        if (newWidth !== tooltipWidth) {
-          setTooltipWidth(newWidth);
-        }
-      }
-    };
-
-    updateTooltipDimensions();
-  }, [showTooltip, tooltipHeight, tooltipWidth]);
-
   const dynamicBoxStyle = useCallback(
     (block) => {
       return {
-        "--x_position": `${block.props?.x_position?.value || 0}%`,
-        "--y_position": `${block.props?.y_position?.value || 0}%`,
-        "--box_width": `${block.props?.box_width?.value || 0}%`,
-        "--box_height": `${block.props?.box_height?.value || 0}%`,
+        "--x_position": `${block?.props?.x_position?.value || 0}%`,
+        "--y_position": `${block?.props?.y_position?.value || 0}%`,
+        "--box_width": `${block?.props?.box_width?.value || 0}%`,
+        "--box_height": `${block?.props?.box_height?.value || 0}%`,
         "--tooltip-height": `${tooltipHeight}px`,
         "--tooltip-width": `${tooltipWidth}px`,
-        "--x_offset": `-${block.props?.y_position?.value || 0}%`,
-        "--y_offset": `-${block.props?.x_position?.value || 0}%`,
+        "--x_offset": `-${block.props?.x_position?.value || 0}%`,
+        "--y_offset": `-${block.props?.y_position?.value || 0}%`,
       };
     },
     [tooltipHeight, tooltipWidth]
   );
-
-  const mouseOverTooltip = (param, index) => {
-    if (!isMobile) {
-      clearTimeout(interval[index]);
-      if (!param) {
-        interval[index] = setTimeout(() => {
-          setShowTooltip((prev) => ({ ...prev, [index]: param }));
-        }, 200);
-      } else {
-        setShowTooltip((prev) => ({ ...prev, [index]: param }));
-      }
-    }
-  };
-
-  const clickHotspotMobile = (event, param, index) => {
-    event.stopPropagation();
-    setShowTooltip((prevIndexes) => {
-      const newIndexes = {};
-      // Close all tooltips
-      Object.keys(prevIndexes).forEach((key) => {
-        newIndexes[key] = false;
-      });
-      // Toggle the clicked tooltip
-      newIndexes[index] = !prevIndexes[index];
-      return newIndexes;
-    });
-  };
 
   const displayOverlay = () =>
     !!(overlay_option?.value && overlay_option?.value !== "no_overlay");
@@ -318,192 +293,113 @@ export function Component({ props, globalConfig, blocks }) {
   const getOverlayColor = () =>
     overlay_option?.value === "black_overlay" ? "#000000" : "#ffffff";
 
+  const getHotspots = () => {
+    return {
+      desktop: blocks?.filter((block) => block?.type === "hotspot_desktop"),
+      mobile: blocks?.filter((block) => block?.type === "hotspot_mobile"),
+    };
+  };
+
   return (
     <div
       className={styles.heroImageContainer}
-      style={{ marginBottom: `${globalConfig.section_margin_bottom}px` }}
+      style={{ marginBottom: `${globalConfig?.section_margin_bottom}px` }}
     >
-      <IntersectionObserverComponent>
-        {(getDesktopUrl() || getMobileUrl()) && (
-          <FyImage
-            src={getDesktopUrl()}
-            sources={getImgSrcSet()}
-            showOverlay={displayOverlay()}
-            overlayColor={getOverlayColor()}
-            aspectRatio={16 / 9}
-            mobileAspectRatio={9 / 16}
-          />
+      {/* To Do: fix intersection observer flicker issue */}
+      {/* <IntersectionObserverComponent> */}
+      {(getDesktopUrl() || getMobileUrl()) && (
+        <FyImage
+          src={getDesktopUrl()}
+          sources={getImgSrcSet()}
+          showOverlay={displayOverlay()}
+          overlayColor={getOverlayColor()}
+          defer={false}
+          isFixedAspectRatio={false}
+        />
+      )}
+      <div className={styles.overlayItems} style={getOverlayPositionStyles()}>
+        {heading?.value && (
+          <h1 className={`${styles.header} fontHeader`}>{heading?.value}</h1>
         )}
-        <div className={styles.overlayItems} style={getOverlayPositionStyles()}>
-          {heading?.value && (
-            <h1 className={`${styles.header} fontHeader`}>{heading?.value}</h1>
-          )}
 
-          {description?.value && (
-            <p className={`${styles.description} ${styles.bSmall} fontBody `}>
-              {description?.value}
-            </p>
-          )}
+        {description?.value && (
+          <p className={`${styles.description} b2 fontBody `}>
+            {description?.value}
+          </p>
+        )}
 
-          {button_text?.value && (
-            <FDKLink to={button_link?.value}>
-              <button
-                type="button"
-                className={`${styles.cta_button} fontBody} ${
-                  invert_button_color?.value ? "btnSecondary" : "btnPrimary"
-                }`}
-                disabled={!(button_link?.value?.length > 1)}
-              >
-                {button_text?.value}
-              </button>
+        {button_text?.value && (
+          <FDKLink to={button_link?.value}>
+            <button
+              type="button"
+              className={`${styles.cta_button} fontBody} ${
+                invert_button_color?.value ? "btnSecondary" : "btnPrimary"
+              }`}
+              disabled={!(button_link?.value?.length > 1)}
+            >
+              {button_text?.value}
+            </button>
+          </FDKLink>
+        )}
+      </div>
+      {!isMobile &&
+        getHotspots()?.desktop?.map((hotspot, index) => {
+          return hotspot?.props?.pointer_type?.value !== "box" ? (
+            <Hotspot
+              className={styles["hotspot--desktop"]}
+              key={index}
+              hotspot={hotspot}
+              product={{
+                hotspot_description: hotspot?.props?.hotspot_header?.value,
+                media: [
+                  { type: "image", url: hotspot?.props?.hotspot_image?.value },
+                ],
+                name: hotspot?.props?.hotspot_description?.value,
+              }}
+              hotspot_link_text={hotspot?.props?.hotspot_link_text?.value}
+              redirect_link={hotspot?.props?.redirect_link?.value}
+            />
+          ) : (
+            <FDKLink to={hotspot?.props?.redirect_link?.value}>
+              <div
+                className={`
+                      ${styles["box-wrapper"]}
+                      ${hotspot?.props?.edit_visible?.value ? `${styles["box-wrapper-visible"]}` : ""}
+                    `}
+                style={dynamicBoxStyle(hotspot)}
+              ></div>
             </FDKLink>
-          )}
-        </div>
-        {blocks &&
-          blocks.map((block, index) => {
-            if (
-              (block.type === "hotspot_desktop" && !isMobile) ||
-              (block.type === "hotspot_mobile" && isMobile)
-            ) {
-              return (
-                <div
-                  key={index}
-                  className={
-                    isMobile
-                      ? styles["mobile-hotspot"]
-                      : styles["desktop-hotspot"]
-                  }
-                >
-                  <div className={styles["link-container"]}>
-                    {!isMobile && (
-                      <FDKLink to={block.props?.redirect_link?.value}>
-                        <div
-                          onMouseOver={() => mouseOverTooltip(true, index)}
-                          onMouseOut={() => mouseOverTooltip(false, index)}
-                          onFocus={() => mouseOverTooltip(true, index)}
-                          onBlur={() => mouseOverTooltip(false, index)}
-                          className={`
-                      ${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper"] : styles["pointer-wrapper"]}
-                      ${block.props?.edit_visible?.value ? `${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper-visible"] : styles["pointer-wrapper-visible"]}` : ""}
+          );
+        })}
+      {isMobile &&
+        getHotspots()?.mobile?.map((hotspot, index) => {
+          return hotspot?.props?.pointer_type?.value !== "box" ? (
+            <Hotspot
+              className={styles["hotspot--mobile"]}
+              key={index}
+              hotspot={hotspot}
+              product={{
+                hotspot_description: hotspot?.props?.hotspot_header?.value,
+                media: [
+                  { type: "image", url: hotspot?.props?.hotspot_image?.value },
+                ],
+                name: hotspot?.props?.hotspot_description?.value,
+              }}
+              hotspot_link_text={hotspot?.props?.hotspot_link_text?.value}
+              redirect_link={hotspot?.props?.redirect_link?.value}
+            />
+          ) : (
+            <FDKLink to={hotspot?.props?.redirect_link?.value}>
+              <div
+                className={`
+                      ${styles["box-wrapper"]}
+                      ${hotspot?.props?.edit_visible?.value ? `${styles["box-wrapper-visible"]}` : ""}
                     `}
-                          style={dynamicBoxStyle(block)}
-                        ></div>
-                      </FDKLink>
-                    )}
-                    {isMobile &&
-                    block.props?.redirect_link?.value &&
-                    block?.props?.pointer_type?.value === "box" ? (
-                      <FDKLink to={block.props?.redirect_link?.value}>
-                        <div
-                          onClick={(e) => clickHotspotMobile(e, true, index)}
-                          className={`
-                      ${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper"] : styles["pointer-wrapper"]}
-                      ${block.props?.edit_visible?.value ? `${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper-visible"] : styles["pointer-wrapper-visible"]}` : ""}
-                    `}
-                          style={dynamicBoxStyle(block)}
-                        />
-                      </FDKLink>
-                    ) : (
-                      isMobile && (
-                        <div
-                          onClick={(e) => clickHotspotMobile(e, true, index)}
-                          className={`
-                      ${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper"] : styles["pointer-wrapper"]}
-                      ${block.props?.edit_visible?.value ? `${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper-visible"] : styles["pointer-wrapper-visible"]}` : ""}
-                    `}
-                          style={dynamicBoxStyle(block)}
-                        />
-                      )
-                    )}
-
-                    <div
-                      id="tooltip"
-                      className={`
-                    ${styles.tooltip}
-                    ${showTooltip[index] && block?.props?.pointer_type?.value === "pointer" ? styles["tooltip-visible"] : styles["tooltip-hidden"]}
-                  `}
-                      style={dynamicBoxStyle(block)}
-                      onMouseOver={() => mouseOverTooltip(true, index)}
-                      onMouseOut={() => mouseOverTooltip(false, index)}
-                      onFocus={() => mouseOverTooltip(true, index)}
-                      onBlur={() => mouseOverTooltip(false, index)}
-                      onClick={() => {
-                        if (isMobile) {
-                          window.location.replace(
-                            block.props?.redirect_link?.value
-                          );
-                        }
-                      }}
-                    >
-                      {isMobile && (
-                        <div
-                          onClick={(e) => clickHotspotMobile(e, false, index)}
-                          className={styles["close-div"]}
-                        >
-                          <SvgWrapper
-                            svgSrc="close"
-                            className={styles["close-icon"]}
-                          />
-                        </div>
-                      )}
-                      {block.props?.hotspot_image?.value && (
-                        <FyImage
-                          customClass={styles["image-wrapper"]}
-                          src={block.props?.hotspot_image?.value}
-                          sources={[{ breakpoint: { min: 300 }, width: 380 }]}
-                        />
-                      )}
-                      {(block?.props?.hotspot_header.value ||
-                        block?.props?.hotspot_description.value) && (
-                        <div className={styles["text-wrapper"]}>
-                          {block?.props?.hotspot_header?.value?.length > 0 && (
-                            <div
-                              className={`${styles["tooltip-header"]} fontHeader`}
-                              title={block?.props?.hotspot_header.value}
-                            >
-                              {block?.props?.hotspot_header?.value}
-                            </div>
-                          )}
-                          <div
-                            className={`${styles["tooltip-description"]} fontBody`}
-                            title={block?.props?.hotspot_description.value}
-                          >
-                            {block?.props?.hotspot_description?.value}
-                          </div>
-                          {block.props?.hotspot_link_text?.value?.length >
-                            0 && (
-                            <div className={styles["tooltip-link"]}>
-                              <FDKLink
-                                className={`${styles["tooltip-action"]} fontBody`}
-                                to={block.props?.redirect_link?.value}
-                              >
-                                {block.props?.hotspot_link_text?.value}
-                              </FDKLink>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            }
-            // Return null if condition is not met
-            return null;
-          })}
-      </IntersectionObserverComponent>
-      <noscript>
-        {(getDesktopUrl() || getMobileUrl()) && (
-          <FyImage
-            src={getDesktopUrl()}
-            sources={getImgSrcSet()}
-            showOverlay={displayOverlay()}
-            overlayColor={getOverlayColor()}
-            aspectRatio={16 / 9}
-            mobileAspectRatio={9 / 16}
-          />
-        )}
-      </noscript>
+                style={dynamicBoxStyle(hotspot)}
+              ></div>
+            </FDKLink>
+          );
+        })}
     </div>
   );
 }
@@ -573,7 +469,6 @@ export const settings = {
       default: "",
       options: {
         aspect_ratio: "16:9",
-        aspect_ratio_strict_check: true,
       },
     },
     {
@@ -647,7 +542,6 @@ export const settings = {
       default: "",
       options: {
         aspect_ratio: "9:16",
-        aspect_ratio_strict_check: true,
       },
     },
     {
@@ -750,7 +644,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Vertical Position",
+          label: "Horizontal Position",
           default: 50,
         },
         {
@@ -760,7 +654,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Horizontal Position",
+          label: "Vertical Position",
           default: 50,
         },
         {
@@ -853,7 +747,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Vertical Position",
+          label: "Horizontal Position",
           default: 50,
         },
         {
@@ -863,7 +757,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Horizontal Position",
+          label: "Vertical Position",
           default: 50,
         },
         {
@@ -925,3 +819,4 @@ export const settings = {
     },
   ],
 };
+export default Component;

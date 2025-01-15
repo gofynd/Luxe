@@ -19,23 +19,31 @@
   text-align: center;
 }
 .Trust-marker-image-container {
-  padding: 32px 40px;
+  --col-gap: 20px;
+  --col-count: var(--item-count);
+  padding: 32px 40px 0px 40px;
+  @media @tablet {
+    padding: 24px 40px 0px 40px;
+  }
+  align-items: stretch;
   display: grid;
   justify-content: center;
+  gap: var(--col-gap);
+  grid-template-columns: repeat(
+    auto-fit,
+    calc(
+      (100% / var(--col-count)) -
+        (var(--col-gap) * (var(--col-count) - 1) / var(--col-count))
+    )
+  );
   @media @tablet {
-    grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+    --col-gap: 12px;
   }
-  grid-template-columns: repeat(auto-fit, minmax(256px, 1fr));
-  gap: 20px;
-  align-items: stretch;
-
+  @media @mobile {
+    --col-count: var(--item-count-mobile);
+  }
   a {
     background-color: var(--img-background-color);
-  }
-  @media @tablet {
-    display: grid;
-    gap: 12px;
-    padding: 24px 16px;
   }
   // @media @mobile {
   //   display: flex;
@@ -48,6 +56,7 @@
   display: flex !important;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding: 24px;
   width: 100%;
   // border-radius: @ImageRadius;
@@ -56,13 +65,12 @@
   }
 }
 .trust_marker_image {
-  width: 100px;
-  height: 100px;
+  max-width: 100px;
   margin: 0 auto;
+  padding-bottom: 8px;
   @media @tablet {
-    width: 24px;
-    height: 24px;
-    // margin: 0;
+    max-width: 24px;
+    padding-bottom: 4px;
   }
 }
 .trust-marker-data {
@@ -76,12 +84,10 @@
   text-align: center;
   line-height: normal;
   letter-spacing: -0.4px;
-  padding-top: 8px;
   text-transform: capitalize;
   color: @TextHeading;
   @media @tablet {
     font-size: 8px;
-    padding-top: 4px;
     letter-spacing: -0.16px;
   }
   // @media @mobile {
@@ -109,8 +115,10 @@
 }
 .trustMarker {
   .sliderView {
-    padding: 32px 40px;
-
+    padding: 32px 40px 0px 40px;
+    @media @tablet {
+      padding: 24px 40px 0px 40px;
+    }
     --gap: 12px;
     @media @desktop {
       --gap: 24px;
@@ -146,10 +154,10 @@
         height: auto !important;
         // padding: 0 calc(var(--gap) / 2);
         background-color: var(--img-background-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
-    }
-    @media @tablet {
-      padding: 24px 16px;
     }
     // @media @mobile {
     //   padding: 0px 16px;

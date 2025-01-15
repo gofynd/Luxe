@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FDKLink } from "fdk-core/components";
-
-import FyImage from "../components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import styles from "../styles/sections/media-with-text.less";
 import { isRunningOnClient } from "../helper/utils";
 import Hotspot from "../components/hotspot/product-hotspot";
@@ -18,6 +18,7 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     description,
     button_text,
     align_text_desktop,
+    text_alignment,
   } = props;
 
   // const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
@@ -145,7 +146,6 @@ export function Component({ props, globalConfig, blocks, fpi }) {
       mobile: blocks?.filter((block) => block?.type === "hotspot_mobile"),
     };
   };
-
   useEffect(() => {
     if (isRunningOnClient()) {
       const localDetectMobileWidth = () =>
@@ -165,6 +165,54 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     }
   }, []);
 
+  const mapAlignment = {
+    top_left: {
+      justifyContent: "unset",
+      alignItems: "flex-start",
+      textAlign: "left",
+    },
+    top_center: {
+      justifyContent: "unset",
+      alignItems: "center",
+      textAlign: "center",
+    },
+    top_right: {
+      justifyContent: "unset",
+      alignItems: "flex-end",
+      textAlign: "right",
+    },
+    center_center: {
+      justifyContent: "center",
+      alignItems: "center",
+      textAlign: "center",
+    },
+    center_left: {
+      justifyContent: "center",
+      alignItems: "flex-start",
+      textAlign: "left",
+    },
+    center_right: {
+      justifyContent: "center",
+      alignItems: "flex-end",
+      textAlign: "right",
+    },
+    bottom_left: {
+      justifyContent: "flex-end",
+      alignItems: "flex-start",
+      textAlign: "left",
+    },
+    bottom_right: {
+      justifyContent: "flex-end",
+      alignItems: "flex-end",
+      textAlign: "right",
+    },
+    bottom_center: {
+      justifyContent: "flex-end",
+      alignItems: "center",
+      textAlign: "center",
+    },
+  };
+
   const dynamicStyles = {
     paddingBottom: `${globalConfig?.section_margin_bottom}px`,
   };
@@ -181,6 +229,7 @@ export function Component({ props, globalConfig, blocks, fpi }) {
           aspectRatio={314 / 229}
           mobileAspectRatio={320 / 467}
           sources={getImgSrcSet()}
+          isFixedAspectRatio={false}
         />
         {!isMobile &&
           getHotspots()?.desktop?.map((hotspot, index) => (
@@ -203,7 +252,10 @@ export function Component({ props, globalConfig, blocks, fpi }) {
           ))}
       </div>
 
-      <div className={styles.media_text__info}>
+      <div
+        className={styles.media_text__info}
+        style={mapAlignment[text_alignment?.value]}
+      >
         {title?.value && (
           <h2 className={`${styles.media_text__heading} fontHeader`}>
             {title?.value}
@@ -236,7 +288,6 @@ export const settings = {
       default: "",
       options: {
         aspect_ratio: "314:229",
-        aspect_ratio_strict_check: true,
       },
     },
     {
@@ -246,8 +297,52 @@ export const settings = {
       default: "",
       options: {
         aspect_ratio: "320:467",
-        aspect_ratio_strict_check: true,
       },
+    },
+    {
+      id: "text_alignment",
+      type: "select",
+      options: [
+        {
+          value: "top_left",
+          text: "Top Left",
+        },
+        {
+          value: "top_center",
+          text: "Top Center",
+        },
+        {
+          value: "top_right",
+          text: "Top Right",
+        },
+        {
+          value: "center_center",
+          text: "Center Center",
+        },
+        {
+          value: "center_left",
+          text: "Center Left",
+        },
+        {
+          value: "center_right",
+          text: "Center Right",
+        },
+        {
+          value: "bottom_left",
+          text: "Bottom Left",
+        },
+        {
+          value: "bottom_right",
+          text: "Bottom Right",
+        },
+        {
+          value: "bottom_center",
+          text: "Bottom Center",
+        },
+      ],
+      default: "center_left",
+      label: "Text Alignment",
+      info: "Alignment of text content",
     },
 
     {
@@ -351,3 +446,4 @@ export const settings = {
     },
   ],
 };
+export default Component;

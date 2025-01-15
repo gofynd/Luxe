@@ -1,19 +1,17 @@
 import { useLocation } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { isRunningOnClient } from "../../helper/utils";
 
 const useHeader = (fpi) => {
   const FOLLOWED_IDS = useGlobalStore(fpi.getters.FOLLOWED_LIST);
   const wishlistIds = FOLLOWED_IDS?.items?.map((m) => m?.uid);
   const wishlistCount = FOLLOWED_IDS?.page?.item_total;
-
   const NAVIGATION = useGlobalStore(fpi.getters.NAVIGATION);
   const THEME = useGlobalStore(fpi.getters.THEME);
   const CART_ITEMS = useGlobalStore(fpi.getters.CART);
   const CONTACT_INFO = useGlobalStore(fpi.getters.CONTACT_INFO);
   const SUPPORT_INFO = useGlobalStore(fpi.getters.SUPPORT_INFORMATION);
-  const [cartItemCount, setCartItemCount] = useState(0);
   const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
   const loggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
   const BUY_NOW = useGlobalStore(fpi.getters.BUY_NOW_CART_ITEMS);
@@ -38,20 +36,14 @@ const useHeader = (fpi) => {
     }
   }, []);
 
-  useEffect(() => {
-    const bNowCount = BUY_NOW?.cart?.user_cart_items_count;
+  const cartItemCount = useMemo(() => {
+    const bNowCount = BUY_NOW?.cart?.user_cart_items_count || 0;
     if (bNowCount && buyNowParam) {
-      setCartItemCount(bNowCount);
-    } else if (CART_ITEMS?.cart_items?.items?.length >= 0) {
-      const totalQuantity = CART_ITEMS?.cart_items?.items?.reduce(
-        (acc, item) => {
-          return acc + (item.quantity || 0);
-        },
-        0
-      );
-      setCartItemCount(totalQuantity);
+      return bNowCount;
+    } else {
+      return CART_ITEMS?.cart_items?.user_cart_items_count || 0;
     }
-  }, [CART_ITEMS, buyNowParam]);
+  }, [CART_ITEMS, BUY_NOW, buyNowParam]);
 
   return {
     HeaderNavigation: HeaderNavigation?.filter((f) => f?.active) || [],

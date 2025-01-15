@@ -102,6 +102,59 @@ export const settings = JSON.stringify({
       default: "1",
       label: "Default grid layout mobile",
     },
+    {
+      type: "checkbox",
+      id: "show_add_to_cart",
+      label: "Show Add to Cart",
+      default: true,
+    },
+    {
+      type: "checkbox",
+      id: "show_size_guide",
+      label: "Show Size Guide",
+      default: true,
+    },
+    {
+      type: "text",
+      id: "tax_label",
+      label: "Price tax label text",
+      default: "Price inclusive of all tax",
+    },
+    {
+      type: "checkbox",
+      id: "mandatory_pincode",
+      label: "Mandatory Delivery check",
+      default: true,
+    },
+    {
+      type: "checkbox",
+      id: "hide_single_size",
+      label: "Hide single size",
+      default: false,
+    },
+    {
+      type: "checkbox",
+      id: "preselect_size",
+      label: "Preselect size",
+      info: "Applicable only for multiple-size products",
+      default: true,
+    },
+    {
+      type: "radio",
+      id: "size_selection_style",
+      label: "Size selection style",
+      default: "dropdown",
+      options: [
+        {
+          value: "dropdown",
+          text: "Dropdown style",
+        },
+        {
+          value: "block",
+          text: "Block style",
+        },
+      ],
+    },
   ],
 });
 

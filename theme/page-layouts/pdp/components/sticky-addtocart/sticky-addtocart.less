@@ -7,10 +7,8 @@
   display: none;
   padding: 16px;
   background: @PageBackground;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  width: 100%;
+  position: relative;
   z-index: calc(@header - 1);
   @media @mobile {
     display: block;
@@ -102,7 +100,7 @@
   padding: 12px;
   cursor: pointer;
   transition: all 0.4s;
-  border: none;
+  border: 0.8px solid @DividerStokes;
   border-radius: @ButtonRadius;
   line-height: normal;
   background-color: @ButtonSecondary;
@@ -113,10 +111,7 @@
   height: 14px;
   width: 13px;
   margin-right: 5px;
-
-  /deep/ svg path {
-    fill: @ButtonPrimary;
-  }
+  fill: @ButtonPrimary;
 }
 
 .productPrice {

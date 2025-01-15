@@ -53,6 +53,7 @@ body {
 .fdk-theme-outlet {
   min-height: 0;
   width: 100vw;
+  min-height: 75vh;
   background-color: @PageBackground;
   @media @mobile {
     width: 100vw;
@@ -559,8 +560,14 @@ img::selection {
   @media @tablet {
     padding: 0;
   }
+  @media @mobile {
+    width: 100%;
+  }
   width: auto;
   li {
+    @media @mobile {
+      margin: 0 2px;
+    }
     cursor: pointer;
     display: inline-block;
     margin: 0 4px;
@@ -568,6 +575,9 @@ img::selection {
     width: auto;
     height: auto;
     button {
+      @media @mobile {
+        width: 10px;
+      }
       width: 14px;
       height: 4px;
       border-radius: 25px;
@@ -595,6 +605,9 @@ img::selection {
       button {
         background-color: @TextHeading;
         width: 24px;
+        @media @mobile {
+          width: 18px;
+        }
       }
     }
   }

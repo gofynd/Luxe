@@ -1,6 +1,6 @@
 import React from "react";
 import ProductListingPage from "../page-layouts/plp/product-listing-page";
-import { PLP_PRODUCTS } from "../queries/plpQuery";
+import { PLP_PRODUCTS, BRAND_META, CATEGORY_META } from "../queries/plpQuery";
 
 const ProductListing = ({ fpi }) => {
   return <ProductListingPage fpi={fpi} />;
@@ -8,6 +8,24 @@ const ProductListing = ({ fpi }) => {
 
 export const settings = JSON.stringify({
   props: [
+    {
+      type: "image_picker",
+      id: "desktop_banner",
+      label: "Desktop Banner Image",
+      default: "",
+    },
+    {
+      type: "image_picker",
+      id: "mobile_banner",
+      label: "Mobile Banner Image",
+      default: "",
+    },
+    {
+      type: "url",
+      id: "banner_link",
+      default: "",
+      label: "Redirect",
+    },
     {
       type: "checkbox",
       id: "product_number",
@@ -108,6 +126,59 @@ export const settings = JSON.stringify({
       default: "",
       label: "Description",
     },
+    {
+      type: "checkbox",
+      id: "show_add_to_cart",
+      label: "Show Add to Cart",
+      default: true,
+    },
+    {
+      type: "checkbox",
+      id: "show_size_guide",
+      label: "Show Size Guide",
+      default: true,
+    },
+    {
+      type: "text",
+      id: "tax_label",
+      label: "Price tax label text",
+      default: "Price inclusive of all tax",
+    },
+    {
+      type: "checkbox",
+      id: "mandatory_pincode",
+      label: "Mandatory Delivery check",
+      default: true,
+    },
+    {
+      type: "checkbox",
+      id: "hide_single_size",
+      label: "Hide single size",
+      default: false,
+    },
+    {
+      type: "checkbox",
+      id: "preselect_size",
+      label: "Preselect size",
+      info: "Applicable only for multiple-size products",
+      default: true,
+    },
+    {
+      type: "radio",
+      id: "size_selection_style",
+      label: "Size selection style",
+      default: "dropdown",
+      options: [
+        {
+          value: "dropdown",
+          text: "Dropdown style",
+        },
+        {
+          value: "block",
+          text: "Block style",
+        },
+      ],
+    },
   ],
 });
 
@@ -116,12 +187,15 @@ export const sections = JSON.stringify([]);
 ProductListing.serverFetch = async ({ fpi, router }) => {
   let filterQuery = "";
   let sortQuery = "";
+  let search = "";
   let pageNo = null;
   Object.keys(router.filterQuery)?.forEach((key) => {
     if (key === "page_no") {
       pageNo = parseInt(router.filterQuery[key], 10);
     } else if (key === "sort_on") {
       sortQuery = router.filterQuery[key];
+    } else if (key === "q") {
+      search = router.filterQuery[key];
     } else if (typeof router.filterQuery[key] === "string") {
       if (filterQuery.includes(":")) {
         filterQuery = `${filterQuery}:::${key}:${router.filterQuery[key]}`;
@@ -137,11 +211,25 @@ ProductListing.serverFetch = async ({ fpi, router }) => {
         }
       });
     }
+
+    if (key === "category") {
+      const slug = Array.isArray(router.filterQuery[key])
+        ? router.filterQuery[key][0]
+        : router.filterQuery[key];
+      fpi.executeGQL(CATEGORY_META, { slug });
+    }
+    if (key === "brand") {
+      const slug = Array.isArray(router.filterQuery[key])
+        ? router.filterQuery[key][0]
+        : router.filterQuery[key];
+      fpi.executeGQL(BRAND_META, { slug });
+    }
   });
 
   const payload = {
     filterQuery,
     sortOn: sortQuery,
+    search,
     enableFilter: true,
     first: 12,
     pageType: "number",

@@ -71,7 +71,7 @@ export default function CheckPincodeModal({
         </div>
 
         {pincodeErrorMessage && (
-          <div className={`${styles.captionNormal} ${styles.error}`}>
+          <div className={`captionNormal ${styles.error}`}>
             {pincodeErrorMessage}
           </div>
         )}

@@ -9,9 +9,18 @@ import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 import styles from "./styles/search.less";
 import { SEARCH_PRODUCT } from "../../queries/headerQuery";
 
-function Search({ screen, onSearchOpened, globalConfig, fpi }) {
+function Search({
+  screen,
+  onSearchOpened,
+  globalConfig,
+  fpi,
+  customSearchClass = "",
+  customSearchWrapperClass = "",
+  showCloseButton = true,
+  alwaysOnSearch = false,
+}) {
   const [searchData, setSearchData] = useState([]);
-  const [showSearch, setShowSearch] = useState(false);
+  const [showSearch, setShowSearch] = useState(alwaysOnSearch);
   const [searchText, setSearchText] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const navigate = useNavigate();
@@ -106,7 +115,14 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
           : styles["single-row-search"]
       }
     >
-      <button onClick={openSearch} aria-label="search" type="button">
+      <button
+        onClick={openSearch}
+        aria-label="search"
+        type="button"
+        style={{
+          display: alwaysOnSearch ? "none" : "block",
+        }}
+      >
         <SvgWrapper
           className={`${styles.searchIcon} ${styles.headerIcon}`}
           svgSrc="single-row-search"
@@ -114,7 +130,7 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
       </button>
       <div>
         <motion.div
-          className={`${styles.search}`}
+          className={`${styles.search} ${customSearchClass}`}
           initial={{ scaleY: 0, opacity: 0 }}
           animate={{
             scaleY: showSearch ? 1 : 0,
@@ -125,7 +141,9 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
             transformOrigin: "top",
           }}
         >
-          <div className={styles.search__wrapper}>
+          <div
+            className={`${styles.search__wrapper} ${customSearchWrapperClass}`}
+          >
             <div className={styles.search__input}>
               <input
                 ref={inputRef}
@@ -155,7 +173,7 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
               <label
                 htmlFor="searchInput"
                 id="search-input-label"
-                className={`${styles["search__input--label"]} ${styles.b1} ${
+                className={`${styles["search__input--label"]} b1 ${
                   styles.fontBody
                 } ${isSearchFocused ? styles.active : ""}`}
                 style={{ display: !isDoubleRowHeader ? "block" : "none" }}
@@ -163,18 +181,20 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
                 Search
               </label>
             </div>
-            <SvgWrapper
-              className={`${styles["search--closeIcon"]} ${styles.headerIcon}`}
-              svgSrc="close"
-              onClick={closeSearch}
-            />
+            {showCloseButton && (
+              <SvgWrapper
+                className={`${styles["search--closeIcon"]} ${styles.headerIcon}`}
+                svgSrc="close"
+                onClick={closeSearch}
+              />
+            )}
             <div
               className={styles.search__suggestions}
               style={{ display: searchText ? "block" : "none" }}
             >
               <div className={styles["search__suggestions--products"]}>
                 <div
-                  className={`${styles.b1} ${styles["search__suggestions--title"]} ${styles.fontBody}`}
+                  className={`b1 ${styles["search__suggestions--title"]} ${styles.fontBody}`}
                   style={{
                     display:
                       !isDoubleRowHeader && searchData?.length > 0
@@ -208,7 +228,7 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
                           />
                         </div>
                         <div
-                          className={`${styles.productTitle} ${styles.b1} ${styles.fontBody}`}
+                          className={`${styles.productTitle} b1 ${styles.fontBody}`}
                         >
                           {getDisplayData(product)}
                         </div>
@@ -243,7 +263,7 @@ function Search({ screen, onSearchOpened, globalConfig, fpi }) {
                 >
                   <button
                     type="button"
-                    className={`${styles.btnLink} fontBody`}
+                    className="btnLink fontBody"
                     onClick={() =>
                       redirectToProduct(`/products/?q=${searchText}`)
                     }

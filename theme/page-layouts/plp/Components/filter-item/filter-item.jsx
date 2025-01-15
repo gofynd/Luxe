@@ -18,7 +18,7 @@ function FilterItem({ filter, isMobileView, updateFilter }) {
           className={`${styles.filter__title} ${styles.flexAlignCenter} ${styles.justifyBetween}`}
           onClick={toggleActive}
         >
-          <p className={`${styles.name} ${styles.b2}`}>{filter.key.display}</p>
+          <p className={`${styles.name} b2`}>{filter.key.display}</p>
           <div>
             <SvgWrapper
               className={`${styles["arrow-icon"]} ${

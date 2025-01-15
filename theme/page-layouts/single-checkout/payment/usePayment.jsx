@@ -18,6 +18,7 @@ const usePayment = (fpi) => {
 
   const [searchParams] = useSearchParams();
   const cart_id = searchParams.get("id");
+  const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
   const address_id = searchParams.get("address_id");
 
   const PAYMENT_OPTIONS_SVG = {
@@ -128,6 +129,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then(() => {
           addParamsToLocation({
@@ -150,6 +153,7 @@ const usePayment = (fpi) => {
               paymentOption?.payment_flows[
                 selectedNewCardData.aggregator_name.toLowerCase()
               ],
+            buy_now: buyNow,
           });
         });
     } else if (mode === "CARD") {
@@ -192,6 +196,7 @@ const usePayment = (fpi) => {
           paymentOption?.payment_flows[
             selectedCard.aggregator_name.toLowerCase()
           ],
+        buy_now: buyNow,
       });
     } else if (mode === "WL") {
       const payload = {
@@ -205,6 +210,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then(() => {
           addParamsToLocation({
@@ -222,6 +229,7 @@ const usePayment = (fpi) => {
             billing_address_id: address_id,
             paymentflow:
               paymentOption?.payment_flows[selectedWallet.aggregator_name],
+            buy_now: buyNow,
           });
         });
     } else if (mode === "UPI") {
@@ -236,6 +244,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then(() => {
           addParamsToLocation({
@@ -257,6 +267,7 @@ const usePayment = (fpi) => {
             billing_address_id: address_id,
             paymentflow:
               paymentOption?.payment_flows[selectedUPIData.aggregator_name],
+            buy_now: buyNow,
           });
         });
     } else if (mode === "NB") {
@@ -278,6 +289,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then(() => {
           // if (res?.selectPaymentMode?.is_valid) {
@@ -303,6 +316,7 @@ const usePayment = (fpi) => {
             address_id,
             billing_address_id: address_id,
             paymentflow: paymentOption?.payment_flows[options.aggregator_name],
+            buy_now: buyNow,
           });
           // }
         });
@@ -317,6 +331,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then((res) => {
           if (res?.data?.selectPaymentMode?.is_valid) {
@@ -335,6 +351,7 @@ const usePayment = (fpi) => {
               billing_address_id: address_id,
               paymentflow:
                 paymentOption?.payment_flows[selectedTabData.aggregator_name],
+              buy_now: buyNow,
             });
           }
         });
@@ -351,6 +368,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then(() => {
           addParamsToLocation({
@@ -371,6 +390,7 @@ const usePayment = (fpi) => {
               paymentOption?.payment_flows[
                 selectedPayLater.aggregator_name.toLowerCase()
               ],
+            buy_now: buyNow,
           });
         });
     } else if (mode === "CARDLESS_EMI") {
@@ -384,6 +404,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then(() => {
           addParamsToLocation({
@@ -402,6 +424,7 @@ const usePayment = (fpi) => {
             billing_address_id: address_id,
             paymentflow:
               paymentOption?.payment_flows[selectedCardless.aggregator_name],
+            buy_now: buyNow,
           });
         });
     } else if (mode === "Other") {
@@ -415,6 +438,8 @@ const usePayment = (fpi) => {
       await fpi
         .executeGQL(SELECT_PAYMENT_MODE, {
           updateCartPaymentRequestInput: payload,
+          id: cart_id,
+          buyNow,
         })
         .then(() => {
           addParamsToLocation({
@@ -435,6 +460,7 @@ const usePayment = (fpi) => {
                 paymentOption?.payment_flows[
                   selectedOtherPayment.aggregator_name?.toLowerCase()
                 ],
+              buy_now: buyNow,
             })
             .then((res) => {
               if (res?.error?.message) {

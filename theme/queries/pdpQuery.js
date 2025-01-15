@@ -583,9 +583,27 @@ export const ADD_TO_CART = `mutation AddItemsToCart($buyNow: Boolean,$areaCode:S
           promotion_name
           promotion_type
           applied_free_articles {
-            article_id
-            parent_item_identifier
-            quantity
+              article_id
+              parent_item_identifier
+              quantity
+              free_gift_item_details {
+                  item_brand_name
+                  item_id
+                  item_images_url
+                  item_name
+                  item_price_details {
+                    currency
+                    marked {
+                        min
+                        max
+                    }
+                    effective {
+                        min
+                        max
+                    }
+                  }
+                  item_slug
+              }
           }
           discount_rules {
             item_criteria

@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
 import { CART_DETAILS } from "../../queries/cartQuery";
 import { LOCALITY } from "../../queries/localityQuery";
 import { SELECT_ADDRESS } from "../../queries/checkoutQuery";
 import { useAddress, useSnackbar } from "../../helper/hooks/index";
+import useInternational from "../../components/header/useInternational";
+import { capitalize } from "../../helper/utils";
 
 const useCartDeliveryLocation = ({ fpi }) => {
+  const [searchParams] = useSearchParams();
+
   const navigate = useNavigate();
+  const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
+  const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
   const isLoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
   const CART = useGlobalStore(fpi.getters.CART);
   const { cart_items } = CART || {};
   const [pincode, setPincode] = useState(
-    localStorage?.getItem("pincode") || ""
+    (pincodeDetails?.localityValue ?? locationDetails?.pincode) || ""
   );
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [isPincodeModalOpen, setIsPincodeModalOpen] = useState(false);
@@ -29,9 +35,10 @@ const useCartDeliveryLocation = ({ fpi }) => {
     addAddress,
     mapApiKey,
     showGoogleMap,
-    getLocality,
   } = useAddress({ fpi, pageName: "cart" });
   const { showSnackbar } = useSnackbar();
+
+  const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
 
   useEffect(() => {
     if (!allAddress?.length) {
@@ -46,6 +53,157 @@ const useCartDeliveryLocation = ({ fpi }) => {
       setSelectedAddressId(otherAddresses?.[0]?.id);
     }
   }, [allAddress]);
+
+  const {
+    countries,
+    fetchCountrieDetails,
+    countryDetails,
+    currentCountry,
+    fetchLocalities,
+    isInternationalShippingEnabled,
+    renderTemplate,
+    updateEnumForField,
+  } = useInternational({
+    fpi,
+  });
+  const [defaultFormSchema, setDefaultFormSchema] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(currentCountry);
+  const [countrySearchText, setCountrySearchText] = useState("");
+
+  useEffect(() => {
+    if (currentCountry) {
+      setSelectedCountry(currentCountry);
+    }
+  }, [currentCountry]);
+
+  useEffect(() => {
+    fetchCountrieDetails({
+      countryIsoCode: selectedCountry?.iso2 ?? countries?.[0]?.iso2,
+    });
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    const formSchema = renderTemplate(
+      countryDetails?.fields?.address_template?.checkout_form,
+      countryDetails?.fields?.address
+    );
+    formSchema.forEach((group) => {
+      group.fields.forEach((field) => {
+        if (field.key === "phone") {
+          // Add the country_code key to the field object
+          field.countryCode = selectedCountry?.phone_code.replace("+", "");
+        }
+      });
+    });
+    getOptionsDetails(formSchema);
+  }, [countryDetails]);
+
+  const getLocalityValues = async (slug) => {
+    const payload = {
+      pageNo: 1,
+      pageSize: 1000,
+      country: selectedCountry?.iso2,
+      locality: slug,
+      city: "",
+    };
+    const localityDetails = await fetchLocalities(payload);
+    return localityDetails || [];
+  };
+
+  function convertDropDownField(inputField) {
+    return {
+      key: inputField.display_name,
+      display: inputField.display_name,
+    };
+  }
+
+  const getOptionsDetails = async (formSchema) => {
+    if (!countryDetails?.fields?.serviceability_fields?.length) {
+      setDefaultFormSchema([...formSchema]);
+      return;
+    }
+    for (const item of countryDetails?.fields?.serviceability_fields) {
+      const serviceabilityDetails = countryDetails?.fields?.address.find(
+        (entity) => entity.slug === item
+      );
+      let localityDetails = [];
+      if (serviceabilityDetails.input === "list") {
+        // eslint-disable-next-line no-await-in-loop
+        localityDetails = await getLocalityValues(item, formSchema);
+      }
+      const dropDownFieldArray = [];
+      for (const locality of localityDetails) {
+        dropDownFieldArray.push(convertDropDownField(locality));
+      }
+      const formData = updateEnumForField(formSchema, item, dropDownFieldArray);
+      setDefaultFormSchema([...formData]);
+    }
+  };
+  const setI18nDetails = (e) => {
+    const selectedCountry = countries.find(
+      (country) => country.display_name === e
+    );
+    setSelectedCountry(selectedCountry);
+    fetchCountrieDetails({ countryIsoCode: selectedCountry?.iso2 });
+  };
+
+  const handleCountrySearch = (event) => {
+    setCountrySearchText(event);
+  };
+
+  const getFilteredCountries = (selectedCountry) => {
+    if (!countrySearchText) {
+      return countries.map((country) => convertDropDownField(country)) || [];
+    }
+    return countries?.filter(
+      (country) =>
+        country?.display_name
+          ?.toLowerCase()
+          ?.indexOf(countrySearchText?.toLowerCase()) !== -1 &&
+        country?.id !== selectedCountry?.id
+    );
+  };
+
+  const getLocality = (posttype, postcode) => {
+    return fpi
+      .executeGQL(LOCALITY, {
+        locality: posttype,
+        localityValue: `${postcode}`,
+        country: selectedCountry?.iso2,
+      })
+      .then((res) => {
+        const data = { showError: false, errorMsg: "" };
+        const localityObj = res?.data?.locality || false;
+        if (localityObj) {
+          localityObj?.localities.forEach((locality) => {
+            switch (locality.type) {
+              case "city":
+                data.city = capitalize(locality.display_name);
+                break;
+              case "state":
+                data.state = capitalize(locality.display_name);
+                break;
+              case "country":
+                data.country = capitalize(locality.display_name);
+                break;
+              default:
+                break;
+            }
+          });
+
+          return data;
+        } else {
+          showSnackbar(
+            res?.errors?.[0]?.message || "Pincode verification failed"
+          );
+          data.showError = true;
+          data.errorMsg =
+            res?.errors?.[0]?.message || "Pincode verification failed";
+          return data;
+        }
+      });
+  };
+
   function handleButtonClick() {
     if (isLoggedIn) {
       setIsAddressModalOpen(true);
@@ -81,7 +239,7 @@ const useCartDeliveryLocation = ({ fpi }) => {
     }
   }
 
-  const handlePincodeSubmit = ({ pincode }) => {
+  const handlePincodeSubmit = ({ posttype, pincode }) => {
     const deliveryPayload = {
       locality: "pincode",
       localityValue: pincode?.toString(),
@@ -92,10 +250,8 @@ const useCartDeliveryLocation = ({ fpi }) => {
         if (res.errors) {
           throw res?.errors?.[0];
         }
-        localStorage?.setItem("pincode", pincode);
-        setPincode(pincode);
         const payload = {
-          buyNow: false,
+          buyNow,
           includeAllItems: true,
           includeCodCharges: true,
           includeBreakup: true,
@@ -155,6 +311,7 @@ const useCartDeliveryLocation = ({ fpi }) => {
     const addrId = id.length ? id : findAddress?.id;
     const payload = {
       cartId: cart_id,
+      buyNow,
       selectCartAddressRequestInput: {
         cart_id,
         id: addrId,
@@ -165,8 +322,7 @@ const useCartDeliveryLocation = ({ fpi }) => {
     fpi.executeGQL(SELECT_ADDRESS, payload).then((res) => {
       if (res?.data?.selectAddress?.is_valid) {
         const selectedAddPincode = findAddress?.area_code;
-        localStorage?.setItem("pincode", selectedAddPincode);
-        setPincode(selectedAddPincode);
+        // setPincode(selectedAddPincode);
         closeModal();
         gotoCheckout(addrId);
         setAddrError(null);
@@ -178,12 +334,38 @@ const useCartDeliveryLocation = ({ fpi }) => {
       }
     });
   };
+  const setI18NDetails = () => {
+    const cookiesData = JSON.stringify({
+      currency: { code: selectedCountry?.currency?.code },
+      country: {
+        iso_code: selectedCountry?.iso2,
+        isd_code: selectedCountry?.phone_code,
+      },
+      display_name: selectedCountry?.display_name,
+      countryCode: selectedCountry?.country?.iso2,
+    });
+    fpi.setI18nDetails(cookiesData);
+  };
   function addAddressCaller(data) {
+    if (
+      data?.geo_location?.latitude === "" &&
+      data?.geo_location?.longitude === ""
+    ) {
+      delete data.geo_location;
+    }
+    for (const key in data) {
+      if (data[key] === undefined) {
+        delete data[key]; // Removes undefined values directly from the original object
+      }
+    }
+    data.country_phone_code = `+${data.phone.countryCode}`;
+    data.phone = data.phone.mobile;
+    fpi.setI18nDetails({ countryCode: countryDetails?.iso2 });
     addAddress?.(data)?.then((res) => {
       if (res?.data?.addAddress?.success) {
+        setI18NDetails();
         fetchAddresses().then(() => {
-          localStorage?.setItem("pincode", data?.area_code);
-          setPincode(data?.area_code);
+          // setPincode(data?.area_code);
           closeModal();
           gotoCheckout(res?.data?.addAddress?.id);
         });
@@ -192,6 +374,13 @@ const useCartDeliveryLocation = ({ fpi }) => {
       }
     });
   }
+
+  useEffect(() => {
+    setPincode(
+      (pincodeDetails?.localityValue ?? locationDetails?.pincode) || ""
+    );
+  }, [pincodeDetails, locationDetails]);
+
   return {
     pincode,
     error,
@@ -212,6 +401,13 @@ const useCartDeliveryLocation = ({ fpi }) => {
     isAddAddressModalOpen,
     selectAddress,
     addrError,
+    isInternationalShippingEnabled,
+    defaultFormSchema,
+    setI18nDetails,
+    handleCountrySearch,
+    getFilteredCountries,
+    selectedCountry,
+    countryDetails,
   };
 };
 

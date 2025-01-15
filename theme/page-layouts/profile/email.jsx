@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import EmailPage from "@gofynd/theme-template/pages/profile/email";
+import { motion } from "framer-motion";
 import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
 import { useSnackbar } from "../../helper/hooks";
@@ -56,13 +56,22 @@ function Email({ fpi }) {
 
   return (
     <ProfileRoot fpi={fpi}>
-      <EmailPage
-        sendVerificationLinkToEmail={handleVerification}
-        setEmailAsPrimary={handleSetPrimary}
-        addEmail={handleAddEmail}
-        deleteEmail={handleDelete}
-        emails={emails}
-      />
+      <motion.div
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, transition: { duration: 0.5 } },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        <EmailPage
+          sendVerificationLinkToEmail={handleVerification}
+          setEmailAsPrimary={handleSetPrimary}
+          addEmail={handleAddEmail}
+          deleteEmail={handleDelete}
+          emails={emails}
+        />
+      </motion.div>
     </ProfileRoot>
   );
 }

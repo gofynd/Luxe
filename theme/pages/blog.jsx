@@ -7,6 +7,7 @@ import useBlog from "../page-layouts/blog/useBlog";
 function Blog({ fpi }) {
   const {
     blogs,
+    totalBlogsList,
     sliderBlogs,
     footerProps,
     sliderProps,
@@ -20,6 +21,7 @@ function Blog({ fpi }) {
   return (
     <BlogList
       blogs={blogs}
+      totalBlogsList={totalBlogsList}
       sliderBlogs={sliderBlogs}
       footerProps={footerProps}
       sliderProps={sliderProps}
@@ -43,7 +45,7 @@ export const settings = JSON.stringify({
     },
     {
       id: "filter_tags",
-      type: "text",
+      type: "tags-list",
       default: "",
       label: "Filter By Tags",
       info: "Blog tags are case-sensitive. Enter the identical tag used on the Fynd platform, separated by commas, to display the blog post in the slideshow.",
@@ -182,7 +184,7 @@ Blog.serverFetch = async ({ fpi, router }) => {
     });
 
     fpi.custom.setValue("blogProps", {
-      sliderBlogsData: response?.data?.applicationContent?.blogs,
+      totalBlogsListData: response?.data?.applicationContent?.blogs,
       filterQuery,
     });
 

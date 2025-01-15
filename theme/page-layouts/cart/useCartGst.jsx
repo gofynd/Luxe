@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { CART_META_UPDATE } from "../../queries/cartQuery";
 
 const GST_NUMBER_LENGTH = 15;
@@ -10,8 +11,10 @@ const useCartGst = ({ fpi, cartData }) => {
   const [gstNumber, setGstNumber] = useState(cartData?.gstin || "");
   const [isApplied, setIsApplied] = useState(!!cartData?.gstin);
   const [error, setError] = useState({});
+  const [searchParams] = useSearchParams();
 
   const gstCharges = cartData?.breakup_values?.raw?.gst_charges;
+  const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
 
   useEffect(() => {
     if (cartData) {
@@ -26,6 +29,7 @@ const useCartGst = ({ fpi, cartData }) => {
       cartMetaRequestInput: {
         gstin,
       },
+      buyNow,
     };
     return fpi.executeGQL(CART_META_UPDATE, payload).then((res) => {
       if (res?.errors) {
@@ -41,6 +45,7 @@ const useCartGst = ({ fpi, cartData }) => {
       cartMetaRequestInput: {
         gstin: "",
       },
+      buyNow,
     };
     return fpi.executeGQL(CART_META_UPDATE, payload).then((res) => {
       if (res?.errors) {

@@ -1,6 +1,5 @@
 import React from "react";
-import OrdersHeader from "@gofynd/theme-template/components/order-header/order-header";
-import OrderShipment from "@gofynd/theme-template/components/order-shipment/order-shipment";
+import { motion } from "framer-motion";
 import styles from "../styles/order-list.less";
 import useOrdersListing from "../page-layouts/orders/useOrdersListing";
 import "@gofynd/theme-template/components/order-header/order-header.css";
@@ -16,6 +15,8 @@ function OrdersList({ fpi }) {
   const getOrdersCount = () => {
     if (orderShipments?.page?.item_total) {
       return `${orderShipments.page.item_total} Orders`;
+    } else {
+      return "";
     }
     return `0 Order`;
   };
@@ -25,7 +26,15 @@ function OrdersList({ fpi }) {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className={`${styles.basePageContainer} ${styles.margin0auto}`}>
+        <motion.div
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { duration: 0.5 } },
+          }}
+          initial="hidden"
+          animate="visible"
+          className="basePageContainer margin0auto"
+        >
           <OrdersHeader
             filters={orderShipments?.filters}
             title="My Orders"
@@ -49,7 +58,7 @@ function OrdersList({ fpi }) {
               ))}
             </div>
           )}
-        </div>
+        </motion.div>
       )}
     </ProfileRoot>
   );

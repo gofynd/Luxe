@@ -1,6 +1,4 @@
 import React from "react";
-// import styles from "./login-page.less";
-import { useGlobalStore } from "fdk-core/utils";
 import Login from "@gofynd/theme-template/pages/login/login";
 import "@gofynd/theme-template/pages/login/login.css";
 import useLogin from "./useLogin";

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import OrdersHeader from "@gofynd/theme-template/components/order-header/order-header";
 import "@gofynd/theme-template/components/order-header/order-header.css";
@@ -463,7 +464,15 @@ function ProfileShipmentUpdatePage({ fpi }) {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className={`${styles.basePageContainer}`}>
+        <motion.div
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { duration: 0.5 } },
+          }}
+          initial="hidden"
+          animate="visible"
+          className="basePageContainer"
+        >
           {!shipmentDetails && (
             <div className={`${styles.error} ${styles.shipment}`}>
               <EmptyState></EmptyState>
@@ -688,7 +697,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
     </ProfileRoot>
   );

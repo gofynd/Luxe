@@ -165,9 +165,27 @@ export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBrea
         promotion_name
         promotion_type
         applied_free_articles {
-          article_id
-          parent_item_identifier
-          quantity
+            article_id
+            parent_item_identifier
+            quantity
+            free_gift_item_details {
+                item_brand_name
+                item_id
+                item_images_url
+                item_name
+                item_price_details {
+                  currency
+                  marked {
+                      min
+                      max
+                  }
+                  effective {
+                      min
+                      max
+                  }
+                }
+                item_slug
+            }
         }
         discount_rules {
           item_criteria
@@ -323,8 +341,8 @@ export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBrea
   }
 }`;
 
-export const SELECT_ADDRESS = `mutation SelectAddress( $cartId: String, $selectCartAddressRequestInput: SelectCartAddressRequestInput) {
-  selectAddress(cartId: $cartId, selectCartAddressRequestInput: $selectCartAddressRequestInput)
+export const SELECT_ADDRESS = `mutation SelectAddress( $buyNow: Boolean, $cartId: String, $selectCartAddressRequestInput: SelectCartAddressRequestInput) {
+  selectAddress(cartId: $cartId, buyNow: $buyNow, selectCartAddressRequestInput: $selectCartAddressRequestInput)
   {
     is_valid
     id
@@ -332,8 +350,8 @@ export const SELECT_ADDRESS = `mutation SelectAddress( $cartId: String, $selectC
   }
 }`;
 
-export const FETCH_SHIPMENTS = `query CartShipmentDetails($addressId: String, $id: String) {
-  cartShipmentDetails(addressId: $addressId, id: $id) {
+export const FETCH_SHIPMENTS = `query CartShipmentDetails($buyNow: Boolean, $addressId: String, $id: String) {
+  cartShipmentDetails(addressId: $addressId, id: $id, buyNow: $buyNow) {
     buy_now
         cart_id
         checkout_mode
@@ -864,8 +882,8 @@ export const PAYMENT_OPTIONS = `query PaymentModeRoutes($amount: Float!,$cartId:
   }
 }`;
 
-export const SELECT_PAYMENT_MODE = `mutation SelectPaymentMode($updateCartPaymentRequestInput: UpdateCartPaymentRequestInput) {
-  selectPaymentMode(updateCartPaymentRequestInput: $updateCartPaymentRequestInput) {
+export const SELECT_PAYMENT_MODE = `mutation SelectPaymentMode( $buyNow: Boolean, $id: String $updateCartPaymentRequestInput: UpdateCartPaymentRequestInput) {
+  selectPaymentMode(buyNow: $buyNow, id: $id, updateCartPaymentRequestInput: $updateCartPaymentRequestInput) {
     applied_promo_details {
       amount
       article_quantity
@@ -1385,10 +1403,10 @@ export const ORDER_BY_ID = `query Order($orderId: String!) {
         applied_promos {
           amount
           applied_free_articles {
-            article_id
-            free_gift_item_details
-            parent_item_identifier
-            quantity
+              article_id
+              parent_item_identifier
+              quantity
+              free_gift_item_details
           }
           article_quantity
           mrp_promotion

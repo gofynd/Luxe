@@ -12,7 +12,7 @@ const StickyAddToCart = ({
   productMeta,
   selectedSize,
   onSizeSelection,
-  pageConfig,
+  blockProps,
   sizes,
   getProductPrice,
   addProductForCheckout,
@@ -43,7 +43,7 @@ const StickyAddToCart = ({
     };
   }, []);
   useEffect(() => {
-    if (!productMeta?.loading) {
+    if (!productMeta?.loading && addToCartBtnRef?.current) {
       observerRef.current.observe(addToCartBtnRef?.current);
     }
     return () => {
@@ -78,7 +78,7 @@ const StickyAddToCart = ({
           >
             <button
               type="button"
-              className={`${styles.btnSecondary} ${styles.button}`}
+              className={`btnSecondary ${styles.button}`}
               onClick={openSizeModal}
             >
               <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
@@ -137,7 +137,7 @@ const StickyAddToCart = ({
           <div className={styles.priceBlock}>
             <div className={styles.productPrice}>
               {getProductPrice("effective") &&
-                pageConfig?.mrp_label &&
+                blockProps?.mrp_label &&
                 getProductPrice("effective") === getProductPrice("marked") && (
                   <span className="mrp-label">MRP:</span>
                 )}
@@ -146,7 +146,7 @@ const StickyAddToCart = ({
               </h4>
 
               {getProductPrice("marked") &&
-                pageConfig?.mrp_label &&
+                blockProps?.mrp_label &&
                 getProductPrice("effective") !== getProductPrice("marked") && (
                   <>
                     <span className={styles.mrpLabel}>MRP:</span>
@@ -163,9 +163,9 @@ const StickyAddToCart = ({
               )}
             </div>
 
-            {pageConfig?.tax_label && (
+            {blockProps?.tax_label && (
               <div className={`${styles["caption-normal"]} ${styles.taxLabel}`}>
-                {pageConfig?.tax_label}
+                {blockProps?.tax_label}
               </div>
             )}
           </div>
@@ -174,7 +174,7 @@ const StickyAddToCart = ({
 
           <button
             type="button"
-            className={`${styles.btnSecondary} ${styles.button}`}
+            className={`btnSecondary ${styles.button}`}
             onClick={addToCartHandler}
             disabled={!productMeta.sellable}
           >

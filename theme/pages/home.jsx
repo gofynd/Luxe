@@ -22,7 +22,7 @@ function Home({ numberOfSections, fpi }) {
     );
   }
   return (
-    <div className={`${styles.basePageContainer} ${styles.margin0auto}`}>
+    <div className="basePageContainer margin0auto">
       {!isLoading && (
         <SectionRenderer
           sections={sections}

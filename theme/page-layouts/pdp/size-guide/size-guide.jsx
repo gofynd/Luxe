@@ -12,6 +12,8 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
   const [previewSelectedMetric, setPreviewSelectedMetric] = useState("cm");
   const [selectedMetric, setSelectedMetric] = useState("cm");
   const [activeTab, setActiveTab] = useState("size_guide");
+  const [touched, setTouched] = useState(false);
+
   const values = {
     in: "inch",
     cm: "cm",
@@ -30,6 +32,12 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
 
   const changeSelectedMetric = (val) => {
     setPreviewSelectedMetric(val);
+
+    if (selectedMetric === val) {
+      setTouched(false);
+    } else {
+      setTouched(true);
+    }
   };
 
   const isSizeChartAvailable = () => {
@@ -38,10 +46,9 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
   };
 
   const convertMetrics = (val) => {
-    let value = null;
-    if (previewSelectedMetric === "cm") {
+    if (previewSelectedMetric === "cm" && touched) {
       let finalVal = "";
-      value = val.split("-");
+      val = val.split("-");
       for (let i = 0; i < val.length; i += 1) {
         if (i !== 0 && i < val.length) {
           finalVal += "-";
@@ -55,9 +62,9 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
       return finalVal;
     }
 
-    if (previewSelectedMetric === "in") {
+    if (previewSelectedMetric === "in" && touched) {
       let finalVal = "";
-      value = val.split("-");
+      val = val.split("-");
       for (let i = 0; i < val.length; i += 1) {
         if (i !== 0 && i < val.length) {
           finalVal += "-";
@@ -99,7 +106,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
           {isSizeChartAvailable() && (
             <button
               type="button"
-              className={`${styles.b2} ${styles.tab} ${styles.tabSizeGuide} ${
+              className={`b2 ${styles.tab} ${styles.tabSizeGuide} ${
                 activeTab === "size_guide" ? styles.active : ""
               }`}
               onClick={() => setActiveTab("size_guide")}
@@ -112,7 +119,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
           {productMeta?.size_chart && (
             <button
               type="button"
-              className={`${styles.b2} ${styles.tab} ${styles.tabMeasure} ${
+              className={`b2 ${styles.tab} ${styles.tabMeasure} ${
                 activeTab === "measure" ? styles.active : ""
               }`}
               onClick={() => setActiveTab("measure")}
@@ -145,9 +152,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
                       onClick={() => {
                         changeSelectedMetric(key);
                       }}
-                      className={`${styles.h5} ${styles.unitBtn} ${
-                        styles.fontBody
-                      } ${
+                      className={`h5 ${styles.unitBtn} ${styles.fontBody} ${
                         previewSelectedMetric === key
                           ? styles.unitBtnSelected
                           : ""
@@ -177,7 +182,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
                         val !== null && (
                           <th
                             key={`column${key}`}
-                            className={`${styles.b2} ${styles.sizeHeader}`}
+                            className={`b2 ${styles.sizeHeader}`}
                           >
                             {val?.value}
                           </th>
@@ -196,7 +201,7 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
                         ?.map(([key, val], index2) => (
                           <td
                             key={`cell_${key}`}
-                            className={`${styles.captionNormal} ${styles.sizeCell}`}
+                            className={`captionNormal ${styles.sizeCell}`}
                           >
                             {headers[index2][1]?.convertable
                               ? convertMetrics(val)
@@ -214,10 +219,10 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
                 <h3 className={styles.fontHeader}>
                   Not available, contact us for more information
                 </h3>
-                <FDKLink link="/contact-us" target="_blank">
+                <FDKLink to="/contact-us" target="_blank">
                   <button
                     type="button"
-                    className={`${styles.contactUs} ${styles.btnPrimary} ${styles.fontBody}`}
+                    className={`${styles.contactUs} btnPrimary ${styles.fontBody}`}
                   >
                     CONTACT US
                   </button>
@@ -254,10 +259,10 @@ function SizeGuide({ isOpen, productMeta, onCloseDialog }) {
                   <h3 className={styles.fontHeader}>
                     Not available, contact us for more information
                   </h3>
-                  <FDKLink link="/contact-us" target="_blank">
+                  <FDKLink to="/contact-us" target="_blank">
                     <button
                       type="button"
-                      className={`${styles.contactUs} ${styles.btnPrimary} ${styles.fontBody}`}
+                      className={`${styles.contactUs} btnPrimary ${styles.fontBody}`}
                     >
                       CONTACT US
                     </button>

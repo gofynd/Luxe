@@ -9,6 +9,7 @@ import {
 import { useSnackbar } from "../../../helper/hooks";
 import { LOCALITY } from "../../../queries/logisticsQuery";
 import { capitalize } from "../../../helper/utils";
+import useInternational from "../../../components/header/useInternational";
 
 const useAddress = (setShowShipment, setShowPayment, fpi) => {
   const allAddresses = useGlobalStore(fpi.getters.ADDRESS)?.address || [];
@@ -19,6 +20,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
   const [searchParams] = useSearchParams();
   const cart_id = searchParams.get("id");
   const address_id = searchParams.get("address_id");
+  const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
   const [selectedAddressId, setSelectedAddressId] = useState(address_id || "");
   const [invalidAddressError, setInvalidAddressError] = useState(null);
   const [openModal, setOpenModal] = useState(false);
@@ -33,6 +35,116 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     allAddresses?.filter((item) => !item?.is_default_address) || [];
 
   const { showSnackbar } = useSnackbar();
+
+  const {
+    countries,
+    fetchCountrieDetails,
+    countryDetails,
+    currentCountry,
+    fetchLocalities,
+    isInternationalShippingEnabled,
+    renderTemplate,
+    updateEnumForField,
+  } = useInternational({
+    fpi,
+  });
+  const [defaultFormSchema, setDefaultFormSchema] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(currentCountry);
+  const [countrySearchText, setCountrySearchText] = useState("");
+
+  useEffect(() => {
+    if (currentCountry) {
+      setSelectedCountry(currentCountry);
+    }
+  }, [currentCountry]);
+
+  useEffect(() => {
+    fetchCountrieDetails({
+      countryIsoCode: selectedCountry?.iso2 ?? countries?.[0]?.iso2,
+    });
+  }, [selectedCountry]);
+
+  useEffect(() => {
+    const formSchema = renderTemplate(
+      countryDetails?.fields?.address_template?.checkout_form,
+      countryDetails?.fields?.address
+    );
+    formSchema.forEach((group) => {
+      group.fields.forEach((field) => {
+        if (field.key === "phone") {
+          // Add the country_code key to the field object
+          field.countryCode = selectedCountry?.phone_code.replace("+", "");
+        }
+      });
+    });
+    getOptionsDetails(formSchema);
+  }, [countryDetails]);
+
+  const getLocalityValues = async (slug) => {
+    const payload = {
+      pageNo: 1,
+      pageSize: 1000,
+      country: selectedCountry?.iso2,
+      locality: slug,
+      city: "",
+    };
+    const localityDetails = await fetchLocalities(payload);
+    return localityDetails || [];
+  };
+
+  function convertDropDownField(inputField) {
+    return {
+      key: inputField.display_name,
+      display: inputField.display_name,
+    };
+  }
+
+  const getOptionsDetails = async (formSchema) => {
+    if (!countryDetails?.fields?.serviceability_fields?.length) {
+      setDefaultFormSchema([...formSchema]);
+      return;
+    }
+    for (const item of countryDetails?.fields?.serviceability_fields) {
+      const serviceabilityDetails = countryDetails?.fields?.address.find(
+        (entity) => entity.slug === item
+      );
+      let localityDetails = [];
+      if (serviceabilityDetails.input === "list") {
+        // eslint-disable-next-line no-await-in-loop
+        localityDetails = await getLocalityValues(item, formSchema);
+      }
+      const dropDownFieldArray = [];
+      for (const locality of localityDetails) {
+        dropDownFieldArray.push(convertDropDownField(locality));
+      }
+      const formData = updateEnumForField(formSchema, item, dropDownFieldArray);
+      setDefaultFormSchema([...formData]);
+    }
+  };
+  const setI18nDetails = (e) => {
+    const selectedCountry = countries.find(
+      (country) => country.display_name === e
+    );
+    setSelectedCountry(selectedCountry);
+    fetchCountrieDetails({ countryIsoCode: selectedCountry?.iso2 });
+  };
+
+  const handleCountrySearch = (event) => {
+    setCountrySearchText(event);
+  };
+
+  const getFilteredCountries = (selectedCountry) => {
+    if (!countrySearchText) {
+      return countries.map((country) => convertDropDownField(country)) || [];
+    }
+    return countries?.filter(
+      (country) =>
+        country?.display_name
+          ?.toLowerCase()
+          ?.indexOf(countrySearchText?.toLowerCase()) !== -1 &&
+        country?.id !== selectedCountry?.id
+    );
+  };
 
   useEffect(() => {
     if (address_id) {
@@ -54,6 +166,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
         .executeGQL(FETCH_SHIPMENTS, {
           addressId: `${addrId.length ? addrId : selectedAddressId}`,
           id: `${cart_id}`,
+          buyNow,
         })
         .then(() => {
           setShowShipment(true);
@@ -71,12 +184,47 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
 
   const editAddress = (item) => {
     setModalTitle("Edit Address");
-    setAddressItem(item);
+    setI18nDetails(item?.country);
+    setAddressItem({
+      ...item,
+      phone: {
+        mobile: item?.phone,
+        countryCode: item?.country_code?.replace("+", ""),
+        isValidNumber: true,
+      },
+    });
     setIssNewAddress(false);
     setOpenModal(true);
   };
 
+  const setI18NDetails = () => {
+    const cookiesData = JSON.stringify({
+      currency: { code: selectedCountry?.currency?.code },
+      country: {
+        iso_code: selectedCountry?.iso2,
+        isd_code: selectedCountry?.phone_code,
+      },
+      display_name: selectedCountry?.display_name,
+      countryCode: selectedCountry?.country?.iso2,
+    });
+    fpi.setI18nDetails(cookiesData);
+  };
+
   const addAddress = (obj) => {
+    if (
+      obj?.geo_location?.latitude === "" &&
+      obj?.geo_location?.longitude === ""
+    ) {
+      delete obj.geo_location;
+    }
+    for (const key in obj) {
+      if (obj[key] === undefined) {
+        delete obj[key]; // Removes undefined values directly from the original object
+      }
+    }
+    obj.country_phone_code = `+${obj.phone.countryCode}`;
+    obj.phone = obj.phone.mobile;
+    fpi.setI18nDetails({ countryCode: countryDetails?.iso2 });
     setAddressLoader(true);
     const payload = {
       address2Input: {
@@ -97,16 +245,17 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
       .then((res) => {
         setAddressLoader(false);
         if (res?.data?.addAddress?.success) {
+          setI18NDetails();
           showSnackbar("Address added successfully", "success");
           resetAddressState();
           fpi
-            .executeGQL(CHECKOUT_LANDING, { includeBreakup: true })
+            .executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow })
             .then(() => {
               selectAddress(res?.data?.addAddress?.id);
             });
           setAddressLoader(false);
         } else {
-          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true });
+          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
           showSnackbar("Failed to create new address", "error");
           resetAddressState();
           setAddressLoader(false);
@@ -115,12 +264,27 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
   };
 
   const updateAddress = (obj) => {
+    if (
+      obj?.geo_location?.latitude === "" &&
+      obj?.geo_location?.longitude === ""
+    ) {
+      delete obj.geo_location;
+    }
+    for (const key in obj) {
+      if (obj[key] === undefined) {
+        delete obj[key]; // Removes undefined values directly from the original object
+      }
+    }
+    obj.country_phone_code = `+${obj?.phone?.countryCode}`;
+    obj.phone = obj?.phone?.mobile;
+
     const add = obj;
     delete add?.custom_json;
     delete add?.otherAddressType;
     /* eslint-disable no-underscore-dangle */
     delete add?.__typename;
 
+    fpi.setI18nDetails({ countryCode: countryDetails?.iso2 });
     const payload = {
       id: selectedAddressId,
       address2Input: {
@@ -143,12 +307,12 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
       .then((res) => {
         if (res?.data?.updateAddress?.success) {
           fpi
-            .executeGQL(CHECKOUT_LANDING, { includeBreakup: true })
+            .executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow })
             .then(() => selectAddress());
           showSnackbar("Address updated successfully", "success");
           resetAddressState();
         } else {
-          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true });
+          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
           showSnackbar("Failed to update an address", "error");
           resetAddressState();
         }
@@ -169,10 +333,10 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
       )
       .then((res) => {
         if (res?.data?.removeAddress?.is_deleted) {
-          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true });
+          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
           showSnackbar("Address deleted successfully", "success");
         } else {
-          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true });
+          fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
           showSnackbar("Failed to delete an address", "error");
           resetAddressState();
         }
@@ -204,6 +368,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     );
     const payload = {
       cartId: cart_id,
+      buyNow,
       selectCartAddressRequestInput: {
         cart_id,
         id: id.length ? id : findAddress?.id,
@@ -217,6 +382,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
         fpi.executeGQL(FETCH_SHIPMENTS, {
           addressId: `${id.length ? id : selectedAddressId}`,
           id: `${cart_id}`,
+          buyNow,
         });
         setShowShipment(true);
         setAddressLoader(false);
@@ -230,7 +396,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
           id: id.length ? id : findAddress?.id,
           message: res?.data?.selectAddress?.message,
         });
-        showSnackbar("Failed to select an address", "error");
+        //showSnackbar("Failed to select an address", "error");
       }
     });
   };
@@ -257,11 +423,12 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     setOpenModal(true);
   }
 
-  function getLocality(postcode) {
+  function getLocality(posttype, postcode) {
     return fpi
       .executeGQL(LOCALITY, {
-        locality: `pincode`,
+        locality: posttype,
         localityValue: `${postcode}`,
+        country: selectedCountry?.iso2,
       })
       .then((res) => {
         const data = { showError: false, errorMsg: "" };
@@ -321,6 +488,13 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     showAddNewAddressModal,
     setSelectedAddressId,
     getLocality,
+    isInternationalShippingEnabled,
+    defaultFormSchema,
+    setI18nDetails,
+    handleCountrySearch,
+    getFilteredCountries,
+    selectedCountry,
+    countryDetails,
   };
 };
 

@@ -124,7 +124,6 @@ export const UPDATE_CART_WITH_SHARED_ITEMS = `mutation updateCartWithSharedItems
       message
       restrict_checkout
       uid
-      error
       custom_cart_meta
     }
     error

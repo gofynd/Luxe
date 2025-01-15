@@ -6,6 +6,7 @@ import { GET_PAGE } from "../../queries/marketingQuery";
 import styles from "../../styles/main.less";
 import PageNotFound from "../../components/page-not-found/page-not-found";
 import Loader from "../../components/loader/loader";
+import { getHelmet } from "../../providers/global-provider";
 
 function MarketingPage({ fpi, defaultSlug, id: sectionId }) {
   let { slug } = useParams();
@@ -30,19 +31,9 @@ function MarketingPage({ fpi, defaultSlug, id: sectionId }) {
         });
       });
     }
-    // if (!content) {
-    //   fetch(content_path).then(async (res) => {
-    //     const text = await res.text();
-    //     setContent(text);
-    //   });
-    // }
   }, [slug]);
 
-  const {
-    seo = {},
-    // sanitized_content: sanitizedContent = [],
-    error,
-  } = customPage || {};
+  const { seo = {}, error } = customPage || {};
 
   const pageNotFound =
     error?.name === "FDKServerResponseError" &&
@@ -74,11 +65,8 @@ function MarketingPage({ fpi, defaultSlug, id: sectionId }) {
 
   return (
     <>
-      {/* {isLoading && <Loader />} */}
-      <div
-        id="custom-page-container"
-        className={`${styles.basePageContainer} ${styles.margin0auto}`}
-      >
+      {getHelmet({ seo })}
+      <div id="custom-page-container" className="basePageContainer margin0auto">
         {renderContent(type, content)}
       </div>
     </>

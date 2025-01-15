@@ -36,10 +36,10 @@ function Sort({ filteredSorts = [], customClass, updateSelection }) {
   return (
     <OutsideClickHandler onOutsideClick={(e) => closeSortOption(e)}>
       <div className={` ${styles.items} ${styles["sort-list"]} ${customClass}`}>
-        <span className={` ${styles["dd-label"]} ${styles.b1}`}>Sort by: </span>
+        <span className={` ${styles["dd-label"]} b1`}>Sort by: </span>
         <button
           type="button"
-          className={`${styles.selected} ${styles.b1} ${styles.flexAlignCenter} ${styles.justifyStart}`}
+          className={`${styles.selected} b1 ${styles.flexAlignCenter} ${styles.justifyStart}`}
           onClick={() => setSortOpen(!sortOpen)}
         >
           <span className={styles.selectedSort}> {selectedSort()} </span>

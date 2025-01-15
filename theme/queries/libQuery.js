@@ -326,6 +326,15 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
     features {
       id
       app
+      common {
+        listing_price {
+          sort
+          value
+        }
+        international_shipping {
+          enabled
+        }
+      }
       landing_page {
         continue_as_guest
         launch_page {
@@ -359,6 +368,11 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
       robots_txt
       sitemap_enabled
       additonal_sitemap
+      details {
+        description
+        image_url
+        title
+      }
     }
     legal_information {
       id
@@ -392,6 +406,17 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
           }
         }
       }
+    }
+    tags {
+      id
+      attributes
+      content
+      name
+      pages
+      position
+      sub_type
+      type
+      url
     }
     navigations {
       items {

@@ -19,7 +19,6 @@ export function Component({ props, globalConfig }) {
 }
 
 export const settings = {
-  name: "custom-html",
   label: "Custom HTML",
   props: [
     {
@@ -32,3 +31,4 @@ export const settings = {
   ],
   blocks: [],
 };
+export default Component;

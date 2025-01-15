@@ -2,20 +2,20 @@ import React from "react";
 import FyImage from "../../../../components/core/fy-image/fy-image";
 import styles from "./badges.less";
 
-function Badges({ pageConfig }) {
+function Badges({ blockProps }) {
   const getBadgeData = () => {
     const badgeData = [];
     const totalBadges = 5;
-    if (Object.keys(pageConfig).length) {
+    if (Object.keys(blockProps).length) {
       for (let i = 1; i <= totalBadges; i += 1) {
         if (
-          pageConfig?.[`badge_logo_${i}`] !== "" ||
-          pageConfig?.[`badge_label_${i}`] !== ""
+          blockProps?.[`badge_logo_${i}`]?.value !== "" ||
+          blockProps?.[`badge_label_${i}`]?.value !== ""
         ) {
           badgeData.push({
-            logo: pageConfig?.[`badge_logo_${i}`],
-            label: pageConfig?.[`badge_label_${i}`],
-            url: pageConfig?.[`badge_url_${i}`],
+            logo: blockProps?.[`badge_logo_${i}`]?.value,
+            label: blockProps?.[`badge_label_${i}`]?.value,
+            url: blockProps?.[`badge_url_${i}`]?.value,
           });
         }
       }

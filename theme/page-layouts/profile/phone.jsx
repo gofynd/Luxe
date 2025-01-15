@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import PhonePage from "@gofynd/theme-template/pages/profile/phone";
+import { motion } from "framer-motion";
 import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
 import "@gofynd/theme-template/page-layouts/auth/mobile-number/mobile-number.css";
@@ -62,14 +62,23 @@ function Phone({ fpi }) {
 
   return (
     <ProfileRoot fpi={fpi}>
-      <PhonePage
-        setMobileNumberAsPrimary={handleSetPrimary}
-        deleteMobileNumber={handleDelete}
-        phoneNumbers={phoneNumbers}
-        sendOtpMobile={handleSendOtp}
-        verifyMobileOtp={handleVerifyOtp}
-        resendOtp={handleResendOtp}
-      />
+      <motion.div
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, transition: { duration: 0.5 } },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
+        <PhonePage
+          setMobileNumberAsPrimary={handleSetPrimary}
+          deleteMobileNumber={handleDelete}
+          phoneNumbers={phoneNumbers}
+          sendOtpMobile={handleSendOtp}
+          verifyMobileOtp={handleVerifyOtp}
+          resendOtp={handleResendOtp}
+        />
+      </motion.div>
     </ProfileRoot>
   );
 }

@@ -170,7 +170,10 @@
             "show_price": true,
             "custom_button_icon": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyndnp/wrkr/addsale/company/4108/applications/65dec2e1145986b98e7c377d/theme/pictures/free/original/theme-image-1710322198761.png",
             "img_fill": true,
-            "disable_cart": false
+            "disable_cart": false,
+            "is_delivery_minutes": false,
+            "is_delivery_day": true,
+            "is_hyperlocal": false
           }
         }
       },
@@ -256,11 +259,13 @@
               "product_number": true,
               "loading_options": "pagination",
               "back_top": true,
-              "in_new_tab": true,
+              "in_new_tab": false,
               "grid_desktop": "4",
               "grid_tablet": "3",
               "grid_mob": "2",
-              "description": ""
+              "description": "",
+              "banner_link": "",
+              "show_add_to_cart": true
             }
           }
         },
@@ -631,7 +636,7 @@
               },
               "desktop_banner": {
                 "type": "image_picker",
-                "value": ""
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a5852e8c9c824f3f71bfd6/theme/pictures/free/original/theme-image-1706877310472.jpeg"
               },
               "text_placement_desktop": {
                 "type": "select",
@@ -643,7 +648,7 @@
               },
               "mobile_banner": {
                 "type": "image_picker",
-                "value": ""
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a5852e8c9c824f3f71bfd6/theme/pictures/free/original/theme-image-1706877310472.jpeg"
               },
               "text_placement_mobile": {
                 "value": "top_left",
@@ -656,9 +661,66 @@
             }
           },
           {
-            "blocks": [],
-            "label": "Featured Collection",
-            "name": "featured-collection",
+            "blocks": [
+              {
+                "type": "gallery",
+                "name": "Image card",
+                "props": {
+                  "image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2031/TLsyapymK2-image-(4).png"
+                  },
+                  "link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "gallery",
+                "name": "Image card",
+                "props": {
+                  "image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2023/AsY7QHVFCM-image-(4).png"
+                  },
+                  "link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "gallery",
+                "name": "Image card",
+                "props": {
+                  "image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2034/4hK785hTJC-image-(4).png"
+                  },
+                  "link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              },
+              {
+                "type": "gallery",
+                "name": "Image card",
+                "props": {
+                  "image": {
+                    "type": "image_picker",
+                    "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/products/pictures/item/free/original/2032/p2s72qBwka-image-(4).png"
+                  },
+                  "link": {
+                    "type": "url",
+                    "value": ""
+                  }
+                }
+              }
+            ],
+            "label": "Image Gallery",
+            "name": "image-gallery",
             "predicate": {
               "route": {
                 "exact_url": "",
@@ -914,6 +976,113 @@
               "slide_interval": {
                 "value": 2,
                 "type": "range"
+              }
+            }
+          },
+          {
+            "blocks": [],
+            "label": "Featured Products",
+            "name": "featured-products",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {},
+            "props": {
+              "product": {
+                "type": "product"
+              },
+              "Heading": {
+                "type": "text",
+                "value": "Our Featured Product"
+              },
+              "description": {
+                "value": "",
+                "type": "text"
+              },
+              "show_seller": {
+                "value": true,
+                "type": "checkbox"
+              },
+              "show_size_guide": {
+                "value": true,
+                "type": "checkbox"
+              },
+              "size_selection_style": {
+                "type": "radio",
+                "value": "dropdown"
+              },
+              "hide_single_size": {
+                "value": false,
+                "type": "checkbox"
+              },
+              "tax_label": {
+                "value": "Price inclusive of all tax",
+                "type": "text"
+              }
+            }
+          },
+          {
+            "blocks": [],
+            "label": "Media with Text",
+            "name": "media-with-text",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {},
+            "props": {
+              "image_desktop": {
+                "type": "image_picker",
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a3fad6b5bf42ceeae77e6a/theme/pictures/free/original/theme-image-1702633093067.png"
+              },
+              "image_mobile": {
+                "type": "image_picker",
+                "value": "https://cdn.fynd.com/v2/falling-surf-7c8bb8/fyprod/wrkr/company/5178/applications/64a3fad6b5bf42ceeae77e6a/theme/pictures/free/original/theme-image-1702633093067.png"
+              },
+              "banner_link": {
+                "type": "url",
+                "value": "https://glam.fynd.io/products"
+              },
+              "title": {
+                "type": "text",
+                "value": "Shop your style"
+              },
+              "description": {
+                "type": "textarea",
+                "value": "Shop the latest collections now."
+              },
+              "button_text": {
+                "type": "text",
+                "value": "View Products"
+              },
+              "align_text_desktop": {
+                "value": false,
+                "type": "checkbox"
               }
             }
           }

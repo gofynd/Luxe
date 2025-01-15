@@ -84,6 +84,11 @@ export const COLLECTION = `query collection(
         url
       }
     }
+    logo {
+      type
+      url
+      alt
+    }
     action {
       type
       page {

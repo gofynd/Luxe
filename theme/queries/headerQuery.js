@@ -116,3 +116,9 @@ export const SEARCH_PRODUCT = `query products(
     }
   }
 }`;
+
+export const CART_COUNT = `query Cart($areaCode: String, $assignCardId: Int, $includeBreakup: Boolean, $buyNow: Boolean, $includeAllItems: Boolean, $includeCodCharges: Boolean, $cartId: String) {
+  cart(areaCode: $areaCode, assignCardId: $assignCardId, includeBreakup: $includeBreakup, buyNow: $buyNow, includeAllItems: $includeAllItems, includeCodCharges: $includeCodCharges, id: $cartId) {
+    user_cart_items_count
+  }
+}`;

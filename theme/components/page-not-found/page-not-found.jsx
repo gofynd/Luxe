@@ -15,7 +15,7 @@ function PageNotFound({ title }) {
         </h3>
         <FDKLink to="/">
           <FyButton
-            className={`${styles.btnPrimary}`}
+            className="btnPrimary"
             variant="outlined"
             size="large"
             color="secondary"

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { FDKLink } from "fdk-core/components";
-import FyImage from "../components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import styles from "../styles/sections/application-banner.less";
 import { isRunningOnClient } from "../helper/utils";
+import Hotspot from "../components/hotspot/product-hotspot";
 
 export function Component({ props, blocks, globalConfig }) {
   const [isMobile, setIsMobile] = useState(false);
-  const [showTooltip, setShowTooltip] = useState({});
   const [tooltipHeight, setTooltipHeight] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [tooltipWidth, setTooltipWidth] = useState(0);
@@ -56,7 +56,7 @@ export function Component({ props, blocks, globalConfig }) {
     };
 
     updateTooltipDimensions();
-  }, [showTooltip, tooltipHeight, tooltipWidth]);
+  }, [tooltipHeight, tooltipWidth]);
 
   const dynamicBoxStyle = useCallback(
     (block) => {
@@ -67,8 +67,8 @@ export function Component({ props, blocks, globalConfig }) {
         "--box_height": `${block.props?.box_height?.value || 0}%`,
         "--tooltip-height": `${tooltipHeight}px`,
         "--tooltip-width": `${tooltipWidth}px`,
-        "--x_offset": `-${block.props?.y_position?.value || 0}%`,
-        "--y_offset": `-${block.props?.x_position?.value || 0}%`,
+        "--x_offset": `-${block.props?.x_position?.value || 0}%`,
+        "--y_offset": `-${block.props?.y_position?.value || 0}%`,
       };
     },
     [tooltipHeight, tooltipWidth]
@@ -92,7 +92,7 @@ export function Component({ props, blocks, globalConfig }) {
         { breakpoint: { min: 800 }, width: 1500 },
         { breakpoint: { min: 768 }, width: 1500 },
         {
-          breakpoint: { max: 767 },
+          breakpoint: { max: 480 },
           width: 900,
           url: getMobileImage(),
         },
@@ -104,42 +104,22 @@ export function Component({ props, blocks, globalConfig }) {
       { breakpoint: { min: 800 }, width: 850 },
       { breakpoint: { min: 768 }, width: 780 },
       {
-        breakpoint: { max: 767 },
+        breakpoint: { max: 480 },
         width: 450,
         url: getMobileImage(),
       },
     ];
   }, [globalConfig]);
 
-  const mouseOverTooltip = (param, index) => {
-    if (!isMobile) {
-      clearTimeout(interval[index]);
-      if (!param) {
-        interval[index] = setTimeout(() => {
-          setShowTooltip((prev) => ({ ...prev, [index]: param }));
-        }, 200);
-      } else {
-        setShowTooltip((prev) => ({ ...prev, [index]: param }));
-      }
-    }
-  };
-
-  const clickHotspotMobile = (event, param, index) => {
-    event.stopPropagation();
-    setShowTooltip((prevIndexes) => {
-      const newIndexes = {};
-      // Close all tooltips
-      Object.keys(prevIndexes).forEach((key) => {
-        newIndexes[key] = false;
-      });
-      // Toggle the clicked tooltip
-      newIndexes[index] = !prevIndexes[index];
-      return newIndexes;
-    });
+  const getHotspots = () => {
+    return {
+      desktop: blocks?.filter((block) => block?.type === "hotspot_desktop"),
+      mobile: blocks?.filter((block) => block?.type === "hotspot_mobile"),
+    };
   };
 
   const dynamicStyles = {
-    paddingBottom: `${globalConfig.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
   };
 
   return (
@@ -159,6 +139,7 @@ export function Component({ props, blocks, globalConfig }) {
             isLazyLoaded={false}
             onLoad={() => setImgLoaded(true)}
             defer={false}
+            isFixedAspectRatio={false}
           />
         </FDKLink>
       ) : (
@@ -172,139 +153,67 @@ export function Component({ props, blocks, globalConfig }) {
           isLazyLoaded={false}
           onLoad={() => setImgLoaded(true)}
           defer={false}
+          isFixedAspectRatio={false}
         />
       )}
 
-      {blocks &&
-        blocks.map((block, index) => {
-          if (
-            (block.type === "hotspot_desktop" && !isMobile) ||
-            (block.type === "hotspot_mobile" && isMobile)
-          ) {
-            return (
+      {!isMobile &&
+        getHotspots()?.desktop?.map((hotspot, index) => {
+          return hotspot?.props?.pointer_type?.value !== "box" ? (
+            <Hotspot
+              className={styles["hotspot--desktop"]}
+              key={index}
+              hotspot={hotspot}
+              product={{
+                hotspot_description: hotspot?.props?.hotspot_header?.value,
+                media: [
+                  { type: "image", url: hotspot?.props?.hotspot_image?.value },
+                ],
+                name: hotspot?.props?.hotspot_description?.value,
+              }}
+              hotspot_link_text={hotspot?.props?.hotspot_link_text?.value}
+              redirect_link={hotspot?.props?.redirect_link?.value}
+            />
+          ) : (
+            <FDKLink to={hotspot?.props?.redirect_link?.value}>
               <div
-                key={index}
-                className={
-                  isMobile
-                    ? styles["mobile-hotspot"]
-                    : styles["desktop-hotspot"]
-                }
-              >
-                <div className={styles["link-container"]}>
-                  {!isMobile && (
-                    <FDKLink to={block.props?.redirect_link?.value}>
-                      <div
-                        onMouseOver={() => mouseOverTooltip(true, index)}
-                        onMouseOut={() => mouseOverTooltip(false, index)}
-                        onFocus={() => mouseOverTooltip(true, index)}
-                        onBlur={() => mouseOverTooltip(false, index)}
-                        className={`
-                      ${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper"] : styles["pointer-wrapper"]}
-                      ${block.props?.edit_visible?.value ? `${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper-visible"] : styles["pointer-wrapper-visible"]}` : ""}
+                className={`
+                      ${styles["box-wrapper"]}
+                      ${hotspot?.props?.edit_visible?.value ? `${styles["box-wrapper-visible"]}` : ""}
                     `}
-                        style={dynamicBoxStyle(block)}
-                      ></div>
-                    </FDKLink>
-                  )}
-                  {isMobile &&
-                  block.props?.redirect_link?.value &&
-                  block?.props?.pointer_type?.value === "box" ? (
-                    <FDKLink to={block.props?.redirect_link?.value}>
-                      <div
-                        onClick={(e) => clickHotspotMobile(e, true, index)}
-                        className={`
-                      ${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper"] : styles["pointer-wrapper"]}
-                      ${block.props?.edit_visible?.value ? `${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper-visible"] : styles["pointer-wrapper-visible"]}` : ""}
+                style={dynamicBoxStyle(hotspot)}
+              ></div>
+            </FDKLink>
+          );
+        })}
+      {isMobile &&
+        getHotspots()?.mobile?.map((hotspot, index) => {
+          return hotspot?.props?.pointer_type?.value !== "box" ? (
+            <Hotspot
+              className={styles["hotspot--mobile"]}
+              key={index}
+              hotspot={hotspot}
+              product={{
+                hotspot_description: hotspot?.props?.hotspot_header?.value,
+                media: [
+                  { type: "image", url: hotspot?.props?.hotspot_image?.value },
+                ],
+                name: hotspot?.props?.hotspot_description?.value,
+              }}
+              hotspot_link_text={hotspot?.props?.hotspot_link_text?.value}
+              redirect_link={hotspot?.props?.redirect_link?.value}
+            />
+          ) : (
+            <FDKLink to={hotspot?.props?.redirect_link?.value}>
+              <div
+                className={`
+                      ${styles["box-wrapper"]}
+                      ${hotspot?.props?.edit_visible?.value ? `${styles["box-wrapper-visible"]}` : ""}
                     `}
-                        style={dynamicBoxStyle(block)}
-                      />
-                    </FDKLink>
-                  ) : (
-                    isMobile && (
-                      <div
-                        onClick={(e) => clickHotspotMobile(e, true, index)}
-                        className={`
-                      ${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper"] : styles["pointer-wrapper"]}
-                      ${block.props?.edit_visible?.value ? `${block?.props?.pointer_type?.value === "box" ? styles["box-wrapper-visible"] : styles["pointer-wrapper-visible"]}` : ""}
-                    `}
-                        style={dynamicBoxStyle(block)}
-                      />
-                    )
-                  )}
-
-                  <div
-                    id="tooltip"
-                    className={`
-                    ${styles.tooltip}
-                    ${showTooltip[index] && block?.props?.pointer_type?.value === "pointer" ? styles["tooltip-visible"] : styles["tooltip-hidden"]}
-                  `}
-                    style={dynamicBoxStyle(block)}
-                    onMouseOver={() => mouseOverTooltip(true, index)}
-                    onMouseOut={() => mouseOverTooltip(false, index)}
-                    onFocus={() => mouseOverTooltip(true, index)}
-                    onBlur={() => mouseOverTooltip(false, index)}
-                    onClick={() => {
-                      if (isMobile) {
-                        window.location.replace(
-                          block.props?.redirect_link?.value
-                        );
-                      }
-                    }}
-                  >
-                    {isMobile && (
-                      <div
-                        onClick={(e) => clickHotspotMobile(e, false, index)}
-                        className={styles["close-div"]}
-                      >
-                        <SvgWrapper
-                          svgSrc="close"
-                          className={styles["close-icon"]}
-                        />
-                      </div>
-                    )}
-                    {block.props?.hotspot_image?.value && (
-                      <FyImage
-                        customClass={styles["image-wrapper"]}
-                        src={block.props?.hotspot_image?.value}
-                        sources={[{ breakpoint: { min: 300 }, width: 380 }]}
-                      />
-                    )}
-                    {(block?.props?.hotspot_header.value ||
-                      block?.props?.hotspot_description.value) && (
-                      <div className={styles["text-wrapper"]}>
-                        {block?.props?.hotspot_header?.value?.length > 0 && (
-                          <div
-                            className={`${styles["tooltip-header"]} fontHeader`}
-                            title={block?.props?.hotspot_header.value}
-                          >
-                            {block?.props?.hotspot_header?.value}
-                          </div>
-                        )}
-                        <div
-                          className={`${styles["tooltip-description"]} fontBody`}
-                          title={block?.props?.hotspot_description.value}
-                        >
-                          {block?.props?.hotspot_description?.value}
-                        </div>
-                        {block.props?.hotspot_link_text?.value?.length > 0 && (
-                          <div className={styles["tooltip-link"]}>
-                            <FDKLink
-                              className={`${styles["tooltip-action"]} fontBody`}
-                              to={block.props?.redirect_link?.value}
-                            >
-                              {block.props?.hotspot_link_text?.value}
-                            </FDKLink>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          }
-          // Return null if condition is not met
-          return null;
+                style={dynamicBoxStyle(hotspot)}
+              ></div>
+            </FDKLink>
+          );
         })}
     </div>
   );
@@ -320,17 +229,15 @@ export const settings = {
       default: "",
       options: {
         aspect_ratio: "19:6",
-        aspect_ratio_strict_check: true,
       },
     },
     {
       type: "image_picker",
       id: "image_mobile",
-      label: "mobile Image",
+      label: "Mobile Image",
       default: "",
       options: {
         aspect_ratio: "4:5",
-        aspect_ratio_strict_check: true,
       },
     },
     {
@@ -374,7 +281,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Vertical Position",
+          label: "Horizontal Position",
           default: 50,
         },
         {
@@ -384,7 +291,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Horizontal Position",
+          label: "Vertical Position",
           default: 50,
         },
         {
@@ -427,8 +334,8 @@ export const settings = {
           type: "textarea",
           id: "hotspot_description",
           label: "Description",
-          placeholder: "Description",
-          value: "",
+          default: "",
+          info: "Write the description value",
         },
         {
           type: "text",
@@ -477,7 +384,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Vertical Position",
+          label: "Horizontal Position",
           default: 50,
         },
         {
@@ -487,7 +394,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Horizontal Position",
+          label: "Vertical Position",
           default: 50,
         },
         {
@@ -530,8 +437,8 @@ export const settings = {
           type: "textarea",
           id: "hotspot_description",
           label: "Description",
-          placeholder: "Description",
-          value: "",
+          default: "",
+          info: "Write the description value",
         },
         {
           type: "text",
@@ -549,3 +456,4 @@ export const settings = {
     },
   ],
 };
+export default Component;

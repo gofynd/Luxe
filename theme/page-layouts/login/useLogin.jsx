@@ -4,9 +4,10 @@ import { useLocation } from "react-router-dom";
 import { useAccounts } from "../../helper/hooks";
 import useLoginOtp from "./useLoginOtp";
 import useLoginPassword from "./useLoginPassword";
+import { isRunningOnClient } from "../../helper/utils";
 
 const useLogin = ({ fpi }) => {
-  const { pathname } = useLocation();
+  const location = useLocation();
 
   const THEME = useGlobalStore(fpi.getters.THEME);
   const mode = THEME?.config?.list.find(
@@ -60,6 +61,7 @@ const useLogin = ({ fpi }) => {
   }, [platformData, isPasswordToggle]);
 
   const handleRegisterClick = () => {
+    const pathname = isRunningOnClient() ? location.pathname : "";
     if (pathname === "/auth/login") {
       openRegister();
     }

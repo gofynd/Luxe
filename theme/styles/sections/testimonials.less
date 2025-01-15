@@ -28,7 +28,13 @@
   }
 
   &__carousel {
-    --gap: 12px;
+    @media @desktop {
+      max-width: 96.6%;
+      margin: auto;
+    }
+    @media @tablet {
+      --gap: 12px;
+    }
     // padding-left: 16px;
     // padding-right: var(--p-right-mob);
     // // @media @tablet {
@@ -54,6 +60,7 @@
 
       .slick-track {
         display: flex !important;
+        align-items: unset;
       }
       .slick-slide {
         padding: 0 calc(var(--gap) / 2);
@@ -75,7 +82,7 @@
     @media @tablet {
       border-radius: @ImageRadius;
     }
-    background-color: @ThemeAccentL5;
+    background-color: @ThemeAccentL4;
     border: 1px solid @DividerStokes;
     height: 100%;
     @media @tablet {
@@ -84,7 +91,7 @@
     }
 
     @media @desktop {
-      align-items: center;
+      // align-items: center;
       padding: 16px;
       .column-gap(16px);
     }
@@ -97,6 +104,9 @@
     }
 
     &__info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       @media @tablet {
         padding: 16px;
       }

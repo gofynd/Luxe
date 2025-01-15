@@ -74,9 +74,7 @@ function ProductVariants({
             ) : (
               <>
                 {getSelectedVariantLabel(item) && (
-                  <div
-                    className={`${styles.captionNormal} ${styles.variantTitle}`}
-                  >
+                  <div className={`captionNormal ${styles.variantTitle}`}>
                     {getSelectedVariantLabel(item)}
                   </div>
                 )}

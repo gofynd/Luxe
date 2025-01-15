@@ -11,7 +11,7 @@ function SectionPage({ fpi }) {
   const { sections = [], error } = page || {};
 
   return (
-    <div className={`${styles.basePageContainer} ${styles.margin0auto}`}>
+    <div className="basePageContainer margin0auto">
       <SectionRenderer
         sections={sections}
         fpi={fpi}

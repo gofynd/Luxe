@@ -59,7 +59,7 @@ function MoreOffers({
       <div className={styles.sizeTabs}>
         <button
           type="button"
-          className={`${styles.b2} ${styles.tab} ${
+          className={`b2 ${styles.tab} ${
             activeTab === "coupons" ? styles.active : ""
           }`}
           onClick={() => setActiveTab("coupons")}
@@ -68,7 +68,7 @@ function MoreOffers({
         </button>
         <button
           type="button"
-          className={`${styles.b2} ${styles.tab} ${
+          className={`b2 ${styles.tab} ${
             activeTab === "promotions" ? styles.active : ""
           }`}
           onClick={() => setActiveTab("promotions")}
@@ -89,14 +89,14 @@ function MoreOffers({
                   <h4 className={styles.offerCardCode}>{item.title}</h4>
                 )}
                 {item.subtitle && (
-                  <p className={`${styles.offerCardTitle} ${styles.h5}`}>
+                  <p className={`${styles.offerCardTitle} h5`}>
                     {item.subtitle}
                   </p>
                 )}
                 {item.bodyText && (
                   <HTMLContent
                     content={item.bodyText}
-                    className={`${styles.offerCardDescription} ${styles.b1}`}
+                    className={`${styles.offerCardDescription} b1`}
                   />
                 )}
               </div>

@@ -1,23 +1,24 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
+import Values from "values.js";
 import { useFPI, useGlobalStore } from "fdk-core/utils";
 // eslint-disable-next-line import/no-unresolved
 import { Helmet } from "react-helmet-async";
+import { getProductImgAspectRatio } from "../helper/utils";
+import { useThemeConfig } from "../helper/hooks";
 
 export function ThemeProvider({ children }) {
   const fpi = useFPI();
-
-  const themeConfig = useGlobalStore(fpi.getters.THEME)?.config || {};
+  const locationDetails = useGlobalStore(fpi.getters.LOCATION_DETAILS);
+  const sellerDetails = JSON.parse(
+    useGlobalStore(fpi.getters.SELLER_DETAILS) || "{}"
+  );
+  const { globalConfig, pallete } = useThemeConfig({ fpi });
 
   const fontStyles = useMemo(() => {
-    const currentConfig = themeConfig.current || "";
-    const configList = themeConfig.list || [];
-    const currentGlobalConfig =
-      configList.find((configData) => configData.name === currentConfig) || {};
-    const globalConfigData =
-      currentGlobalConfig?.global_config?.custom?.props || {};
-    const headerFont = globalConfigData.font_header;
-    const bodyFont = globalConfigData.font_body;
     let styles = "";
+    const headerFont = globalConfig.font_header;
+    const bodyFont = globalConfig.font_body;
+
     const headerFontName = headerFont?.family;
     const headerFontVariants = headerFont?.variants;
 
@@ -71,19 +72,53 @@ export function ThemeProvider({ children }) {
 
       styles = styles.concat(customFontClasses);
     }
-    styles = styles.concat(
-      `:root, ::before, ::after { --font-body: ${bodyFontName}; --font-header: ${headerFontName}}`
-    );
 
-    return styles;
-  }, [themeConfig]);
+    const buttonPrimaryShade = new Values(pallete.button.button_primary);
+    const buttonLinkShade = new Values(pallete.button.button_link);
+    const accentDarkShades = new Values(pallete.theme.theme_accent).shades(20);
+    const accentLightShades = new Values(pallete.theme.theme_accent).tints(20);
+
+    styles = styles.concat(
+      `:root, ::before, ::after {
+        --font-body: ${bodyFontName};
+        --font-header: ${headerFontName};
+        --imageRadius: ${globalConfig?.image_border_radius}px;
+        --buttonRadius: ${globalConfig?.button_border_radius}px;
+        --productImgAspectRatio: ${getProductImgAspectRatio(globalConfig)};
+        --buttonPrimaryL1: #${buttonPrimaryShade.tint(20).hex};
+        --buttonPrimaryL3: #${buttonPrimaryShade.tint(60).hex};
+        --buttonLinkL1: #${buttonLinkShade.tint(20).hex};
+        --buttonLinkL2: #${buttonLinkShade.tint(40).hex};
+        ${accentDarkShades?.reduce((acc, color, index) => acc.concat(`--themeAccentD${index + 1}: #${color.hex};`), "")}
+        ${accentLightShades?.reduce((acc, color, index) => acc.concat(`--themeAccentL${index + 1}: #${color.hex};`), "")}
+      }`
+    );
+    return styles.replace(/\s+/g, "");
+  }, [globalConfig]);
+
+  useEffect(() => {
+    if (!locationDetails?.country_iso_code) {
+      fpi.setI18nDetails({
+        countryCode: sellerDetails.country_code,
+      });
+    }
+  }, []);
 
   return (
-    <div className="provider">
+    <>
       <Helmet>
         <style type="text/css">{fontStyles}</style>
       </Helmet>
       {children}
-    </div>
+    </>
   );
 }
+
+export const getHelmet = ({ seo }) => {
+  return (
+    <Helmet>
+      <title>{seo?.title}</title>
+      <meta name="description" content={seo?.description} />
+    </Helmet>
+  );
+};

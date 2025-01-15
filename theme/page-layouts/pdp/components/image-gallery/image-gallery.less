@@ -32,8 +32,8 @@
   position: absolute;
   text-align: center;
   z-index: 2;
-  bottom: 24px !important;
-  right: 24px !important;
+  bottom: 8px !important;
+  left: 8px !important;
   top: unset !important;
   left: unset !important;
   padding: 4px var(--scale-8-px, 8px);
@@ -41,12 +41,14 @@
   width: fit-content;
 }
 .b4 {
+  bottom: 8px !important;
+  left: 8px !important;
   font-size: 14px;
   font-weight: 400;
   line-height: 18px;
   letter-spacing: 0.28px;
   border-radius: 24px;
-  background-color: @ThemeAccentL5;
+  background-color: @PageBackground;
   color: @TextBody;
   border: 1px solid @DividerStokes;
 }
@@ -125,13 +127,13 @@
       overflow-x: scroll;
 
       &--item {
-        background-color: @White;
+        // background-color: @White;
         width: 63px;
         height: 100%;
         cursor: pointer;
-        border-radius: @ImageRadius;
+        border-radius: calc(var(--imageRadius) - 1px);
         box-sizing: border-box;
-        border: 2px solid white;
+        // border: 2px solid white;
         .aspect-ratio(@ProductImgAspectRatio);
 
         .modelIcon {
@@ -235,7 +237,13 @@
   width: 48px;
   height: 48px;
   cursor: pointer;
-
+  rect:nth-of-type(1) {
+    fill: @PageBackground !important;
+  }
+  path {
+    fill: none;
+    stroke: @TextHeading;
+  }
   &--left {
     transform: rotate(180deg);
   }

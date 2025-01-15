@@ -1,25 +1,18 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import Slider from "react-slick";
 import { FDKLink } from "fdk-core/components";
-import { useGlobalStore } from "fdk-core/utils";
 import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
 import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/brand-listing.less";
 import { BRAND_DETAILS } from "../queries/brandsQuery";
 import placeHolder1X1 from "../assets/images/brand-small-placeholder.png";
 import placeHolder9X16 from "../assets/images/brand-placeholder-1.png";
+import { useGlobalStore, useFPI } from "fdk-core/utils";
 import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
-const SlickNextArrow = ({ currentSlide, slideCount, ...props }) => (
-  <SvgWrapper {...props} svgSrc="glideArrowRight" />
-);
-
-const SlickPrevArrow = ({ currentSlide, slideCount, ...props }) => (
-  <SvgWrapper {...props} svgSrc="glideArrowLeft" />
-);
-
-export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
+export function Component({ props, globalConfig, blocks, id: sectionId }) {
+  const fpi = useFPI();
   const {
     heading,
     description,
@@ -53,7 +46,7 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
       }, []) ?? []
     );
   }, [blocks]);
-  const customSectionId = brandIds?.toSorted()?.join?.("__");
+  const customSectionId = brandIds?.join?.("__");
   const brands = brandCustomValue[`brandData-${customSectionId}`];
 
   useEffect(() => {
@@ -122,8 +115,7 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
   const showScrollView = () => {
     if (windowWidth <= 768 && brands?.length > 1) {
       return layout_mobile?.value === "horizontal";
-    }
-    if (per_row?.value < brands?.length) {
+    } else if (per_row?.value < brands?.length) {
       return layout_desktop?.value === "horizontal";
     }
   };
@@ -142,8 +134,7 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
           return brands?.slice(0, 12);
         if (windowWidth < 768) return brands?.slice(0, 12);
         return brands?.slice(0, perRowItem * 4);
-      }
-      if (showStackedView()) {
+      } else if (showStackedView()) {
         if (windowWidth >= 768 && windowWidth < 830) return brands?.slice(0, 9);
         if (windowWidth < 768) return brands?.slice(0, 9);
         return brands?.slice(0, perRowItem * 2);
@@ -165,6 +156,14 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
       ? card?.data?.brand?.logo?.url
       : card?.data?.brand?.banners?.portrait?.url || getPlaceHolder();
   };
+
+  const SlickNextArrow = ({ currentSlide, slideCount, ...props }) => (
+    <SvgWrapper {...props} svgSrc="glideArrowRight" />
+  );
+
+  const SlickPrevArrow = ({ currentSlide, slideCount, ...props }) => (
+    <SvgWrapper {...props} svgSrc="glideArrowLeft" />
+  );
 
   const [slickSetting, setSlickSettings] = useState({
     dots: brands?.length > per_row?.value,
@@ -233,7 +232,7 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
   };
 
   const dynamicStyles = {
-    padding: `16px 0 ${globalConfig.section_margin_bottom}px`,
+    padding: `16px 0 ${globalConfig?.section_margin_bottom}px`,
   };
 
   const getPlaceHolder = () => {
@@ -340,7 +339,7 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
           >
             <Slider
               style={{ maxWidth: "100vw" }}
-              className={`${styles["brands-carousel"]} ${logoOnly?.value ? styles[`logo-carousel`] : ""} ${logoOnly?.value ? styles[`card-count-${per_row?.value}`] : ""} ${getBrandCount()?.length <= per_row?.value ? "no-nav" : ""}`}
+              className={`${styles["brands-carousel"]} ${logoOnly?.value ? styles[`logo-carousel`] : ""} ${logoOnly?.value ? styles[`card-count-${per_row?.value}`] : ""} ${getBrandCount()?.length <= per_row?.value || windowWidth <= 480 ? "no-nav" : ""}`}
               {...slickSetting}
             >
               {!isLoading &&
@@ -449,7 +448,7 @@ export function Component({ props, globalConfig, blocks, fpi, id: sectionId }) {
               {button_text?.value && (
                 <button
                   type="button"
-                  className={`${styles["section-button"]} ${styles["btn-secondary"]}`}
+                  className={`${styles["section-button"]} btn-secondary`}
                 >
                   {button_text?.value}
                 </button>
@@ -588,7 +587,7 @@ Component.serverFetch = async ({ fpi, blocks, id }) => {
   try {
     const promisesArr = [];
     const ids = [];
-    blocks.map(async (block) => {
+    blocks?.map(async (block) => {
       if (block?.props?.brand?.value) {
         const slug = block.props.brand.value.id;
         ids.push(slug);
@@ -601,11 +600,9 @@ Component.serverFetch = async ({ fpi, blocks, id }) => {
       }
     });
     const responses = await Promise.all(promisesArr);
-    return fpi.custom.setValue(
-      `brandData-${ids?.toSorted()?.join("__")}`,
-      responses
-    );
+    return fpi.custom.setValue(`brandData-${ids?.join("__")}`, responses);
   } catch (err) {
     console.log(err);
   }
 };
+export default Component;

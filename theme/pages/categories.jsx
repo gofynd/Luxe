@@ -23,16 +23,17 @@ function Categories({ fpi }) {
     fetchAllCategories();
     setIsMobile(detectMobileWidth());
   }, []);
-  if (!isLoading && categories.length === 0) {
-    return <EmptyState />;
+  //   const { page, items = [], loading } = product_lists || {};
+  if (!isLoading && categories?.length === 0) {
+    return <EmptyState title="No Category Found" />;
   }
 
   return (
     <div
-      className={`${styles.categories} ${styles.basePageContainer} ${styles.margin0auto} fontBody`}
+      className={`${styles.categories} basePageContainer margin0auto fontBody`}
     >
       <div
-        className={`${styles.categories__breadcrumbs} ${styles.desktop} ${styles.captionNormal}`}
+        className={`${styles.categories__breadcrumbs} ${styles.desktop} captionNormal`}
       >
         <span>
           <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
@@ -67,7 +68,7 @@ function Categories({ fpi }) {
         <Loader />
       )}
       <div
-        className={`${styles.categories__breadcrumbs} ${styles.mobile} ${styles.captionNormal}`}
+        className={`${styles.categories__breadcrumbs} ${styles.mobile} captionNormal`}
       >
         <span>
           <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;

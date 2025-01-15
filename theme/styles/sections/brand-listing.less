@@ -32,7 +32,7 @@ div[data-cardtype="BRANDS"] .streach picture {
     margin-bottom: 16px;
   }
   &.logo-only {
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     @media @desktop {
       margin-bottom: 16px;
     }
@@ -46,7 +46,7 @@ div[data-cardtype="BRANDS"] .streach picture {
   margin-left: auto;
   margin-right: auto;
   @media @tablet {
-    margin-bottom: 16px;
+    margin-bottom: 24px;
   }
   @media @desktop {
     margin-bottom: 32px;
@@ -76,29 +76,6 @@ div[data-cardtype="BRANDS"] .streach picture {
     }
   }
 }
-.defaultBrandBlock {
-  padding: 0 16px;
-  display: grid;
-  justify-content: center;
-  grid-template-columns: 1fr 1fr;
-  .grid-gap(10px);
-  @media @mobile-up {
-    padding: 0 24px;
-    .grid-gap(24px, 12px);
-    grid-template-columns: repeat(auto-fit, calc((100% - 24px) / 3));
-  }
-  @media @desktop {
-    padding: 0 40px;
-    .grid-gap(32px, 24px);
-    grid-template-columns: repeat(
-      auto-fit,
-      calc((100% - (24px * (4 - 1))) / 4)
-    );
-    &.card-count-4 {
-      .grid-gap(24px);
-    }
-  }
-}
 .categories-horizontal {
   width: 100%;
   --gap: 8px;
@@ -110,7 +87,7 @@ div[data-cardtype="BRANDS"] .streach picture {
   // }
 
   @media @mobile-up {
-    --gap: 12px;
+    --gap: 24px;
     padding: 0 24px;
   }
   @media @desktop {
@@ -221,9 +198,11 @@ div[data-cardtype="BRANDS"] .streach picture {
 }
 .section-button {
   padding: 12px 24px;
-  text-transform: uppercase;
   cursor: pointer;
   font-family: var(--font-body);
+  @media @mobile {
+    padding: 12px 20px;
+  }
 }
 .glide--swipeable {
   cursor: auto;
@@ -241,4 +220,30 @@ div[data-cardtype="BRANDS"] .streach picture {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 50%;
+}
+.defaultBrandBlock {
+  padding: 0 16px;
+  display: grid;
+  justify-content: center;
+  grid-template-columns: 1fr 1fr;
+  .grid-gap(10px);
+
+  @media @mobile-up {
+    padding: 0 24px;
+    .grid-gap(24px, 12px);
+    grid-template-columns: repeat(auto-fit, calc((100% - 24px) / 3));
+  }
+
+  @media @desktop {
+    padding: 0 40px;
+    .grid-gap(32px, 24px);
+    grid-template-columns: repeat(
+      auto-fit,
+      calc((100% - (24px * (4 - 1))) / 4)
+    );
+
+    &.card-count-4 {
+      .grid-gap(24px);
+    }
+  }
 }

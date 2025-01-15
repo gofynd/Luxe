@@ -29,6 +29,10 @@ export const ADDRESS_LIST = `query addresses(
       country_phone_code
       created_by_user_id
       email
+      geo_location {
+          latitude
+          longitude
+      }
       google_map_point
       id
       is_active

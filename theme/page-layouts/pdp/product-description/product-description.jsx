@@ -21,6 +21,7 @@ import StickyAddToCart from "../components/sticky-addtocart/sticky-addtocart";
 import { isEmptyOrNull, isRunningOnClient } from "../../../helper/utils";
 import "@gofynd/theme-template/components/loader/loader.css";
 import MoreOffers from "../components/offers/more-offers";
+import ShareItom from "../../../components/share-item/share-item";
 
 function ProductDescriptionPdp({ fpi, slug }) {
   const addToCartBtnRef = useRef(null);
@@ -39,6 +40,9 @@ function ProductDescriptionPdp({ fpi, slug }) {
     promotions,
     selectPincodeError,
     pincodeErrorMessage,
+    isIntlShippingEnabled,
+    sellerDetails,
+    updateIntlLocation,
     setCurrentSize,
     setCurrentPincode,
     addToWishList,
@@ -47,6 +51,8 @@ function ProductDescriptionPdp({ fpi, slug }) {
     checkPincode,
     setPincodeErrorMessage,
     isPageLoading,
+    pincodeDetails,
+    locationDetails,
   } = useProductDescription(fpi, slug);
   const priceDataDefault = productMeta?.price;
   const [selectedSize, setSelectedSize] = useState("");
@@ -54,6 +60,8 @@ function ProductDescriptionPdp({ fpi, slug }) {
   const [showMoreOffers, setShowMoreOffers] = useState(false);
   const [sidebarActiveTab, setSidebarActiveTab] = useState("coupons");
   const [errMessage, setErrorMessage] = useState("");
+  const [showSocialLinks, setShowSocialLinks] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const {
     media,
     grouped_attributes,
@@ -80,6 +88,24 @@ function ProductDescriptionPdp({ fpi, slug }) {
   const isSizeCollapsed = pageConfig?.hide_single_size && isSingleSize;
   const preSelectFirstOfMany = pageConfig?.preselect_size;
   const { show_size_guide = true } = pageConfig;
+
+  useEffect(() => {
+    const detectMobileWidth = () =>
+      document?.getElementsByTagName("body")?.[0]?.getBoundingClientRect()
+        ?.width <= 768;
+    const handleResize = () => {
+      setIsMobile(detectMobileWidth());
+    };
+    if (isRunningOnClient()) {
+      window.addEventListener("resize", handleResize);
+      handleResize();
+    }
+    return () => {
+      if (isRunningOnClient()) {
+        window.removeEventListener("resize", handleResize);
+      }
+    };
+  }, []);
 
   function getManufacturingTime() {
     const custom_order = productDetails?.custom_order;
@@ -152,6 +178,19 @@ function ProductDescriptionPdp({ fpi, slug }) {
     );
   }
 
+  const handleShare = async () => {
+    if (navigator.share && isMobile) {
+      try {
+        await navigator.share({
+          title: "Amazing Product",
+          text: "Check out this amazing product on fynd!",
+          url: window?.location?.href,
+        });
+      } catch (error) {
+        console.error("Sharing failed", error);
+      }
+    } else setShowSocialLinks(true);
+  };
   return (
     <>
       <div className={`${styles.mainContainer} fontBody`}>
@@ -174,6 +213,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                   removeFromWishlist={removeFromWishlist}
                   addToWishList={addToWishList}
                   isLoading={isLoading}
+                  handleShare={() => handleShare()}
                 />
               </div>
             )}
@@ -187,9 +227,16 @@ function ProductDescriptionPdp({ fpi, slug }) {
               />
               {/* ---------- Product Name ----------  */}
               <h1
-                className={`${styles.product__title} ${styles.h2} ${styles.fontHeader} fontHeader`}
+                className={`${styles.product__title} h2 ${styles.fontHeader} fontHeader`}
               >
                 {name}
+                <span>
+                  <SvgWrapper
+                    svgSrc="shareDesktop"
+                    className={styles.shareIcon}
+                    onClick={() => handleShare()}
+                  />
+                </span>
               </h1>
               {/* ---------- Product Price ---------- */}
               {show_price && !isLoading && productMeta?.sellable && (
@@ -233,7 +280,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
               )}
               {/* ---------- Product Tax Label ---------- */}
               {pageConfig?.tax_label && productMeta?.sellable && (
-                <div className={`${styles.captionNormal} ${styles.taxLabel}`}>
+                <div className={`captionNormal ${styles.taxLabel}`}>
                   {pageConfig?.tax_label}
                 </div>
               )}
@@ -258,7 +305,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
         )}
       {getReviewRatingInfo.review_count && (
         <div
-          class={`${styles.reviewWrapper} ${styles.captionNormal}`}
+          class={`${styles.reviewWrapper} captionNormal`}
         >
           {getReviewRatingInfo.review_count +
             ` Review${
@@ -271,7 +318,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
               {/* ---------- Short Description ----------  */}
               {short_description?.length > 0 && (
                 <p
-                  className={`${styles.b2} ${styles.fontBody} ${styles.shortDescription}`}
+                  className={`b2 ${styles.fontBody} ${styles.shortDescription}`}
                 >
                   {short_description}
                 </p>
@@ -292,9 +339,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                 selectedSize &&
                 !isEmptyOrNull(productPriceBySlug) && (
                   <div className={`${styles.sellerInfo} ${styles.fontBody}`}>
-                    <div
-                      className={`${styles.storeSeller} ${styles.captionNormal}`}
-                    >
+                    <div className={`${styles.storeSeller} captionNormal`}>
                       <span className={styles.soldByLabel}>Seller :</span>
                       <div
                         // v-if="showSellerStoreLabel"
@@ -309,7 +354,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                         </p>
                         {productPriceBySlug?.seller?.count > 1 && (
                           <span
-                            className={`${styles.captionSemiBold} ${styles.otherSellers}`}
+                            className={`captionSemiBold ${styles.otherSellers}`}
                           >
                             &nbsp;&&nbsp;
                             {`${(productPriceBySlug?.seller?.count ?? 2) - 1} Other${
@@ -348,9 +393,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                     }`}
                   >
                     <div>
-                      <p
-                        className={`${styles.b2} ${styles.sizeSelection__label}`}
-                      >
+                      <p className={`b2 ${styles.sizeSelection__label}`}>
                         <span>Size :</span>
                       </p>
 
@@ -359,9 +402,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                           <button
                             type="button"
                             key={`${size?.display}`}
-                            className={`${styles.b2} ${
-                              styles.sizeSelection__block
-                            } ${
+                            className={`b2 ${styles.sizeSelection__block} ${
                               size.quantity === 0 &&
                               !isMto &&
                               styles["sizeSelection__block--disable"]
@@ -482,7 +523,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                       <FyButton
                         ref={addToCartBtnRef}
                         type="button"
-                        className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
+                        className={`${styles.button} btnSecondary ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
                         onClick={(e) =>
                           addProductForCheckout(e, selectedSize, false)
                         }
@@ -501,7 +542,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                       <button
                         type="button"
                         disabled
-                        className={`${styles.button} ${styles.btnPrimary} ${styles.notAvailable} ${styles.fontBody}`}
+                        className={`${styles.button} btnPrimary ${styles.notAvailable} ${styles.fontBody}`}
                       >
                         PRODUCT NOT AVAILABLE
                       </button>
@@ -521,7 +562,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                       {!disable_cart && productMeta?.sellable && (
                         <button
                           type="button"
-                          className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
+                          className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
                           onClick={(e) =>
                             addProductForCheckout(e, selectedSize, true)
                           }
@@ -543,7 +584,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                   {!disable_cart && productMeta?.sellable && (
                     <button
                       type="button"
-                      className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
+                      className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
                       onClick={(e) =>
                         addProductForCheckout(e, selectedSize, true)
                       }
@@ -563,7 +604,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
                 <FDKLink to={custom_button_link}>
                   <button
                     type="button"
-                    className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
+                    className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
                   >
                     {custom_button_icon && (
                       <FyImage
@@ -589,6 +630,11 @@ function ProductDescriptionPdp({ fpi, slug }) {
                   checkPincode={checkPincode}
                   fpi={fpi}
                   setPincodeErrorMessage={setPincodeErrorMessage}
+                  isIntlShippingEnabled={isIntlShippingEnabled}
+                  sellerDetails={sellerDetails}
+                  updateIntlLocation={updateIntlLocation}
+                  pincodeDetails={pincodeDetails}
+                  locationDetails={locationDetails}
                 />
               )}
               {pageConfig?.add_to_compare && (
@@ -648,6 +694,12 @@ function ProductDescriptionPdp({ fpi, slug }) {
                 </div>
               )}
             </div>
+            {showSocialLinks && (
+              <ShareItom
+                setShowSocialLinks={setShowSocialLinks}
+                handleShare={() => handleShare()}
+              />
+            )}
           </div>
         </div>
         <ProdDesc
@@ -660,6 +712,7 @@ function ProductDescriptionPdp({ fpi, slug }) {
           pageConfig={pageConfig}
         />
       </div>
+
       {button_options?.includes("addtocart") &&
         !disable_cart &&
         productMeta?.sellable && (
@@ -684,6 +737,11 @@ function ProductDescriptionPdp({ fpi, slug }) {
               setErrorMessage,
               checkPincode,
               fpi,
+              isIntlShippingEnabled,
+              sellerDetails,
+              updateIntlLocation,
+              productDetails,
+              locationDetails,
             }}
           />
         )}

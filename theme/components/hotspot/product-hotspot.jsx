@@ -10,7 +10,13 @@ import {
 } from "../../helper/utils";
 import styles from "./product-hotspot.less";
 
-const Hotspot = ({ product, hotspot, isMobile }) => {
+const Hotspot = ({
+  product,
+  hotspot,
+  isMobile,
+  hotspot_link_text = "",
+  redirect_link = "",
+}) => {
   const [isActive, setIsActive] = useState(false);
   const [tooltipClassDesktop, setTooltipClassDesktop] = useState("");
   const [tooltipClassMobile, setTooltipClassMobile] = useState("");
@@ -98,6 +104,10 @@ const Hotspot = ({ product, hotspot, isMobile }) => {
     return product?.media?.find((media) => media.type === "image")?.url;
   }, [product, isMobile]);
 
+  const redirectValue = product?.slug
+    ? `/product/${product?.slug}`
+    : redirect_link;
+
   return (
     <div
       className={styles.hotspot}
@@ -119,7 +129,7 @@ const Hotspot = ({ product, hotspot, isMobile }) => {
         >
           <FDKLink
             className={`${styles.hotspot__tooltip} ${styles.product}`}
-            to={`/product/${product?.slug}`}
+            to={redirectValue}
           >
             <FyImage
               customClass={`${styles.product__image} ${styles.fill}`}
@@ -131,9 +141,9 @@ const Hotspot = ({ product, hotspot, isMobile }) => {
             />
             <div className={styles.product__meta}>
               <div className={styles.product__info}>
-                {product?.brand?.name && (
+                {(product?.brand?.name || product?.hotspot_description) && (
                   <h4 className={styles.product__brand}>
-                    {product.brand.name}
+                    {product?.brand?.name || product?.hotspot_description}
                   </h4>
                 )}
                 <p className={styles.product__name}>{product?.name}</p>
@@ -144,6 +154,14 @@ const Hotspot = ({ product, hotspot, isMobile }) => {
                       product?.sizes?.price?.effective?.currency_symbol
                     )}
                   </p>
+                )}
+                {hotspot_link_text && (
+                  <FDKLink
+                    className={`${styles.product__price} ${styles.linkText}`}
+                    to={redirect_link}
+                  >
+                    {hotspot_link_text}
+                  </FDKLink>
                 )}
               </div>
               <SvgWrapper

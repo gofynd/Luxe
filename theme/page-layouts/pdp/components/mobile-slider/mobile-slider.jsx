@@ -16,6 +16,8 @@ function MobileSlider({
   addToWishList,
   setCurrentImageIndex,
   slideTabCentreNone = false,
+  handleShare,
+  showShareIcon = true,
 }) {
   const settings = {
     dots: true,
@@ -216,6 +218,17 @@ function MobileSlider({
                   />
                 </div>
               </div>
+            )}
+            {showShareIcon && (
+              <SvgWrapper
+                svgSrc="share"
+                className={
+                  media?.type === "video"
+                    ? styles.VideoShareIcon
+                    : styles.shareIcon
+                }
+                onClick={() => handleShare()}
+              />
             )}
             {product?.custom_order?.is_custom_order && (
               <div className={`${styles.badge} ${styles.b4}`}>

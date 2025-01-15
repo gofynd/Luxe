@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import { debounce } from "../../helper/utils";
 import { CART_META_UPDATE } from "../../queries/cartQuery";
 
 const useCartComment = ({ fpi, cartData }) => {
   const [comment, setComment] = useState(cartData.comment);
+  const [searchParams] = useSearchParams();
+
+  const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
 
   useEffect(() => {
     setComment(cartData.comment);
@@ -15,6 +19,7 @@ const useCartComment = ({ fpi, cartData }) => {
       cartMetaRequestInput: {
         comment: comm?.toString(),
       },
+      buyNow,
     };
     fpi.executeGQL(CART_META_UPDATE, payload);
   };

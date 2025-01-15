@@ -84,7 +84,7 @@ const useLoginOtp = ({ fpi }) => {
     };
     resendOtp(payload).then((res) => {
       if (res?.success) {
-        setSendOtpResponse(res);
+        // setSendOtpResponse(res);
         setOtpResendTime(res?.resend_timer);
         timer(res?.resend_timer);
       }

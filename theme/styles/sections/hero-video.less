@@ -28,6 +28,16 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+
+    @media @tablet {
+      &::-webkit-media-controls {
+        display: none !important; /* Hides controls */
+      }
+
+      &::-moz-media-controls {
+        display: none !important; /* For Firefox */
+      }
+    }
   }
 
   &:hover {

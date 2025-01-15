@@ -3,7 +3,7 @@ import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
 
 import Slider from "react-slick";
-
+import { useFPI } from "fdk-core/utils";
 import styles from "../styles/sections/category-listing.less";
 import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
@@ -12,7 +12,8 @@ import useCategories from "../page-layouts/categories/useCategories";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
 import placeholder from "../assets/images/img-placeholder-1.png";
 
-export function Component({ props, blocks, preset, globalConfig, fpi }) {
+export function Component({ props, blocks, preset, globalConfig }) {
+  const fpi = useFPI();
   const {
     getCategoriesByDepartment,
     setDepartmentCategories,
@@ -75,7 +76,12 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
   useEffect(() => {
     const fetchAllCategories = async () => {
       let accumulatedCategories = [];
-      let departments = blocks.map((m) => m?.props?.department.value);
+      let departments = blocks?.reduce((acc, m) => {
+        if (m?.props?.department.value) {
+          acc.push(m?.props?.department.value);
+        }
+        return acc;
+      }, []);
       departments = [...new Set(departments)];
 
       for (const department of departments) {
@@ -87,7 +93,6 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
           ...newCategories.slice(0, 12 - accumulatedCategories.length),
         ];
       }
-      console.log(accumulatedCategories, "accumulatedCategories");
       setDepartmentCategories(accumulatedCategories);
     };
 
@@ -147,7 +152,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
   }
 
   function getImgSrcSet() {
-    if (globalConfig.img_hd) {
+    if (globalConfig?.img_hd) {
       return [
         { breakpoint: { min: 1024 }, width: 900 },
         { breakpoint: { min: 768 }, width: 500 },
@@ -220,7 +225,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
       style={{
         padding: windowWidth > 768 ? `16px` : `16px 0`,
         "--bg-color": `${img_container_bg?.value || "#00000000"}`,
-        marginBottom: `${globalConfig.section_margin_bottom}px`,
+        marginBottom: `${globalConfig?.section_margin_bottom}px`,
       }}
     >
       <div>
@@ -229,9 +234,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
             <h2 className={styles.sectionHeading}>{title?.value}</h2>
           )}
           {cta_text?.value?.length > 0 && (
-            <p className={`${styles.description} ${styles.b2}`}>
-              {cta_text?.value}
-            </p>
+            <p className={`${styles.description} b2`}>{cta_text?.value}</p>
           )}
         </div>
         <IntersectionObserverComponent>
@@ -274,7 +277,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                           >
                             {category?.name && (
                               <div
-                                className={`${styles["categories-name"]} ${styles.h5} ${styles.fontBody} ${styles.inlineBlock}`}
+                                className={`${styles["categories-name"]} h5 ${styles.fontBody} ${styles.inlineBlock}`}
                                 title={category.name}
                               >
                                 {category.name}
@@ -294,7 +297,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                   <FDKLink to="/categories/">
                     <button
                       type="button"
-                      className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
+                      className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
                     >
                       {button_text?.value}
                     </button>
@@ -335,7 +338,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                         <div className={styles.flexJustifyCenter}>
                           {category?.name && (
                             <div
-                              className={`${styles["categories-name"]} ${styles.h5} ${styles.fontBody} ${styles.inlineBlock}`}
+                              className={`${styles["categories-name"]} h5 ${styles.fontBody} ${styles.inlineBlock}`}
                               title={category.name}
                             >
                               {category.name}
@@ -373,7 +376,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
                     />
                     <div className={styles.flexJustifyCenter}>
                       <div
-                        className={`${styles["categories-name"]} ${styles.h5} ${styles.fontBody} ${styles.inlineBlock}`}
+                        className={`${styles["categories-name"]} h5 ${styles.fontBody} ${styles.inlineBlock}`}
                         title={defaultCategories?.[index]}
                       >
                         {defaultCategories?.[index]}
@@ -393,7 +396,7 @@ export function Component({ props, blocks, preset, globalConfig, fpi }) {
               <FDKLink to="/categories/">
                 <button
                   type="button"
-                  className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
+                  className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
                 >
                   {button_text?.value}
                 </button>
@@ -566,3 +569,4 @@ export const settings = {
     ],
   },
 };
+export default Component;

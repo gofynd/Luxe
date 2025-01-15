@@ -9,7 +9,7 @@ function CompareProducts({ fpi }) {
 
   return (
     <div
-      className={`${styles.compare} ${styles.basePageContainer} ${styles.margin0auto} ${styles.fontBody}`}
+      className={`${styles.compare} basePageContainer margin0auto ${styles.fontBody}`}
     >
       <Compare {...compareProps} />
     </div>

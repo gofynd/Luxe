@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { FDKLink } from "fdk-core/components";
 import Slider from "react-slick";
-import { useGlobalStore } from "fdk-core/utils";
 import styles from "../styles/sections/feature-blog.less";
 import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient, throttle } from "../helper/utils";
 import { FETCH_BLOGS_LIST } from "../queries/blogQuery";
+import { useGlobalStore, useFPI } from "fdk-core/utils";
 
-export function Component({ props, globalConfig, fpi }) {
+export function Component({ props, globalConfig }) {
+  const fpi = useFPI();
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
   const blogItems = customValues?.featuredBlogSectionData ?? [];
   const { heading, description } = props;
@@ -123,7 +124,7 @@ export function Component({ props, globalConfig, fpi }) {
 
   const dynamicStyles = {
     paddingTop: "16px",
-    paddingBottom: `${globalConfig.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
   };
 
   useEffect(() => {
@@ -192,6 +193,15 @@ export function Component({ props, globalConfig, fpi }) {
                 </div>
                 <div className={styles.blog__info}>
                   <div className={styles.blog__info__titleSection}>
+                    {getBlogTag(blog) && (
+                      <div
+                        className={`${styles.blog__info__tags} ${styles.blog__info__flexAlignAenter}`}
+                      >
+                        <h4>{getBlogTag(blog)}</h4>
+                        {blog?.tags?.[1] && <h4>{blog?.tags?.[1]}</h4>}
+                      </div>
+                    )}
+
                     <h3 className={styles.blog__info__title}>
                       <FDKLink
                         target="_blank"
@@ -201,14 +211,6 @@ export function Component({ props, globalConfig, fpi }) {
                         {blog.title}
                       </FDKLink>
                     </h3>
-                    {blog?.tags.length > 0 && (
-                      <div
-                        className={`${styles.blog__info__tags} ${styles.blog__info__flexAlignAenter}`}
-                      >
-                        <h4>{getBlogTag(blog)}</h4>
-                        {blog?.tags?.[1] && <h4>{blog?.tags?.[1]}</h4>}
-                      </div>
-                    )}
                   </div>
                   <div
                     className={`${styles.blog__info__meta} ${styles.blog__info__flexAlignAenter}`}
@@ -277,3 +279,4 @@ Component.serverFetch = async ({ fpi, props, id }) => {
     console.log(err);
   }
 };
+export default Component;

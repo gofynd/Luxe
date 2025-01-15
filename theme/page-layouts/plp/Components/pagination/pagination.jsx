@@ -75,7 +75,7 @@ function Pagination({ value, fpi }) {
         {[...Array(getPagesButton()).keys()].map((index) => (
           <FDKLink
             key={index}
-            className={`${styles["page-btn"]} ${styles.b1} ${
+            className={`${styles["page-btn"]} b1 ${
               current === getStartPage() + index ? styles.active : ""
             }`}
             to={getPageUrl(getStartPage() + index)}

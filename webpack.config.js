@@ -45,6 +45,7 @@ module.exports = (configOptions) => {
                   ],
                   "@babel/preset-react",
                   "@babel/preset-typescript",
+                  "@loadable/babel-plugin",
                 ],
                 plugins: [
                   ...(isLocal && isHMREnabled
@@ -142,7 +143,7 @@ module.exports = (configOptions) => {
           exclude: /\.global\.less$/,
         },
         {
-          test: /\.(png|jpg|jpeg|gif)$/i,
+          test: /\.(png|jpg|jpeg|gif|webp)$/i,
           type: "asset/resource",
           generator: {
             publicPath: isLocal

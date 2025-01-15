@@ -17,6 +17,7 @@ import {
   FORGOT_PASSWORD,
 } from "../../queries/authQuery";
 import { useSnackbar } from "./hooks";
+import { isRunningOnClient } from "../utils";
 // import { loginUserInFb } from '../../helper/facebook.utils';
 // import { renderButton } from '../../helper/google.utils';
 
@@ -32,40 +33,46 @@ export const useAccounts = ({ fpi }) => {
   const isLoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
 
   const openLogin = ({ redirect = true } = {}) => {
-    const queryParams = new URLSearchParams(location.search);
+    const queryParams = isRunningOnClient()
+      ? new URLSearchParams(location.search)
+      : null;
     if (redirect) {
-      queryParams.set(
+      queryParams?.set(
         "redirectUrl",
         encodeURIComponent(location.pathname + location.search)
       );
     }
-    navigate({
+    navigate?.({
       pathname: "/auth/login",
-      search: queryParams.toString(),
+      search: queryParams?.toString(),
     });
   };
 
   const openRegister = ({ redirect = true } = {}) => {
-    const queryParams = new URLSearchParams(location.search);
+    const queryParams = isRunningOnClient()
+      ? new URLSearchParams(location.search)
+      : null;
     if (redirect) {
-      queryParams.set("redirectUrl", location.pathname);
+      queryParams?.set("redirectUrl", location.pathname);
     }
-    navigate({
+    navigate?.({
       pathname: "/auth/register",
-      search: queryParams.toString(),
+      search: queryParams?.toString(),
     });
   };
 
   const openForgotPassword = () => {
-    navigate({
+    navigate?.({
       pathname: "/auth/forgot-password",
       search: location.search,
     });
   };
 
   const openHomePage = () => {
-    const queryParams = new URLSearchParams(location.search);
-    const redirectUrl = queryParams.get("redirectUrl") || "";
+    const queryParams = isRunningOnClient()
+      ? new URLSearchParams(location.search)
+      : null;
+    const redirectUrl = queryParams?.get("redirectUrl") || "";
     window.location.href =
       window.location.origin + decodeURIComponent(redirectUrl);
   };
@@ -124,8 +131,10 @@ export const useAccounts = ({ fpi }) => {
         throw res?.errors?.[0];
       }
       if (res?.data?.user?.logout?.logout) {
-        const queryParams = new URLSearchParams(location.search);
-        const redirectUrl = queryParams.get("redirectUrl") || "";
+        const queryParams = isRunningOnClient()
+          ? new URLSearchParams(location.search)
+          : null;
+        const redirectUrl = queryParams?.get("redirectUrl") || "";
         window.location.href =
           window.location.origin + decodeURIComponent(redirectUrl);
         return res?.data;
@@ -149,8 +158,10 @@ export const useAccounts = ({ fpi }) => {
           throw res?.errors?.[0];
         }
         if (isRedirection) {
-          const queryParams = new URLSearchParams(location.search);
-          const redirectUrl = queryParams.get("redirectUrl") || "";
+          const queryParams = isRunningOnClient()
+            ? new URLSearchParams(location.search)
+            : null;
+          const redirectUrl = queryParams?.get("redirectUrl") || "";
           window.location.href =
             window.location.origin + decodeURIComponent(redirectUrl);
         }
@@ -221,14 +232,16 @@ export const useAccounts = ({ fpi }) => {
       const { user_exists: userExists } = res.data.verifyMobileOTP || {};
       if (!userExists) {
         if (isRedirection) {
-          navigate({
+          navigate?.({
             pathname: "/auth/edit-profile",
             search: location.search,
           });
         }
       } else {
-        const queryParams = new URLSearchParams(location.search);
-        const redirectUrl = queryParams.get("redirectUrl") || "";
+        const queryParams = isRunningOnClient()
+          ? new URLSearchParams(location.search)
+          : null;
+        const redirectUrl = queryParams?.get("redirectUrl") || "";
         window.location.href =
           window.location.origin + decodeURIComponent(redirectUrl);
       }
@@ -290,7 +303,7 @@ export const useAccounts = ({ fpi }) => {
       if (res?.errors) {
         throw res?.errors?.[0];
       }
-      navigate({
+      navigate?.({
         pathname: "/",
       });
       return res?.data?.forgotPassword;
@@ -427,16 +440,20 @@ export const useAccounts = ({ fpi }) => {
       if (userExists) {
         if (verifyEmailLink) {
           if (isRedirection) {
-            const queryParams = new URLSearchParams(location.search);
-            queryParams.set("email", email);
-            navigate({
+            const queryParams = isRunningOnClient()
+              ? new URLSearchParams(location.search)
+              : null;
+            queryParams?.set("email", email);
+            navigate?.({
               pathname: "/auth/verify-email-link",
-              search: queryParams.toString(),
+              search: queryParams?.toString(),
             });
           }
         } else if (isRedirection) {
-          const queryParams = new URLSearchParams(location.search);
-          const redirectUrl = queryParams.get("redirectUrl") || "";
+          const queryParams = isRunningOnClient()
+            ? new URLSearchParams(location.search)
+            : null;
+          const redirectUrl = queryParams?.get("redirectUrl") || "";
           window.location.href =
             window.location.origin + decodeURIComponent(redirectUrl);
         }
@@ -470,8 +487,10 @@ export const useAccounts = ({ fpi }) => {
         throw res?.errors?.[0];
       }
       if (isRedirection) {
-        const queryParams = new URLSearchParams(location.search);
-        const redirectUrl = queryParams.get("redirectUrl") || "";
+        const queryParams = isRunningOnClient()
+          ? new URLSearchParams(location.search)
+          : null;
+        const redirectUrl = queryParams?.get("redirectUrl") || "";
         window.location.href =
           window.location.origin + decodeURIComponent(redirectUrl);
       }

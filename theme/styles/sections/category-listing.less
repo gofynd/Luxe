@@ -23,7 +23,7 @@
 
 .imageGrid {
   display: grid;
-  .grid-gap(32px, 24px);
+  .grid-gap(24px);
   padding: 0;
   grid-template-columns: repeat(var(--per_row), 1fr);
 
@@ -39,7 +39,7 @@
   }
   @media @tablet {
     grid-template-columns: repeat(var(--brand-item), 1fr);
-    .grid-gap(24px, 16px);
+    .grid-gap(12px);
     padding: 0 24px;
   }
   @media @mobile {
@@ -56,7 +56,7 @@
 .categories-name {
   position: absolute;
   border: 1px solid @DividerStokes;
-  background-color: @ThemeAccentL5;
+  background-color: @ButtonSecondary;
   border-radius: @ButtonRadius;
   padding: 7px 15px;
   text-align: center;
@@ -98,8 +98,7 @@
   }
 }
 .section-button {
-  padding: 12px 24px;
-  text-transform: uppercase;
+  padding: 12px 20px;
   border-radius: @ButtonRadius;
   cursor: pointer;
 }
@@ -113,8 +112,8 @@
   }
   @media @mobile {
     --gap: 12px;
-    padding-left: 16px;
-    padding-right: var(--p-right-mob, 16px);
+    padding-left: 6px;
+    padding-right: var(--p-right-mob, 6px);
   }
 }
 
@@ -130,6 +129,7 @@
   }
   @media @mobile {
     padding: 0;
+    padding-left: 10px;
   }
 }
 

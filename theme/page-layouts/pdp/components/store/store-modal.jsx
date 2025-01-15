@@ -95,7 +95,7 @@ function StoreModal({
                     onClick={() => setShowSortDropdown(!showSortDropdown)}
                   >
                     <p
-                      className={`${styles.b1} ${styles.selectedOption}`}
+                      className={`b1 ${styles.selectedOption}`}
                       title={activeSortOption}
                     >
                       {activeSortOption}
@@ -115,7 +115,7 @@ function StoreModal({
                     {allStoresInfo.sort_on.map((opt, index) => (
                       <li
                         key={index}
-                        className={`${styles.b1} ${
+                        className={`b1 ${
                           opt.is_selected ? styles.selectedOption : ""
                         }`}
                       >

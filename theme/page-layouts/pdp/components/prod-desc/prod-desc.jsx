@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import FyAccordion from "../../../../components/core/fy-accordion/fy-accordion";
-import FyHTMLRenderer from "../../../../components/core/fy-html-renderer/fy-html-renderer";
 import styles from "./prod-desc.less";
+import { useRichText } from "../../../../helper/hooks";
 
-function ProdDesc({ product, pageConfig, customClass }) {
+function ProdDesc({ product, config, customClass }) {
   const getInitialActiveTab = (product) => {
     if ((product?.highlights || []).length) {
       return 0; // If highlights exist, set to tab 0
@@ -54,7 +54,7 @@ function ProdDesc({ product, pageConfig, customClass }) {
   const getActiveGroupedAttribute = () =>
     getGroupedAttributes().find((item) => item.tabId === activeTab);
 
-  const isDescriptionTabs = () => pageConfig?.variant_position === "tabs";
+  const isDescriptionTabs = () => config?.variant_position?.value === "tabs";
 
   const isProductHighlightAvailable = () =>
     productHighlight?.details?.length > 0;
@@ -67,6 +67,8 @@ function ProdDesc({ product, pageConfig, customClass }) {
     isProductDescAvailable() ||
     getGroupedAttributes().some((attr) => isGroupedAttrAvailable(attr));
 
+  const clientMarkedContent = useRichText(productDescription.details);
+
   return (
     <div className={customClass}>
       {isDisplayDataAvailable() && (
@@ -75,22 +77,21 @@ function ProdDesc({ product, pageConfig, customClass }) {
             isDescriptionTabs() && styles.isDesktopHidden
           }`}
         >
-          <FyAccordion isOpen={true}>
+          <FyAccordion isOpen={config?.first_accordian_open?.value}>
             {[
-              <div className={styles.h5}>{productDescription?.title}</div>,
+              <div className="h5">{productDescription?.title}</div>,
               <>
                 {productDescription.details && (
                   <div
-                    className={`${styles.b2} ${styles.pdpDetail}`}
-                    // eslint-disable-next-line react/no-danger
+                    className={`b2 ${styles.pdpDetail}`}
                     dangerouslySetInnerHTML={{
-                      __html: productDescription.details,
+                      __html: clientMarkedContent,
                     }}
                   >
                     {/* <FyHTMLRenderer
-                      customClass={styles.productLongDescription}
-                      htmlContent={productDescription.details}
-                    ></FyHTMLRenderer> */}
+                    customClass={styles.productLongDescription}
+                    htmlContent={productDescription.details}
+                  ></FyHTMLRenderer> */}
                   </div>
                 )}
                 {productDescription?.details?.length === 0 && (
@@ -106,12 +107,12 @@ function ProdDesc({ product, pageConfig, customClass }) {
               className={styles.accordion}
             >
               {[
-                <div className={styles.h5}>{attribute.title}</div>,
+                <div className="h5">{attribute.title}</div>,
                 <div className={styles.pdpDetail}>
                   {attribute?.details?.length > 0 ? (
                     <ul
-                      className={`${styles.b2}  ${
-                        pageConfig?.product_details_bullets &&
+                      className={`b2  ${
+                        config?.product_details_bullets?.value &&
                         styles.bulletSpacing
                       }`}
                     >
@@ -175,7 +176,7 @@ function ProdDesc({ product, pageConfig, customClass }) {
             ))}
           </div>
           {isDisplayDataAvailable() && (
-            <div className={`${styles.b2} ${styles.details}`}>
+            <div className={`b2 ${styles.details}`}>
               {activeTab === 0 && isProductHighlightAvailable() && (
                 <ul className={styles.items}>
                   {productHighlight.details.length > 0 ? (
@@ -193,9 +194,11 @@ function ProdDesc({ product, pageConfig, customClass }) {
               {activeTab === 1 && isProductDescAvailable() && (
                 <div className={styles.productLongDescription}>
                   {productDescription.details ? (
-                    <FyHTMLRenderer
-                      customClass={styles.pdpDetail}
-                      htmlContent={productDescription.details}
+                    <div
+                      className={styles.pdpDetail}
+                      dangerouslySetInnerHTML={{
+                        __html: productDescription.details,
+                      }}
                     />
                   ) : (
                     <div className={styles.noDataPlaceholder}>
@@ -208,7 +211,7 @@ function ProdDesc({ product, pageConfig, customClass }) {
               {activeTab > 1 && (
                 <ul
                   className={
-                    pageConfig?.product_details_bullets && styles.items
+                    config?.product_details_bullets?.value && styles.items
                   }
                 >
                   {getActiveGroupedAttribute()?.details?.length > 0 ? (

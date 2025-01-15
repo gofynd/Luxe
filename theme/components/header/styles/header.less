@@ -1,5 +1,11 @@
 @import "../../../styles/main.less";
 
+.ctHeaderWrapper {
+  position: sticky;
+  top: 0;
+  z-index: @header;
+}
+
 .header {
   position: relative;
   background-color: @HeaderBackground;
@@ -27,12 +33,18 @@
   }
 
   .mobile {
+    @media @desktop {
+      display: none;
+    }
+  }
+
+  .mobileTop {
     display: flex;
     align-content: center;
     padding: 7px 8px;
     .middle {
       .logo {
-        max-height: 42px;
+        max-height: 38px;
       }
     }
     .left,
@@ -50,8 +62,9 @@
         &--bag {
           position: relative;
           .cartCount {
-            width: 16px;
-            height: 16px;
+            min-width: 16px;
+            min-height: 16px;
+            padding: 0 2px;
             line-height: 16px;
             text-align: center;
             vertical-align: middle;
@@ -81,6 +94,37 @@
           transform: translate(4px, 0px);
         }
       }
+    }
+
+    &.i18Wrapper {
+      border-top: 1px solid @DividerStokes;
+    }
+  }
+  .mobileBottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-height: 51.6px;
+    color: @HeaderIcon;
+    padding: 8px 16px;
+    width: 100%;
+    border-top: 1px solid @DividerStokes;
+    border-bottom: 1px solid @DividerStokes;
+
+    .label {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .pincode {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 16px;
+      letter-spacing: -0.24px;
     }
   }
 

@@ -88,7 +88,7 @@ const useFeatureProductDetails = ({
             `/cart/checkout/?id=${outRes?.data?.addItemsToCart?.cart?.id}`
           );
         }
-        fetchCartDetails(fpi);
+        fetchCartDetails(fpi, { buyNow });
       } else {
         showSnackbar(
           outRes?.data?.addItemsToCart?.message || "Failed to add to cart",

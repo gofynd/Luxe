@@ -3,7 +3,7 @@ import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
 import styles from "./breadcrumb.less";
 
-function BreadCrumb({ productData, pageConfig, customClass }) {
+function BreadCrumb({ productData, config, customClass }) {
   const getBrand = () => productData?.brand || {};
 
   const getCategory = () => {
@@ -17,24 +17,22 @@ function BreadCrumb({ productData, pageConfig, customClass }) {
   };
 
   return (
-    <div
-      className={`${styles.breadcrumbs} ${styles.captionNormal} ${customClass}`}
-    >
+    <div className={`${styles.breadcrumbs} captionNormal ${customClass}`}>
       <span>
         <FDKLink to="/">Home</FDKLink>&nbsp;/&nbsp;
       </span>
-      {pageConfig?.show_products_breadcrumb && (
+      {config?.show_products_breadcrumb?.value && (
         <span>
           <FDKLink to="/products">Products</FDKLink>&nbsp;/&nbsp;
         </span>
       )}
-      {pageConfig?.show_category_breadcrumb && getCategory().name && (
+      {config?.show_category_breadcrumb?.value && getCategory().name && (
         <span>
           <FDKLink to={getCategory().url}>{getCategory().name}</FDKLink>
           &nbsp;/&nbsp;
         </span>
       )}
-      {pageConfig?.show_brand_breadcrumb && getBrand().name && (
+      {config?.show_brand_breadcrumb?.value && getBrand().name && (
         <span>
           <FDKLink to={convertActionToUrl(getBrand().action)}>
             {getBrand().name}

@@ -1,8 +1,9 @@
 import React from "react";
 import BlogPage from "@gofynd/theme-template/components/blog-page/blog-page";
 import "@gofynd/theme-template/components/blog-page/blog-page.css";
-import useBlog from "./useBlog";
+import useBlogDetails from "../../page-layouts/blog/useBlogDetails";
 import { GET_BLOG } from "../../queries/blogQuery";
+import { getHelmet } from "../../providers/global-provider";
 
 function BlogDetails({ fpi }) {
   const {
@@ -12,17 +13,20 @@ function BlogDetails({ fpi }) {
     contactInfo,
     getBlog,
     isBlogDetailsLoading,
-  } = useBlog({ fpi });
+  } = useBlogDetails({ fpi });
 
   return (
-    <BlogPage
-      contactInfo={contactInfo}
-      blogDetails={blogDetails}
-      sliderProps={sliderProps}
-      footerProps={footerProps}
-      getBlog={getBlog}
-      isBlogDetailsLoading={isBlogDetailsLoading}
-    ></BlogPage>
+    <>
+      {getHelmet({ seo: blogDetails?.seo })}
+      <BlogPage
+        contactInfo={contactInfo}
+        blogDetails={blogDetails}
+        sliderProps={sliderProps}
+        footerProps={footerProps}
+        getBlog={getBlog}
+        isBlogDetailsLoading={isBlogDetailsLoading}
+      ></BlogPage>
+    </>
   );
 }
 

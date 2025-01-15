@@ -17,8 +17,10 @@ const useCategories = (fpi) => {
 
   function fetchAllCategories() {
     setIsloading(true);
-    try {
-      fpi.executeGQL(CATEGORIES_LISTING).then((res) => {
+
+    fpi
+      .executeGQL(CATEGORIES_LISTING)
+      .then((res) => {
         if (res?.data?.categories?.data?.length > 0) {
           const data = res?.data?.categories?.data;
           const categoriesList = data
@@ -26,13 +28,17 @@ const useCategories = (fpi) => {
             .flat()
             .flatMap((i) => i?.childs);
           setCategories(categoriesList);
+        } else {
+          setCategories([]); // Ensure categories is cleared if no data is returned
         }
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
+        setCategories([]); // Clear categories on error
+      })
+      .finally(() => {
+        setIsloading(false); // Only update loading state once all actions are complete
       });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsloading(false);
-    }
   }
 
   const getCategoriesByDepartment = async (department) => {

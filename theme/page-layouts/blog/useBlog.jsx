@@ -23,15 +23,18 @@ const useBlog = ({ fpi }) => {
 
   const isClient = useMemo(() => isRunningOnClient(), []);
 
-  const {
-    blogProps: { sliderBlogsData, filterQuery },
-    isBlogSsrFetched,
-  } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const { blogProps = {}, isBlogSsrFetched } = useGlobalStore(
+    fpi?.getters?.CUSTOM_VALUE
+  ) || { blogProps: {} };
+  const { sliderBlogsData, filterQuery, totalBlogsListData } = blogProps;
   const blogsData = useGlobalStore(fpi?.getters?.BLOGS);
 
   const [isBlogPageLoading, setIsBlogPageLoading] = useState(!isBlogSsrFetched);
   const [blogs, setBlogs] = useState(blogsData || undefined);
   const [sliderBlogs, setSliderBlogs] = useState(sliderBlogsData || undefined);
+  const [totalBlogsList, setTotalBlogsList] = useState(
+    totalBlogsListData || undefined
+  );
 
   const footerProps = useMemo(
     () => ({
@@ -59,6 +62,7 @@ const useBlog = ({ fpi }) => {
       show_blog_slide_show: pageConfig?.show_blog_slide_show || "",
       recentBlogs: pageConfig.recent_blogs || [],
       topViewedBlogs: pageConfig.top_blogs || [],
+      sliderFilterTags: pageConfig.filter_tags || [],
     }),
     [pageConfig]
   );
@@ -166,20 +170,38 @@ const useBlog = ({ fpi }) => {
   }, [location?.search]);
 
   useEffect(() => {
-    if (!sliderBlogsData) {
+    const values = {
+      pageNo: Number(1),
+    };
+    if (pageConfig?.filter_tags?.length > 0)
+      values.tags = pageConfig.filter_tags?.join(",");
+
+    fpi
+      .executeGQL(FETCH_BLOGS_LIST, values, { skipStoreUpdate: true })
+      .then((res) => {
+        if (res?.data?.applicationContent) {
+          const data = res?.data?.applicationContent?.blogs;
+          setSliderBlogs(data);
+        }
+      });
+  }, [pageConfig]);
+
+  useEffect(() => {
+    if (!totalBlogsListData) {
       const values = {
-        pageNo: Number(1),
+        pageSize: 12,
+        pageNo: 1,
       };
       fpi
         .executeGQL(FETCH_BLOGS_LIST, values, { skipStoreUpdate: true })
         .then((res) => {
           if (res?.data?.applicationContent) {
             const data = res?.data?.applicationContent?.blogs;
-            setSliderBlogs(data);
+            setTotalBlogsList(data);
           }
         });
     }
-  }, [sliderBlogsData]);
+  }, [totalBlogsListData]);
 
   function fetchBlogs(values, updateStore, append = false) {
     values.pageSize = PAGE_SIZE;
@@ -263,8 +285,9 @@ const useBlog = ({ fpi }) => {
 
   return {
     blogs: blogs || blogsData,
-    sliderBlogs: sliderBlogs || sliderBlogsData,
+    sliderBlogs: sliderBlogs || totalBlogsListData,
     blogDetails: blogDetails?.[slug],
+    totalBlogsList: totalBlogsList || totalBlogsListData,
     footerProps,
     sliderProps,
     contactInfo,

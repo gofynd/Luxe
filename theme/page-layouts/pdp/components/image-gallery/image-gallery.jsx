@@ -25,6 +25,8 @@ function PdpImageGallery({
   hiddenDots = false,
   slideTabCentreNone = false,
   hideImagePreview = false,
+  handleShare,
+  showShareIcon = true,
 }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [enableLightBox, setEnableLightBox] = useState(false);
@@ -187,7 +189,7 @@ function PdpImageGallery({
                   >
                     {item.type === "image" && (
                       <FyImage
-                        customClass={`${styles["imageGallery__list--item"]}`}
+                        customClass={`${styles["imageGallery__list--item"]} ${styles.dotsImage}`}
                         src={item?.url}
                         alt={item?.alt}
                         aspectRatio={getProductImgAspectRatio(globalConfig)}
@@ -256,6 +258,8 @@ function PdpImageGallery({
           addToWishList={addToWishList}
           setCurrentImageIndex={setCurrentImageIndex}
           slideTabCentreNone={slideTabCentreNone}
+          handleShare={handleShare}
+          showShareIcon={showShareIcon}
         />
       </div>
       {enableLightBox && (

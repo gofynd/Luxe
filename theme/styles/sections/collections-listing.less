@@ -23,6 +23,7 @@
     .section-description {
       color: @TextBody;
       margin: 0 auto 32px;
+      font-size: 14px;
       @media @desktop {
         max-width: 590px;
       }
@@ -103,7 +104,6 @@
   .collection-button {
     .button-font();
     cursor: pointer;
-    text-transform: uppercase;
     padding: 12px 16px;
     color: @ButtonSecondary;
     background-color: @ButtonPrimary;
@@ -120,7 +120,7 @@
       .text-line-clamp();
     }
     @media @desktop {
-      padding: 12px 10px;
+      padding: 12px 32px;
       background-color: @ButtonSecondary;
       color: @ButtonPrimary;
       width: 100%;
@@ -179,7 +179,6 @@
 
 .collection-horizontal {
   width: 100%;
-  --gap: 12px;
   @media @tablet-strict {
     padding: 0 28px;
   }
@@ -203,7 +202,10 @@
     }
   }
   .custom-slick-slide {
-    padding: 0 calc(var(--gap) / 2);
+    padding: 0 12px;
+    @media @tablet {
+      padding: 0 6px;
+    }
   }
 }
 .slider-container {
@@ -263,7 +265,7 @@ div[data-cardtype="COLLECTIONS"] {
 }
 :global {
   .slick-list {
-    margin: 0 calc(var(--gap) / 2 * -1) !important;
+    // margin: 0 calc(var(--gap) / 2 * -1) !important;
     @media @mobile {
       padding-left: 0 !important;
     }

@@ -50,3 +50,4 @@ export const settings = {
   ],
   blocks: [],
 };
+export default Component

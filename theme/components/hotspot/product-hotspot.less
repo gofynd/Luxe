@@ -6,7 +6,6 @@
   bottom: var(--bottom);
   right: var(--right);
   transform: var(--transform);
-
   &:hover {
     z-index: 1;
     .hotspot__tooltip-wrapper {
@@ -59,7 +58,7 @@
     padding-top: 10px;
     transform: translateX(-50%);
     width: 272px;
-
+    z-index: 99;
     @media @mobile-up {
       width: 329px;
     }
@@ -170,5 +169,8 @@
     .b2(desktop);
     .text-line-clamp();
     color: @TextHeading;
+    &.linkText {
+      text-decoration: underline;
+    }
   }
 }

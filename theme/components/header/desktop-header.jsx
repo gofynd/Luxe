@@ -1,7 +1,8 @@
 import React from "react";
 import { FDKLink } from "fdk-core/components";
-
+import { useGlobalStore } from "fdk-core/utils";
 import Navigation from "./navigation";
+import I18Dropdown from "./i18n-dropdown";
 import Search from "./search";
 import styles from "./styles/desktop-header.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
@@ -17,7 +18,17 @@ function HeaderDesktop({
   wishlistCount,
   contactInfo,
   fpi,
+  isHyperlocal = false,
+  isPromiseLoading = false,
+  pincode = "",
+  deliveryMessage = "",
+  onDeliveryClick = () => {},
 }) {
+  const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
+  const international_shipping =
+    CONFIGURATION?.app_features?.common?.international_shipping?.enabled ??
+    false;
+
   const isDoubleRowHeader = globalConfig?.header_layout === "double";
   const getMenuMaxLength = () => {
     if (isDoubleRowHeader) {
@@ -60,30 +71,102 @@ function HeaderDesktop({
               contactInfo={contactInfo}
             />
           )}
+          {isDoubleRowHeader && globalConfig?.always_on_search && (
+            <div className={styles.alwaysOnSearch}>
+              <Search
+                customSearchClass={styles.customSearchClass}
+                customSearchWrapperClass={styles.customSearchWrapperClass}
+                showCloseButton={false}
+                alwaysOnSearch={true}
+                screen="desktop"
+                globalConfig={globalConfig}
+                fpi={fpi}
+              />
+            </div>
+          )}
         </div>
         <div className={`${styles.middle} ${styles.flexCenter}`}>
           <FDKLink link="/">
             <img className={styles.logo} src={getShopLogo()} alt="Name" />
           </FDKLink>
+          {isHyperlocal &&
+            globalConfig?.always_on_search &&
+            ["layout_1", "layout_2", "layout_3"].includes(
+              globalConfig?.logo_menu_alignment
+            ) && (
+              <button
+                className={`${styles.hyperlocalActionBtn} ${styles.hyperlocalSearchOn}`}
+                onClick={onDeliveryClick}
+              >
+                {isPromiseLoading ? (
+                  "Fetching..."
+                ) : (
+                  <>
+                    <div className={styles.label}>
+                      {pincode ? deliveryMessage : "Enter a pincode"}
+                    </div>
+                    {pincode && (
+                      <div className={styles.pincode}>
+                        <span>{pincode}</span>
+                        <SvgWrapper
+                          className={styles.headerAngleDownIcon}
+                          svgSrc="header-angle-down"
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </button>
+            )}
         </div>
         <div className={`${styles.right} ${styles.right__icons}`}>
+          {international_shipping && <I18Dropdown fpi={fpi}></I18Dropdown>}
+          {isHyperlocal &&
+            (!globalConfig?.always_on_search ||
+              globalConfig?.logo_menu_alignment === "layout_4") && (
+              <button
+                className={styles.hyperlocalActionBtn}
+                onClick={onDeliveryClick}
+              >
+                {isPromiseLoading ? (
+                  "Fetching..."
+                ) : (
+                  <>
+                    <div className={styles.label}>
+                      {pincode ? deliveryMessage : "Enter a pincode"}
+                    </div>
+                    {pincode && (
+                      <div className={styles.pincode}>
+                        <span>{pincode}</span>
+                        <SvgWrapper
+                          className={styles.headerAngleDownIcon}
+                          svgSrc="header-angle-down"
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </button>
+            )}
           {isDoubleRowHeader && !LoggedIn && (
             <button
-              className={`${styles.labelSignin} ${styles.b2} ${styles.fontBody}`}
+              className={`${styles.labelSignin} b2 ${styles.fontBody}`}
               onClick={() => checkLogin("profile")}
               type="button"
             >
               <span>Sign in</span>
             </button>
           )}
-          <div className={`${styles.icon} ${styles["right__icons--search"]}`}>
-            <Search
-              customClass={`${styles[globalConfig?.header_layout]}-row-search`}
-              screen="desktop"
-              globalConfig={globalConfig}
-              fpi={fpi}
-            />
-          </div>
+          {(!isDoubleRowHeader || !globalConfig?.always_on_search) && (
+            <div className={`${styles.icon} ${styles["right__icons--search"]}`}>
+              <Search
+                customClass={`${styles[globalConfig?.header_layout]}-row-search`}
+                screen="desktop"
+                globalConfig={globalConfig}
+                fpi={fpi}
+              />
+            </div>
+          )}
 
           <button
             type="button"

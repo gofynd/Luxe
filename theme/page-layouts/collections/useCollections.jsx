@@ -14,10 +14,10 @@ const useCollections = (fpi) => {
   const pageConfig =
     mode?.page?.find((f) => f.page === "collections")?.settings?.props || {};
   // TODO need to confirm the collection list getters
-  const COLLECTIONLIST = useGlobalStore(fpi.getters.COLLECTION_LIST);
+  const COLLECTIONLIST = useGlobalStore(fpi.getters.COLLECTIONS);
   const { items: collections } = COLLECTIONLIST;
   const [collectionList, setCollections] = useState(collections);
-  const [pageData, setPageData] = useState(COLLECTIONLIST?.pageData ?? {});
+  const [pageData, setPageData] = useState(COLLECTIONLIST?.page ?? {});
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchCollection = (reset) => {
@@ -49,7 +49,7 @@ const useCollections = (fpi) => {
   }, []);
 
   return {
-    collections: collectionList,
+    collections: collectionList || collections,
     pageData,
     pageConfig,
     globalConfig,

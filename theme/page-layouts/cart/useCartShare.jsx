@@ -12,7 +12,6 @@ const useCartShare = ({ fpi, cartData }) => {
 
   const onShareClick = () => {
     setIsShareLoading(true);
-
     const payload = {
       getShareCartLinkRequestInput: {
         id: cartData?.id.toString(),

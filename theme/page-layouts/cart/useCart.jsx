@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useGlobalStore } from "fdk-core/utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   CART_DETAILS,
   CART_UPDATE,
@@ -9,17 +9,19 @@ import {
 import { useAccounts, useWishlist, useSnackbar } from "../../helper/hooks";
 import useHeader from "../../components/header/useHeader";
 
-export function fetchCartDetails(fpi) {
-  const payload = {
+export function fetchCartDetails(fpi, payload = {}) {
+  const defaultPayload = {
     buyNow: false,
     includeAllItems: true,
     includeCodCharges: true,
     includeBreakup: true,
+    ...payload,
   };
-  return fpi?.executeGQL?.(CART_DETAILS, payload);
+  return fpi?.executeGQL?.(CART_DETAILS, defaultPayload);
 }
 
 const useCart = (fpi) => {
+  const [searchParams] = useSearchParams();
   const [checkoutMode, setCheckoutMode] = useState("");
   const CART = useGlobalStore(fpi.getters.CART);
   const appFeatures = useGlobalStore(fpi.getters.APP_FEATURES);
@@ -28,13 +30,11 @@ const useCart = (fpi) => {
     (f) => f.name === THEME?.config?.current
   );
   const globalConfig = mode?.global_config?.custom?.props;
-  const pageConfig =
-    mode?.page?.find((f) => f.page === "cart-landing")?.settings?.props || {};
   const isLoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
   const { cartItemCount } = useHeader(fpi);
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCartUpdating, setIsCartUpdating] = useState(false);
   const { buy_now_cart_items, cart_items, cart_items_count } = CART || {};
   const {
@@ -51,6 +51,8 @@ const useCart = (fpi) => {
   const { openLogin } = useAccounts({ fpi });
   const { addToWishList } = useWishlist({ fpi });
 
+  const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
+
   useEffect(() => {
     setCheckoutMode(cart_items?.checkout_mode ?? "");
   }, [cart_items]);
@@ -60,7 +62,7 @@ const useCart = (fpi) => {
       navigate("/");
     }
     setIsLoading(true);
-    fetchCartDetails(fpi).then(() => setIsLoading(false));
+    fetchCartDetails(fpi, { buyNow }).then(() => setIsLoading(false));
   }, [fpi]);
 
   const isAnonymous = appFeatures?.landing_page?.continue_as_guest;
@@ -106,7 +108,8 @@ const useCart = (fpi) => {
     itemSize,
     totalQuantity,
     itemIndex,
-    operation
+    operation,
+    moveToWishList = false
   ) {
     if (event) {
       event.stopPropagation();
@@ -115,6 +118,7 @@ const useCart = (fpi) => {
     const payload = {
       b: true,
       i: true,
+      buyNow,
       updateCartRequestInput: {
         items: [
           {
@@ -137,11 +141,13 @@ const useCart = (fpi) => {
       .then((res) => {
         setIsCartUpdating(false);
         if (res?.data?.updateCart?.success) {
-          showSnackbar(
-            res?.data?.updateCart?.message || "Cart is updated",
-            "success"
-          );
-          fetchCartDetails(fpi);
+          if (!moveToWishList) {
+            showSnackbar(
+              res?.data?.updateCart?.message || "Cart is updated",
+              "success"
+            );
+          }
+          fetchCartDetails(fpi, { buyNow });
         } else {
           showSnackbar(
             res?.data?.updateCart?.message || "Cart is updated",
@@ -173,12 +179,20 @@ const useCart = (fpi) => {
     setIsRemoveModalOpen(false);
   }
 
-  function handleRemoveItem(data) {
+  function handleRemoveItem(data, moveToWishList) {
     if (!data) {
       return;
     }
     const { item, size, index } = data;
-    updateCartItems(null, item, size, 0, index, "remove_item").then(() => {
+    updateCartItems(
+      null,
+      item,
+      size,
+      0,
+      index,
+      "remove_item",
+      moveToWishList
+    ).then(() => {
       closeRemoveModal();
     });
   }
@@ -189,7 +203,7 @@ const useCart = (fpi) => {
 
     if (isLoggedIn) {
       addToWishList(data.item.product).then(() => {
-        handleRemoveItem(data);
+        handleRemoveItem(data, true);
       });
     } else {
       closeRemoveModal();
@@ -219,6 +233,7 @@ const useCart = (fpi) => {
       cartMetaRequestInput: {
         checkout_mode: mode,
       },
+      buyNow,
     };
     setCheckoutMode(mode);
     fpi.executeGQL(CART_META_UPDATE, payload);
@@ -241,7 +256,6 @@ const useCart = (fpi) => {
     isOutOfStock,
     isGstInput,
     isPlacingForCustomer,
-    isShareCart: pageConfig?.share_cart ?? true,
     isRemoveModalOpen,
     isPromoModalOpen,
     onUpdateCartItems: updateCartItems,

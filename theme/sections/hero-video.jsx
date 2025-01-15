@@ -3,7 +3,6 @@ import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/hero-video.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import placeholder from "../assets/images/hero-desktop-placeholder.png";
-import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
 
 export function Component({ props, globalConfig }) {
   const {
@@ -323,6 +322,8 @@ export function Component({ props, globalConfig }) {
 
   const handleVideoClick = (event) => {
     event.stopPropagation();
+    event.preventDefault();
+
     if (videoRef.current) {
       if (!videoRef.current.paused) {
         videoRef.current.pause();
@@ -333,14 +334,15 @@ export function Component({ props, globalConfig }) {
   };
 
   const dynamicStyles = {
-    marginBottom: `${globalConfig.section_margin_bottom}px`,
+    marginBottom: `${globalConfig?.section_margin_bottom}px`,
   };
   return (
     <div style={dynamicStyles}>
       {title?.value && (
         <h2 className={`${styles.video_heading} fontHeader`}>{title?.value}</h2>
       )}
-      <noscript>
+
+      <div className={`${styles.video_container} `}>
         {videoFile?.value ? (
           <video
             ref={videoRef}
@@ -363,99 +365,58 @@ export function Component({ props, globalConfig }) {
             allowFullScreen
           ></video>
         ) : (
-          <>
-            isYoutube() &&
-            <img
-              src={
-                coverUrl?.value ||
-                `https://img.youtube.com/vi/${getYTVideoID(videoUrl?.value)}/hqdefault.jpg` ||
-                placeholder
-              }
-              alt="placeholder"
-              style={{ width: "100%" }}
-            />
-          </>
+          isYoutube() &&
+          isValidUrl && (
+            <div className={styles.youtube_wrapper}>
+              <div
+                className={styles.yt_video}
+                ref={ytVideoRef}
+                id={`yt-video-${getYTVideoID(videoUrl?.value)}`}
+                data-videoid={getYTVideoID(videoUrl?.value)}
+                data-videometa={JSON.stringify(props)}
+                allowFullScreen
+              ></div>
+            </div>
+          )
         )}
-      </noscript>
-      {/* <IntersectionObserverComponent> */}
-      {isRunningOnClient() && (
-        <div className={`${styles.video_container} `}>
-          {videoFile?.value ? (
-            <video
-              ref={videoRef}
-              onClick={handleVideoClick}
-              width="100%"
-              poster={coverUrl?.value}
-              autoPlay={autoplay?.value}
-              muted={autoplay?.value}
-              loop={showloop?.value}
-              controls={!hidecontrols?.value}
-              webkitPlaysInline="true"
-              playsInline
-              onPause={() => setShowOverlay(true)}
-              onEnded={() => setShowOverlay(true)}
-              onPlay={() => setShowOverlay(false)}
-              onLoadedData={() => setIsLoading(false)}
-              onProgress={() => setIsLoading(false)}
-              preload="auto"
-              src={getVideoSource()}
-              allowFullScreen
-            ></video>
-          ) : (
-            isYoutube() &&
-            isValidUrl && (
-              <div className={styles.youtube_wrapper}>
-                <div
-                  className={styles.yt_video}
-                  ref={ytVideoRef}
-                  id={`yt-video-${getYTVideoID(videoUrl?.value)}`}
-                  data-videoid={getYTVideoID(videoUrl?.value)}
-                  data-videometa={JSON.stringify(props)}
-                  allowFullScreen
-                ></div>
-              </div>
-            )
-          )}
 
-          {showOverlay && (
-            <div
-              onClick={playVideo}
-              className={`overlay animated fadein overlay-noimage:${coverUrl?.value} youtube-noimage: ${isYoutube()}`}
-            >
-              {coverUrl.value && (
-                <div
-                  className={styles.overlay__image}
-                  style={{
-                    background: `#ccc url(${coverUrl?.value}) center/cover no-repeat `,
-                  }}
-                ></div>
-              )}
-              <div className={styles.overlay__content}>
-                <div
-                  id="play"
-                  // onClick={playVideo}
-                  className={styles.overlay__playButton}
-                >
-                  <SvgWrapper svgSrc="play" />
-                </div>
+        {showOverlay && (
+          <div
+            onClick={playVideo}
+            className={`overlay animated fadein overlay-noimage:${coverUrl?.value} youtube-noimage: ${isYoutube()}`}
+          >
+            {coverUrl.value && (
+              <div
+                className={styles.overlay__image}
+                style={{
+                  background: `#ccc url(${coverUrl?.value}) center/cover no-repeat `,
+                }}
+              ></div>
+            )}
+            <div className={styles.overlay__content}>
+              <div
+                id="play"
+                // onClick={playVideo}
+                className={styles.overlay__playButton}
+              >
+                <SvgWrapper svgSrc="play" />
               </div>
             </div>
-          )}
-          {!showOverlay && ytOverlay && (
-            <div className={styles.pauseButton} onClick={closeVideo}>
-              <SvgWrapper svgSrc="pause" />
-            </div>
-          )}
-          {!videoFile?.value && !videoUrl?.value && (
-            <img
-              src={coverUrl?.value || placeholder}
-              alt="placeholder"
-              style={{ width: "100%" }}
-            />
-          )}
-        </div>
-      )}
-      {/* </IntersectionObserverComponent> */}
+          </div>
+        )}
+        {!showOverlay && ytOverlay && (
+          <div className={styles.pauseButton} onClick={closeVideo}>
+            <SvgWrapper svgSrc="pause" />
+          </div>
+        )}
+        {!videoFile?.value && !videoUrl?.value && (
+          <img
+            src={coverUrl?.value || placeholder}
+            alt="placeholder"
+            style={{ width: "100%" }}
+          />
+        )}
+      </div>
     </div>
   );
 }
@@ -515,3 +476,4 @@ export const settings = {
     },
   ],
 };
+export default Component;

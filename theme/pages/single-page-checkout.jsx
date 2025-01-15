@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useGlobalStore } from "fdk-core/utils";
-import { useNavigate, useSearchParams } from "react-router-dom";
-
+import { useSearchParams } from "react-router-dom";
 import CheckoutPage from "@gofynd/theme-template/pages/checkout/checkout";
 import "@gofynd/theme-template/pages/checkout/checkout.css";
 // import PriceBreakup from "@gofynd/theme-template/components/price-breakup/price-breakup";
 // import "@gofynd/theme-template/components/price-breakup/price-breakup.css";
 
 import { CHECKOUT_LANDING, PAYMENT_OPTIONS } from "../queries/checkoutQuery";
+import { useHyperlocalTat } from "../helper/hooks";
 import useAddress from "../page-layouts/single-checkout/address/useAddress";
 import usePayment from "../page-layouts/single-checkout/payment/usePayment";
 import Loader from "../components/loader/loader";
+import useCartCoupon from "../page-layouts/cart/useCartCoupon";
+import useCartComment from "../page-layouts/cart/useCartComment";
 
 function SingleCheckoutPage({ fpi }) {
   const bagData = useGlobalStore(fpi?.getters?.CART_ITEMS) || {};
@@ -21,22 +23,34 @@ function SingleCheckoutPage({ fpi }) {
   const [showShipment, setShowShipment] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [mapApiKey, setMapApiKey] = useState("");
-
-  const navigate = useNavigate();
+  const { isHyperlocal, convertUTCToHyperlocalTat } = useHyperlocalTat({ fpi });
   const [searchParams] = useSearchParams();
   const cart_id = searchParams.get("id");
   const buy_now = searchParams.get("buy_now") || false;
   const address_id = searchParams.get("address_id");
+  const cartCoupon = useCartCoupon({ fpi, cartData: bagData });
+  const cartComment = useCartComment({ fpi, cartData: bagData });
+
+  const executeCheckoutLanding = useCallback(
+    (reqBody = {}) => {
+      const payload = {
+        buyNow: false,
+        includeAllItems: true,
+        includeBreakup: true,
+        includeCodCharges: true,
+        ...reqBody,
+      };
+      fpi.executeGQL(CHECKOUT_LANDING, payload);
+    },
+    [fpi]
+  );
 
   useEffect(() => {
-    const payload = {
-      buyNow: buy_now === "true",
-      includeAllItems: true,
-      includeBreakup: true,
-      includeCodCharges: true,
+    executeCheckoutLanding({ buyNow: buy_now === "true" });
+    return () => {
+      if (buy_now === "true") executeCheckoutLanding();
     };
-    fpi.executeGQL(CHECKOUT_LANDING, payload);
-  }, [fpi]);
+  }, [executeCheckoutLanding, buy_now]);
 
   useEffect(() => {
     if (
@@ -84,6 +98,10 @@ function SingleCheckoutPage({ fpi }) {
         payment={payment}
         showShipment={showShipment}
         showPayment={showPayment}
+        cartCouponProps={{
+          ...cartCoupon,
+        }}
+        cartCommentProps={cartComment}
         setShowPayment={setShowPayment}
         setShowShipment={setShowShipment}
         shipments={shipments?.shipments || []}
@@ -93,6 +111,8 @@ function SingleCheckoutPage({ fpi }) {
         // mapApiKey={"AIzaSyAVCJQAKy6UfgFqZUNABAuGQp2BkGLhAgI"}
         showGoogleMap={APP_FEATURES?.cart?.google_map || true}
         mapApiKey={mapApiKey}
+        isHyperlocal={isHyperlocal}
+        convertHyperlocalTat={convertUTCToHyperlocalTat}
         loader={<Loader />}
       />
       {/* <PriceBreakup breakUpValues={breakupValues}></PriceBreakup> */}

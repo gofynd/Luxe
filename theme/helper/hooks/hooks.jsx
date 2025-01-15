@@ -44,7 +44,7 @@ export const useSnackbar = () => {
     // Create a new snackbar and store it in the ref
     snackbarRef.current = new Snackbar(`${message}`, {
       position: "top-right",
-      timeout: 2000,
+      timeout: 1000,
       style: {
         container: [["background-color", getBgColor(type)]],
         message: [["color", getColor(type)]],
@@ -110,4 +110,26 @@ export const useSliderDotsWidth = (sliderRef, departmentCategories) => {
   }, [sliderRef.current, departmentCategories]);
 
   return dotsWidth;
+};
+
+export const useViewport = (minBreakpoint = 0, maxBreakpoint = Infinity) => {
+  const [isInRange, setIsInRange] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== "undefined") {
+        const width = window?.innerWidth;
+        setIsInRange(width >= minBreakpoint && width <= maxBreakpoint);
+      }
+    };
+
+    handleResize();
+
+    window?.addEventListener("resize", handleResize);
+    return () => {
+      window?.removeEventListener("resize", handleResize);
+    };
+  }, [minBreakpoint, maxBreakpoint]);
+
+  return isInRange;
 };

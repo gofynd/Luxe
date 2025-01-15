@@ -4,6 +4,7 @@
 .footer {
   background-color: @FooterBackground;
   background-image: var(--background-desktop);
+
   @media @tablet {
     background-image: var(--background-mobile);
   }
@@ -101,8 +102,10 @@
       border-radius: 12px;
       padding: 14px;
       justify-content: space-between;
-      position: relative;
-      isolation: isolate;
+      background-color: var(
+        --footer-opacity-background,
+        @FooterBottomBackground
+      );
 
       @media @mobile-up {
         display: flex;
@@ -111,22 +114,6 @@
       @media @desktop {
         padding: 14px 18px;
         align-items: center;
-      }
-      &::before {
-        content: "";
-        position: absolute;
-        opacity: var(--footer-opacity, 1);
-        inset: 0;
-        z-index: -1;
-        background-color: @FooterBottomBackground;
-        border-radius: 12px;
-        @media @mobile-up {
-          opacity: var(--footer-opacity, 1);
-        }
-        @media @desktop {
-          opacity: var(--footer-opacity, 1);
-          border-radius: 8px;
-        }
       }
       .list {
         svg {
@@ -190,16 +177,8 @@
   }
 
   &__bottom {
-    position: relative;
-    isolation: isolate;
-    &::before {
-      background-color: @FooterBottomBackground;
-      content: "";
-      position: absolute;
-      opacity: var(--footer-opacity, 1);
-      inset: 0;
-      z-index: -1;
-    }
+    background-color: var(--footer-opacity-background, @FooterBottomBackground);
+
     .footerContainer {
       padding: 18.5px 16px;
       @media @mobile-up {

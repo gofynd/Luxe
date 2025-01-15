@@ -9,6 +9,7 @@ const EmptyState = ({
   btnLink = "/",
   btnTitle = "RETURN TO HOMEPAGE",
   iconSrc,
+  Icon = <></>,
 }) => {
   const [isMobile, setIsMobile] = useState(true);
   useEffect(() => {
@@ -17,6 +18,7 @@ const EmptyState = ({
   return (
     <div className={`${styles.error} fontBody`}>
       {iconSrc && <img src={iconSrc} alt="" />}
+      {Icon}
       <h3 className={`${styles.heading} fontHeader`}>{title}</h3>
       {description && (
         <div
@@ -25,10 +27,7 @@ const EmptyState = ({
           <p>{description}</p>
         </div>
       )}
-      <FDKLink
-        to={btnLink}
-        className={`${styles.button} ${styles["btn-secondary"]}`}
-      >
+      <FDKLink to={btnLink} className={`${styles.button} btn-secondary`}>
         {btnTitle}
       </FDKLink>
     </div>

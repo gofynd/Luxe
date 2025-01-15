@@ -5,7 +5,9 @@
   width: 24px;
   height: 24px;
   cursor: pointer;
-  fill: @HeaderIcon;
+  @media @tablet {
+    fill: @TextBody;
+  }
 }
 .wishlist {
   svg {
@@ -15,6 +17,11 @@
   cursor: pointer;
   g > path {
     fill: @HeaderIcon;
+  }
+  @media @tablet {
+    g > path {
+      fill: @TextBody;
+    }
   }
 }
 .arrowRightIcon {
@@ -27,6 +34,7 @@
 .hamburgerIcon {
   width: 32px;
   height: 32px;
+  fill: @HeaderIcon !important;
 }
 .nav {
   @media @desktop {
@@ -42,6 +50,11 @@
         }
         .menuTitle,
         .menuTitle > .dropdownIcon {
+          svg {
+            g > path {
+              fill: @HeaderNav !important;
+            }
+          }
           transition: all 0.25s ease;
         }
         &:hover {
@@ -71,6 +84,10 @@
         opacity: 1;
         display: none;
         &__item {
+          &--container {
+            position: relative;
+          }
+
           &--wrapper {
             display: block;
             padding: 8px 16px;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { isRunningOnClient } from "../../helper/utils";
 
 const IntersectionObserverComponent = ({
   children,
@@ -47,7 +48,7 @@ const IntersectionObserverComponent = ({
 
   return (
     <div ref={elementRef} {...props}>
-      {isInView ? children : null}
+      {isInView || !isRunningOnClient() ? children : null}
     </div>
   );
 };

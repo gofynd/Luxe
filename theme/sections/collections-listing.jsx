@@ -2,15 +2,16 @@ import React, { useEffect, useState, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
 import Slider from "react-slick";
-import { useGlobalStore } from "fdk-core/utils";
 import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
 import styles from "../styles/sections/collections-listing.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient, throttle } from "../helper/utils";
 import { COLLECTION } from "../queries/collectionsQuery";
+import { useGlobalStore, useFPI } from "fdk-core/utils";
 import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 
-export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
+export function Component({ props, blocks, globalConfig, id: sectionId }) {
+  const fpi = useFPI();
   const {
     heading,
     description,
@@ -37,7 +38,7 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
       ) || []
     );
   }, [blocks]);
-  const customSectionId = collectionIds?.toSorted()?.join("__");
+  const customSectionId = collectionIds?.join("__");
   const collections =
     collectionCustomValue[`collectionData-${customSectionId}`];
 
@@ -78,7 +79,7 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
             : acc,
         []
       ) || [];
-    return collections.length === 0;
+    return collections?.length === 0;
   };
 
   useEffect(() => {
@@ -166,7 +167,7 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
   }, [collections, per_row]);
 
   const showStackedView = () => {
-    const hasCollection = (collectionsForStackedView || []).length > 0;
+    const hasCollection = (collectionsForStackedView || [])?.length > 0;
     if (
       collectionsForScrollView?.length === 1 &&
       layout_desktop?.value === "grid"
@@ -180,7 +181,7 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
   };
 
   const showScrollView = () => {
-    const hasCollection = (collectionsForScrollView || []).length > 0;
+    const hasCollection = (collectionsForScrollView || [])?.length > 0;
     if (windowWidth <= 768) {
       return hasCollection && layout_mobile?.value === "horizontal";
     }
@@ -247,7 +248,7 @@ export function Component({ props, blocks, globalConfig, fpi, id: sectionId }) {
 
   const dynamicStyles = {
     paddingTop: "16px",
-    paddingBottom: `${globalConfig.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
     "--bg-color": `${img_container_bg?.value || "#00000000"}`,
     maxWidth: "100vw",
   };
@@ -601,7 +602,7 @@ export const settings = {
 Component.serverFetch = async ({ fpi, blocks, id }) => {
   try {
     const ids = [];
-    const promisesArr = blocks.map(async (block) => {
+    const promisesArr = blocks?.map(async (block) => {
       if (block.props?.collection?.value) {
         const slug = block.props.collection.value;
         ids.push(slug);
@@ -611,11 +612,9 @@ Component.serverFetch = async ({ fpi, blocks, id }) => {
       }
     });
     const responses = await Promise.all(promisesArr);
-    return fpi.custom.setValue(
-      `collectionData-${ids?.toSorted()?.join("__")}`,
-      responses
-    );
+    return fpi.custom.setValue(`collectionData-${ids?.join("__")}`, responses);
   } catch (err) {
     // console.log(err);
   }
 };
+export default Component;

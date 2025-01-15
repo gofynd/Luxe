@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
 import couponSuccessGif from "../../assets/images/coupon-success.gif";
 import { APPLY_COUPON, REMOVE_COUPON } from "../../queries/cartQuery";
@@ -10,6 +11,9 @@ const useCartCoupon = ({ fpi, cartData }) => {
   const [isCouponSuccessModalOpen, setIsCouponSuccessModalOpen] =
     useState(false);
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
+
+  const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
   const { breakup_values: breakUpValues } = cartData;
   const couponAttrs = useMemo(() => {
     let attrs = {
@@ -47,6 +51,7 @@ const useCartCoupon = ({ fpi, cartData }) => {
         coupon_code: couponCode?.toString(),
       },
       applyCouponId: cartData?.id?.toString(),
+      buyNow,
     };
     fpi.executeGQL(APPLY_COUPON, payload).then((res) => {
       const couponBreakup =
@@ -64,6 +69,7 @@ const useCartCoupon = ({ fpi, cartData }) => {
   const onRemoveCouponClick = (couponId) => {
     const payload = {
       removeCouponId: couponId?.toString(),
+      buyNow,
     };
     fpi.executeGQL(REMOVE_COUPON, payload);
   };

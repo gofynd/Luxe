@@ -9,29 +9,26 @@ import {
   getProductImgAspectRatio,
   isRunningOnClient,
 } from "../../helper/utils";
+import useAddToCartModal from "../plp/useAddToCartModal";
+import { useThemeConfig } from "../../helper/hooks";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
 const PAGE_OFFSET = 2;
 
-const useCollectionListing = ({ fpi }) => {
+const useCollectionListing = ({ fpi, slug }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const params = useParams();
-  const collectionSlugRef = useRef(params?.slug);
-  const THEME = useGlobalStore(fpi.getters.THEME);
   const { toggleWishlist, followedIdList } = useWishlist({ fpi });
 
   const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
   const listingPrice =
     CONFIGURATION?.app_features?.common?.listing_price?.value || "range";
-  const mode = THEME?.config?.list.find(
-    (f) => f.name === THEME?.config?.current
-  );
-  const globalConfig = mode?.global_config?.custom?.props;
-  const pageConfig =
-    mode?.page?.find((f) => f.page === "collection-listing")?.settings?.props ||
-    {};
+
+  const { globalConfig, pageConfig } = useThemeConfig({
+    fpi,
+    page: "collection-listing",
+  });
 
   const collectionData = useGlobalStore(fpi?.getters?.COLLECTION);
   const { isCollectionsSsrFetched } = useGlobalStore(fpi.getters.CUSTOM_VALUE);
@@ -51,6 +48,8 @@ const useCollectionListing = ({ fpi }) => {
   const [apiLoading, setApiLoading] = useState(!isCollectionsSsrFetched);
   const [isPageLoading, setIsPageLoading] = useState(!isCollectionsSsrFetched);
 
+  const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
+  const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
   const { user_plp_columns } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE) ?? {};
   const [columnCount, setColumnCount] = useState(
     user_plp_columns ?? {
@@ -61,6 +60,8 @@ const useCollectionListing = ({ fpi }) => {
   );
 
   const [isResetFilterDisable, setIsResetFilterDisable] = useState(false);
+
+  const addToCartModalProps = useAddToCartModal({ fpi, pageConfig });
 
   const breadcrumb = useMemo(
     () => [
@@ -76,10 +77,10 @@ const useCollectionListing = ({ fpi }) => {
   useEffect(() => {
     if (!isCollectionsSsrFetched) {
       fetchCollection({
-        slug: collectionSlugRef.current,
+        slug,
       });
     }
-  }, []);
+  }, [slug]);
 
   useEffect(() => {
     fpi.custom.setValue("isCollectionsSsrFetched", false);
@@ -94,7 +95,7 @@ const useCollectionListing = ({ fpi }) => {
       const pageNo = Number(searchParams?.get("page_no"));
 
       const payload = {
-        slug: collectionSlugRef.current,
+        slug,
         pageType: "number",
         first: PAGE_SIZE,
         search: appendDelimiter(searchParams?.toString()) || undefined,
@@ -111,7 +112,7 @@ const useCollectionListing = ({ fpi }) => {
         ) ?? [];
       setIsResetFilterDisable(!resetableFilterKeys?.length);
     }
-  }, [location?.search]);
+  }, [location?.search, locationDetails, slug]);
 
   const fetchCollection = (payload) => {
     fpi
@@ -149,7 +150,7 @@ const useCollectionListing = ({ fpi }) => {
       ? new URLSearchParams(location?.search)
       : null;
     const payload = {
-      slug: collectionSlugRef.current,
+      slug,
       pageNo: currentPage + 1,
       pageType: "number",
       first: PAGE_SIZE,
@@ -331,6 +332,26 @@ const useCollectionListing = ({ fpi }) => {
     toggleWishlist(data);
   };
 
+  const selectedFilters = useMemo(() => {
+    const searchParams = isRunningOnClient()
+      ? new URLSearchParams(location?.search)
+      : null;
+
+    return filterList?.reduce((acc, curr) => {
+      const selectedValues = curr?.values?.filter(
+        (filter) =>
+          searchParams?.getAll(curr?.key?.name).includes(filter?.value) ||
+          filter?.is_selected
+      );
+
+      if (selectedValues.length > 0) {
+        return [...acc, { key: curr?.key, values: selectedValues }];
+      }
+
+      return acc;
+    }, []);
+  }, [filterList]);
+
   return {
     isProductCountDisplayed: pageConfig?.product_number,
     isScrollTop: pageConfig?.back_top,
@@ -346,6 +367,7 @@ const useCollectionListing = ({ fpi }) => {
     productCount: pageInfo?.item_total,
     columnCount,
     filterList,
+    selectedFilters,
     sortList: sortOn,
     productList: productList || items,
     isProductLoading: apiLoading,
@@ -359,6 +381,9 @@ const useCollectionListing = ({ fpi }) => {
     isImageFill: globalConfig?.img_fill,
     imageBackgroundColor: globalConfig?.img_container_bg,
     showImageOnHover: globalConfig?.show_image_on_hover,
+    showAddToCart: pageConfig?.show_add_to_cart && !globalConfig?.disable_cart,
+    addToCartModalProps,
+    globalConfig,
     aspectRatio: getProductImgAspectRatio(globalConfig),
     onResetFiltersClick: resetFilters,
     onColumnCountUpdate: handleColumnCountUpdate,

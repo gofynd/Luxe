@@ -129,9 +129,7 @@ function ProductCard({
     if (!product.sellable) {
       return (
         <div className={`${styles.badge} ${styles.outOfStock}`}>
-          <span
-            className={`${styles.text} ${styles.fontBody} ${styles.captionNormal}`}
-          >
+          <span className={`${styles.text} ${styles.fontBody} captionNormal`}>
             Out of stock
           </span>
         </div>
@@ -141,9 +139,7 @@ function ProductCard({
     if (product.teaser_tag) {
       return (
         <div className={styles.badge}>
-          <span
-            className={`${styles.text} ${styles.fontBody} ${styles.captionNormal}`}
-          >
+          <span className={`${styles.text} ${styles.fontBody} captionNormal`}>
             {product.teaser_tag.substring(0, 14)}
           </span>
         </div>
@@ -153,9 +149,7 @@ function ProductCard({
     if (globalConfig?.show_sale_badge && product.discount && product.sellable) {
       return (
         <div className={`${styles.badge} ${styles.sale}`}>
-          <span
-            className={`${styles.text} ${styles.fontBody} ${styles.captionNormal}`}
-          >
+          <span className={`${styles.text} ${styles.fontBody} captionNormal`}>
             Sale
           </span>
         </div>
@@ -231,7 +225,7 @@ function ProductCard({
           </h5>
         )}
         <h3
-          className={`${styles.productName} ${styles.b2} ${styles.fontBody}`}
+          className={`${styles.productName} b2 ${styles.fontBody}`}
           title={product.name}
         >
           {product.name}
@@ -239,20 +233,20 @@ function ProductCard({
         {globalConfig?.show_price && (
           <div className={styles.productPrice}>
             {product?.price?.effective && (
-              <span className={`${styles["productPrice--sale"]} ${styles.h4}`}>
+              <span className={`${styles["productPrice--sale"]} h4`}>
                 {getListingPrice("effective")}
               </span>
             )}
             {hasDiscount && (
               <span
-                className={`${styles["productPrice--regular"]} ${styles.captionNormal}`}
+                className={`${styles["productPrice--regular"]} captionNormal`}
               >
                 {getListingPrice("marked")}
               </span>
             )}
             {product.discount && (
               <span
-                className={`${styles["productPrice--discount"]} ${styles.captionNormal} `}
+                className={`${styles["productPrice--discount"]} captionNormal `}
               >
                 ({product.discount})
               </span>

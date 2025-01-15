@@ -23,11 +23,9 @@ function Brands({ fpi }) {
   //   const { page, items = [], loading } = product_lists || {};
 
   return (
-    <div
-      className={`${styles.brands} ${styles.basePageContainer} ${styles.margin0auto} fontBody`}
-    >
+    <div className={`${styles.brands} basePageContainer margin0auto fontBody`}>
       <div
-        className={`${styles.brands__breadcrumbs} ${styles.desktop} ${styles.captionNormal}`}
+        className={`${styles.brands__breadcrumbs} ${styles.desktop} captionNormal`}
       >
         <span>
           <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
@@ -59,10 +57,20 @@ function Brands({ fpi }) {
               globalConfig={globalConfig}
             />
           </InfiniteLoader>
+          {pageData?.has_next && !infinite_scroll && (
+            <div className={`${styles.viewMoreBtnWrapper} flex-center`}>
+              <button
+                onClick={() => fetchBrands()}
+                className={`${styles.viewMoreBtn} btn-secondary`}
+              >
+                View More
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <div
-        className={`${styles.brands__breadcrumbs} ${styles.mobile} ${styles.captionNormal}`}
+        className={`${styles.brands__breadcrumbs} ${styles.mobile} captionNormal`}
       >
         <span>
           <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;

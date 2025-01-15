@@ -1,4 +1,5 @@
 import React from "react";
+import { SectionRenderer } from "fdk-core/components";
 import CartNew from "@gofynd/theme-template/pages/cart/cart";
 import styles from "./cart.less";
 import "@gofynd/theme-template/pages/cart/cart.css";
@@ -13,7 +14,7 @@ import useCartComment from "./useCartComment";
 import useCartGst from "./useCartGst";
 import useCartCoupon from "./useCartCoupon";
 
-function Cart({ fpi }) {
+function Cart({ fpi, globalConfig, sections }) {
   const { isLoading, cartData, currencySymbol, ...restProps } = useCart(fpi);
 
   const cartDeliveryLocation = useCartDeliveryLocation({ fpi });
@@ -24,16 +25,12 @@ function Cart({ fpi }) {
 
   if (isLoading) {
     return <Loader />;
-  }
-
-  if (cartData?.items?.length === 0) {
+  } else if (cartData?.items?.length === 0) {
     return <EmptyState title="Your Shopping Bag is empty" />;
   }
 
   return (
-    <div
-      className={`${styles.cart} ${styles.basePageContainer} ${styles.margin0auto}`}
-    >
+    <div className={`${styles.cart} basePageContainer margin0auto`}>
       <CartNew
         {...restProps}
         cartData={cartData}
@@ -46,6 +43,11 @@ function Cart({ fpi }) {
         cartGstProps={{ ...cartGst, currencySymbol }}
         cartCommentProps={cartComment}
         cartShareProps={cartShare}
+      />
+      <SectionRenderer
+        sections={sections}
+        fpi={fpi}
+        globalConfig={globalConfig}
       />
     </div>
   );

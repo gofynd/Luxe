@@ -42,7 +42,7 @@ export const useAddress = ({ fpi, pageName }) => {
     }
   }, [INTEGRATION_TOKENS, APP_FEATURES]);
 
-  const getLocality = (postcode) => {
+  const getLocality = (posttype, postcode) => {
     return fpi
       .executeGQL(LOCALITY, {
         locality: `pincode`,

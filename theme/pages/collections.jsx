@@ -10,6 +10,7 @@ import { detectMobileWidth } from "../helper/utils";
 import EmptyState from "../components/empty-state/empty-state";
 import InfiniteLoader from "../components/infinite-loader/infinite-loader";
 import ScrollToTop from "../components/scroll-to-top/scroll-to-top";
+import { COLLECTIONS } from "../queries/collectionsQuery";
 
 function Collections({ fpi }) {
   const {
@@ -30,14 +31,14 @@ function Collections({ fpi }) {
 
   return (
     <div
-      className={`${styles.collections} ${styles.basePageContainer} ${styles.margin0auto} fontBody`}
+      className={`${styles.collections} basePageContainer margin0auto fontBody`}
     >
       {isLoading && !collections?.length ? (
         <Loader />
       ) : (
         <>
           <div
-            className={`${styles.collections__breadcrumbs} ${styles.desktop} ${styles.captionNormal}`}
+            className={`${styles.collections__breadcrumbs} ${styles.desktop} captionNormal`}
           >
             <span>
               <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
@@ -79,7 +80,7 @@ function Collections({ fpi }) {
             )}
           </div>
           <div
-            className={`${styles.collections__breadcrumbs} ${styles.mobile} ${styles.captionNormal}`}
+            className={`${styles.collections__breadcrumbs} ${styles.mobile} captionNormal`}
           >
             <span>
               <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
@@ -125,18 +126,18 @@ export const settings = JSON.stringify({
 
 export const sections = JSON.stringify([]);
 
-// Collections.serverFetch = async ({ fpi, props }) => {
-//   try {
-//     const payload = {
-//       slug: props.collection.value,
-//       first: 12,
-//       pageNo: 1,
-//     };
-//     await fpi.executeGQL(FEATURED_COLLECTION, payload).then((res) => {
-//       return fpi.custom.setValue("featuredCollectionData", res);
-//     });
-//   } catch (err) {
-//     console.log(err);
-//   }
+Collections.serverFetch = async ({ fpi, props }) => {
+  try {
+    const payload = {
+      pageNo: 1,
+      pageSize: 12,
+    };
+    await fpi.executeGQL(COLLECTIONS, payload).then((res) => {
+      return res;
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 export default Collections;

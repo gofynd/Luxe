@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAccounts } from "../../helper/hooks";
+import { isRunningOnClient } from "../../helper/utils";
 
 const useLoginPassword = ({ fpi }) => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const useLoginPassword = ({ fpi }) => {
     signIn(payload)
       .then(() => {})
       .catch((err) => {
-        if (err?.details?.meta?.is_deleted) {
+        if (isRunningOnClient() && err?.details?.meta?.is_deleted) {
           navigate({
             pathname: "/auth/account-locked",
             search: location.search,

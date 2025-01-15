@@ -133,7 +133,25 @@ export const CART_DETAILS = `query Cart($areaCode: String, $assignCardId: Int, $
           article_id
           parent_item_identifier
           quantity
-        }
+          free_gift_item_details {
+              item_brand_name
+              item_id
+              item_images_url
+              item_name
+              item_price_details {
+                currency
+                marked {
+                    min
+                    max
+                }
+                effective {
+                    min
+                    max
+                }
+              }
+              item_slug
+          }
+      }
         discount_rules {
           item_criteria
           matched_buy_rules
@@ -408,10 +426,28 @@ export const CART_UPDATE = `mutation UpdateCart($areaCode: String, $b: Boolean, 
           promotion_group
           promotion_name
           promotion_type
-          applied_free_articles {
-            article_id
-            parent_item_identifier
-            quantity
+         applied_free_articles {
+              article_id
+              parent_item_identifier
+              quantity
+              free_gift_item_details {
+                  item_brand_name
+                  item_id
+                  item_images_url
+                  item_name
+                  item_price_details {
+                    currency
+                    marked {
+                        min
+                        max
+                    }
+                    effective {
+                        min
+                        max
+                    }
+                  }
+                  item_slug
+              }
           }
         }
         currency {
@@ -572,7 +608,7 @@ export const CART_UPDATE = `mutation UpdateCart($areaCode: String, $b: Boolean, 
   }
 }`;
 
-export const APPLY_COUPON = `mutation ApplyCoupon($applyCouponRequestInput: ApplyCouponRequestInput, $b: Boolean, $i: Boolean, $applyCouponId: String, $p: Boolean, $buyNow: Boolean, $cartType: String) {
+export const APPLY_COUPON = `mutation ApplyCoupon($buyNow: Boolean, $applyCouponRequestInput: ApplyCouponRequestInput, $b: Boolean, $i: Boolean, $applyCouponId: String, $p: Boolean, $cartType: String) {
   applyCoupon(applyCouponRequestInput: $applyCouponRequestInput, b: $b, i: $i, id: $applyCouponId, p: $p, buyNow: $buyNow, cartType: $cartType) {
     buy_now
     cart_id
@@ -604,9 +640,27 @@ export const APPLY_COUPON = `mutation ApplyCoupon($applyCouponRequestInput: Appl
       promotion_name
       promotion_type
       applied_free_articles {
-        article_id
-        parent_item_identifier
-        quantity
+          article_id
+          parent_item_identifier
+          quantity
+          free_gift_item_details {
+              item_brand_name
+              item_id
+              item_images_url
+              item_name
+              item_price_details {
+                currency
+                marked {
+                    min
+                    max
+                }
+                effective {
+                    min
+                    max
+                }
+              }
+              item_slug
+          }
       }
     }
     breakup_values {
@@ -840,8 +894,8 @@ export const APPLY_COUPON = `mutation ApplyCoupon($applyCouponRequestInput: Appl
   }
 }`;
 
-export const REMOVE_COUPON = `mutation RemoveCoupon($removeCouponId: String) {
-  removeCoupon(id: $removeCouponId) {
+export const REMOVE_COUPON = `mutation RemoveCoupon($buyNow: Boolean, $removeCouponId: String) {
+  removeCoupon(buyNow: $buyNow, id: $removeCouponId) {
     buy_now
     cart_id
     checkout_mode
@@ -1120,8 +1174,8 @@ export const REMOVE_COUPON = `mutation RemoveCoupon($removeCouponId: String) {
   }
 }`;
 
-export const CART_META_UPDATE = `mutation UpdateCartMeta($updateCartMetaId: String, $cartMetaRequestInput: CartMetaRequestInput) {
-  updateCartMeta(id: $updateCartMetaId, cartMetaRequestInput: $cartMetaRequestInput) {
+export const CART_META_UPDATE = `mutation UpdateCartMeta($buyNow: Boolean, $updateCartMetaId: String, $cartMetaRequestInput: CartMetaRequestInput) {
+  updateCartMeta(buyNow: $buyNow, id: $updateCartMetaId, cartMetaRequestInput: $cartMetaRequestInput) {
     is_valid
     message
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import Slider from "react-slick";
-import FyImage from "../components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import styles from "../styles/sections/testimonials.less";
 import { isRunningOnClient } from "../helper/utils";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
@@ -127,7 +128,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
 
   const dynamicStyles = {
     paddingTop: "16px",
-    paddingBottom: `${globalConfig.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
   };
 
   return (
@@ -161,6 +162,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
                       { breakpoint: { min: 481 }, width: 350 },
                       { breakpoint: { max: 390 }, width: 350 },
                     ]}
+                    isFixedAspectRatio={false}
                   />
                 )}
                 <div
@@ -184,7 +186,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
                       {block.props?.author_name?.value || ""}
                     </h5>
                     <div
-                      className={`${styles.testimonial__block__info__author__description} ${styles.captionNormal}`}
+                      className={`${styles.testimonial__block__info__author__description} captionNormal`}
                       title={block.props?.author_description?.value}
                     >
                       {block.props?.author_description?.value || ""}
@@ -231,6 +233,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
                         { breakpoint: { min: 481 }, width: 350 },
                         { breakpoint: { max: 390 }, width: 350 },
                       ]}
+                      isFixedAspectRatio={false}
                     />
                   )}
                   <div
@@ -254,7 +257,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
                         {block.props?.author_name?.value || ""}
                       </h5>
                       <div
-                        className={`${styles.testimonial__block__info__author__description} ${styles.captionNormal}`}
+                        className={`${styles.testimonial__block__info__author__description} captionNormal`}
                         title={block.props?.author_description?.value}
                       >
                         {block.props?.author_description?.value || ""}
@@ -310,7 +313,6 @@ export const settings = {
           label: "Image",
           options: {
             aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
           },
         },
         {
@@ -408,3 +410,4 @@ export const settings = {
     ],
   },
 };
+export default Component;

@@ -406,7 +406,7 @@
       padding: 11px 16px;
       border: 0.8px solid @DividerStokes;
       border-radius: @ButtonRadius;
-      background-color: @White;
+      background-color: @ThemeAccentL4;
       width: 100%;
       height: 100%;
       font-weight: 500;
@@ -521,7 +521,11 @@
   transition: all 0.4s;
   border: 0.8px solid @DividerStokes;
   border-radius: @ButtonRadius;
-
+  svg {
+    g > path {
+      fill: @ButtonPrimary;
+    }
+  }
   @media @tablet {
     padding: 16px;
   }
@@ -533,15 +537,13 @@
   justify-content: center;
   align-items: center;
   border: 0.8px solid transparent;
-
+  svg > path {
+    fill: @ButtonSecondary !important;
+  }
   &__icon {
     width: 11px;
     height: 14px;
     margin-right: 6.83px;
-
-    /deep/ svg path {
-      fill: @ButtonSecondary !important;
-    }
   }
 
   @media @tablet {

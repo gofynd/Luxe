@@ -8,24 +8,31 @@
 
 .featureBlogWrapper {
   padding-inline: 16px;
-
+  :global {
+    .slick-track {
+      align-items: unset;
+    }
+  }
   @media @mobile {
     padding-inline: unset;
   }
 }
 
 .blogSection {
-  padding: 0 0 0 16px;
+  // padding: 0 0 0 16px;
+  @media @mobile {
+    padding: 0 16px;
+  }
   @media @mobile-up {
-    padding: 0 24px 16px 24px;
+    padding: 0 24px;
   }
   @media @desktop {
-    padding: 0 40px 16px 40px;
+    padding: 0 40px;
   }
   &__heading {
     text-align: center;
     margin-bottom: 8px;
-    @media @mobile-up {
+    @media @desktop {
       margin-bottom: 16px;
     }
   }
@@ -35,10 +42,13 @@
     margin: 0 auto;
     max-width: 620px;
     color: @TextBody;
+    @media @tablet {
+      font-size: 12px;
+    }
   }
   &__list {
     margin-top: 24px;
-    @media @mobile-up {
+    @media @mobile {
       margin-top: 16px;
     }
     @media @desktop {
@@ -56,7 +66,6 @@
     height: 44px;
     padding: 14px 24px;
     display: inline-block;
-    text-transform: uppercase;
     border-radius: @ButtonRadius;
     font-weight: 500;
     cursor: pointer;
@@ -117,8 +126,11 @@
       }
     }
     &__title {
-      .text-line-clamp(3);
-      margin-bottom: 2px;
+      .text-line-clamp(8);
+      margin-bottom: 7px;
+      @media @mobile {
+        margin-bottom: 0px;
+      }
       @media @mobile-up {
         .text-line-clamp(2);
       }

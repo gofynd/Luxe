@@ -18,7 +18,7 @@ function BlogFooter({ title, description, button_text, button_link }) {
         {button_text && (
           <div className={`${styles.footer__ctaWrapper} `}>
             <FDKLink
-              className={`${styles.footer__cta} ${styles.btnPrimary} ${styles.breakWords}`}
+              className={`${styles.footer__cta} btnPrimary ${styles.breakWords}`}
               to={button_link}
             >
               {button_text}

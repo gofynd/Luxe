@@ -1,133 +1,48 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
-
 import Slider from "react-slick";
-
 import styles from "../styles/sections/image-gallery.less";
-import FyImage from "../components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
-import { isRunningOnClient, throttle } from "../helper/utils";
+import { isRunningOnClient } from "../helper/utils";
 import placeholder from "../assets/images/img-placeholder-1.png";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
+import { useWindowWidth } from "../helper/hooks";
 
-export function Component({ props, blocks, globalConfig, preset }) {
-  const getGallery = blocks.length ? blocks : preset?.blocks;
+export function Component({ props, blocks = [], globalConfig = {}, preset }) {
   const {
-    autoplay,
-    play_slides,
-    title,
-    description,
-    item_count,
-    mobile_layout,
-    desktop_layout,
-    link,
+    autoplay: { value: autoplay } = {},
+    play_slides: { value: playSlides } = {},
+    title: { value: title } = {},
+    description: { value: description } = {},
+    desktop_layout: { value: desktopLayout } = {},
+    item_count: { value: itemCount } = {},
+    mobile_layout: { value: mobileLayout } = {},
+    item_count_mobile: { value: itemCountMobile } = {},
+    card_radius: { value: cardRadius } = {},
   } = props;
 
-  const [windowWidth, setWindowWidth] = useState(0);
+  const galleryItems = blocks?.length ? blocks : preset?.blocks || [];
+  const windowWidth = useWindowWidth();
   const [isClient, setIsClient] = useState(false);
 
-  const [config, setConfig] = useState({
-    dots: getGallery.length > item_count?.value,
-    speed: 500,
-    slidesToShow: getGallery?.length < 4 ? getGallery.length : 4,
-    slidesToScroll: getGallery?.length < 4 ? getGallery.length : 4,
-    swipeToSlide: true,
-    lazyLoad: "ondemand",
-    autoplay: false,
-    autoplaySpeed: 3000,
-    cssEase: "linear",
-    // arrows: getGallery.length > item_count?.value || false,
-    nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
-    prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
-    arrows: imagesForScrollView()?.length > item_count?.value,
-    adaptiveHeight: true,
-    responsive: [
-      {
-        breakpoint: 800,
-        settings: {
-          arrows: false,
-          slidesToShow: getGallery.length < 3 ? getGallery.length : 3,
-          slidesToScroll: getGallery.length < 3 ? getGallery.length : 3,
-          swipe: true,
-          swipeToSlide: false,
-          touchThreshold: 80,
-          draggable: false,
-          touchMove: true,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          dots: false,
-          arrows: false,
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          centerMode: getGallery?.length !== 1,
-          centerPadding: "25px",
-          swipe: true,
-          swipeToSlide: false,
-          touchThreshold: 80,
-          draggable: false,
-          touchMove: true,
-        },
-      },
-    ],
-  });
-
-  useEffect(() => {
-    setIsClient(true);
-    if (autoplay?.value !== config.autoplay) {
-      setConfig((prevConfig) => ({
-        ...prevConfig,
-        autoplay: autoplay?.value,
-      }));
+  const isStackView = useMemo(() => {
+    if (windowWidth > 768) {
+      return desktopLayout === "grid";
     }
+    return mobileLayout === "grid";
+  }, [desktopLayout, mobileLayout, windowWidth]);
 
-    if (item_count?.value !== config.slidesToShow) {
-      setConfig((prevConfig) => ({
-        ...prevConfig,
-        slidesToShow: item_count?.value,
-        slidesToScroll: item_count?.value,
-      }));
+  const isHorizontalView = useMemo(() => {
+    if (windowWidth > 768) {
+      return desktopLayout === "horizontal";
     }
+    return mobileLayout === "horizontal";
+  }, [desktopLayout, mobileLayout, windowWidth]);
 
-    if (play_slides?.value * 1000 !== config.autoplaySpeed) {
-      setConfig((prevConfig) => ({
-        ...prevConfig,
-        autoplaySpeed: play_slides?.value * 1000,
-      }));
-    }
-  }, [autoplay, play_slides, item_count]);
-
-  useEffect(() => {
-    const handleResize = throttle(() => {
-      setWindowWidth(isRunningOnClient() ? window.innerWidth : 0);
-    }, 1500);
-
-    if (isRunningOnClient()) {
-      window.addEventListener("resize", handleResize);
-    }
-
-    return () => {
-      if (isRunningOnClient()) {
-        window.removeEventListener("resize", handleResize);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleResize = throttle(() => {
-      setWindowWidth(isRunningOnClient() ? window?.innerWidth : 0);
-    }, 100);
-    handleResize();
-  }, [mobile_layout, desktop_layout]);
-
-  function getDesktopImage(block) {
-    return block?.image?.value ? block?.image?.value : placeholder;
-  }
-
-  function getImgSrcSet() {
-    if (globalConfig.img_hd) {
+  const getImgSrcSet = useMemo(() => {
+    if (globalConfig?.img_hd) {
       return [
         { breakpoint: { min: 1024 }, width: 900 },
         { breakpoint: { min: 768 }, width: 500 },
@@ -141,244 +56,224 @@ export function Component({ props, blocks, globalConfig, preset }) {
       { breakpoint: { min: 481 }, width: 480 },
       { breakpoint: { max: 390 }, width: 390 },
     ];
-  }
+  }, [globalConfig?.img_hd]);
 
-  function getWidthByCount() {
-    if (windowWidth <= 768) {
-      return getGallery?.length <= 3 ? getGallery?.length : 3;
-    }
-    return getGallery?.length < item_count?.value
-      ? getGallery?.length
-      : item_count?.value;
-  }
-
-  function imagesForStackedView() {
-    const itemCount = item_count?.value;
-    if (!isClient) {
-      return getGallery.slice(0, itemCount);
-    }
-    if (!getGallery) return [];
-
-    if (windowWidth <= 480) {
-      return getGallery.slice(0, 8);
-    }
-    if (windowWidth <= 768) {
-      return getGallery.slice(0, 9);
-    }
-    return getGallery.slice(0, itemCount * 2);
-  }
-
-  function imagesForScrollView() {
-    const itemCount = item_count?.value;
-
-    if (!getGallery) return [];
-
-    if (windowWidth <= 480) {
-      return getGallery;
-    }
-    if (windowWidth <= 768) {
-      return getGallery.slice(0, 12);
-    }
-    return getGallery.slice(0, itemCount * 4);
-  }
-
-  function showStackedView() {
-    if (
-      (windowWidth > 768 && item_count?.value >= getGallery?.length) ||
-      getGallery?.length === 1
-    ) {
-      return true;
-    }
-    if (!getGallery) return [];
-    if (windowWidth <= 768) {
-      return mobile_layout?.value === "grid";
-    }
-    return desktop_layout?.value === "grid";
-  }
-  function showScrollView() {
-    if (windowWidth <= 768 && getGallery?.length > 1) {
-      return mobile_layout?.value === "horizontal";
-    }
-    if (item_count?.value < getGallery?.length) {
-      return desktop_layout?.value === "horizontal";
-    }
-  }
+  useEffect(() => {
+    setIsClient(isRunningOnClient());
+  }, []);
 
   return (
     <div
       style={{
         paddingTop: "16px",
-        paddingBottom: `${globalConfig.section_margin_bottom}px`,
+        paddingBottom: `${globalConfig?.section_margin_bottom}px`,
+        "--bd-radius": `${(cardRadius || 0) / 2}%`,
       }}
     >
       <div>
         <div className={styles.titleBlock}>
-          {(title?.value?.length > 0 || description?.value?.length > 0) && (
-            <h2 className={styles.sectionHeading}>{title?.value}</h2>
-          )}
-          {description?.value?.length > 0 && (
-            <p className={`${styles.description} ${styles.b2}`}>
-              {description?.value}
-            </p>
+          {title && <h2 className={styles.sectionHeading}>{title}</h2>}
+          {description && (
+            <p className={`${styles.description} b2`}>{description}</p>
           )}
         </div>
         <noscript>
           <div
-            className={`${styles.imageGrid}  ${
-              item_count?.value > getGallery?.length && styles.singleItem
-            }`}
+            className={styles.imageGrid}
             style={{
-              "--per_row": item_count?.value,
-              "--brand-item": getWidthByCount() || 1,
+              "--col-count": itemCount,
+              "--col-count-mobile": itemCountMobile,
             }}
           >
-            {imagesForStackedView().map(({ props: block }, index) => (
+            {galleryItems.slice(0, itemCount).map(({ props: block }, index) => (
               <div key={index}>
-                <FDKLink to={block?.link?.value}>
-                  {getDesktopImage(block).length > 0 && (
-                    <div className={styles.imgBlock}>
-                      <FyImage
-                        customClass={styles.imageGallery}
-                        src={getDesktopImage(block)}
-                        sources={getImgSrcSet()}
-                      />
-                    </div>
-                  )}
+                <FDKLink to={block?.link?.value || ""}>
+                  <FyImage
+                    customClass={styles.imageGallery}
+                    src={block?.image?.value || placeholder}
+                    sources={getImgSrcSet}
+                    isFixedAspectRatio={false}
+                  />
                 </FDKLink>
               </div>
             ))}
           </div>
         </noscript>
         {isClient && (
-          <IntersectionObserverComponent>
-            {showScrollView() && (
-              <div
-                className={`${imagesForScrollView().length < 3 && styles["single-card-view"]}  ${styles.slideWrap}`}
-                style={{
-                  "--slick-dots": `${Math.ceil(imagesForScrollView()?.length / item_count?.value) * 22 + 10}px`,
-                }}
-              >
-                <Slider
-                  {...config}
-                  className={`
-                    ${
-                      imagesForScrollView()?.length / item_count?.value === 0 ||
-                      imagesForScrollView()?.length < item_count?.value
-                        ? "no-nav"
-                        : ""
-                    } ${styles.customSlider}`}
-                >
-                  {imagesForScrollView()?.map(({ props: block }, index) => (
-                    <div key={index} className={styles.sliderView}>
-                      {block?.link?.value?.length > 0 ? (
-                        <FDKLink to={block?.link?.value}>
-                          {getDesktopImage(block).length > 0 && (
-                            <div className={styles.imgBlock}>
-                              <FyImage
-                                customClass={styles.imageGallery}
-                                src={getDesktopImage(block, index)}
-                                sources={getImgSrcSet()}
-                                globalConfig={globalConfig}
-                              />
-                            </div>
-                          )}
-                        </FDKLink>
-                      ) : (
-                        <div className={styles.imgBlock}>
-                          <FyImage
-                            customClass={styles.imageGallery}
-                            src={getDesktopImage(block, index)}
-                            sources={getImgSrcSet()}
-                            globalConfig={globalConfig}
-                          />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </Slider>
-              </div>
-            )}
-            {showStackedView() && (
-              <div
-                className={`${styles.imageGrid}  ${
-                  item_count?.value > getGallery?.length && styles.singleItem
-                }`}
-                style={{
-                  "--per_row": item_count?.value,
-                  "--brand-item": getWidthByCount() || 1,
-                }}
-              >
-                {imagesForStackedView().map(({ props: block }, index) => (
-                  <div key={index}>
-                    <FDKLink to={block?.link?.value}>
-                      {getDesktopImage(block).length > 0 && (
-                        <div className={styles.imgBlock}>
-                          <FyImage
-                            customClass={styles.imageGallery}
-                            src={getDesktopImage(block)}
-                            sources={getImgSrcSet()}
-                            globalConfig={globalConfig}
-                          />
-                        </div>
-                      )}
-                    </FDKLink>
-                  </div>
-                ))}
-              </div>
-            )}
-          </IntersectionObserverComponent>
+          <>
+            <IntersectionObserverComponent>
+              {isHorizontalView && (
+                <HorizontalLayout
+                  items={galleryItems}
+                  globalConfig={globalConfig}
+                  colCount={itemCount}
+                  colCountMobile={itemCountMobile}
+                  sources={getImgSrcSet}
+                  autoplay={autoplay}
+                  autoplaySpeed={playSlides * 1000}
+                />
+              )}
+              {isStackView && (
+                <StackLayout
+                  items={galleryItems}
+                  globalConfig={globalConfig}
+                  colCount={itemCount}
+                  colCountMobile={itemCountMobile}
+                  sources={getImgSrcSet}
+                />
+              )}
+            </IntersectionObserverComponent>
+          </>
         )}
       </div>
     </div>
   );
 }
 
+const StackLayout = ({
+  items,
+  globalConfig,
+  colCount,
+  colCountMobile,
+  sources,
+}) => {
+  const dynamicStyles = {
+    "--item-count": `${colCount}`,
+    "--item-count-mobile": `${colCountMobile}`,
+  };
+
+  return (
+    <div className={styles.imageGrid} style={dynamicStyles}>
+      {items.map(({ props: block }, index) => (
+        <div key={index}>
+          <FDKLink to={block?.link?.value || ""}>
+            <FyImage
+              customClass={styles.imageGallery}
+              src={block?.image?.value || placeholder}
+              sources={sources}
+              globalConfig={globalConfig}
+              isFixedAspectRatio={false}
+            />
+          </FDKLink>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const HorizontalLayout = ({
+  items,
+  globalConfig,
+  colCount,
+  colCountMobile,
+  sources,
+  autoplay,
+  autoplaySpeed,
+}) => {
+  const config = useMemo(
+    () => ({
+      dots: items.length > colCount,
+      speed: 500,
+      slidesToShow: items?.length < 4 ? items.length : 4,
+      slidesToScroll: items?.length < 4 ? items.length : 4,
+      swipeToSlide: true,
+      lazyLoad: "ondemand",
+      autoplay,
+      autoplaySpeed,
+      cssEase: "linear",
+      // arrows: getGallery.length > item_count?.value || false,
+      nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
+      prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
+      arrows: items?.length > colCount,
+      responsive: [
+        {
+          breakpoint: 800,
+          settings: {
+            arrows: false,
+            slidesToShow: items.length < 3 ? items.length : 3,
+            slidesToScroll: items.length < 3 ? items.length : 3,
+            swipe: true,
+            swipeToSlide: false,
+            touchThreshold: 80,
+            draggable: false,
+            touchMove: true,
+          },
+        },
+        {
+          breakpoint: 480,
+          settings: {
+            dots: true,
+            arrows: false,
+            slidesToShow: colCountMobile,
+            slidesToScroll: colCountMobile,
+            centerMode: false,
+            centerPadding: "25px",
+            swipe: true,
+            swipeToSlide: false,
+            touchThreshold: 80,
+            draggable: false,
+            touchMove: true,
+          },
+        },
+      ],
+    }),
+    [colCount, colCountMobile, autoplay, autoplaySpeed]
+  );
+
+  return (
+    <div
+      className={`${styles.slideWrap}`}
+      style={{
+        "--slick-dots": `${Math.ceil(items?.length / colCount) * 22 + 10}px`,
+      }}
+    >
+      <Slider
+        {...config}
+        className={`${items?.length / colCount === 0 || items?.length < colCount ? "no-nav" : ""} ${styles.customSlider}`}
+      >
+        {items.map(({ props: block }, index) => (
+          <div key={index} className={styles.sliderView}>
+            <FDKLink to={block?.link?.value || ""}>
+              <FyImage
+                customClass={styles.imageGallery}
+                src={block?.image?.value || placeholder}
+                sources={sources}
+                globalConfig={globalConfig}
+                isFixedAspectRatio={false}
+              />
+            </FDKLink>
+          </div>
+        ))}
+      </Slider>
+    </div>
+  );
+};
+
 export const settings = {
   label: "Image Gallery",
   props: [
     {
-      type: "checkbox",
-      id: "autoplay",
-      default: false,
-      label: "Auto Play Slides",
+      type: "text",
+      id: "title",
+      default: "Customize Your Style",
+      label: "Heading",
+    },
+    {
+      type: "text",
+      id: "description",
+      default:
+        "This flexible gallery lets you highlight key products and promotions, guiding customers to the right places.",
+      label: "Description",
     },
     {
       type: "range",
-      id: "play_slides",
-      min: 1,
-      max: 10,
+      id: "card_radius",
+      min: 0,
+      max: 100,
       step: 1,
-      unit: "sec",
-      label: "Change slides every",
-      default: 3,
-    },
-    {
-      type: "range",
-      id: "item_count",
-      min: 3,
-      max: 5,
-      step: 1,
-      unit: "",
-      label: "Items per row(Desktop)",
-      default: 4,
-      info: "Maximum items allowed per row for Horizontal view, for gallery max 5 are viewable and only 5 blocks are required",
-    },
-    {
-      id: "mobile_layout",
-      type: "select",
-      options: [
-        {
-          value: "grid",
-          text: "Stack",
-        },
-        {
-          value: "horizontal",
-          text: "Horizontal scroll ",
-        },
-      ],
-      default: "grid",
-      label: "Mobile Layout",
-      info: "Alignment of content",
+      unit: "%",
+      label: "Card Radius",
+      default: 0,
     },
     {
       id: "desktop_layout",
@@ -398,24 +293,63 @@ export const settings = {
       info: "Items per row should be less than number of blocks to show horizontal scroll",
     },
     {
-      type: "text",
-      id: "title",
-      default: "Customize Your Style",
-      label: "Heading",
+      type: "range",
+      id: "item_count",
+      min: 3,
+      max: 10,
+      step: 1,
+      unit: "",
+      label: "Items per row (Desktop)",
+      default: 5,
     },
     {
-      type: "text",
-      id: "description",
-      default:
-        "This flexible gallery lets you highlight key products and promotions, guiding customers to the right places.",
-      label: "Description",
+      id: "mobile_layout",
+      type: "select",
+      options: [
+        {
+          value: "grid",
+          text: "Stack",
+        },
+        {
+          value: "horizontal",
+          text: "Horizontal scroll ",
+        },
+      ],
+      default: "grid",
+      label: "Mobile Layout",
+      info: "Alignment of content",
+    },
+    {
+      type: "range",
+      id: "item_count_mobile",
+      min: 1,
+      max: 5,
+      step: 1,
+      unit: "",
+      label: "Items per row (Mobile)",
+      default: 2,
+    },
+    {
+      type: "checkbox",
+      id: "autoplay",
+      default: false,
+      label: "Auto Play Slides",
+    },
+    {
+      type: "range",
+      id: "play_slides",
+      min: 1,
+      max: 10,
+      step: 1,
+      unit: "sec",
+      label: "Change slides every",
+      default: 3,
     },
   ],
   blocks: [
     {
       name: "Image card",
       type: "gallery",
-
       props: [
         {
           type: "image_picker",
@@ -424,10 +358,8 @@ export const settings = {
           default: "",
           options: {
             aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
           },
         },
-
         {
           type: "url",
           id: "link",
@@ -487,3 +419,4 @@ export const settings = {
     ],
   },
 };
+export default Component;

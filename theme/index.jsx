@@ -106,7 +106,7 @@ export default async ({
       import(/* webpackChunkName:"getOrdersList" */ "./pages/orders-list"),
     getShipmentDetails: () =>
       import(
-        /* webpackChunkName:"getShipmentDetails" */ "./page-layouts/profile/profile-my-order-shipment-page"
+        /* webpackChunkName:"getShipmentDetails" */ "./pages/shipment-details"
       ),
     getShipmentUpdate: () =>
       import(
@@ -123,6 +123,10 @@ export default async ({
       ),
     getVerifyEmail: () =>
       import(/* webpackChunkName:"getVerifyEmail" */ "./pages/verify-email"),
+    getVerifyEmailLink: () =>
+      import(
+        /* webpackChunkName:"getVerifyEmailLink" */ "./pages/verify-email-link"
+      ),
     getTnc: () => import(/* webpackChunkName:"getTnc" */ "./pages/tnc"),
     getPrivacyPolicy: () =>
       import(/* webpackChunkName:"getPrivacyPolicy" */ "./pages/policy"),
@@ -138,9 +142,7 @@ export default async ({
       ),
     getBlog: () => import(/* webpackChunkName:"getBlog" */ "./pages/blog"),
     getBlogPage: () =>
-      import(
-        /* webpackChunkName:"getBlogPage" */ "./page-layouts/blog/BlogPage"
-      ),
+      import(/* webpackChunkName:"getBlogPage" */ "./components/blog/BlogPage"),
     getContactUs: () =>
       import(/* webpackChunkName:"getContactUs" */ "./pages/contact-us"),
     getFormItem: () =>

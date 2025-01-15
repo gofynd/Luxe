@@ -32,6 +32,14 @@
       ]
     },
     {
+      "type": "checkbox",
+      "id": "always_on_search",
+      "default": false,
+      "category": "Header",
+      "label": "Always on Search",
+      "info": "It provides one click search in header, this option will only be functional with a \"Double Row Navigation\" Layout configuration"
+    },
+    {
       "type": "select",
       "id": "logo_menu_alignment",
       "default": "layout_1",
@@ -81,6 +89,69 @@
         }
       ],
       "default": {}
+    },
+    {
+      "type": "checkbox",
+      "id": "is_hyperlocal",
+      "default": false,
+      "category": "Header",
+      "label": "Hyperlocal",
+      "info": "Enable hyperlocal"
+    },
+    {
+      "type": "checkbox",
+      "id": "is_mandatory_pincode",
+      "category": "Header",
+      "label": "Mandatory Delivery check",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "is_delivery_minutes",
+      "default": false,
+      "category": "Header",
+      "label": "Minutes",
+      "info": "Show delivery promise in minutes."
+    },
+    {
+      "type": "text",
+      "id": "max_delivery_min",
+      "label": "Minutes",
+      "category": "Header",
+      "default": "60",
+      "info": "Set minute threshold for promise."
+    },
+    {
+      "type": "checkbox",
+      "id": "is_delivery_hours",
+      "default": false,
+      "category": "Header",
+      "label": "Hours",
+      "info": "Show delivery promise in hours."
+    },
+    {
+      "type": "text",
+      "id": "max_delivery_hours",
+      "label": "Hours",
+      "category": "Header",
+      "default": "2",
+      "info": "Set hour threshold for promise."
+    },
+    {
+      "type": "checkbox",
+      "id": "is_delivery_day",
+      "default": false,
+      "category": "Header",
+      "label": "Today / Tomorrow",
+      "info": "Show delivery promise as today/tomorrow."
+    },
+    {
+      "type": "checkbox",
+      "id": "is_delivery_date",
+      "default": false,
+      "category": "Header",
+      "label": "Date Range",
+      "info": "Show delivery promise in date range."
     },
     {
       "type": "image_picker",
@@ -220,6 +291,14 @@
       "label": "Custom Button link",
       "category": "Cart & Button Configuration",
       "default": ""
+    },
+    {
+      "type": "checkbox",
+      "id": "show_quantity_control",
+      "label": "Show Quantity Control",
+      "category": "Cart & Button Configuration",
+      "default": false,
+      "info": "Displays in place of Add to Cart when enabled."
     },
     {
       "type": "image_picker",

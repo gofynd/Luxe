@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useFPI } from "fdk-core/utils";
 
 import Slider from "react-slick";
 import ProductCard from "@gofynd/theme-template/components/product-card/product-card";
@@ -14,10 +14,39 @@ import { FEATURED_COLLECTION } from "../queries/collectionsQuery";
 import "@gofynd/theme-template/components/product-card/product-card.css";
 import bannerPlaceholder from "../assets/images/collection-banner-placeholder.png";
 import imagePlaceholder from "../assets/images/placeholder3x4.png";
+import useAddToCartModal from "../page-layouts/plp/useAddToCartModal";
+import Modal from "@gofynd/theme-template/components/core/modal/modal";
+import AddToCart from "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart";
+import "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart.css";
+import SizeGuide from "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide";
+import "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide.css";
+import { useViewport, useAccounts, useWishlist } from "../helper/hooks";
 
-export function Component({ props, globalConfig, fpi }) {
+export function Component({ props, globalConfig }) {
+  const fpi = useFPI();
   const bannerRef = useRef(null);
+  const isTablet = useViewport(0, 768);
+  const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
+  const listingPrice =
+    CONFIGURATION?.app_features?.common?.listing_price?.value || "range";
+  const THEME = useGlobalStore(fpi.getters.THEME);
+  const mode = THEME?.config?.list.find(
+    (f) => f.name === THEME?.config?.current
+  );
+  const pageConfig =
+    mode?.page?.find((f) => f.page === "product-listing")?.settings?.props ||
+    {};
 
+  const addToCartModalProps = useAddToCartModal({ fpi, pageConfig });
+  const { isLoggedIn, openLogin } = useAccounts({ fpi });
+  const { toggleWishlist, followedIdList } = useWishlist({ fpi });
+  const {
+    handleAddToCart,
+    isOpen: isAddToCartOpen,
+    showSizeGuide,
+    handleCloseSizeGuide,
+    ...restAddToModalProps
+  } = addToCartModalProps;
   const {
     autoplay,
     play_slides,
@@ -30,6 +59,14 @@ export function Component({ props, globalConfig, fpi }) {
     img_container_bg,
     button_text,
     collection,
+    show_add_to_cart,
+    show_wishlist_icon,
+    item_count_mobile,
+    show_view_all,
+    show_badge,
+    max_count,
+    text_alignment,
+    title_size,
   } = props;
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
   const getGallery =
@@ -47,8 +84,8 @@ export function Component({ props, globalConfig, fpi }) {
   const [windowWidth, setWindowWidth] = useState(0);
   // const [getGallery, setGetGallery] = useState([]);
   // const [slug, setSlug] = useState("");
-  // const [bannerUrl, setBannerUrl] = useState("");
-  // const [imgAlt, setImgAlt] = useState("");
+  const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
+  const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
   const [isClient, setIsClient] = useState(false);
   const [config, setConfig] = useState({
     dots: true,
@@ -84,7 +121,7 @@ export function Component({ props, globalConfig, fpi }) {
         settings: {
           dots: false,
           arrows: false,
-          slidesToShow: 1,
+          slidesToShow: item_count_mobile?.value ? item_count_mobile?.value : 1,
           slidesToScroll: 1,
           centerMode: true,
           centerPadding: "30px",
@@ -98,13 +135,24 @@ export function Component({ props, globalConfig, fpi }) {
     ],
   });
 
+  const pincode = useMemo(() => {
+    if (!isRunningOnClient()) {
+      return "";
+    }
+    return pincodeDetails?.localityValue || locationDetails?.pincode || "";
+  }, [pincodeDetails, locationDetails]);
+
+  const lastPincodeRef = useRef(pincode);
+
   useEffect(() => {
     setWindowWidth(isRunningOnClient() ? window.innerWidth : 0);
     setIsClient(true);
     if (
-      collection?.value &&
-      !customValues?.[`featuredCollectionData-${collection?.value}`]
+      (collection?.value &&
+        !customValues?.[`featuredCollectionData-${collection?.value}`]) ||
+      lastPincodeRef.current !== pincode
     ) {
+      lastPincodeRef.current = pincode;
       const payload = {
         slug: collection?.value,
         first: 12,
@@ -117,7 +165,7 @@ export function Component({ props, globalConfig, fpi }) {
         );
       });
     }
-  }, [collection]);
+  }, [collection, pincode]);
 
   const bannerConfig = {
     dots: false,
@@ -140,14 +188,14 @@ export function Component({ props, globalConfig, fpi }) {
         },
       },
       {
-        breakpoint: 480,
+        breakpoint: 500,
         settings: {
           dots: false,
           arrows: false,
           slidesToShow: 1,
           slidesToScroll: 1,
           centerMode: getGallery?.length !== 1,
-          centerPadding: "4px",
+          centerPadding: "16px",
         },
       },
     ],
@@ -201,7 +249,7 @@ export function Component({ props, globalConfig, fpi }) {
   }, []);
 
   function getImgSrcSet() {
-    if (globalConfig.img_hd) {
+    if (globalConfig?.img_hd) {
       return [
         { breakpoint: { min: 1024 }, width: 900 },
         { breakpoint: { min: 768 }, width: 500 },
@@ -245,13 +293,13 @@ export function Component({ props, globalConfig, fpi }) {
 
     if (!getGallery) return [];
 
-    if (windowWidth <= 480) {
-      return getGallery;
-    }
-    if (windowWidth <= 768) {
-      return getGallery.slice(0, 12);
-    }
-    return getGallery.slice(0, itemCount * 4);
+    // if (windowWidth <= 480) {
+    //   return getGallery;
+    // }
+    // if (windowWidth <= 768) {
+    //   return getGallery.slice(0, );
+    // }
+    return getGallery.slice(0, max_count?.value);
   }
 
   function showStackedView() {
@@ -275,23 +323,66 @@ export function Component({ props, globalConfig, fpi }) {
     }
     return desktop_layout?.value === "banner_horizontal_scroll";
   }
+  const handleWishlistToggle = (data) => {
+    if (!isLoggedIn) {
+      openLogin();
+      return;
+    }
+    toggleWishlist(data);
+  };
+
+  const titleSizeDesktop =
+    title_size?.value === "small"
+      ? "24px"
+      : title_size?.value === "medium"
+        ? "40px"
+        : "52px";
+
+  const titleSizeTablet =
+    title_size?.value === "small"
+      ? "20px"
+      : title_size?.value === "medium"
+        ? "30px"
+        : "40px";
 
   return (
     <div
       className={styles.sectionWrapper}
       style={{
-        paddingBottom: `${globalConfig.section_margin_bottom}px`,
+        paddingBottom: `${globalConfig?.section_margin_bottom}px`,
         "--bg-color": `${img_container_bg?.value || "#00000000"}`,
       }}
     >
       <div>
         {(!showBannerScrollView() || windowWidth <= 768) && (
-          <div className={styles.titleBlock}>
+          <div
+            className={styles.titleBlock}
+            style={{
+              alignItems:
+                text_alignment?.value === "left"
+                  ? "flex-start"
+                  : text_alignment?.value === "right"
+                    ? "flex-end"
+                    : "center",
+            }}
+          >
             {heading?.value?.length > 0 && (
-              <h2 className={styles.sectionHeading}>{heading?.value}</h2>
+              <h2
+                className={styles.sectionHeading}
+                style={{
+                  textAlign: text_alignment?.value,
+                  fontSize:
+                    windowWidth > 768 ? titleSizeDesktop : titleSizeTablet,
+                }}
+              >
+                {heading?.value}
+              </h2>
             )}
             {description?.value?.length > 0 && (
-              <p className={`${styles.description} ${styles.b2}`}>
+              <p
+                className={`${styles.description} b2`}
+                style={{ textAlign: text_alignment?.value }}
+              >
                 {description?.value}
               </p>
             )}
@@ -317,24 +408,52 @@ export function Component({ props, globalConfig, fpi }) {
                   </FDKLink>
                   <div className={styles.slideWrapBanner}>
                     <div
-                      className={styles.titleBlock}
-                      style={{ paddingLeft: "10px" }}
+                      className={`${styles.titleBlock} ${styles.bannerTitleBlock}`}
+                      style={{
+                        alignItems:
+                          text_alignment?.value === "left"
+                            ? "flex-start"
+                            : text_alignment?.value === "right"
+                              ? "flex-end"
+                              : "center",
+                        paddingLeft: "10px",
+                      }}
                     >
                       {heading?.value?.length > 0 && (
                         <h2
                           className={styles.sectionHeading}
-                          style={{ textAlign: "left" }}
+                          style={{
+                            textAlign: text_alignment?.value,
+                            fontSize:
+                              windowWidth > 768
+                                ? titleSizeDesktop
+                                : titleSizeTablet,
+                          }}
                         >
                           {heading?.value}
                         </h2>
                       )}
                       {description?.value?.length > 0 && (
                         <p
-                          className={`${styles.description} ${styles.b2}`}
-                          style={{ textAlign: "left" }}
+                          className={`${styles.description} b2`}
+                          style={{ textAlign: text_alignment?.value }}
                         >
                           {description?.value}
                         </p>
+                      )}
+                      {button_text?.value && show_view_all?.value && (
+                        <div
+                          className={` ${styles["gap-above-button"]} ${styles.visibleOnDesktop}`}
+                        >
+                          <FDKLink to={`/collection/${slug}`}>
+                            <button
+                              type="button"
+                              className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
+                            >
+                              {button_text?.value}
+                            </button>
+                          </FDKLink>
+                        </div>
                       )}
                     </div>
                     <div className={styles.slWrap}>
@@ -344,11 +463,15 @@ export function Component({ props, globalConfig, fpi }) {
                             <FDKLink to={`/product/${product.slug}`}>
                               <ProductCard
                                 product={product}
+                                listingPrice={listingPrice}
                                 isSaleBadgeDisplayed={false}
-                                isWishlistDisplayed={false}
-                                isWishlistIcon={false}
+                                showBadge={show_badge?.value}
+                                isWishlistDisplayed={show_wishlist_icon?.value}
+                                isWishlistIcon={show_wishlist_icon?.value}
                                 isImageFill={img_fill?.value}
                                 isPrice={globalConfig?.show_price}
+                                onWishlistClick={handleWishlistToggle}
+                                followedIdList={followedIdList}
                                 centerAlign={
                                   windowWidth <= 480
                                     ? mobile_layout?.value !==
@@ -357,6 +480,11 @@ export function Component({ props, globalConfig, fpi }) {
                                       "banner_horizontal_scroll"
                                 }
                                 imagePlaceholder={imagePlaceholder}
+                                showAddToCart={
+                                  show_add_to_cart?.value &&
+                                  !globalConfig?.disable_cart
+                                }
+                                handleAddToCart={handleAddToCart}
                               />
                             </FDKLink>
                           </div>
@@ -369,14 +497,14 @@ export function Component({ props, globalConfig, fpi }) {
                         <SvgWrapper svgSrc="arrow-right" />
                       </span>
                     </div>
-                    {button_text?.value && (
+                    {button_text?.value && show_view_all?.value && (
                       <div
-                        className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
+                        className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]} ${styles.visibleOnMobile}`}
                       >
                         <FDKLink to={`/collection/${slug}`}>
                           <button
                             type="button"
-                            className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
+                            className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
                           >
                             {button_text?.value}
                           </button>
@@ -400,8 +528,9 @@ export function Component({ props, globalConfig, fpi }) {
                           <ProductCard
                             product={product}
                             isSaleBadgeDisplayed={false}
+                            showBadge={show_badge?.value}
                             isWishlistDisplayed={false}
-                            isWishlistIcon={false}
+                            isWishlistIcon={show_wishlist_icon?.value}
                             isImageFill={img_fill?.value}
                             isPrice={globalConfig?.show_price}
                             centerAlign={
@@ -412,6 +541,11 @@ export function Component({ props, globalConfig, fpi }) {
                                   "banner_horizontal_scroll"
                             }
                             imagePlaceholder={imagePlaceholder}
+                            showAddToCart={
+                              show_add_to_cart?.value &&
+                              !globalConfig?.disable_cart
+                            }
+                            handleAddToCart={handleAddToCart}
                           />
                         </FDKLink>
                       </div>
@@ -455,8 +589,9 @@ export function Component({ props, globalConfig, fpi }) {
                           <ProductCard
                             product={product}
                             isSaleBadgeDisplayed={false}
+                            showBadge={show_badge?.value}
                             isWishlistDisplayed={false}
-                            isWishlistIcon={false}
+                            isWishlistIcon={show_wishlist_icon?.value}
                             isImageFill={img_fill?.value}
                             isPrice={globalConfig?.show_price}
                             centerAlign={
@@ -467,6 +602,11 @@ export function Component({ props, globalConfig, fpi }) {
                                   "banner_horizontal_scroll"
                             }
                             imagePlaceholder={imagePlaceholder}
+                            showAddToCart={
+                              show_add_to_cart?.value &&
+                              !globalConfig?.disable_cart
+                            }
+                            handleAddToCart={handleAddToCart}
                           />
                         </FDKLink>
                       </div>
@@ -501,7 +641,7 @@ export function Component({ props, globalConfig, fpi }) {
                       )}
                       {description?.value?.length > 0 && (
                         <p
-                          className={`${styles.description} ${styles.b2}`}
+                          className={`${styles.description} b2`}
                           style={{ textAlign: "left" }}
                         >
                           {description?.value}
@@ -527,14 +667,14 @@ export function Component({ props, globalConfig, fpi }) {
                         </div>
                       ))}
                     </div>
-                    {button_text?.value && (
+                    {button_text?.value && show_view_all?.value && (
                       <div
                         className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
                       >
                         <FDKLink to={`/collection/${slug}`}>
                           <button
                             type="button"
-                            className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
+                            className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
                           >
                             {button_text?.value}
                           </button>
@@ -563,8 +703,9 @@ export function Component({ props, globalConfig, fpi }) {
                   <ProductCard
                     product={product}
                     isSaleBadgeDisplayed={false}
+                    showBadge={show_badge?.value}
                     isWishlistDisplayed={false}
-                    isWishlistIcon={false}
+                    isWishlistIcon={show_wishlist_icon?.value}
                     isImageFill={img_fill?.value}
                     centerAlign={
                       windowWidth <= 480
@@ -572,6 +713,10 @@ export function Component({ props, globalConfig, fpi }) {
                         : desktop_layout?.value !== "banner_horizontal_scroll"
                     }
                     imagePlaceholder={imagePlaceholder}
+                    showAddToCart={
+                      show_add_to_cart?.value && !globalConfig?.disable_cart
+                    }
+                    handleAddToCart={handleAddToCart}
                   />
                 </FDKLink>
               </div>
@@ -580,6 +725,7 @@ export function Component({ props, globalConfig, fpi }) {
         </noscript>
 
         {button_text?.value &&
+          show_view_all?.value &&
           !showBannerScrollView() &&
           getGallery?.length > 0 && (
             <div
@@ -588,7 +734,7 @@ export function Component({ props, globalConfig, fpi }) {
               <FDKLink to={`/collection/${slug}`}>
                 <button
                   type="button"
-                  className={`${styles["btn-secondary"]} ${styles["section-button"]} ${styles.fontBody}`}
+                  className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
                 >
                   {button_text?.value}
                 </button>
@@ -596,6 +742,27 @@ export function Component({ props, globalConfig, fpi }) {
             </div>
           )}
       </div>
+      {show_add_to_cart?.value && !globalConfig?.disable_cart && (
+        <>
+          <Modal
+            isOpen={isAddToCartOpen}
+            hideHeader={!isTablet}
+            bodyClassName={styles.addToCartBody}
+            title={
+              isTablet ? restAddToModalProps?.productData?.product?.name : ""
+            }
+            closeDialog={restAddToModalProps?.handleClose}
+            containerClassName={styles.addToCartContainer}
+          >
+            <AddToCart {...restAddToModalProps} globalConfig={globalConfig} />
+          </Modal>
+          <SizeGuide
+            isOpen={showSizeGuide}
+            onCloseDialog={handleCloseSizeGuide}
+            productMeta={restAddToModalProps?.productData?.product?.sizes}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -687,6 +854,48 @@ export const settings = {
       info: "Description text of the section",
     },
     {
+      id: "text_alignment",
+      type: "select",
+      options: [
+        {
+          value: "left",
+          text: "Left",
+        },
+        {
+          value: "right",
+          text: "Right",
+        },
+        {
+          value: "center",
+          text: "Center",
+        },
+      ],
+      default: "center",
+      label: "Text Alignment",
+      info: "Alignment of text content",
+    },
+    {
+      id: "title_size",
+      type: "select",
+      options: [
+        {
+          value: "small",
+          text: "Small",
+        },
+        {
+          value: "medium",
+          text: "Medium",
+        },
+        {
+          value: "large",
+          text: "Large",
+        },
+      ],
+      default: "medium",
+      label: "Title size",
+      info: "Select title size",
+    },
+    {
       type: "text",
       id: "button_text",
       default: "View all",
@@ -696,12 +905,58 @@ export const settings = {
       type: "range",
       id: "item_count",
       min: 3,
-      max: 5,
+      max: 6,
       step: 1,
       unit: "",
       label: "Products per row (Desktop)",
       default: 4,
-      info: "Maximum items allowed per row",
+      info: "Maximum items allowed per row in horizontal scroll",
+    },
+    {
+      type: "range",
+      id: "item_count_mobile",
+      min: 1,
+      max: 2,
+      step: 1,
+      unit: "",
+      label: "Products per row (Mobile)",
+      default: 1,
+      info: "Maximum items allowed per row in horizontal scroll",
+    },
+    {
+      type: "range",
+      id: "max_count",
+      min: 1,
+      max: 25,
+      step: 1,
+      unit: "",
+      label: "Maximum products to show",
+      default: 10,
+      info: "Maximu products to show in horizontal scroll",
+    },
+    {
+      type: "checkbox",
+      id: "show_add_to_cart",
+      label: "Show Add to Cart",
+      default: true,
+    },
+    {
+      type: "checkbox",
+      id: "show_wishlist_icon",
+      label: "Show Wish List Icon",
+      default: true,
+    },
+    {
+      type: "checkbox",
+      id: "show_badge",
+      label: "Show Badge",
+      default: true,
+    },
+    {
+      type: "checkbox",
+      id: "show_view_all",
+      label: "Show View All Button",
+      default: true,
     },
   ],
 };
@@ -723,3 +978,4 @@ Component.serverFetch = async ({ fpi, props, id }) => {
     console.log(err);
   }
 };
+export default Component;

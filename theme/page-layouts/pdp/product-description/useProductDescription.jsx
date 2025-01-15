@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
 import {
@@ -20,26 +20,41 @@ import { LOCALITY } from "../../../queries/logisticsQuery";
 import { isEmptyOrNull } from "../../../helper/utils";
 import { fetchCartDetails } from "../../cart/useCart";
 
-const useProductDescription = (fpi, slug) => {
+const useProductDescription = (fpi, slug, props, blockProps) => {
+  const { mandatory_pincode } = props;
+  const isIntlShippingEnabled =
+    useGlobalStore(fpi.getters.CONFIGURATION)?.app_features?.common
+      ?.international_shipping?.enabled ?? false;
+  const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
+  const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
   const PRODUCT = useGlobalStore(fpi.getters.PRODUCT);
   const LoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
+  const COUPONS = useGlobalStore(fpi.getters.COUPONS);
+  const PROMOTION_OFFERS = useGlobalStore(fpi.getters.PROMOTION_OFFERS);
   const THEME = useGlobalStore(fpi.getters.THEME);
   const mode = THEME?.config?.list.find(
     (f) => f.name === THEME?.config?.current
   );
-  const globalConfig = mode?.global_config?.custom?.props;
-  const pageConfig =
-    mode?.page?.find((f) => f.page === "product-description")?.settings
-      ?.props || {};
 
-  const { isPdpSsrFetched } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const globalConfig = mode?.global_config?.custom?.props;
+
+  const { isPdpSsrFetched, isI18ModalOpen } = useGlobalStore(
+    fpi?.getters?.CUSTOM_VALUE
+  );
+
+  let sellerDetails = useGlobalStore(fpi.getters.i18N_DETAILS);
+  if (typeof sellerDetails === "string" && sellerDetails !== "") {
+    sellerDetails = JSON.parse(sellerDetails);
+  }
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [currentPincode, setCurrentPincode] = useState("");
+  const [currentPincode, setCurrentPincode] = useState(
+    (pincodeDetails?.localityValue ?? locationDetails?.pincode) || ""
+  );
   const [currentSize, setCurrentSize] = useState(null);
   const [followed, setFollowed] = useState(false);
-  const [coupons, setCoupons] = useState([]);
-  const [promotions, setPromotions] = useState([]);
+  const [coupons, setCoupons] = useState(null);
+  const [promotions, setPromotions] = useState(null);
   const [selectPincodeError, setSelectPincodeError] = useState(false);
   const [pincodeErrorMessage, setPincodeErrorMessage] = useState("");
   const { product_details, product_meta, product_price_by_slug } = PRODUCT;
@@ -52,6 +67,10 @@ const useProductDescription = (fpi, slug) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPriceBySize, setIsLoadingPriceBySize] = useState(false);
+  const pincodeValue = useMemo(
+    () => (pincodeDetails?.localityValue ?? locationDetails?.pincode) || "",
+    [pincodeDetails, locationDetails]
+  );
   // const isLoading =
   //   productMetaLoading ||
   //   productDetailsLoading ||
@@ -69,7 +88,7 @@ const useProductDescription = (fpi, slug) => {
         Object.keys?.(PRODUCT?.product_details)?.length &&
         slug === PRODUCT?.product_details?.slug
       ) {
-        if (product_meta?.sizes?.sellable && pageConfig?.show_offers) {
+        if (product_meta?.sizes?.sellable && blockProps?.show_offers) {
           getOffers(slug);
           setIsLoading(false);
         }
@@ -86,7 +105,6 @@ const useProductDescription = (fpi, slug) => {
           if (res) {
             setCoupons(res?.data?.coupons?.available_coupon_list || []);
             setPromotions(res?.data?.promotions?.available_promotions);
-            setCurrentPincode(localStorage?.getItem("pincode") || "");
             setIsLoading(false);
           }
         })
@@ -101,11 +119,14 @@ const useProductDescription = (fpi, slug) => {
     setFollowed(wishlistIds?.includes(product_details?.uid));
   }, [LoggedIn, wishlistIds, product_details]);
 
+  const updateIntlLocation = () => {
+    console.log("update country");
+  };
+
   function getOffers(slug) {
     fpi.executeGQL(OFFERS, { slug }).then((res) => {
       setCoupons(res?.data?.coupons?.available_coupon_list || []);
       setPromotions(res?.data?.promotions?.available_promotions);
-      setCurrentPincode(localStorage?.getItem("pincode") || "");
     });
   }
 
@@ -123,7 +144,7 @@ const useProductDescription = (fpi, slug) => {
       });
     } else if (
       currentSize !== null &&
-      pageConfig?.mandatory_pincode &&
+      mandatory_pincode?.value &&
       currentPincode?.length === 6
     ) {
       setIsLoadingPriceBySize(true);
@@ -139,6 +160,9 @@ const useProductDescription = (fpi, slug) => {
             setPincodeErrorMessage(
               "Product is not serviceable at given locality"
             );
+          } else {
+            setSelectPincodeError(false);
+            setPincodeErrorMessage("");
           }
         });
       }, 700);
@@ -146,8 +170,17 @@ const useProductDescription = (fpi, slug) => {
   };
 
   useEffect(() => {
-    fetchProductPrice();
-  }, [currentSize, currentPincode]);
+    if (
+      Object.keys?.(PRODUCT?.product_details)?.length &&
+      slug === PRODUCT?.product_details?.slug
+    ) {
+      fetchProductPrice();
+    }
+  }, [currentSize, pincodeValue]);
+
+  useEffect(() => {
+    setCurrentPincode(pincodeValue);
+  }, [pincodeValue]);
 
   function addToWishList(event) {
     if (event) {
@@ -203,10 +236,7 @@ const useProductDescription = (fpi, slug) => {
       .then((res) => {
         if (res?.data?.locality) {
           fetchProductPrice();
-          localStorage?.setItem("pincode", postCode);
-          setCurrentPincode(postCode);
         } else {
-          localStorage?.removeItem("pincode");
           setPincodeErrorMessage(
             res?.errors?.[0]?.message || "Pincode verification failed"
           );
@@ -230,7 +260,8 @@ const useProductDescription = (fpi, slug) => {
       event.stopPropagation();
     }
     if (
-      pageConfig?.mandatory_pincode &&
+      !isIntlShippingEnabled &&
+      mandatory_pincode?.value &&
       (currentPincode?.length !== 6 || pincodeErrorMessage.length)
     ) {
       setSelectPincodeError(true);
@@ -242,7 +273,8 @@ const useProductDescription = (fpi, slug) => {
       return;
     }
     if (
-      !pageConfig?.mandatory_pincode &&
+      !isIntlShippingEnabled &&
+      !mandatory_pincode?.value &&
       ((currentPincode?.length > 0 && currentPincode?.length < 6) ||
         pincodeErrorMessage.length)
     ) {
@@ -255,7 +287,8 @@ const useProductDescription = (fpi, slug) => {
       return;
     }
     if (
-      !pageConfig?.mandatory_pincode &&
+      !isIntlShippingEnabled &&
+      !mandatory_pincode?.value &&
       (!currentPincode?.length || !currentPincode?.length === 6) &&
       !pincodeErrorMessage.length
     ) {
@@ -291,7 +324,9 @@ const useProductDescription = (fpi, slug) => {
       return fpi.executeGQL(ADD_TO_CART, payload).then((outRes) => {
         if (outRes?.data?.addItemsToCart?.success) {
           // fpi.executeGQL(CART_ITEMS_COUNT, null).then((res) => {
-          fetchCartDetails(fpi);
+          if (!buyNow) {
+            fetchCartDetails(fpi);
+          }
           showSnackbar(
             outRes?.data?.addItemsToCart?.message || "Added to Cart",
             "success"
@@ -313,6 +348,14 @@ const useProductDescription = (fpi, slug) => {
     }
   }
 
+  const moq = product_details?.moq;
+  const incrementDecrementUnit = moq?.increment_unit ?? 1;
+  const maxCartQuantity = Math.min(
+    moq?.maximum || Number.POSITIVE_INFINITY,
+    currentSize?.quantity || 0
+  );
+  const minCartQuantity = moq?.minimum || 1;
+
   return {
     productDetails: product_details || {},
     productMeta: product_meta?.sizes || {},
@@ -320,16 +363,18 @@ const useProductDescription = (fpi, slug) => {
     currentImageIndex,
     currentSize,
     currentPincode,
-    coupons: coupons || [],
-    promotions: promotions || [],
+    coupons: coupons ?? (COUPONS?.available_coupon_list || []),
+    promotions: promotions ?? (PROMOTION_OFFERS?.available_promotions || []),
     isLoading,
     isPageLoading,
     isLoadingPriceBySize,
-    pageConfig,
     globalConfig,
     followed,
     selectPincodeError,
     pincodeErrorMessage,
+    isIntlShippingEnabled,
+    sellerDetails,
+    updateIntlLocation,
     setCurrentSize,
     setCurrentImageIndex,
     setCurrentPincode,
@@ -338,6 +383,12 @@ const useProductDescription = (fpi, slug) => {
     addProductForCheckout,
     checkPincode,
     setPincodeErrorMessage,
+    isI18ModalOpen,
+    pincodeDetails,
+    locationDetails,
+    incrementDecrementUnit,
+    maxCartQuantity,
+    minCartQuantity,
   };
 };
 

@@ -10,6 +10,8 @@ import {
   isRunningOnClient,
 } from "../../helper/utils";
 import placeholder from "../../assets/images/placeholder3x4.png";
+import useAddToCartModal from "./useAddToCartModal";
+import { useThemeConfig } from "../../helper/hooks";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
@@ -18,20 +20,19 @@ const PAGE_OFFSET = 2;
 const useProductListing = ({ fpi }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const THEME = useGlobalStore(fpi.getters.THEME);
   const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
   const listingPrice =
     CONFIGURATION?.app_features?.common?.listing_price?.value || "range";
-  const mode = THEME?.config?.list.find(
-    (f) => f.name === THEME?.config?.current
-  );
-  const globalConfig = mode?.global_config?.custom?.props;
-  const pageConfig =
-    mode?.page?.find((f) => f.page === "product-listing")?.settings?.props ||
-    {};
+
+  const { globalConfig, pageConfig } = useThemeConfig({
+    fpi,
+    page: "product-listing",
+  });
 
   const productsListData = useGlobalStore(fpi?.getters?.PRODUCTS);
   const { isPlpSsrFetched } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
+  const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
 
   const { filters = [], sort_on: sortOn, page, items } = productsListData || {};
 
@@ -56,12 +57,26 @@ const useProductListing = ({ fpi }) => {
 
   const isClient = useMemo(() => isRunningOnClient(), []);
 
+  const addToCartModalProps = useAddToCartModal({ fpi, pageConfig });
+
+  const pincode = useMemo(() => {
+    if (!isClient) {
+      return "";
+    }
+    return (
+      pincodeDetails?.localityValue ||
+      locationDetails?.pincode ||
+      locationDetails?.sector ||
+      ""
+    );
+  }, [pincodeDetails, locationDetails]);
+
   useEffect(() => {
     fpi.custom.setValue("isPlpSsrFetched", false);
   }, []);
 
   useEffect(() => {
-    if (!isPlpSsrFetched) {
+    if (!isPlpSsrFetched || locationDetails) {
       const searchParams = isClient
         ? new URLSearchParams(location?.search)
         : null;
@@ -71,6 +86,7 @@ const useProductListing = ({ fpi }) => {
         first: PAGE_SIZE,
         filterQuery: appendDelimiter(searchParams?.toString()) || undefined,
         sortOn: searchParams?.get("sort_on") || undefined,
+        search: searchParams?.get("q") || undefined,
       };
 
       if (pageConfig?.loading_options === "pagination")
@@ -84,7 +100,7 @@ const useProductListing = ({ fpi }) => {
         ) ?? [];
       setIsResetFilterDisable(!resetableFilterKeys?.length);
     }
-  }, [location?.search]);
+  }, [location?.search, pincode, locationDetails]);
 
   const fetchProducts = (payload, append = false) => {
     setApiLoading(true);
@@ -126,7 +142,7 @@ const useProductListing = ({ fpi }) => {
     const params = Array.from(searchParams?.entries() || []);
 
     const result = params.reduce((acc, [key, value]) => {
-      if (key !== "page_no" && key !== "sort_on") {
+      if (key !== "page_no" && key !== "sort_on" && key !== "q") {
         acc.push(`${key}:${value}`);
       }
       return acc;
@@ -278,6 +294,26 @@ const useProductListing = ({ fpi }) => {
     filterList[0].isOpen = true;
   }
 
+  const selectedFilters = useMemo(() => {
+    const searchParams = isRunningOnClient()
+      ? new URLSearchParams(location?.search)
+      : null;
+
+    return filterList?.reduce((acc, curr) => {
+      const selectedValues = curr?.values?.filter(
+        (filter) =>
+          searchParams?.getAll(curr?.key?.name).includes(filter?.value) ||
+          filter?.is_selected
+      );
+
+      if (selectedValues.length > 0) {
+        return [...acc, { key: curr?.key, values: selectedValues }];
+      }
+
+      return acc;
+    }, []);
+  }, [filterList]);
+
   const { openFilterModal, ...filterModalProps } = useFilterModal({
     filters: filterList ?? [],
     resetFilters,
@@ -302,6 +338,7 @@ const useProductListing = ({ fpi }) => {
     title: "",
     description: pageConfig.description || "",
     filterList,
+    selectedFilters,
     sortList: sortOn,
     productList: productList || items,
     columnCount,
@@ -309,22 +346,30 @@ const useProductListing = ({ fpi }) => {
     isBrand: !pageConfig?.hide_brand,
     isSaleBadge: globalConfig?.show_sale_badge,
     isPrice: globalConfig?.show_price,
+    globalConfig,
     isHdimgUsed: false,
     isResetFilterDisable,
     aspectRatio: getProductImgAspectRatio(globalConfig),
     isWishlistIcon: true,
     followedIdList,
     isProductLoading: apiLoading,
+    banner: {
+      desktopBanner: pageConfig?.desktop_banner,
+      mobileBanner: pageConfig?.mobile_banner,
+      redirectLink: pageConfig?.banner_link,
+    },
     isPageLoading,
     listingPrice,
     loadingOption: pageConfig.loading_options,
     paginationProps,
     sortModalProps,
     filterModalProps,
+    addToCartModalProps,
     isImageFill: globalConfig?.img_fill,
     imageBackgroundColor: globalConfig?.img_container_bg,
     showImageOnHover: globalConfig?.show_image_on_hover,
     imagePlaceholder: placeholder,
+    showAddToCart: pageConfig?.show_add_to_cart && !globalConfig?.disable_cart,
     onResetFiltersClick: resetFilters,
     onColumnCountUpdate: handleColumnCountUpdate,
     onFilterUpdate: handleFilterUpdate,

@@ -81,9 +81,7 @@ function StoreItem({
           {getProductPrice("effective")}
         </span>
         {getProductPrice("effective") !== getProductPrice("marked") && (
-          <span
-            className={`${styles.priceWrapperMarked} ${styles.captionNormal}`}
-          >
+          <span className={`${styles.priceWrapperMarked} captionNormal`}>
             {getProductPrice("marked")}
           </span>
         )}
@@ -99,14 +97,14 @@ function StoreItem({
       <div className={styles.buttonWrapper}>
         <button
           type="button"
-          className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
+          className={`${styles.button} btnSecondary ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
           onClick={() => selectStoreItem(false)}
         >
           ADD TO CART
         </button>
         <button
           type="button"
-          className={`${styles.button} ${styles.btnPrimary} ${styles.buyNow} ${styles.fontBody}`}
+          className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
           onClick={() => selectStoreItem(true)}
         >
           BUY NOW

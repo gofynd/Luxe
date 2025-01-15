@@ -1,15 +1,11 @@
 @import "../../styles/main.less";
-
 .loader {
   position: relative;
-  height: 90vh;
   width: 100%;
-
   .loaderContainer {
     position: absolute;
-    height: 100%;
+    height: 75vh;
     background: transparent;
-
     .customLoader {
       margin-left: 0;
     }
@@ -33,20 +29,8 @@
 
 .main {
   color: @Mako;
-  .loader {
-    position: relative;
-    height: 81.8vh;
-    width: 100%;
-
-    .loaderContainer {
-      position: absolute;
-      height: 100%;
-      background: transparent;
-
-      .customLoader {
-        margin-left: 0;
-      }
-    }
+  .emptyState {
+    max-height: 50vh;
   }
   .addressItemContainer {
     padding: 12px;

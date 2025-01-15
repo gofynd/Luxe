@@ -71,7 +71,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
     <>
       <button
         type="button"
-        className={`${styles.button} ${styles.btnPrimary} ${styles.flexCenter} ${styles.addToCompare} ${customClass}`}
+        className={`${styles.button} btnPrimary ${styles.flexCenter} ${styles.addToCompare} ${customClass}`}
         onClick={addCompareProducts}
       >
         <SvgWrapper svgSrc="compare-icon" className={styles.compareIcon} />
@@ -99,7 +99,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
               <div>
                 <button
                   type="button"
-                  className={`${styles.button} ${styles.btnSecondary}`}
+                  className={`${styles.button} btnSecondary`}
                   onClick={() => compareProducts({ action: "reset" })}
                 >
                   Reset
@@ -108,7 +108,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
               <div>
                 <button
                   type="button"
-                  className={`${styles.button} ${styles.btnPrimary} ${styles.btnNoBorder}`}
+                  className={`${styles.button} btnPrimary ${styles.btnNoBorder}`}
                   onClick={() => compareProducts({ action: "goToCompare" })}
                 >
                   Go to Compare

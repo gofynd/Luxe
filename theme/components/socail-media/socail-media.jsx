@@ -10,7 +10,7 @@ export default function SocailMedia({ social_links }) {
         ([key, { link, title }]) =>
           link && (
             <FDKLink key={key} to={link} target="_blank" title={title}>
-              <SvgWrapper svgSrc={`socail-${title?.toLowerCase()}`} />
+              <SvgWrapper svgSrc={`socail-${key}`} />
             </FDKLink>
           )
       )}

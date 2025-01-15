@@ -1,8 +1,8 @@
 import React, { memo, useEffect, useState, useRef } from "react";
 import { FDKLink } from "fdk-core/components";
-
 import Slider from "react-slick";
-import FyImage from "../components/core/fy-image/fy-image";
+import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
+import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import styles from "../styles/sections/image-slideshow.less";
 import placeHolder3X4 from "../assets/images/slideshow-mobile-placeholder.png";
@@ -80,6 +80,7 @@ const MemoizedSlide = memo(({ block, globalConfig, index }) => (
           defer={false}
           alt={`slide-${index}`}
           showSkeleton={true}
+          isFixedAspectRatio={false}
         />
       </FDKLink>
     ) : (
@@ -92,6 +93,7 @@ const MemoizedSlide = memo(({ block, globalConfig, index }) => (
         defer={false}
         alt={`slide-${index}`}
         showSkeleton={true}
+        isFixedAspectRatio={false}
       />
     )}
   </div>
@@ -189,7 +191,7 @@ export function Component({ props, blocks, globalConfig, preset }) {
     <div
       className={styles.carouselImage}
       style={{
-        paddingBottom: `${globalConfig.section_margin_bottom}px`,
+        paddingBottom: `${globalConfig?.section_margin_bottom}px`,
         maxWidth: "100vw",
       }}
     >
@@ -201,6 +203,7 @@ export function Component({ props, blocks, globalConfig, preset }) {
             aspectRatio={16 / 5}
             mobileAspectRatio={3 / 4}
             sources={getImgSrcSet(blocks?.[0]?.props)}
+            isFixedAspectRatio={false}
           />
         </noscript>
 
@@ -265,7 +268,6 @@ export const settings = {
           default: "",
           options: {
             aspect_ratio: "16:5",
-            aspect_ratio_strict_check: true,
           },
         },
 
@@ -276,7 +278,6 @@ export const settings = {
           default: "",
           options: {
             aspect_ratio: "3:4",
-            aspect_ratio_strict_check: true,
           },
         },
         {
@@ -351,3 +352,4 @@ export const settings = {
     ],
   },
 };
+export default Component;

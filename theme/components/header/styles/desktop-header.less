@@ -7,6 +7,7 @@
     .middle {
       .logo,
       a {
+        max-width: 294px;
         max-height: 65px;
       }
     }
@@ -31,8 +32,9 @@
         & > div {
           position: relative;
           .count {
-            width: 16px;
-            height: 16px;
+            min-width: 16px;
+            min-height: 16px;
+            padding: 0 2px;
             background-color: @HeaderIcon;
             color: @HeaderBackground;
             border-radius: 50%;
@@ -146,4 +148,44 @@
 }
 .singleRowIcon g > path {
   fill: @HeaderIcon;
+}
+
+.alwaysOnSearch {
+  width: 100%;
+  max-width: 600px;
+  .customSearchClass {
+    position: relative;
+    transform: scaleY(1) !important;
+    opacity: 1 !important;
+    transition: none !important;
+    .search__wrapper {
+      width: unset !important;
+    }
+  }
+  .customSearchWrapperClass {
+    width: unset;
+  }
+}
+.hyperlocalActionBtn {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: @HeaderNav;
+  &.hyperlocalSearchOn {
+    margin-left: 24px;
+  }
+  .label {
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .pincode {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: -0.24px;
+  }
 }
