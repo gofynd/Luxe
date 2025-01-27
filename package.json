@@ -1,13 +1,11 @@
 {
-  "name": "Astra",
-  "version": "1.0.0",
+  "name": "Luxe",
+  "version": "1.1.9",
   "description": "",
   "main": "index.js",
-  "author": "Sandeep Baikan",
   "license": "ISC",
   "scripts": {
     "build": "npm run clean && webpack --mode production",
-    "dev": "npx concurrently \" npm run build:dev \" \" npm run serve \" ",
     "build:dev": "npm run clean && npm run build:local -- --watch",
     "build:local": "npm run clean && webpack --env local",
     "clean": "rm -rf dist && rm -rf dist_sections",
@@ -19,7 +17,6 @@
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint . --ext .js,.jsx --fix",
     "format": "prettier --write \"theme/**/*.{js,jsx,json,css,md}\"",
-    "refresh": "npm uninstall fdk-store && npm install gitlab:fynd/regrowth/fynd-platform/themes/shadowfire.git#develop",
     "husky": "npm install husky --save-dev && husky install && npx husky add .husky/pre-commit 'npm run lint && npm run format'"
   },
   "husky": {

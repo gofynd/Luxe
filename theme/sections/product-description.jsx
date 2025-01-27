@@ -38,7 +38,7 @@ import { createPortal } from "react-dom";
 
 export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
   const fpi = useFPI();
-  const { icon_color, variant_position, product } = props;
+  const { icon_color, variant_position, product, enable_buy_now } = props;
 
   const addToCartBtnRef = useRef(null);
   const params = useParams();
@@ -89,6 +89,8 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
 
     return currentProps;
   }, [blocks]);
+
+  const application = useGlobalStore(fpi.getters.APPLICATION);
 
   const {
     productDetails,
@@ -164,15 +166,8 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
 
   const isMto = productDetails?.custom_order?.is_custom_order || false;
 
-  const {
-    show_price,
-    disable_cart,
-    button_options,
-    custom_button_text,
-    custom_button_link,
-    custom_button_icon,
-    show_quantity_control,
-  } = globalConfig;
+  const { show_price, disable_cart, button_options, show_quantity_control } =
+    globalConfig;
 
   const priceDataBySize = productPriceBySlug?.price;
   const isSizeSelectionBlock = (block) =>
@@ -198,24 +193,6 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
     };
   }, []);
 
-  useEffect(() => {
-    if (slug) {
-      const values = {
-        slug,
-      };
-      fpi.custom.setValue("isProductNotFound", false);
-      fpi.executeGQL(GET_PRODUCT_DETAILS, values).then((res) => {
-        if (res.errors && res.errors.length) {
-          // const error = res.errors[0];
-          // if (error.status_code === 404) {
-          fpi.custom.setValue("isProductNotFound", true);
-          // }
-        }
-        return res;
-      });
-    }
-  }, [slug]);
-
   function getManufacturingTime() {
     const custom_order = productDetails?.custom_order;
 
@@ -230,21 +207,22 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
   }
 
   const getProductPrice = (key) => {
-    if (selectedSize && !isEmptyOrNull(productPriceBySlug)) {
+    if (selectedSize && !isEmptyOrNull(productPriceBySlug.price)) {
       if (productPriceBySlug?.set) {
         return currencyFormat(productPriceBySlug?.price_per_piece[key]) || "";
       }
       const price = productPriceBySlug?.price || "";
-      return `${price?.currency_symbol || ""} ${currencyFormat(price?.[key]) || ""}`;
+      return currencyFormat(price?.[key], price?.currency_symbol) || "";
     }
     if (priceDataDefault) {
       return priceDataDefault?.[key]?.min !== priceDataDefault?.[key]?.max
         ? `${priceDataDefault?.[key]?.currency_symbol || ""} ${
             currencyFormat(priceDataDefault?.[key]?.min) || ""
-          } - ${priceDataDefault?.[key]?.max || ""}`
-        : `${priceDataDefault?.[key]?.currency_symbol || ""} ${
-            currencyFormat(priceDataDefault?.[key]?.max) || ""
-          } `;
+          } - ${currencyFormat(priceDataDefault?.[key]?.max) || ""}`
+        : currencyFormat(
+            priceDataDefault?.[key]?.max,
+            priceDataDefault?.[key]?.currency_symbol
+          ) || "";
     }
   };
 
@@ -302,7 +280,7 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
       try {
         await navigator.share({
           title: "Amazing Product",
-          text: "Check out this amazing product on fynd!",
+          text: `Check out this amazing product on ${application?.name}`,
           url: window?.location?.href,
         });
       } catch (error) {
@@ -419,6 +397,7 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                               <ShareItem
                                 setShowSocialLinks={setShowSocialLinks}
                                 handleShare={() => handleShare()}
+                                description={`Check out this amazing product on ${application?.name}`}
                               />
                             )}
                           </h1>
@@ -726,103 +705,97 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                 </div>
                               )}
 
-                            {button_options?.includes("addtocart") && (
-                              <div
-                                className={`${styles.cartWrapper} ${
-                                  isSizeSelectionBlock(block) &&
-                                  styles["cartWrapper--half-width"]
-                                }`}
-                              >
-                                {!disable_cart && productMeta?.sellable && (
-                                  <>
-                                    {singleItemDetails?.quantity &&
-                                    show_quantity_control ? (
-                                      <>
-                                        <QuantityController
-                                          isCartUpdating={isCartUpdating}
-                                          count={
-                                            singleItemDetails?.quantity || 0
-                                          }
-                                          onDecrementClick={(e) =>
-                                            cartUpdateHandler(
-                                              e,
-                                              singleItemDetails,
-                                              currentSize.value,
-                                              -incrementDecrementUnit,
-                                              singleItemDetails?.itemIndex,
-                                              "update_item"
-                                            )
-                                          }
-                                          onIncrementClick={(e) =>
-                                            cartUpdateHandler(
-                                              e,
-                                              singleItemDetails,
-                                              currentSize.value,
-                                              incrementDecrementUnit,
-                                              singleItemDetails?.itemIndex,
-                                              "update_item"
-                                            )
-                                          }
-                                          onQtyChange={(evt, currentNum) =>
-                                            cartUpdateHandler(
-                                              evt,
-                                              singleItemDetails,
-                                              currentSize.value,
-                                              currentNum,
-                                              singleItemDetails?.itemIndex,
-                                              "edit_item"
-                                            )
-                                          }
-                                          maxCartQuantity={maxCartQuantity}
-                                          minCartQuantity={minCartQuantity}
-                                          containerClassName={
-                                            styles.qtyContainer
-                                          }
-                                          inputClassName={styles.inputContainer}
-                                        />
-                                      </>
-                                    ) : (
-                                      <button
-                                        type="button"
-                                        ref={addToCartBtnRef}
-                                        className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
-                                        onClick={(e) => {
-                                          addProductForCheckout(
+                            <div
+                              className={`${styles.cartWrapper} ${
+                                isSizeSelectionBlock(block) &&
+                                styles["cartWrapper--half-width"]
+                              }`}
+                            >
+                              {!disable_cart && productMeta?.sellable && (
+                                <>
+                                  {singleItemDetails?.quantity &&
+                                  show_quantity_control ? (
+                                    <>
+                                      <QuantityController
+                                        isCartUpdating={isCartUpdating}
+                                        count={singleItemDetails?.quantity || 0}
+                                        onDecrementClick={(e) =>
+                                          cartUpdateHandler(
                                             e,
-                                            selectedSize,
-                                            false
-                                          );
-                                          setIsLaodingCart(true);
-                                          setTimeout(() => {
-                                            setIsLaodingCart(false);
-                                          }, 1000);
-                                        }}
-                                        disabled={
-                                          isLoadingCart || isLoadingPriceBySize
+                                            singleItemDetails,
+                                            currentSize.value,
+                                            -incrementDecrementUnit,
+                                            singleItemDetails?.itemIndex,
+                                            "update_item"
+                                          )
                                         }
-                                      >
-                                        <SvgWrapper
-                                          svgSrc="cart"
-                                          className={styles.cartIcon}
-                                        />
-                                        ADD TO CART
-                                      </button>
-                                    )}
-                                  </>
-                                )}
-                                {!productMeta?.sellable && (
-                                  <button
-                                    type="button"
-                                    disabled
-                                    className={`${styles.button} btnPrimary ${styles.notAvailable} ${styles.fontBody}`}
-                                  >
-                                    PRODUCT NOT AVAILABLE
-                                  </button>
-                                )}
-                              </div>
-                            )}
+                                        onIncrementClick={(e) =>
+                                          cartUpdateHandler(
+                                            e,
+                                            singleItemDetails,
+                                            currentSize.value,
+                                            incrementDecrementUnit,
+                                            singleItemDetails?.itemIndex,
+                                            "update_item"
+                                          )
+                                        }
+                                        onQtyChange={(evt, currentNum) =>
+                                          cartUpdateHandler(
+                                            evt,
+                                            singleItemDetails,
+                                            currentSize.value,
+                                            currentNum,
+                                            singleItemDetails?.itemIndex,
+                                            "edit_item"
+                                          )
+                                        }
+                                        maxCartQuantity={maxCartQuantity}
+                                        minCartQuantity={minCartQuantity}
+                                        containerClassName={styles.qtyContainer}
+                                        inputClassName={styles.inputContainer}
+                                      />
+                                    </>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      ref={addToCartBtnRef}
+                                      className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
+                                      onClick={(e) => {
+                                        addProductForCheckout(
+                                          e,
+                                          selectedSize,
+                                          false
+                                        );
+                                        setIsLaodingCart(true);
+                                        setTimeout(() => {
+                                          setIsLaodingCart(false);
+                                        }, 1000);
+                                      }}
+                                      disabled={
+                                        isLoadingCart || isLoadingPriceBySize
+                                      }
+                                    >
+                                      <SvgWrapper
+                                        svgSrc="cart"
+                                        className={styles.cartIcon}
+                                      />
+                                      ADD TO CART
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                              {!productMeta?.sellable && (
+                                <button
+                                  type="button"
+                                  disabled
+                                  className={`${styles.button} btnPrimary ${styles.notAvailable} ${styles.fontBody}`}
+                                >
+                                  PRODUCT NOT AVAILABLE
+                                </button>
+                              )}
+                            </div>
 
-                            {button_options?.includes("buynow") &&
+                            {enable_buy_now?.value &&
                               isSizeSelectionBlock(block) &&
                               productMeta?.sellable && (
                                 <div
@@ -862,7 +835,7 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                 </div>
                               )}
                           </div>
-                          {button_options?.includes("buynow") &&
+                          {enable_buy_now?.value &&
                             !isSizeSelectionBlock(block) && (
                               <div className={styles.actionBuyNow}>
                                 {!disable_cart && productMeta?.sellable && (
@@ -922,20 +895,34 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                     case "custom_button":
                       return (
                         <>
-                          {custom_button_text && (
-                            <FDKLink to={custom_button_link}>
+                          {getBlockConfigValue(block, "custom_button_text") && (
+                            <FDKLink
+                              to={getBlockConfigValue(
+                                block,
+                                "custom_button_link"
+                              )}
+                            >
                               <button
                                 type="button"
                                 className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
                               >
-                                {custom_button_icon && (
+                                {getBlockConfigValue(
+                                  block,
+                                  "custom_button_icon"
+                                ) && (
                                   <FyImage
                                     customClass={styles.customIcon}
-                                    src={custom_button_icon}
+                                    src={getBlockConfigValue(
+                                      block,
+                                      "custom_button_icon"
+                                    )}
                                     globalConfig={globalConfig}
                                   />
                                 )}
-                                {custom_button_text}
+                                {getBlockConfigValue(
+                                  block,
+                                  "custom_button_text"
+                                )}
                               </button>
                             </FDKLink>
                           )}
@@ -1159,6 +1146,13 @@ export const settings = {
     },
     {
       type: "checkbox",
+      id: "enable_buy_now",
+      label: "Enable Buy now",
+      info: "Enable buy now feature",
+      default: false,
+    },
+    {
+      type: "checkbox",
       id: "product_details_bullets",
       label: "Show Bullets in Product Details",
       default: true,
@@ -1324,7 +1318,31 @@ export const settings = {
     {
       type: "custom_button",
       name: "Custom Button",
-      props: [],
+      props: [
+        {
+          type: "text",
+          id: "custom_button_text",
+          label: "Custom Button text",
+          default: "Enquire now",
+          info: "Applicable for PDP Section",
+        },
+        {
+          type: "url",
+          id: "custom_button_link",
+          label: "Custom Button link",
+          default: "",
+        },
+        {
+          type: "image_picker",
+          id: "custom_button_icon",
+          label: "Custom Button Icon",
+          default: "",
+          options: {
+            aspect_ratio: "1:1",
+            aspect_ratio_strict_check: true,
+          },
+        },
+      ],
     },
     {
       type: "pincode",
@@ -1543,7 +1561,15 @@ Component.serverFetch = async ({ fpi, router }) => {
   };
 
   fpi.custom.setValue("isPdpSsrFetched", true);
+  fpi.custom.setValue("isProductNotFound", false);
 
-  return fpi.executeGQL(GET_PRODUCT_DETAILS, values);
+  return fpi.executeGQL(GET_PRODUCT_DETAILS, values).then((result) => {
+    if (result.errors && result.errors.length) {
+      fpi.custom.setValue("isProductNotFound", true);
+    } else {
+      fpi.custom.setValue("productPromotions", result?.data?.promotions || {});
+    }
+    return result;
+  });
 };
 export default Component;

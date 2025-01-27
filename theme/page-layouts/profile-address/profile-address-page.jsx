@@ -7,8 +7,9 @@ import AddressItem from "@gofynd/theme-template/components/address-item/address-
 import { LOCALITY } from "../../queries/logisticsQuery";
 import useAddress from "../address/useAddress";
 import EmptyState from "../../components/empty-state/empty-state";
-import "@gofynd/theme-template/components/loader/loader.css";
-import { useSnackbar } from "../../helper/hooks";
+import Loader from "fdk-react-templates/components/loader/loader";
+import "fdk-react-templates/components/loader/loader.css";
+import { useSnackbar, useAddressFormSchema } from "../../helper/hooks";
 import { capitalize } from "../../helper/utils";
 import styles from "./profile-address-page.less";
 import "@gofynd/theme-template/components/address-form/address-form.css";
@@ -29,10 +30,7 @@ const ProfileAddressPage = ({ fpi }) => {
     fetchCountrieDetails,
     countryDetails,
     currentCountry,
-    fetchLocalities,
-    isInternationalShippingEnabled,
-    renderTemplate,
-    updateEnumForField,
+    isInternational,
   } = useInternational({
     fpi,
   });
@@ -52,7 +50,6 @@ const ProfileAddressPage = ({ fpi }) => {
   const [addressLoader, setAddressLoader] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [countrySearchText, setCountrySearchText] = useState("");
-  const [defaultFormSchema, setDefaultFormSchema] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(currentCountry);
   const queryAddressId = searchParams.get("address_id");
   const memoizedSelectedAdd = useMemo(() => {
@@ -88,23 +85,15 @@ const ProfileAddressPage = ({ fpi }) => {
     }
   }, [selectedCountry, memoizedSelectedAdd]);
 
-  useEffect(() => {
-    const formSchema = renderTemplate(
-      countryDetails?.fields?.address_template?.checkout_form,
-      countryDetails?.fields?.address
-    );
-    formSchema.forEach((group) => {
-      group.fields.forEach((field) => {
-        if (field.key === "phone") {
-          // Add the country_code key to the field object
-          field.countryCode = memoizedSelectedAdd
-            ? memoizedSelectedAdd?.country_phone_code.replace("+", "")
-            : selectedCountry?.phone_code.replace("+", "");
-        }
-      });
-    });
-    getOptionsDetails(formSchema);
-  }, [countryDetails]);
+  const { formSchema } = useAddressFormSchema({
+    fpi,
+    countryCode:
+      memoizedSelectedAdd?.country_phone_code ?? selectedCountry?.phone_code,
+    countryIso: memoizedSelectedAdd?.country_iso_code ?? selectedCountry?.iso2,
+    addressTemplate: countryDetails?.fields?.address_template?.checkout_form,
+    addressFields: countryDetails?.fields?.address,
+    addressItem: memoizedSelectedAdd,
+  });
 
   useEffect(() => {
     setIsLoading(true);
@@ -128,41 +117,6 @@ const ProfileAddressPage = ({ fpi }) => {
       setIsCreateMode(false);
     }
   }, [searchParams, allAddresses]);
-
-  const getLocalityValues = async (slug) => {
-    const payload = {
-      pageNo: 1,
-      pageSize: 1000,
-      country: memoizedSelectedAdd?.country_iso_code ?? selectedCountry?.iso2,
-      locality: slug,
-      city: "",
-    };
-    const localityDetails = await fetchLocalities(payload);
-    return localityDetails || [];
-  };
-
-  const getOptionsDetails = async (formSchema) => {
-    if (!countryDetails?.fields?.serviceability_fields?.length) {
-      setDefaultFormSchema([...formSchema]);
-      return;
-    }
-    for (const item of countryDetails?.fields?.serviceability_fields) {
-      const serviceabilityDetails = countryDetails?.fields?.address.find(
-        (entity) => entity.slug === item
-      );
-      let localityDetails = [];
-      if (serviceabilityDetails.input === "list") {
-        // eslint-disable-next-line no-await-in-loop
-        localityDetails = await getLocalityValues(item, formSchema);
-      }
-      const dropDownFieldArray = [];
-      for (const locality of localityDetails) {
-        dropDownFieldArray.push(convertDropDownField(locality));
-      }
-      const formData = updateEnumForField(formSchema, item, dropDownFieldArray);
-      setDefaultFormSchema([...formData]);
-    }
-  };
 
   const navigateToLocation = (replace = true) => {
     navigate(`${location.pathname}?${searchParams.toString()}`, {
@@ -229,7 +183,10 @@ const ProfileAddressPage = ({ fpi }) => {
         fetchAddresses();
         resetPage();
       } else {
-        showSnackbar("Failed to create new address", "error");
+        showSnackbar(
+          res?.errors?.[0]?.message ?? "Failed to create new address",
+          "error"
+        );
       }
       window.scrollTo({
         top: 0,
@@ -249,7 +206,10 @@ const ProfileAddressPage = ({ fpi }) => {
         fetchAddresses();
         resetPage();
       } else {
-        showSnackbar("Failed to update an address", "error");
+        showSnackbar(
+          res?.errors?.[0]?.message ?? "Failed to update an address",
+          "error"
+        );
       }
       window.scrollTo({
         top: 0,
@@ -463,8 +423,8 @@ const ProfileAddressPage = ({ fpi }) => {
           ) : (
             <div className={styles.addressFormWrapper}>
               <AddressForm
-                internationalShipping={isInternationalShippingEnabled}
-                formSchema={defaultFormSchema}
+                internationalShipping={isInternational}
+                formSchema={formSchema}
                 addressItem={memoizedSelectedAdd}
                 showGoogleMap={!!mapApiKey?.length}
                 mapApiKey={mapApiKey}

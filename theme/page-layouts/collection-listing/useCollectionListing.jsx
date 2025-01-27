@@ -10,7 +10,7 @@ import {
   isRunningOnClient,
 } from "../../helper/utils";
 import useAddToCartModal from "../plp/useAddToCartModal";
-import { useThemeConfig } from "../../helper/hooks";
+import { useThemeConfig, useThemeFeature } from "../../helper/hooks";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
@@ -29,6 +29,7 @@ const useCollectionListing = ({ fpi, slug }) => {
     fpi,
     page: "collection-listing",
   });
+  const { isInternational } = useThemeFeature({ fpi });
 
   const collectionData = useGlobalStore(fpi?.getters?.COLLECTION);
   const { isCollectionsSsrFetched } = useGlobalStore(fpi.getters.CUSTOM_VALUE);
@@ -381,7 +382,10 @@ const useCollectionListing = ({ fpi, slug }) => {
     isImageFill: globalConfig?.img_fill,
     imageBackgroundColor: globalConfig?.img_container_bg,
     showImageOnHover: globalConfig?.show_image_on_hover,
-    showAddToCart: pageConfig?.show_add_to_cart && !globalConfig?.disable_cart,
+    showAddToCart:
+      !isInternational &&
+      pageConfig?.show_add_to_cart &&
+      !globalConfig?.disable_cart,
     addToCartModalProps,
     globalConfig,
     aspectRatio: getProductImgAspectRatio(globalConfig),

@@ -4,7 +4,11 @@ import { useGlobalStore } from "fdk-core/utils";
 import { CART_DETAILS } from "../../queries/cartQuery";
 import { LOCALITY } from "../../queries/localityQuery";
 import { SELECT_ADDRESS } from "../../queries/checkoutQuery";
-import { useAddress, useSnackbar } from "../../helper/hooks/index";
+import {
+  useAddress,
+  useSnackbar,
+  useAddressFormSchema,
+} from "../../helper/hooks";
 import useInternational from "../../components/header/useInternational";
 import { capitalize } from "../../helper/utils";
 
@@ -59,14 +63,10 @@ const useCartDeliveryLocation = ({ fpi }) => {
     fetchCountrieDetails,
     countryDetails,
     currentCountry,
-    fetchLocalities,
-    isInternationalShippingEnabled,
-    renderTemplate,
-    updateEnumForField,
+    isInternational,
   } = useInternational({
     fpi,
   });
-  const [defaultFormSchema, setDefaultFormSchema] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(currentCountry);
   const [countrySearchText, setCountrySearchText] = useState("");
 
@@ -82,33 +82,13 @@ const useCartDeliveryLocation = ({ fpi }) => {
     });
   }, [selectedCountry]);
 
-  useEffect(() => {
-    const formSchema = renderTemplate(
-      countryDetails?.fields?.address_template?.checkout_form,
-      countryDetails?.fields?.address
-    );
-    formSchema.forEach((group) => {
-      group.fields.forEach((field) => {
-        if (field.key === "phone") {
-          // Add the country_code key to the field object
-          field.countryCode = selectedCountry?.phone_code.replace("+", "");
-        }
-      });
-    });
-    getOptionsDetails(formSchema);
-  }, [countryDetails]);
-
-  const getLocalityValues = async (slug) => {
-    const payload = {
-      pageNo: 1,
-      pageSize: 1000,
-      country: selectedCountry?.iso2,
-      locality: slug,
-      city: "",
-    };
-    const localityDetails = await fetchLocalities(payload);
-    return localityDetails || [];
-  };
+  const { formSchema, defaultAddressItem } = useAddressFormSchema({
+    fpi,
+    countryCode: selectedCountry?.phone_code,
+    countryIso: selectedCountry?.iso2,
+    addressTemplate: countryDetails?.fields?.address_template?.checkout_form,
+    addressFields: countryDetails?.fields?.address,
+  });
 
   function convertDropDownField(inputField) {
     return {
@@ -117,34 +97,11 @@ const useCartDeliveryLocation = ({ fpi }) => {
     };
   }
 
-  const getOptionsDetails = async (formSchema) => {
-    if (!countryDetails?.fields?.serviceability_fields?.length) {
-      setDefaultFormSchema([...formSchema]);
-      return;
-    }
-    for (const item of countryDetails?.fields?.serviceability_fields) {
-      const serviceabilityDetails = countryDetails?.fields?.address.find(
-        (entity) => entity.slug === item
-      );
-      let localityDetails = [];
-      if (serviceabilityDetails.input === "list") {
-        // eslint-disable-next-line no-await-in-loop
-        localityDetails = await getLocalityValues(item, formSchema);
-      }
-      const dropDownFieldArray = [];
-      for (const locality of localityDetails) {
-        dropDownFieldArray.push(convertDropDownField(locality));
-      }
-      const formData = updateEnumForField(formSchema, item, dropDownFieldArray);
-      setDefaultFormSchema([...formData]);
-    }
-  };
   const setI18nDetails = (e) => {
     const selectedCountry = countries.find(
       (country) => country.display_name === e
     );
     setSelectedCountry(selectedCountry);
-    fetchCountrieDetails({ countryIsoCode: selectedCountry?.iso2 });
   };
 
   const handleCountrySearch = (event) => {
@@ -370,7 +327,10 @@ const useCartDeliveryLocation = ({ fpi }) => {
           gotoCheckout(res?.data?.addAddress?.id);
         });
       } else {
-        showSnackbar("Failed to add an address", "error");
+        showSnackbar(
+          res?.errors?.[0]?.message ?? "Failed to add an address",
+          "error"
+        );
       }
     });
   }
@@ -401,8 +361,9 @@ const useCartDeliveryLocation = ({ fpi }) => {
     isAddAddressModalOpen,
     selectAddress,
     addrError,
-    isInternationalShippingEnabled,
-    defaultFormSchema,
+    isInternationalShippingEnabled: isInternational,
+    addressFormSchema: formSchema,
+    addressItem: defaultAddressItem,
     setI18nDetails,
     handleCountrySearch,
     getFilteredCountries,

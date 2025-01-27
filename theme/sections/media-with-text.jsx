@@ -19,6 +19,7 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     button_text,
     align_text_desktop,
     text_alignment,
+    text_alignment_mobile,
   } = props;
 
   // const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
@@ -165,53 +166,71 @@ export function Component({ props, globalConfig, blocks, fpi }) {
     }
   }, []);
 
-  const mapAlignment = {
-    top_left: {
-      justifyContent: "unset",
-      alignItems: "flex-start",
-      textAlign: "left",
-    },
-    top_center: {
-      justifyContent: "unset",
-      alignItems: "center",
-      textAlign: "center",
-    },
-    top_right: {
-      justifyContent: "unset",
-      alignItems: "flex-end",
-      textAlign: "right",
-    },
-    center_center: {
-      justifyContent: "center",
-      alignItems: "center",
-      textAlign: "center",
-    },
-    center_left: {
-      justifyContent: "center",
-      alignItems: "flex-start",
-      textAlign: "left",
-    },
-    center_right: {
-      justifyContent: "center",
-      alignItems: "flex-end",
-      textAlign: "right",
-    },
-    bottom_left: {
-      justifyContent: "flex-end",
-      alignItems: "flex-start",
-      textAlign: "left",
-    },
-    bottom_right: {
-      justifyContent: "flex-end",
-      alignItems: "flex-end",
-      textAlign: "right",
-    },
-    bottom_center: {
-      justifyContent: "flex-end",
-      alignItems: "center",
-      textAlign: "center",
-    },
-  };
+  const mapAlignment = !isMobile
+    ? {
+        top_left: {
+          justifyContent: "unset",
+          alignItems: "flex-start",
+          textAlign: "left",
+        },
+        top_center: {
+          justifyContent: "unset",
+          alignItems: "center",
+          textAlign: "center",
+        },
+        top_right: {
+          justifyContent: "unset",
+          alignItems: "flex-end",
+          textAlign: "right",
+        },
+        center_center: {
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+        },
+        center_left: {
+          justifyContent: "center",
+          alignItems: "flex-start",
+          textAlign: "left",
+        },
+        center_right: {
+          justifyContent: "center",
+          alignItems: "flex-end",
+          textAlign: "right",
+        },
+        bottom_left: {
+          justifyContent: "flex-end",
+          alignItems: "flex-start",
+          textAlign: "left",
+        },
+        bottom_right: {
+          justifyContent: "flex-end",
+          alignItems: "flex-end",
+          textAlign: "right",
+        },
+        bottom_center: {
+          justifyContent: "flex-end",
+          alignItems: "center",
+          textAlign: "center",
+        },
+      }
+    : {
+        center: {
+          justifyContent: "center",
+          alignItems: "center",
+          textAlign: "center",
+        },
+        left: {
+          justifyContent: "center",
+          alignItems: "flex-start",
+          textAlign: "left",
+        },
+        right: {
+          justifyContent: "center",
+          alignItems: "flex-end",
+          textAlign: "right",
+        },
+      };
 
   const dynamicStyles = {
     paddingBottom: `${globalConfig?.section_margin_bottom}px`,
@@ -254,7 +273,11 @@ export function Component({ props, globalConfig, blocks, fpi }) {
 
       <div
         className={styles.media_text__info}
-        style={mapAlignment[text_alignment?.value]}
+        style={
+          !isMobile
+            ? mapAlignment[text_alignment?.value]
+            : mapAlignment[text_alignment_mobile?.value]
+        }
       >
         {title?.value && (
           <h2 className={`${styles.media_text__heading} fontHeader`}>
@@ -341,8 +364,29 @@ export const settings = {
         },
       ],
       default: "center_left",
-      label: "Text Alignment",
-      info: "Alignment of text content",
+      label: "Text Alignment (Desktop)",
+      info: "Set text alignment for desktop",
+    },
+    {
+      id: "text_alignment_mobile",
+      type: "select",
+      options: [
+        {
+          value: "center",
+          text: "Center",
+        },
+        {
+          value: "left",
+          text: "Left",
+        },
+        {
+          value: "right",
+          text: "Right",
+        },
+      ],
+      default: "left",
+      label: "Text Alignment (Mobile)",
+      info: "Set text alignment for mobile devices",
     },
 
     {

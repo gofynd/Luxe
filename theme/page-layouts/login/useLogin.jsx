@@ -5,22 +5,20 @@ import { useAccounts } from "../../helper/hooks";
 import useLoginOtp from "./useLoginOtp";
 import useLoginPassword from "./useLoginPassword";
 import { isRunningOnClient } from "../../helper/utils";
+import { useThemeConfig } from "../../helper/hooks";
 
 const useLogin = ({ fpi }) => {
   const location = useLocation();
-
-  const THEME = useGlobalStore(fpi.getters.THEME);
-  const mode = THEME?.config?.list.find(
-    (f) => f.name === THEME?.config?.current
-  );
-  const pageConfig =
-    mode?.page?.find((f) => f.page === "login")?.settings?.props || {};
+  const { pageConfig } = useThemeConfig({ fpi, page: "login" });
 
   const [isPasswordToggle, setIsPasswordToggle] = useState(false);
   const platformData = useGlobalStore(fpi.getters.PLATFORM_DATA);
   const appFeatures = useGlobalStore(fpi.getters.APP_FEATURES);
 
-  const { handleLoginWithOtp, ...restOtp } = useLoginOtp({ fpi });
+  const { handleLoginWithOtp, ...restOtp } = useLoginOtp({
+    fpi,
+    isLoginToggle: isPasswordToggle,
+  });
   const { handleLoginWthPassword, ...restPassword } = useLoginPassword({ fpi });
 
   const { openRegister } = useAccounts({ fpi });

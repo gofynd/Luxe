@@ -58,9 +58,6 @@ const useCart = (fpi) => {
   }, [cart_items]);
 
   useEffect(() => {
-    if (globalConfig?.disable_cart) {
-      navigate("/");
-    }
     setIsLoading(true);
     fetchCartDetails(fpi, { buyNow }).then(() => setIsLoading(false));
   }, [fpi]);
@@ -68,7 +65,7 @@ const useCart = (fpi) => {
   const isAnonymous = appFeatures?.landing_page?.continue_as_guest;
   const isGstInput = appFeatures?.cart?.gst_input;
   // disabling isPlacingForCustomer feature now as flow is not decided yet, please remove && false once need to be enabled.
-  const isPlacingForCustomer = appFeatures?.cart?.placing_for_customer && false;
+  const isPlacingForCustomer = appFeatures?.cart?.placing_for_customer;
 
   const cartItemsByItemId = useMemo(() => {
     if (items?.length > 0) {

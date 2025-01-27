@@ -40,6 +40,8 @@ function Header({ fpi }) {
 
   const { openLogin } = useAccounts({ fpi });
   const [searchParams] = useSearchParams();
+  const location = useLocation();
+
   const buyNow = searchParams?.get("buy_now") || false;
 
   const checkHeaderHeight = throttle(() => {
@@ -49,14 +51,17 @@ function Header({ fpi }) {
   }, 1400);
 
   useEffect(() => {
-    if (isEmptyOrNull(CART_ITEMS?.cart_items)) {
+    if (
+      isEmptyOrNull(CART_ITEMS?.cart_items) &&
+      location.pathname !== "/cart/bag/"
+    ) {
       const payload = {
         includeAllItems: true,
         includeCodCharges: true,
         includeBreakup: true,
         buyNow: buyNow === "true",
       };
-      return fpi?.executeGQL(CART_COUNT, payload);
+      fpi.executeGQL(CART_COUNT, payload);
     }
     if (isRunningOnClient()) {
       setHeaderHeight(headerRef.current.getBoundingClientRect().height);
@@ -130,7 +135,6 @@ function Header({ fpi }) {
   };
 
   // to scroll top whenever path changes
-  const location = useLocation();
   useEffect(() => {
     if (isRunningOnClient()) {
       window?.scrollTo?.(0, 0);

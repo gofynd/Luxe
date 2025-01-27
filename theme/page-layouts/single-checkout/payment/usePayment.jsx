@@ -480,7 +480,7 @@ const usePayment = (fpi) => {
     const totalObj = bagData?.breakup_values?.display?.find(
       (item) => item.key === "total"
     );
-    return numberWithCommas(totalObj?.value);
+    return totalObj?.value;
   };
 
   const PaymentOptionsList = () => {

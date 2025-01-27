@@ -12,80 +12,102 @@ import { HTMLContent } from "../core/html-content/html-content";
 import FyDropdownLib from "../core/fy-dropdown/fy-dropdown-lib";
 import useInternational from "./useInternational";
 import { LOCALITY } from "../../queries/logisticsQuery";
+import { useSyncedState } from "../../helper/hooks";
 
 function I18Dropdown({ fpi }) {
   const {
     countries,
     currencies,
-    defaultCurrencies,
-    sellerDetails,
+    defaultCurrency,
     countryDetails,
-
-    selectedCountry,
-    setSelectedCountry,
-
-    selectedCurrency,
-    setSelectedCurrency,
-
     currentCountry,
     currentCurrency,
+    fetchCountrieDetails,
     fetchLocalities,
-    isInternationalShippingEnabled,
+    isInternational,
   } = useInternational({
     fpi,
   });
 
-  const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
-  const showI18DropdownFlag = customValues?.isI18ModalOpen;
-  const [showInternationalDropdown, setShowInternationalDropdown] = useState(
-    showI18DropdownFlag || false
-  );
+  const location = useLocation();
+  const [countryInfo, setCountryInfo] = useSyncedState(countryDetails);
+  const { isI18ModalOpen = false } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
   const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
   const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
 
   const [formSchema, setFormSchema] = useState([]);
-  const location = useLocation();
-
-  const { control, handleSubmit, setValue, getValues } = useForm({
+  const { control, handleSubmit, setValue, reset, watch, getValues } = useForm({
     mode: "onChange",
     reValidateMode: "onChange",
     defaultValues: {
-      country: selectedCountry,
-      currency: selectedCurrency,
+      country: currentCountry,
+      currency: currentCurrency,
     },
   });
 
-  useEffect(() => {
-    setShowInternationalDropdown(showI18DropdownFlag);
-  }, [showI18DropdownFlag]);
+  const selectedCountry = watch("country");
+
+  const showI18Dropdown = useMemo(() => {
+    const whiteListedRoutes = [
+      "/product",
+      "/products",
+      "/collections",
+      "/collection",
+      "/categories",
+      "/brands",
+      "/profile/address",
+    ];
+
+    const currentPath = location.pathname;
+
+    if (currentPath === "/") {
+      return true;
+    }
+
+    return whiteListedRoutes.some((route) => currentPath.indexOf(route) === 0);
+  }, [location.pathname]);
+
+  const currentSelectedCurrency = useMemo(() => {
+    if (!currentCountry?.display_name || !currentCurrency?.code) return "";
+    return;
+  }, [currentCountry, currentCurrency]);
+
+  const addressFieldsMap = useMemo(() => {
+    if (!countryInfo?.fields?.address) return {};
+    const prevFieldMap = countryInfo.fields.address.reduce((acc, field) => {
+      if (field.next) {
+        acc[field.next] = field.slug;
+      }
+      return acc;
+    }, {});
+    return countryInfo.fields.address.reduce((acc, field) => {
+      acc[field.slug] = prevFieldMap[field.slug]
+        ? { ...field, prev: prevFieldMap[field.slug] }
+        : field;
+      return acc;
+    }, {});
+  }, [countryInfo?.fields?.address]);
 
   useEffect(() => {
-    if (!selectedCountry || Object.keys(selectedCountry).length === 0) {
-      setSelectedCountry(countries[0]);
+    if (currentCountry && Object.keys(currentCountry).length > 0) {
+      setValue("country", currentCountry);
     }
-    if (selectedCountry && Object.keys(selectedCountry).length > 0) {
-      const sellerCurrency = currencies?.find(
-        (data) => data?.code === selectedCountry?.currency?.code
-      );
-      setSelectedCurrency(sellerCurrency);
-      setValue("country", selectedCountry);
-    }
-  }, [selectedCountry, setValue]);
+  }, [currentCountry, setValue]);
 
   useEffect(() => {
-    if (selectedCurrency && Object.keys(selectedCurrency).length > 0) {
-      setValue("currency", selectedCurrency);
+    if (currentCurrency && Object.keys(currentCurrency).length > 0) {
+      setValue("currency", currentCurrency);
     }
-  }, [selectedCurrency, setValue]);
+  }, [currentCurrency, setValue]);
 
   useEffect(() => {
     if (formSchema?.some((item) => item.slug === "pincode")) {
       let pincode = "";
       if (pincodeDetails?.type === "pincode") {
-        if (pincodeDetails?.country === selectedCountry?.iso2) {
+        if (pincodeDetails?.country === currentCountry?.iso2) {
           pincode = pincodeDetails?.localityValue;
         }
-      } else if (locationDetails?.country_iso_code === selectedCountry?.iso2) {
+      } else if (locationDetails?.country_iso_code === currentCountry?.iso2) {
         pincode = locationDetails?.pincode;
       }
       setValue("pincode", pincode);
@@ -119,14 +141,14 @@ function I18Dropdown({ fpi }) {
           "city",
           // eslint-disable-next-line no-nested-ternary
           pincodeDetails?.type === "sector"
-            ? pincodeDetails?.country === selectedCountry?.iso2
+            ? pincodeDetails?.country === currentCountry?.iso2
               ? pincodeDetails?.localities?.find((item) => item.type === "city")
               : ""
             : {
                 display_name:
                   !pincodeDetails ||
                   (Object.keys(pincodeDetails).length === 0 &&
-                    locationDetails?.country_iso_code === selectedCountry?.iso2)
+                    locationDetails?.country_iso_code === currentCountry?.iso2)
                     ? locationDetails?.city
                     : "",
               }
@@ -151,12 +173,10 @@ function I18Dropdown({ fpi }) {
   };
 
   useEffect(() => {
-    if (countryDetails) {
-      const dynamicFields = countryDetails?.fields?.serviceability_fields?.map(
+    if (countryInfo) {
+      const dynamicFields = countryInfo?.fields?.serviceability_fields?.map(
         (localityField) => {
-          const addressField = countryDetails?.fields?.address?.find(
-            (addressField) => addressField.slug === localityField
-          );
+          const addressField = addressFieldsMap[localityField];
 
           const fieldValidation = createValidation(
             addressField.validation,
@@ -173,6 +193,11 @@ function I18Dropdown({ fpi }) {
               options: [],
               value: {},
               validation: fieldValidation,
+              disabled:
+                locationDetails?.country_iso_code === countryInfo?.iso2 &&
+                locationDetails?.[addressField.slug]
+                  ? !locationDetails[addressField.slug]
+                  : !!addressField.prev,
             };
           }
 
@@ -185,7 +210,7 @@ function I18Dropdown({ fpi }) {
       const populateFormFields = async () => {
         try {
           const formFields = await Promise.all(
-            countryDetails?.fields?.serviceability_fields?.map(
+            countryInfo?.fields?.serviceability_fields?.map(
               async (localityField, index) => {
                 const localityDetails = { ...dynamicFields[index] };
 
@@ -217,59 +242,7 @@ function I18Dropdown({ fpi }) {
 
       populateFormFields();
     }
-  }, [countryDetails]);
-
-  const showI18Dropdown = () => {
-    const whiteListedRoutes = [
-      "/product",
-      "/products",
-      "/collections",
-      "/collection",
-      "/categories",
-      "/brands",
-      "/profile/address",
-    ];
-
-    const currentPath = location.pathname;
-
-    if (currentPath === "/") {
-      return true;
-    }
-
-    return whiteListedRoutes.some((route) => currentPath.indexOf(route) === 0);
-  };
-
-  const getCurrencyByCode = (code) => {
-    return currencies?.find((currency) => currency?.code === code);
-  };
-
-  const getDefaultCurrency = () => {
-    return getCurrencyByCode(defaultCurrencies?.default_currency?.code);
-  };
-
-  const getCurrentCountry = () => {
-    if (sellerDetails?.country?.iso_code) {
-      return getCountryByIso(sellerDetails?.country?.iso_code);
-    }
-    return getCountryByIso(countries[0]?.iso2);
-  };
-
-  const currentSelectedCurrency = () => {
-    if (getDefaultCurrency()?.code) {
-      const selectedCountry =
-        currentCountry?.display_name ?? getCurrentCountry()?.display_name;
-      const selectedCurrency =
-        currentCurrency?.code ?? getDefaultCurrency()?.code;
-      return `<span>
-        ${selectedCountry} - ${selectedCurrency}
-        </span>`;
-    }
-  };
-
-  const getCountryByIso = (code) => {
-    if (!code) return;
-    return countries?.find((country) => country?.iso2 === code);
-  };
+  }, [countryInfo]);
 
   const checkLocality = (localityValue, localityType, selectedValues) => {
     fpi
@@ -290,9 +263,10 @@ function I18Dropdown({ fpi }) {
         }
       });
   };
+
   const handleSetI18n = () => {
     const selectedValues = getValues();
-    const cookiesData = JSON.stringify({
+    const cookiesData = {
       currency: { code: selectedValues?.currency?.code },
       country: {
         iso_code: selectedValues?.country?.iso2,
@@ -300,7 +274,7 @@ function I18Dropdown({ fpi }) {
       },
       display_name: selectedValues?.country?.display_name,
       countryCode: selectedValues?.country?.iso2,
-    });
+    };
     fpi.setI18nDetails(cookiesData);
     if (selectedValues?.pincode) {
       checkLocality(selectedValues?.pincode, "pincode", selectedValues);
@@ -313,7 +287,7 @@ function I18Dropdown({ fpi }) {
 
   const onDynamicFieldChange = async (selectedField, selectedValue) => {
     const serviceabilitySlugs =
-      countryDetails?.fields?.serviceability_fields || [];
+      countryInfo?.fields?.serviceability_fields || [];
     const currentIndex = serviceabilitySlugs?.findIndex(
       (slug) => slug === selectedField.slug
     );
@@ -348,6 +322,7 @@ function I18Dropdown({ fpi }) {
 
       updatedFormSchema[nextIndex] = {
         ...updatedFormSchema[nextIndex],
+        disabled: false,
         // Optimize this
         options: LocalityValues,
         // .map((locality) => ({
@@ -362,8 +337,14 @@ function I18Dropdown({ fpi }) {
     setFormSchema(updatedFormSchema);
   };
 
-  const onModalClose = () => {
+  const openI18nModal = () => {
+    fpi.custom.setValue("isI18ModalOpen", true);
+  };
+
+  const closeI18nModal = () => {
     fpi.custom.setValue("isI18ModalOpen", false);
+    setCountryInfo(countryDetails);
+    reset();
   };
 
   // const isFormValid = useMemo(() => {
@@ -420,27 +401,41 @@ function I18Dropdown({ fpi }) {
     return result;
   }
 
+  const handleCountryChange = async (country) => {
+    const countryCurrency = currencies?.find(
+      (data) => data?.code === country?.currency?.code
+    );
+    try {
+      const response = await fetchCountrieDetails(
+        { countryIsoCode: country?.iso2 },
+        { skipStoreUpdate: true }
+      );
+      if (response?.data?.country) {
+        setCountryInfo(response.data.country);
+        setValue("currency", countryCurrency ?? defaultCurrency);
+      }
+    } catch (error) {}
+  };
+
   return (
     <>
-      {isInternationalShippingEnabled && (
+      {isInternational && (
         <div>
-          {showI18Dropdown() && (
+          {showI18Dropdown && (
             <div className={`${styles.internationalization}`}>
               <button
                 className={`${styles.internationalization__selected}`}
-                onClick={() =>
-                  setShowInternationalDropdown(
-                    fpi.custom.setValue("isI18ModalOpen", true)
-                  )
-                }
+                onClick={openI18nModal}
               >
                 <SvgWrapper
                   svgSrc="international"
                   className={styles.dropdownIcon}
                 />
-                <div>
-                  <HTMLContent key="html" content={currentSelectedCurrency()} />
-                </div>
+                {currentCountry?.display_name && currentCurrency?.code && (
+                  <div>
+                    {`${currentCountry.display_name} - ${currentCurrency.code}`}
+                  </div>
+                )}
                 {/* 
                   <SvgWrapper
                     svgSrc="arrow-down"
@@ -448,107 +443,103 @@ function I18Dropdown({ fpi }) {
                   /> 
                 */}
               </button>
-              {showInternationalDropdown && (
-                <Modal
-                  hideHeader={true}
-                  isOpen={showInternationalDropdown}
-                  closeDialog={onModalClose}
-                  bodyClassName={styles.i18ModalBody}
-                  containerClassName={styles.i18ModalContainer}
-                  ignoreClickOutsideForClass="fydrop"
-                >
-                  <h4 className={styles.title}>
-                    Choose your location{" "}
-                    <span onClick={onModalClose}>
-                      <SvgWrapper svgSrc="cross-black" />
-                    </span>
-                  </h4>
-                  <p className={styles.description}>
-                    Choose your address location to see product availability and
-                    delivery options
-                  </p>
+              <Modal
+                hideHeader={true}
+                isOpen={isI18ModalOpen}
+                closeDialog={closeI18nModal}
+                bodyClassName={styles.i18ModalBody}
+                containerClassName={styles.i18ModalContainer}
+                ignoreClickOutsideForClass="fydrop"
+              >
+                <h4 className={styles.title}>
+                  Choose your location{" "}
+                  <span onClick={closeI18nModal}>
+                    <SvgWrapper svgSrc="cross-black" />
+                  </span>
+                </h4>
+                <p className={styles.description}>
+                  Choose your address location to see product availability and
+                  delivery options
+                </p>
 
-                  <div className={`${styles.internationalization__dropdown}`}>
-                    <div className={`${styles.section}`}>
-                      <FormField
-                        formData={{
-                          key: "country",
-                          type: "list",
-                          label: "Select country",
-                          placeholder: "Select country",
-                          options: countries,
-                          onChange: (value) => {
-                            setSelectedCountry(value);
-                          },
-                          validation: {
-                            validate: (value) =>
-                              Object.keys(value || {}).length > 0 ||
-                              `Invalid country`,
-                          },
-                          getOptionLabel: (option) => option.display_name || "",
-                        }}
-                        control={control}
-                      />
-                    </div>
-
-                    {formSchema.map((field) => (
-                      <Fragment key={field.slug}>
-                        {field?.input ? (
-                          <div className={`${styles.section}`}>
-                            <FormField
-                              formData={{
-                                key: field.slug,
-                                type: field?.input,
-                                label: field?.display_name,
-                                placeholder: field?.display_name,
-                                options: field.options,
-                                onChange: (value) => {
-                                  onDynamicFieldChange(field, value);
-                                },
-                                validation: field.validation,
-                                getOptionLabel: (option) =>
-                                  option.display_name || "",
-                              }}
-                              control={control}
-                            />
-                          </div>
-                        ) : null}
-                      </Fragment>
-                    ))}
-
-                    <div className={`${styles.section}`}>
-                      <FormField
-                        formData={{
-                          key: "currency",
-                          type: "list",
-                          label: "Select currency",
-                          placeholder: "Select currency",
-                          options: currencies,
-                          onChange: (value) => {
-                            setSelectedCurrency(value);
-                          },
-                          validation: {
-                            validate: (value) =>
-                              Object.keys(value || {}).length > 0 ||
-                              `Invalid currency`,
-                          },
-                          getOptionLabel: (option) =>
-                            option?.code
-                              ? `${option?.code} - ${option?.name}`
-                              : "",
-                        }}
-                        control={control}
-                      />
-                    </div>
-                    <button
-                      className={`${styles.save_btn}`}
-                      onClick={handleSubmit(handleSetI18n)}
-                    >
-                      Apply
-                    </button>
+                <div className={`${styles.internationalization__dropdown}`}>
+                  <div className={`${styles.section}`}>
+                    <FormField
+                      formData={{
+                        key: "country",
+                        type: "list",
+                        label: "Select country",
+                        placeholder: "Select country",
+                        options: countries,
+                        dataKey: "iso2",
+                        onChange: handleCountryChange,
+                        validation: {
+                          validate: (value) =>
+                            Object.keys(value || {}).length > 0 ||
+                            `Invalid country`,
+                        },
+                        getOptionLabel: (option) => option.display_name || "",
+                      }}
+                      control={control}
+                    />
                   </div>
-                </Modal>
-              )}
+
+                  {formSchema.map((field) => (
+                    <Fragment key={field.slug}>
+                      {field?.input ? (
+                        <div className={`${styles.section}`}>
+                          <FormField
+                            formData={{
+                              key: field.slug,
+                              type: field?.input,
+                              label: field?.display_name,
+                              placeholder: field?.display_name,
+                              options: field.options,
+                              disabled: field.disabled,
+                              onChange: (value) => {
+                                onDynamicFieldChange(field, value);
+                              },
+                              validation: field.validation,
+                              getOptionLabel: (option) =>
+                                option.display_name || "",
+                            }}
+                            control={control}
+                          />
+                        </div>
+                      ) : null}
+                    </Fragment>
+                  ))}
+
+                  <div className={`${styles.section}`}>
+                    <FormField
+                      formData={{
+                        key: "currency",
+                        type: "list",
+                        label: "Select currency",
+                        placeholder: "Select currency",
+                        options: currencies,
+                        dataKey: "code",
+                        validation: {
+                          validate: (value) =>
+                            Object.keys(value || {}).length > 0 ||
+                            `Invalid currency`,
+                        },
+                        getOptionLabel: (option) =>
+                          option?.code
+                            ? `${option?.code} - ${option?.name}`
+                            : "",
+                      }}
+                      control={control}
+                    />
+                  </div>
+                  <button
+                    className={`${styles.save_btn}`}
+                    onClick={handleSubmit(handleSetI18n)}
+                  >
+                    Apply
+                  </button>
+                </div>
+              </Modal>
             </div>
           )}
         </div>
@@ -567,6 +558,8 @@ const FormField = ({ formData, control }) => {
     onChange = (value) => {},
     validation = {},
     getOptionLabel,
+    disabled = false,
+    dataKey,
   } = formData;
 
   const InputComponent = ({ field, error }) => {
@@ -578,12 +571,14 @@ const FormField = ({ formData, control }) => {
           value={field.value}
           options={options}
           labelClassName={styles.autoCompleteLabel}
+          containerClassName={styles.autoCompleteContainer}
+          disabled={disabled}
           onChange={(value) => {
             field.onChange(value);
             onChange(value);
           }}
           error={error}
-          dataKey="id"
+          dataKey={dataKey}
           getOptionLabel={getOptionLabel}
         />
       );
@@ -594,8 +589,10 @@ const FormField = ({ formData, control }) => {
         name={field?.name}
         label={label}
         labelVariant="floating"
+        labelClassName={styles.inputLabel}
         inputVariant="outlined"
         value={field.value}
+        disabled={disabled}
         onChange={(e) => {
           field.onChange(e.target.value);
         }}

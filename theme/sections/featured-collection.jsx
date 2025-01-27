@@ -15,12 +15,17 @@ import "@gofynd/theme-template/components/product-card/product-card.css";
 import bannerPlaceholder from "../assets/images/collection-banner-placeholder.png";
 import imagePlaceholder from "../assets/images/placeholder3x4.png";
 import useAddToCartModal from "../page-layouts/plp/useAddToCartModal";
-import Modal from "@gofynd/theme-template/components/core/modal/modal";
-import AddToCart from "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart";
-import "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart.css";
-import SizeGuide from "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide";
-import "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide.css";
-import { useViewport, useAccounts, useWishlist } from "../helper/hooks";
+import Modal from "fdk-react-templates/components/core/modal/modal";
+import AddToCart from "fdk-react-templates/page-layouts/plp/Components/add-to-cart/add-to-cart";
+import "fdk-react-templates/page-layouts/plp/Components/add-to-cart/add-to-cart.css";
+import SizeGuide from "fdk-react-templates/page-layouts/plp/Components/size-guide/size-guide";
+import "fdk-react-templates/page-layouts/plp/Components/size-guide/size-guide.css";
+import {
+  useViewport,
+  useAccounts,
+  useWishlist,
+  useThemeFeature,
+} from "../helper/hooks";
 
 export function Component({ props, globalConfig }) {
   const fpi = useFPI();
@@ -37,6 +42,7 @@ export function Component({ props, globalConfig }) {
     mode?.page?.find((f) => f.page === "product-listing")?.settings?.props ||
     {};
 
+  const { isInternational } = useThemeFeature({ fpi });
   const addToCartModalProps = useAddToCartModal({ fpi, pageConfig });
   const { isLoggedIn, openLogin } = useAccounts({ fpi });
   const { toggleWishlist, followedIdList } = useWishlist({ fpi });
@@ -68,6 +74,9 @@ export function Component({ props, globalConfig }) {
     text_alignment,
     title_size,
   } = props;
+
+  const showAddToCart =
+    !isInternational && show_add_to_cart?.value && !globalConfig?.disable_cart;
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
   const getGallery =
     customValues?.[`featuredCollectionData-${collection?.value}`]?.data
@@ -480,10 +489,7 @@ export function Component({ props, globalConfig }) {
                                       "banner_horizontal_scroll"
                                 }
                                 imagePlaceholder={imagePlaceholder}
-                                showAddToCart={
-                                  show_add_to_cart?.value &&
-                                  !globalConfig?.disable_cart
-                                }
+                                showAddToCart={showAddToCart}
                                 handleAddToCart={handleAddToCart}
                               />
                             </FDKLink>
@@ -541,10 +547,7 @@ export function Component({ props, globalConfig }) {
                                   "banner_horizontal_scroll"
                             }
                             imagePlaceholder={imagePlaceholder}
-                            showAddToCart={
-                              show_add_to_cart?.value &&
-                              !globalConfig?.disable_cart
-                            }
+                            showAddToCart={showAddToCart}
                             handleAddToCart={handleAddToCart}
                           />
                         </FDKLink>
@@ -602,10 +605,7 @@ export function Component({ props, globalConfig }) {
                                   "banner_horizontal_scroll"
                             }
                             imagePlaceholder={imagePlaceholder}
-                            showAddToCart={
-                              show_add_to_cart?.value &&
-                              !globalConfig?.disable_cart
-                            }
+                            showAddToCart={showAddToCart}
                             handleAddToCart={handleAddToCart}
                           />
                         </FDKLink>
@@ -713,9 +713,7 @@ export function Component({ props, globalConfig }) {
                         : desktop_layout?.value !== "banner_horizontal_scroll"
                     }
                     imagePlaceholder={imagePlaceholder}
-                    showAddToCart={
-                      show_add_to_cart?.value && !globalConfig?.disable_cart
-                    }
+                    showAddToCart={showAddToCart}
                     handleAddToCart={handleAddToCart}
                   />
                 </FDKLink>
@@ -742,7 +740,7 @@ export function Component({ props, globalConfig }) {
             </div>
           )}
       </div>
-      {show_add_to_cart?.value && !globalConfig?.disable_cart && (
+      {showAddToCart && (
         <>
           <Modal
             isOpen={isAddToCartOpen}

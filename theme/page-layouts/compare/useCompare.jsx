@@ -65,7 +65,10 @@ const useCompare = (fpi) => {
           setProducts(items ?? []);
           setAttributes(res?.data?.productComparison?.attributes_metadata);
         } else {
-          showSnackbar("Something went wrong!", "error");
+          showSnackbar(
+            res?.errors?.[0]?.message ?? "Something went wrong!",
+            "error"
+          );
         }
         setIsLoading(false);
       });

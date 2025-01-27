@@ -207,7 +207,26 @@ export function Component({ blocks }) {
                           currencySymbol={currencySymbol}
                         />
                       );
-
+                    case "order_for_customer":
+                      return (
+                        <>
+                          {isPlacingForCustomer && (
+                            <div
+                              className={styles.checkoutContainer}
+                              onClick={updateCartCheckoutMode}
+                            >
+                              <SvgWrapper
+                                svgSrc={
+                                  checkoutMode === "other"
+                                    ? "radio-selected"
+                                    : "radio"
+                                }
+                              />
+                              <span> Placing order on behalf of Customer</span>
+                            </div>
+                          )}
+                        </>
+                      );
                     case "checkout_buttons":
                       return (
                         <>
@@ -259,21 +278,6 @@ export function Component({ blocks }) {
                       return <div>Invalid block</div>;
                   }
                 })}
-
-              {/* This feature is currently disabled from "useCart" */}
-              {/*
-              {isPlacingForCustomer && isLoggedIn && (
-                <div className={styles.checkoutContainer}>
-                  <SvgWrapper
-                    onClick={updateCartCheckoutMode}
-                    svgSrc={
-                      checkoutMode === "other" ? "radio-selected" : "radio"
-                    }
-                  />
-                  <span> Placing order on behalf of Customer</span>
-                </div>
-              )}
-               */}
             </div>
           )}
         </div>
@@ -326,6 +330,11 @@ export const settings = {
       props: [],
     },
     {
+      type: "order_for_customer",
+      name: "Behalf of customer",
+      props: [],
+    },
+    {
       type: "checkout_buttons",
       name: "Log-In/Checkout Buttons",
       props: [],
@@ -346,6 +355,9 @@ export const settings = {
       },
       {
         name: "GST Card",
+      },
+      {
+        name: "Behalf of customer",
       },
       {
         name: "Price Breakup",

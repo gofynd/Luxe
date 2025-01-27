@@ -26,10 +26,10 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
   } = props;
 
   const placeholderBrands = [
-    "Maison Margiela",
-    "Adidas",
-    "Peter England",
-    "DIOR",
+    "Brand1",
+    "Brand2",
+    "Brand3",
+    "Brand4",
   ];
 
   const [isLoading, setIsLoading] = useState(false);

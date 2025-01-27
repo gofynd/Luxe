@@ -2,7 +2,12 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import Slider from "react-slick";
 import { FDKLink } from "fdk-core/components";
 import { useGlobalStore, useFPI } from "fdk-core/utils";
-import { useAccounts, useViewport, useWishlist } from "../helper/hooks";
+import {
+  useAccounts,
+  useViewport,
+  useWishlist,
+  useThemeFeature,
+} from "../helper/hooks";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { FEATURED_COLLECTION } from "../queries/collectionsQuery";
 import styles from "../styles/sections/multi-collection-product-list.less";
@@ -21,6 +26,7 @@ import useAddToCartModal from "../page-layouts/plp/useAddToCartModal";
 
 export function Component({ props = {}, blocks = [], globalConfig = {} }) {
   const fpi = useFPI();
+  const { isInternational } = useThemeFeature({ fpi });
   const {
     heading,
     position,
@@ -29,6 +35,8 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
     show_wishlist_icon,
     show_add_to_cart,
   } = props;
+  const showAddToCart =
+    !isInternational && show_add_to_cart?.value && !globalConfig?.disable_cart;
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE) ?? {};
   const [activeLink, setActiveLink] = useState(0);
   const [activeCollectionItems, setActiveCollectionItems] = useState([]);
@@ -281,9 +289,7 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
                       isImageFill={true}
                       onWishlistClick={handleWishlistToggle}
                       followedIdList={followedIdList}
-                      showAddToCart={
-                        show_add_to_cart?.value && !globalConfig?.disable_cart
-                      }
+                      showAddToCart={showAddToCart}
                       handleAddToCart={handleAddToCart}
                       isSlider
                       columnCount={{
@@ -330,9 +336,7 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
                         isImageFill={true}
                         onWishlistClick={handleWishlistToggle}
                         followedIdList={followedIdList}
-                        showAddToCart={
-                          show_add_to_cart?.value && !globalConfig?.disable_cart
-                        }
+                        showAddToCart={showAddToCart}
                         handleAddToCart={handleAddToCart}
                         isSlider
                         columnCount={{
@@ -349,7 +353,7 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
           )}
         </div>
       </div>
-      {show_add_to_cart?.value && !globalConfig?.disable_cart && (
+      {showAddToCart && (
         <>
           <Modal
             isOpen={isAddToCartOpen}

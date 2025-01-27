@@ -4,12 +4,10 @@ import { FDKLink } from "fdk-core/components";
 import styles from "./share-item.less";
 import { copyToClipboard } from "../../helper/utils";
 
-function ShareItom({ setShowSocialLinks }) {
+function ShareItom({ setShowSocialLinks, description }) {
   const [btnText, setBtnText] = useState("Copy Link");
 
-  const encodedDescription = encodeURIComponent(
-    "Check out this amazing product on fynd!"
-  );
+  const encodedDescription = encodeURIComponent(description);
   const encodedUrl = encodeURIComponent(window?.location?.href);
 
   const handleCopyToClipboard = (event) => {

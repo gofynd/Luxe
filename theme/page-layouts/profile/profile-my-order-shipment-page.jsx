@@ -17,11 +17,13 @@ function ProfileMyOrderShipmentPage({ fpi }) {
 
   return (
     <ProfileRoot fpi={fpi}>
-      <SectionRenderer
-        sections={sections}
-        fpi={fpi}
-        globalConfig={globalConfig}
-      />
+      {page?.value === "shipment-details" && (
+        <SectionRenderer
+          sections={sections}
+          fpi={fpi}
+          globalConfig={globalConfig}
+        />
+      )}
     </ProfileRoot>
   );
 }

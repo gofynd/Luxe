@@ -10,6 +10,7 @@ const EmptyState = ({
   btnTitle = "RETURN TO HOMEPAGE",
   iconSrc,
   Icon = <></>,
+  showButton = true,
 }) => {
   const [isMobile, setIsMobile] = useState(true);
   useEffect(() => {
@@ -27,9 +28,11 @@ const EmptyState = ({
           <p>{description}</p>
         </div>
       )}
-      <FDKLink to={btnLink} className={`${styles.button} btn-secondary`}>
-        {btnTitle}
-      </FDKLink>
+      {showButton && (
+        <FDKLink to={btnLink} className={`${styles.button} btn-secondary`}>
+          {btnTitle}
+        </FDKLink>
+      )}
     </div>
   );
 };

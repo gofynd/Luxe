@@ -1088,6 +1088,201 @@
           }
         ],
         "value": "home"
+      },
+      {
+        "sections": [
+          {
+            "blocks": [
+              {
+              "type": "product_name",
+              "name": "Product Name",
+              "props" : {
+                "show_brand":{
+                  "type": "checkbox",
+                  "value":true
+                }
+              }
+            },
+            {
+              "type": "product_price",
+              "name": "Product Price",
+              "props" : {
+                "mrp_label":{
+                  "type": "checkbox",
+                  "value":true
+                }
+              }
+            },
+             {
+              "type": "size_wrapper",
+              "name": "Size Container with Action Buttons",
+              "props": {
+                "hide_single_size": {
+                  "type": "checkbox",
+                  "default": false
+                },
+                "preselect_size": {
+                  "type": "checkbox",
+                  "default": true
+                },
+                "size_selection_style": {
+                  "type": "radio",
+                  "default": "dropdown",
+                  "options": [
+                    {
+                      "value": "dropdown",
+                      "text": "Dropdown style"
+                    },
+                    {
+                      "value": "block",
+                      "text": "Block style"
+                    }
+                  ]
+                }
+              }
+            }
+            ],
+            "label": "Product Description",
+            "name": "product-description",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {},
+            "props": {}
+          }
+        ],
+        "value": "product-description"
+      },
+      {
+        "sections": [
+          {
+            "blocks": [
+              {
+          "type": "coupon",
+          "name": "Coupon",
+         "props": {}
+        },
+        {
+          "type": "comment",
+          "name": "Comment",
+         "props": {}
+        },
+        {
+          "type": "gst_card",
+          "name": "GST Card",
+         "props": {}
+        },
+        {
+          "type": "price_breakup",
+          "name": "Price Breakup",
+         "props": {}
+        },
+        {
+          "type": "checkout_buttons",
+          "name": "Log-In/Checkout Buttons",
+          "props": {}
+        },
+        {
+          "type": "share_cart",
+          "name": "Share Cart",
+          "props": {}
+    }
+  ],
+            "label": "Cart Landing",
+            "name": "cart-landing",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {},
+            "props": {}
+          }
+        ],
+        "value": "cart-landing"
+      },
+      {
+        "sections" :[
+          {
+            "blocks": [
+                {
+                  "type": "order_header",
+                  "name": "Order Header",
+                  "props": {}
+                },
+                {
+                  "type": "shipment_items",
+                  "name": "Shipment Items",
+                   "props": {}
+                },
+                {
+                  "type": "shipment_tracking",
+                  "name": "Shipment Tracking",
+                  "props": {}
+                },
+                {
+                  "type": "shipment_address",
+                  "name": "Shipment Address",
+                  "props": {}
+                },
+                {
+                  "type": "payment_details_card",
+                  "name": "Payment Details Card",
+                  "props": {}
+                },
+                {
+                  "type": "shipment_breakup",
+                  "name": "Shipment Breakup",
+                  "props": {}
+                }
+            ],
+            "label": "Order Details",
+            "name": "order-details",
+            "predicate": {
+              "route": {
+                "exact_url": "",
+                "query": null,
+                "selected": "none"
+              },
+              "screen": {
+                "desktop": true,
+                "mobile": true,
+                "tablet": true
+              },
+              "user": {
+                "anonymous": true,
+                "authenticated": true
+              }
+            },
+            "preset": {},
+            "props": {}
+          }
+        ],
+        "value": "shipment-details"
       }
     ]
   }

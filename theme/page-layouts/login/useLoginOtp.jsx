@@ -1,12 +1,8 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAccounts } from "../../helper/hooks";
+import useInternational from "../../components/header/useInternational";
 
-const useLoginOtp = ({ fpi }) => {
-  const mobileInfo = useRef({
-    countryCode: "91",
-    mobile: "",
-    isValidNumber: false,
-  });
+const useLoginOtp = ({ fpi, isLoginToggle }) => {
   const [submittedMobile, setSubmittedMobile] = useState("");
   const [otpResendTime, setOtpResendTime] = useState(0);
   const [isFormSubmitSuccess, setIsFormSubmitSuccess] = useState(false);
@@ -16,15 +12,22 @@ const useLoginOtp = ({ fpi }) => {
   const resendTimerRef = useRef(null);
 
   const { sendOtp, signInWithOtp, resendOtp } = useAccounts({ fpi });
+  const { currentCountry } = useInternational({ fpi });
+
+  const clearTimer = () => {
+    if (resendTimerRef.current) {
+      clearInterval(resendTimerRef.current);
+    }
+  };
 
   const timer = (remaining) => {
     let remainingTime = remaining;
     resendTimerRef.current = setInterval(() => {
       remainingTime -= 1;
       if (remainingTime <= 0) {
-        clearInterval(resendTimerRef.current);
+        clearTimer();
       }
-      setOtpResendTime(`${remainingTime}`);
+      setOtpResendTime(remainingTime);
     }, 1000);
   };
 
@@ -57,12 +60,7 @@ const useLoginOtp = ({ fpi }) => {
       isRedirection: true,
     };
     signInWithOtp(payload)
-      .then((res) => {
-        // console.log("verifyOtp", { res });
-        // if (data?.errors) {
-        //   throw data?.errors?.[0];
-        // }
-      })
+      .then((res) => {})
       .catch((err) => {
         if (err?.details?.meta?.is_deleted) {
           // return this.$router.push({
@@ -70,12 +68,11 @@ const useLoginOtp = ({ fpi }) => {
           //     query: this.$router.currentRoute.query,
           // });
         }
-        // console.log(err);
         setOtpError({ message: err?.message || "Something went wrong" });
       });
   };
   const handleResendOtp = ({ phone }) => {
-    clearInterval(resendTimerRef.current);
+    clearTimer();
     const payload = {
       mobile: phone?.mobile,
       countryCode: phone?.countryCode,
@@ -91,8 +88,22 @@ const useLoginOtp = ({ fpi }) => {
     });
   };
 
+  useEffect(() => {
+    setSubmittedMobile("");
+    setOtpResendTime(0);
+    setIsFormSubmitSuccess(false);
+    setSendOtpResponse({});
+    setOtpError(null);
+    clearTimer();
+    resendTimerRef.current = null;
+  }, [isLoginToggle]);
+
   return {
-    mobileInfo: mobileInfo.current,
+    mobileInfo: {
+      countryCode: currentCountry?.phone_code?.replace("+", "") ?? "91",
+      mobile: "",
+      isValidNumber: false,
+    },
     submittedMobile,
     otpResendTime,
     otpError,

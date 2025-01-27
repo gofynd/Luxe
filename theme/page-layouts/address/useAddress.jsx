@@ -7,6 +7,7 @@ import {
   REMOVE_ADDRESS,
 } from "../../queries/addressQuery";
 import useInternational from "../../components/header/useInternational";
+import { useAddressFormSchema } from "../../helper/hooks";
 
 const useAddress = (fpi, pageName) => {
   const INTEGRATION_TOKENS = useGlobalStore(fpi.getters.INTEGRATION_TOKENS);
@@ -18,14 +19,10 @@ const useAddress = (fpi, pageName) => {
     fetchCountrieDetails,
     countryDetails,
     currentCountry,
-    fetchLocalities,
-    isInternationalShippingEnabled,
-    renderTemplate,
-    updateEnumForField,
+    isInternational,
   } = useInternational({
     fpi,
   });
-  const [defaultFormSchema, setDefaultFormSchema] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(currentCountry);
   const [countrySearchText, setCountrySearchText] = useState("");
 
@@ -41,33 +38,13 @@ const useAddress = (fpi, pageName) => {
     });
   }, [selectedCountry]);
 
-  useEffect(() => {
-    const formSchema = renderTemplate(
-      countryDetails?.fields?.address_template?.checkout_form,
-      countryDetails?.fields?.address
-    );
-    formSchema.forEach((group) => {
-      group.fields.forEach((field) => {
-        if (field.key === "phone") {
-          // Add the country_code key to the field object
-          field.countryCode = selectedCountry?.phone_code.replace("+", "");
-        }
-      });
-    });
-    getOptionsDetails(formSchema);
-  }, [countryDetails]);
-
-  const getLocalityValues = async (slug) => {
-    const payload = {
-      pageNo: 1,
-      pageSize: 1000,
-      country: selectedCountry?.iso2,
-      locality: slug,
-      city: "",
-    };
-    const localityDetails = await fetchLocalities(payload);
-    return localityDetails || [];
-  };
+  const { formSchema } = useAddressFormSchema({
+    fpi,
+    countryCode: selectedCountry?.phone_code,
+    countryIso: selectedCountry?.iso2,
+    addressTemplate: countryDetails?.fields?.address_template?.checkout_form,
+    addressFields: countryDetails?.fields?.address,
+  });
 
   function convertDropDownField(inputField) {
     return {
@@ -76,24 +53,6 @@ const useAddress = (fpi, pageName) => {
     };
   }
 
-  const getOptionsDetails = async (formSchema) => {
-    for (const item of countryDetails?.fields?.serviceability_fields) {
-      const serviceabilityDetails = countryDetails?.fields?.address.find(
-        (entity) => entity.slug === item
-      );
-      let localityDetails = [];
-      if (serviceabilityDetails.input === "list") {
-        // eslint-disable-next-line no-await-in-loop
-        localityDetails = await getLocalityValues(item, formSchema);
-      }
-      const dropDownFieldArray = [];
-      for (const locality of localityDetails) {
-        dropDownFieldArray.push(convertDropDownField(locality));
-      }
-      const formData = updateEnumForField(formSchema, item, dropDownFieldArray);
-      setDefaultFormSchema([...formData]);
-    }
-  };
   const setI18nDetails = (e) => {
     const selectedCountry = countries.find(
       (country) => country.display_name === e
@@ -178,8 +137,8 @@ const useAddress = (fpi, pageName) => {
     updateAddress,
     removeAddress,
     getFormattedAddress,
-    isInternationalShippingEnabled,
-    defaultFormSchema,
+    isInternationalShippingEnabled: isInternational,
+    defaultFormSchema: formSchema,
     setI18nDetails,
     handleCountrySearch,
     getFilteredCountries,

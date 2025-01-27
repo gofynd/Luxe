@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useGlobalStore } from "fdk-core/utils";
 import { useSearchParams } from "react-router-dom";
 import CheckoutPage from "@gofynd/theme-template/pages/checkout/checkout";
@@ -30,6 +30,11 @@ function SingleCheckoutPage({ fpi }) {
   const address_id = searchParams.get("address_id");
   const cartCoupon = useCartCoupon({ fpi, cartData: bagData });
   const cartComment = useCartComment({ fpi, cartData: bagData });
+
+  const currencySymbol = useMemo(
+    () => bagData?.currency?.symbol || "₹",
+    [bagData]
+  );
 
   const executeCheckoutLanding = useCallback(
     (reqBody = {}) => {
@@ -94,6 +99,7 @@ function SingleCheckoutPage({ fpi }) {
         fpi={fpi}
         breakupValues={breakupValues}
         cartItemsCount={bagData?.items?.length}
+        currencySymbol={currencySymbol}
         address={address}
         payment={payment}
         showShipment={showShipment}
@@ -109,7 +115,7 @@ function SingleCheckoutPage({ fpi }) {
           showPaymentOptions();
         }}
         // mapApiKey={"AIzaSyAVCJQAKy6UfgFqZUNABAuGQp2BkGLhAgI"}
-        showGoogleMap={APP_FEATURES?.cart?.google_map || true}
+        showGoogleMap={APP_FEATURES?.cart?.google_map}
         mapApiKey={mapApiKey}
         isHyperlocal={isHyperlocal}
         convertHyperlocalTat={convertUTCToHyperlocalTat}

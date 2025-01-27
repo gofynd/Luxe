@@ -15,7 +15,7 @@ import {
   FOLLOWED_PRODUCTS_IDS,
   REMOVE_WISHLIST,
 } from "../../../queries/wishlistQuery";
-import { useSnackbar } from "../../../helper/hooks";
+import { useSnackbar, useThemeConfig } from "../../../helper/hooks";
 import { LOCALITY } from "../../../queries/logisticsQuery";
 import { isEmptyOrNull } from "../../../helper/utils";
 import { fetchCartDetails } from "../../cart/useCart";
@@ -30,17 +30,11 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
   const PRODUCT = useGlobalStore(fpi.getters.PRODUCT);
   const LoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
   const COUPONS = useGlobalStore(fpi.getters.COUPONS);
-  const PROMOTION_OFFERS = useGlobalStore(fpi.getters.PROMOTION_OFFERS);
-  const THEME = useGlobalStore(fpi.getters.THEME);
-  const mode = THEME?.config?.list.find(
-    (f) => f.name === THEME?.config?.current
-  );
-
-  const globalConfig = mode?.global_config?.custom?.props;
-
-  const { isPdpSsrFetched, isI18ModalOpen } = useGlobalStore(
+  const PROMOTION_OFFERS = useGlobalStore(fpi.getters.PROMOTION_OFFERS); // Currently not storing offers on PDP, using custom store for now
+  const { isPdpSsrFetched, isI18ModalOpen, productPromotions } = useGlobalStore(
     fpi?.getters?.CUSTOM_VALUE
   );
+  const { globalConfig } = useThemeConfig({ fpi });
 
   let sellerDetails = useGlobalStore(fpi.getters.i18N_DETAILS);
   if (typeof sellerDetails === "string" && sellerDetails !== "") {
@@ -49,12 +43,10 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentPincode, setCurrentPincode] = useState(
-    (pincodeDetails?.localityValue ?? locationDetails?.pincode) || ""
+    locationDetails?.pincode || ""
   );
   const [currentSize, setCurrentSize] = useState(null);
   const [followed, setFollowed] = useState(false);
-  const [coupons, setCoupons] = useState(null);
-  const [promotions, setPromotions] = useState(null);
   const [selectPincodeError, setSelectPincodeError] = useState(false);
   const [pincodeErrorMessage, setPincodeErrorMessage] = useState("");
   const { product_details, product_meta, product_price_by_slug } = PRODUCT;
@@ -67,10 +59,7 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingPriceBySize, setIsLoadingPriceBySize] = useState(false);
-  const pincodeValue = useMemo(
-    () => (pincodeDetails?.localityValue ?? locationDetails?.pincode) || "",
-    [pincodeDetails, locationDetails]
-  );
+  const locationPincode = locationDetails?.pincode || "";
   // const isLoading =
   //   productMetaLoading ||
   //   productDetailsLoading ||
@@ -78,24 +67,8 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
   //   false;
 
   useEffect(() => {
-    fpi.custom.setValue("isPdpSsrFetched", false);
-  }, []);
-
-  useEffect(() => {
-    if (!isPdpSsrFetched) {
+    if (!isPdpSsrFetched || slug !== PRODUCT?.product_details?.slug) {
       setIsLoading(true);
-      if (
-        Object.keys?.(PRODUCT?.product_details)?.length &&
-        slug === PRODUCT?.product_details?.slug
-      ) {
-        if (product_meta?.sizes?.sellable && blockProps?.show_offers) {
-          getOffers(slug);
-          setIsLoading(false);
-        }
-        setIsLoading(false);
-        setIsPageLoading(false);
-        return;
-      }
       const values = {
         slug,
       };
@@ -103,9 +76,10 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
         .executeGQL(GET_PRODUCT_DETAILS, values)
         .then((res) => {
           if (res) {
-            setCoupons(res?.data?.coupons?.available_coupon_list || []);
-            setPromotions(res?.data?.promotions?.available_promotions);
-            setIsLoading(false);
+            fpi.custom.setValue(
+              "productPromotions",
+              res?.data?.promotions || {}
+            );
           }
         })
         .finally(() => {
@@ -116,22 +90,19 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
   }, [slug]);
 
   useEffect(() => {
+    fpi.custom.setValue("isPdpSsrFetched", false);
+  }, []);
+
+  useEffect(() => {
     setFollowed(wishlistIds?.includes(product_details?.uid));
   }, [LoggedIn, wishlistIds, product_details]);
 
   const updateIntlLocation = () => {
-    console.log("update country");
+    // console.log("update country");
   };
 
-  function getOffers(slug) {
-    fpi.executeGQL(OFFERS, { slug }).then((res) => {
-      setCoupons(res?.data?.coupons?.available_coupon_list || []);
-      setPromotions(res?.data?.promotions?.available_promotions);
-    });
-  }
-
   const fetchProductPrice = () => {
-    if (currentSize !== null && currentPincode?.length < 6) {
+    if (currentSize !== null && locationPincode.length < 6) {
       const values = {
         slug,
         size: currentSize?.value.toString(),
@@ -145,13 +116,13 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
     } else if (
       currentSize !== null &&
       mandatory_pincode?.value &&
-      currentPincode?.length === 6
+      locationPincode.length === 6
     ) {
       setIsLoadingPriceBySize(true);
       const values = {
         slug,
         size: currentSize?.value.toString(),
-        pincode: currentPincode.toString(),
+        pincode: locationPincode.toString() || "",
       };
       setTimeout(() => {
         fpi.executeGQL(PRODUCT_SIZE_PRICE, values).then((res) => {
@@ -170,17 +141,16 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
   };
 
   useEffect(() => {
+    if (locationPincode && currentPincode !== locationPincode) {
+      setCurrentPincode(locationPincode);
+    }
     if (
       Object.keys?.(PRODUCT?.product_details)?.length &&
       slug === PRODUCT?.product_details?.slug
     ) {
       fetchProductPrice();
     }
-  }, [currentSize, pincodeValue]);
-
-  useEffect(() => {
-    setCurrentPincode(pincodeValue);
-  }, [pincodeValue]);
+  }, [currentSize, locationDetails]);
 
   function addToWishList(event) {
     if (event) {
@@ -262,7 +232,7 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
     if (
       !isIntlShippingEnabled &&
       mandatory_pincode?.value &&
-      (currentPincode?.length !== 6 || pincodeErrorMessage.length)
+      (locationPincode.length !== 6 || pincodeErrorMessage.length)
     ) {
       setSelectPincodeError(true);
       setPincodeErrorMessage("");
@@ -275,7 +245,7 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
     if (
       !isIntlShippingEnabled &&
       !mandatory_pincode?.value &&
-      ((currentPincode?.length > 0 && currentPincode?.length < 6) ||
+      ((locationPincode.length > 0 && locationPincode.length < 6) ||
         pincodeErrorMessage.length)
     ) {
       setSelectPincodeError(true);
@@ -289,7 +259,7 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
     if (
       !isIntlShippingEnabled &&
       !mandatory_pincode?.value &&
-      (!currentPincode?.length || !currentPincode?.length === 6) &&
+      (!locationPincode.length || !locationPincode.length === 6) &&
       !pincodeErrorMessage.length
     ) {
       setSelectPincodeError(false);
@@ -303,7 +273,7 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
     if (product_price_by_slug !== null) {
       const payload = {
         buyNow,
-        areaCode: currentPincode?.toString(),
+        areaCode: locationPincode.toString(),
         addCartRequestInput: {
           items: [
             {
@@ -363,8 +333,8 @@ const useProductDescription = (fpi, slug, props, blockProps) => {
     currentImageIndex,
     currentSize,
     currentPincode,
-    coupons: coupons ?? (COUPONS?.available_coupon_list || []),
-    promotions: promotions ?? (PROMOTION_OFFERS?.available_promotions || []),
+    coupons: COUPONS?.available_coupon_list || [],
+    promotions: productPromotions?.available_promotions || [],
     isLoading,
     isPageLoading,
     isLoadingPriceBySize,

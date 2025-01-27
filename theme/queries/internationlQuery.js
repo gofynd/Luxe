@@ -1,3 +1,49 @@
+export const COUNTRIES = `query Countries {
+    countries(pageSize: 200, pageNo: 1) {
+        items {
+            display_name
+            iso2
+            iso3
+            name
+            phone_code
+            timezones
+            id
+            latitude
+            longitude
+            type
+            currency {
+                code
+                symbol
+                name
+            }
+        }
+        page {
+            current
+            next_id
+            has_previous
+            has_next
+            item_total
+            type
+            size
+        }
+    }
+}
+`;
+
+export const CURRENCIES = `query Currencies {
+    currencies {
+        id
+        code
+        created_at
+        decimal_digits
+        is_active
+        name
+        symbol
+        updated_at
+    }
+}
+`;
+
 export const FETCH_ALL_COUNTRIES = `query AllCountries {
     allCountries {
         results {
@@ -31,21 +77,7 @@ export const FETCH_ALL_COUNTRIES = `query AllCountries {
 }
 `;
 
-export const FETCH_ALL_CURRENCIES = `query Currencies {
-    currencies {
-        id
-        code
-        created_at
-        decimal_digits
-        is_active
-        name
-        symbol
-        updated_at
-    }
-}
-`;
-
-export const FETCH_DEFAULT_CURRENCIES = `query ApplicationConfiguration {
+export const DEFAULT_CURRENCY = `query ApplicationConfiguration {
     applicationConfiguration {
         app_currencies {
             application
@@ -57,7 +89,7 @@ export const FETCH_DEFAULT_CURRENCIES = `query ApplicationConfiguration {
     }
 }`;
 
-export const FETCH_COUNTRY_DETAILS = `query Country(
+export const COUNTRY_DETAILS = `query Country(
   $countryIsoCode: String!
 ) {
   country(countryIsoCode: $countryIsoCode) {
@@ -80,6 +112,7 @@ export const FETCH_COUNTRY_DETAILS = `query Country(
                 input
                 required
                 slug
+                next
                 validation {
                     type
                     regex {
@@ -98,38 +131,6 @@ export const FETCH_COUNTRY_DETAILS = `query Country(
         }
     }
 }`;
-
-export const FETCH_COUNTRIES = `query Countries {
-    countries(pageSize: 200, pageNo: 1) {
-        items {
-            display_name
-            iso2
-            iso3
-            name
-            phone_code
-            timezones
-            id
-            latitude
-            longitude
-            type
-            currency {
-                code
-                symbol
-                name
-            }
-        }
-        page {
-            current
-            next_id
-            has_previous
-            has_next
-            item_total
-            type
-            size
-        }
-    }
-}
-`;
 
 export const FETCH_LOCALITIES = `query Localities (
   $locality: LocalityType!

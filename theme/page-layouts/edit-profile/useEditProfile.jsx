@@ -129,7 +129,7 @@ const useEditProfile = (fpi) => {
     isMobile,
     mobileLevel,
     primaryPhone,
-    isLogoutButton: isLoggedIn,
+    isLogoutButton: false, // NOTE: hiding the logout button -> FPPT 1769
     isSkipButton,
     error,
     verifyDetailsProp,

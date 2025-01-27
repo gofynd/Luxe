@@ -130,7 +130,10 @@ export function Component({ props, globalConfig = {} }) {
         console.log(error);
       }
     };
-    fetchProductData();
+
+    if (slug && !customValues?.[featureProductDetails]) {
+      fetchProductData();
+    }
   }, [slug]);
 
   const isSizeGuideAvailable = () => {
@@ -600,28 +603,34 @@ export const settings = {
 
 Component.serverFetch = async ({ fpi, props }) => {
   const slug = props?.product?.value;
-  const values = {
-    slug,
-  };
+  if (slug) {
+    const values = {
+      slug,
+    };
 
-  const productDetails = await fpi.executeGQL(FEATURE_PRODUCT_DETAILS, values, {
-    skipStoreUpdate: true,
-  });
-  const { sizes } = productDetails?.data?.product;
-  const payload = {
-    slug,
-    pincode: "",
-    size: sizes?.sizes[0]?.value,
-  };
-  const productPrice = await fpi.executeGQL(
-    FEATURE_PRODUCT_SIZE_PRICE,
-    payload,
-    { skipStoreUpdate: true }
-  );
+    const productDetails = await fpi.executeGQL(
+      FEATURE_PRODUCT_DETAILS,
+      values,
+      {
+        skipStoreUpdate: true,
+      }
+    );
+    const { sizes } = productDetails?.data?.product;
+    const payload = {
+      slug,
+      pincode: "",
+      size: sizes?.sizes[0]?.value,
+    };
+    const productPrice = await fpi.executeGQL(
+      FEATURE_PRODUCT_SIZE_PRICE,
+      payload,
+      { skipStoreUpdate: true }
+    );
 
-  return fpi.custom.setValue(`featureProductDetails-${slug}`, {
-    productDetails: productDetails?.data,
-    productPrice: productPrice?.data,
-  });
+    return fpi.custom.setValue(`featureProductDetails-${slug}`, {
+      productDetails: productDetails?.data,
+      productPrice: productPrice?.data,
+    });
+  }
 };
 export default Component;

@@ -122,3 +122,30 @@ export const CART_COUNT = `query Cart($areaCode: String, $assignCardId: Int, $in
     user_cart_items_count
   }
 }`;
+
+export const AUTOCOMPLETE = `query SearchProduct($query: String!) {
+  searchProduct(query: $query) {
+    items {
+      custom_json
+      display
+      type
+      action {
+        type
+        page {
+          params
+          query
+          type
+        }
+      }
+      logo {
+        alt
+        type
+        url
+        meta {
+          source
+        }
+      }
+    }
+  }
+}
+`;

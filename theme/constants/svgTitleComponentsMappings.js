@@ -77,10 +77,15 @@ import share from "../assets/images/share.svg";
 import shareDesktop from "../assets/images/share-desktop.svg";
 import wattsappShare from "../assets/images/wattsapp-share.svg";
 import facebookShare from "../assets/images/facebook-share.svg";
-import SocailFacebook from "../assets/images/socail-facebook.svg";
-import SocailInstagram from "../assets/images/socail-instagram.svg";
-import SocailYoutube from "../assets/images/socail-youtube.svg";
 import SocailTwitter from "../assets/images/socail-twitter.svg";
+import SocailFacebook from "../assets/images/socail-facebook.svg";
+import SocailGoogle from "../assets/images/socail-google+.svg";
+import SocailVimeo from "../assets/images/socail-vimeo.svg";
+import SocailBlog from "../assets/images/socail-blog.svg";
+import SocailInstagram from "../assets/images/socail-instagram.svg";
+import SocailLinkedin from "../assets/images/socail-linkedin.svg";
+import SocailYoutube from "../assets/images/socail-youtube.svg";
+import SocailPinterest from "../assets/images/socail-pinterest.svg";
 import polygon from "../assets/images/polygon.svg";
 import locationOn from "../assets/images/location-on.svg";
 import international from "../assets/images/international.svg";
@@ -94,6 +99,7 @@ import buyNow from "../assets/images/buy-now.svg";
 import arrowRightBlack from "../assets/images/arrow-right-black.svg";
 import fyndLogo from "../assets/images/fynd-logo.svg";
 import emptyCart from "../assets/images/empty-cart.svg";
+import email404 from "../assets/images/email404.svg";
 
 /* eslint-disable  import/prefer-default-export */
 export const svgTitleComponentsMappings = {
@@ -107,10 +113,15 @@ export const svgTitleComponentsMappings = {
   cart: CartIcon,
   wishlist: WishlistIcon,
   twitter: TwitterIcon,
+  "socail-twitter": SocailTwitter,
   "socail-facebook": SocailFacebook,
+  "socail-pinterest": SocailPinterest,
+  "socail-google_plus": SocailGoogle,
+  "socail-blog_link": SocailBlog,
   "socail-instagram": SocailInstagram,
   "socail-youtube": SocailYoutube,
-  "socail-twitter": SocailTwitter,
+  "socail-vimeo": SocailVimeo,
+  "socail-linked_in": SocailLinkedin,
   "selected-checkbox": SelectedCheckBox,
   carouselright: CarouselRightSvg,
   increase: IncreaseSvg,
@@ -193,4 +204,5 @@ export const svgTitleComponentsMappings = {
   buyNow,
   "fynd-logo": fyndLogo,
   "empty-cart": emptyCart,
+  "email-404": email404,
 };

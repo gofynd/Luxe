@@ -7,7 +7,7 @@ import FyImage from "../core/fy-image/fy-image";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 
 import styles from "./styles/search.less";
-import { SEARCH_PRODUCT } from "../../queries/headerQuery";
+import { SEARCH_PRODUCT, AUTOCOMPLETE } from "../../queries/headerQuery";
 
 function Search({
   screen,
@@ -63,6 +63,7 @@ function Search({
       .then((res) => {
         setSearchData(res?.data?.products?.items);
       });
+    fpi.executeGQL(AUTOCOMPLETE, { query: searchText });
   };
 
   const setEnterSearchData = debounce((e) => {

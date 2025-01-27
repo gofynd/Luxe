@@ -210,9 +210,9 @@
 .videoThumbnailContainer {
   .aspect-ratio(@ProductImgAspectRatio);
   position: relative;
-  width: 59px;
+  width: 63px;
   overflow: hidden;
-  border-radius: 24px;
+  border-radius: calc(var(--imageRadius) - 1px);
 
   .videoThumbnail {
     position: absolute !important;

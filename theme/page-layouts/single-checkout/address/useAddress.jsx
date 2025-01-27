@@ -10,6 +10,7 @@ import { useSnackbar } from "../../../helper/hooks";
 import { LOCALITY } from "../../../queries/logisticsQuery";
 import { capitalize } from "../../../helper/utils";
 import useInternational from "../../../components/header/useInternational";
+import { useAddressFormSchema } from "../../../helper/hooks";
 
 const useAddress = (setShowShipment, setShowPayment, fpi) => {
   const allAddresses = useGlobalStore(fpi.getters.ADDRESS)?.address || [];
@@ -41,14 +42,10 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     fetchCountrieDetails,
     countryDetails,
     currentCountry,
-    fetchLocalities,
-    isInternationalShippingEnabled,
-    renderTemplate,
-    updateEnumForField,
+    isInternational,
   } = useInternational({
     fpi,
   });
-  const [defaultFormSchema, setDefaultFormSchema] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(currentCountry);
   const [countrySearchText, setCountrySearchText] = useState("");
 
@@ -64,33 +61,13 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     });
   }, [selectedCountry]);
 
-  useEffect(() => {
-    const formSchema = renderTemplate(
-      countryDetails?.fields?.address_template?.checkout_form,
-      countryDetails?.fields?.address
-    );
-    formSchema.forEach((group) => {
-      group.fields.forEach((field) => {
-        if (field.key === "phone") {
-          // Add the country_code key to the field object
-          field.countryCode = selectedCountry?.phone_code.replace("+", "");
-        }
-      });
-    });
-    getOptionsDetails(formSchema);
-  }, [countryDetails]);
-
-  const getLocalityValues = async (slug) => {
-    const payload = {
-      pageNo: 1,
-      pageSize: 1000,
-      country: selectedCountry?.iso2,
-      locality: slug,
-      city: "",
-    };
-    const localityDetails = await fetchLocalities(payload);
-    return localityDetails || [];
-  };
+  const { formSchema } = useAddressFormSchema({
+    fpi,
+    countryCode: selectedCountry?.phone_code,
+    countryIso: selectedCountry?.iso2,
+    addressTemplate: countryDetails?.fields?.address_template?.checkout_form,
+    addressFields: countryDetails?.fields?.address,
+  });
 
   function convertDropDownField(inputField) {
     return {
@@ -99,28 +76,6 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     };
   }
 
-  const getOptionsDetails = async (formSchema) => {
-    if (!countryDetails?.fields?.serviceability_fields?.length) {
-      setDefaultFormSchema([...formSchema]);
-      return;
-    }
-    for (const item of countryDetails?.fields?.serviceability_fields) {
-      const serviceabilityDetails = countryDetails?.fields?.address.find(
-        (entity) => entity.slug === item
-      );
-      let localityDetails = [];
-      if (serviceabilityDetails.input === "list") {
-        // eslint-disable-next-line no-await-in-loop
-        localityDetails = await getLocalityValues(item, formSchema);
-      }
-      const dropDownFieldArray = [];
-      for (const locality of localityDetails) {
-        dropDownFieldArray.push(convertDropDownField(locality));
-      }
-      const formData = updateEnumForField(formSchema, item, dropDownFieldArray);
-      setDefaultFormSchema([...formData]);
-    }
-  };
   const setI18nDetails = (e) => {
     const selectedCountry = countries.find(
       (country) => country.display_name === e
@@ -256,8 +211,10 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
           setAddressLoader(false);
         } else {
           fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
-          showSnackbar("Failed to create new address", "error");
-          resetAddressState();
+          showSnackbar(
+            res?.errors?.[0]?.message ?? "Failed to create new address",
+            "error"
+          );
           setAddressLoader(false);
         }
       });
@@ -488,8 +445,8 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     showAddNewAddressModal,
     setSelectedAddressId,
     getLocality,
-    isInternationalShippingEnabled,
-    defaultFormSchema,
+    isInternationalShippingEnabled: isInternational,
+    defaultFormSchema: formSchema,
     setI18nDetails,
     handleCountrySearch,
     getFilteredCountries,

@@ -65,7 +65,7 @@ function OrderStatus({ fpi }) {
   const fetchOrder = useCallback(() => {
     setTimeout(() => {
       fpi.executeGQL(ORDER_BY_ID, { orderId }).then((res) => {
-        if (res?.data?.order !== null && orderData === null) {
+        if (res?.data?.order && orderData === null) {
           setOrderData(res?.data?.order);
           setShowPolling(false);
         } else {
@@ -76,13 +76,15 @@ function OrderStatus({ fpi }) {
   }, [orderId, orderData]);
 
   useEffect(() => {
-    if (attempts < 5 && orderData === null) {
-      fetchOrder();
-    } else if (attempts >= 5) {
-      setShowPolling(true);
-      // navigate("/cart/order-status?success=false");
+    if (success === "true") {
+      if (attempts < 5 && orderData === null) {
+        fetchOrder();
+      } else if (attempts >= 5) {
+        setShowPolling(true);
+        // navigate("/cart/order-status?success=false");
+      }
     }
-  }, [attempts, fetchOrder, navigate, orderData]);
+  }, [success, attempts, fetchOrder, orderData]);
 
   return (
     <div className="basePageContainer margin0auto">

@@ -11,7 +11,7 @@ import {
 } from "../../helper/utils";
 import placeholder from "../../assets/images/placeholder3x4.png";
 import useAddToCartModal from "./useAddToCartModal";
-import { useThemeConfig } from "../../helper/hooks";
+import { useThemeConfig, useThemeFeature } from "../../helper/hooks";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
@@ -28,6 +28,7 @@ const useProductListing = ({ fpi }) => {
     fpi,
     page: "product-listing",
   });
+  const { isInternational } = useThemeFeature({ fpi });
 
   const productsListData = useGlobalStore(fpi?.getters?.PRODUCTS);
   const { isPlpSsrFetched } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
@@ -369,7 +370,10 @@ const useProductListing = ({ fpi }) => {
     imageBackgroundColor: globalConfig?.img_container_bg,
     showImageOnHover: globalConfig?.show_image_on_hover,
     imagePlaceholder: placeholder,
-    showAddToCart: pageConfig?.show_add_to_cart && !globalConfig?.disable_cart,
+    showAddToCart:
+      !isInternational &&
+      pageConfig?.show_add_to_cart &&
+      !globalConfig?.disable_cart,
     onResetFiltersClick: resetFilters,
     onColumnCountUpdate: handleColumnCountUpdate,
     onFilterUpdate: handleFilterUpdate,

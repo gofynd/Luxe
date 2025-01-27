@@ -22,11 +22,13 @@ function ProductDescription({ fpi }) {
     <>
       {getHelmet({ seo })}
       <div className="basePageContainer margin0auto">
-        <SectionRenderer
-          sections={sections}
-          fpi={fpi}
-          globalConfig={globalConfig}
-        />
+        {page?.value === "product-description" && (
+          <SectionRenderer
+            sections={sections}
+            fpi={fpi}
+            globalConfig={globalConfig}
+          />
+        )}
       </div>
       {/* Note: Do not remove the below empty div, it is required to insert sticky add to cart at the bottom of the sections */}
       <div
@@ -44,24 +46,5 @@ export const sections = JSON.stringify([
     },
   },
 ]);
-ProductDescription.serverFetch = async ({ fpi, router }) => {
-  const slug = router?.params?.slug;
-  const values = {
-    slug,
-  };
-
-  fpi.custom.setValue("isPdpSsrFetched", true);
-  fpi.custom.setValue("isProductNotFound", false);
-
-  return fpi.executeGQL(GET_PRODUCT_DETAILS, values).then((result) => {
-    if (result.errors && result.errors.length) {
-      //   const error = result.errors[0];
-      //   if (error.status_code === 404) {
-      fpi.custom.setValue("isProductNotFound", true);
-      //   }
-    }
-    return result;
-  });
-};
 
 export default ProductDescription;

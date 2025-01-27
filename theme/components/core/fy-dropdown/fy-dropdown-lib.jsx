@@ -39,6 +39,7 @@ const FyDropdown = ({
   labelClassName,
   containerClassName,
   value,
+  disabled = false,
   // optionLabel = "display",
   onChange = (value) => {},
   dataKey = "key",
@@ -75,6 +76,7 @@ const FyDropdown = ({
   );
 
   const toggleDropdown = (event) => {
+    if (disabled) return;
     // event?.stopPropagation();
     setIsOpen((prev) => !prev);
   };
@@ -206,6 +208,8 @@ const FyDropdown = ({
             value={query}
             onChange={handleInputChange}
             placeholder={placeholder}
+            disabled={disabled}
+            autocomplete="off"
           />
           {/* onFocus={() => setIsOpen(true)} */}
           {/* <label className={styles.label} for="input-query" id="label-fname">

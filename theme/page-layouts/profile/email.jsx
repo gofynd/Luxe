@@ -24,6 +24,7 @@ function Email({ fpi }) {
       showSnackbar(`Verification link sent to ${email}`, "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
@@ -33,6 +34,7 @@ function Email({ fpi }) {
       showSnackbar(`${email} set as primary`, "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
@@ -42,6 +44,7 @@ function Email({ fpi }) {
       showSnackbar(`${emailDetails?.email} removed successfully`, "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
@@ -51,6 +54,7 @@ function Email({ fpi }) {
       showSnackbar(`Verification link sent to ${email}`, "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 

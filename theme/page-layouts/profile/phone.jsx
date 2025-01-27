@@ -4,6 +4,7 @@ import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
 import "@gofynd/theme-template/page-layouts/auth/mobile-number/mobile-number.css";
 import { usePhone } from "./usePhone";
+import useInternational from "../../components/header/useInternational";
 import { useSnackbar, useAccounts } from "../../helper/hooks";
 import "@gofynd/theme-template/pages/profile/phone/phone.css";
 
@@ -12,6 +13,7 @@ function Phone({ fpi }) {
     usePhone({ fpi });
   const { sendOtpMobile, verifyMobileOtp, resendOtp } = useAccounts({ fpi });
   const { showSnackbar } = useSnackbar();
+  const { countryDetails } = useInternational({ fpi });
 
   const handleSetPrimary = useCallback(async (phoneDetails) => {
     try {
@@ -19,35 +21,39 @@ function Phone({ fpi }) {
       showSnackbar(`${phoneDetails?.phone} set as primary`, "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
   const handleSendOtp = useCallback(async (phoneDetails) => {
     try {
       const data = await sendOtpMobile(phoneDetails);
-      showSnackbar(`Otp sent on mobile ${phoneDetails?.mobile}`, "success");
+      showSnackbar(`OTP sent on mobile ${phoneDetails?.mobile}`, "success");
       return data;
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
   const handleVerifyOtp = useCallback(async (otpDetails) => {
     try {
       await verifyMobileOtp(otpDetails);
-      showSnackbar(`Otp verified`, "success");
+      showSnackbar(`OTP verified`, "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
   const handleResendOtp = useCallback(async (phoneDetails) => {
     try {
       const data = await resendOtp(phoneDetails);
-      showSnackbar(`Otp sent on mobile ${phoneDetails?.mobile}`, "success");
+      showSnackbar(`OTP sent on mobile ${phoneDetails?.mobile}`, "success");
       return data;
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
@@ -57,6 +63,7 @@ function Phone({ fpi }) {
       showSnackbar(`${phoneDetails?.phone} removed successfully`, "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
+      throw error;
     }
   }, []);
 
@@ -77,6 +84,7 @@ function Phone({ fpi }) {
           sendOtpMobile={handleSendOtp}
           verifyMobileOtp={handleVerifyOtp}
           resendOtp={handleResendOtp}
+          countryCode={countryDetails?.phone_code?.replace("+", "")}
         />
       </motion.div>
     </ProfileRoot>
