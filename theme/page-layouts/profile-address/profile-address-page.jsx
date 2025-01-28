@@ -7,8 +7,7 @@ import AddressItem from "@gofynd/theme-template/components/address-item/address-
 import { LOCALITY } from "../../queries/logisticsQuery";
 import useAddress from "../address/useAddress";
 import EmptyState from "../../components/empty-state/empty-state";
-import Loader from "fdk-react-templates/components/loader/loader";
-import "fdk-react-templates/components/loader/loader.css";
+import "@gofynd/theme-template/components/loader/loader.css";
 import { useSnackbar, useAddressFormSchema } from "../../helper/hooks";
 import { capitalize } from "../../helper/utils";
 import styles from "./profile-address-page.less";
