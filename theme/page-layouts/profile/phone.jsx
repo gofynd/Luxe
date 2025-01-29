@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { motion } from "framer-motion";
 import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
+import PhonePage from "@gofynd/theme-template/pages/profile/phone/phone"
 import "@gofynd/theme-template/page-layouts/auth/mobile-number/mobile-number.css";
 import { usePhone } from "./usePhone";
 import useInternational from "../../components/header/useInternational";

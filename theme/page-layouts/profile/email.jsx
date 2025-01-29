@@ -4,6 +4,7 @@ import { isLoggedIn } from "../../helper/auth-guard";
 import ProfileRoot from "../../components/profile/profile-root";
 import { useSnackbar } from "../../helper/hooks";
 import { useEmail } from "./useEmail";
+import EmailPage from "@gofynd/theme-template/pages/profile/email/email"
 import "@gofynd/theme-template/pages/profile/email/email.css";
 
 function Email({ fpi }) {

@@ -2,6 +2,8 @@ import React from "react";
 import { motion } from "framer-motion";
 import styles from "../styles/order-list.less";
 import useOrdersListing from "../page-layouts/orders/useOrdersListing";
+import OrdersHeader from "@gofynd/theme-template/components/order-header/order-header";
+import OrderShipment from "@gofynd/theme-template/components/order-shipment/order-shipment";
 import "@gofynd/theme-template/components/order-header/order-header.css";
 import "@gofynd/theme-template/components/order-shipment/order-shipment.css";
 import Loader from "../components/loader/loader";
