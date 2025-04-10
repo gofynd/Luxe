@@ -5,6 +5,13 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  padding: 0 40px;
+  @media @tablet {
+    padding: 0 24px;
+  }
+  @media @mobile {
+    padding: 0 16px;
+  }
 }
 .section-title {
   padding-bottom: 16px;
@@ -21,9 +28,12 @@
 .Trust-marker-image-container {
   --col-gap: 20px;
   --col-count: var(--item-count);
-  padding: 32px 40px 0px 40px;
+  padding: 32px 40px 0px;
   @media @tablet {
-    padding: 24px 40px 0px 40px;
+    padding: 24px 24px 0px;
+  }
+  @media @mobile {
+    padding: 24px 16px 0px;
   }
   align-items: stretch;
   display: grid;
@@ -59,7 +69,7 @@
   justify-content: center;
   padding: 24px;
   width: 100%;
-  // border-radius: @ImageRadius;
+  border-radius: @ImageRadius;
   @media @tablet {
     padding: 8px;
   }
@@ -95,7 +105,7 @@
   //   font-weight: 600;
   //   letter-spacing: -0.28px;
   //   padding-top: 0px;
-  //   text-align: left;
+  //   text-align: start;
   // }
 }
 
@@ -115,9 +125,12 @@
 }
 .trustMarker {
   .sliderView {
-    padding: 32px 40px 0px 40px;
+    padding: 32px 40px 0px;
     @media @tablet {
-      padding: 24px 40px 0px 40px;
+      padding: 24px 24px 0px;
+    }
+    @media @mobile {
+      padding: 24px 16px 0px;
     }
     --gap: 12px;
     @media @desktop {
@@ -137,7 +150,7 @@
       .slick-list {
         margin: 0 calc(var(--gap) / 2 * -1) !important;
         @media @mobile {
-          padding-left: 0 !important;
+          padding-inline-start: 0 !important;
         }
       }
       .slick-track {
@@ -153,10 +166,8 @@
       .slick-slide {
         height: auto !important;
         // padding: 0 calc(var(--gap) / 2);
+        border-radius: @ImageRadius;
         background-color: var(--img-background-color);
-        display: flex;
-        justify-content: center;
-        align-items: center;
       }
     }
     // @media @mobile {
@@ -169,14 +180,17 @@
     // }
   }
 }
-.stack-view {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: stretch !important;
-  a {
-    max-width: 138px !important;
-    @media @desktop {
-      max-width: 440px !important;
-    }
-  }
+.Trust-marker-heading {
+  
 }
+// .stack-view {
+//   display: flex !important;
+//   justify-content: center !important;
+//   align-items: stretch !important;
+//   a {
+//     max-width: 138px !important;
+//     @media @desktop {
+//       max-width: 440px !important;
+//     }
+//   }
+// }

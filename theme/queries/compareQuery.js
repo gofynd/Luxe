@@ -5,6 +5,7 @@ export const PRODUCT_COMPARISON = `query productComparison($slug: [String]!) {
         display
         key
       }
+        title
     }
     items {
       attributes
@@ -15,7 +16,7 @@ export const PRODUCT_COMPARISON = `query productComparison($slug: [String]!) {
       teaser_tag
       brand {
         name
-      }
+    }
       categories {
         name
         id

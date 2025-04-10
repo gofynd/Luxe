@@ -1,9 +1,38 @@
 import { getPageSlug } from "fdk-core/utils";
-import { GLOBAL_DATA, THEME_DATA, USER_DATA_QUERY } from "../queries/libQuery";
+import {
+  GLOBAL_DATA,
+  THEME_DATA,
+  USER_DATA_QUERY,
+  INTERNATIONAL,
+} from "../queries/libQuery";
 
 export async function globalDataResolver({ fpi, applicationID }) {
   // TODO
-  return fpi.executeGQL(GLOBAL_DATA);
+  try{
+    const response = await fpi.executeGQL(GLOBAL_DATA);
+  const defaultCurrency =
+    response?.data?.applicationConfiguration?.app_currencies?.default_currency;
+  const isInternational =
+    !!response?.data?.applicationConfiguration?.features?.common
+      ?.international_shipping?.enabled;
+  if (defaultCurrency?.code) {
+    fpi.custom.setValue("defaultCurrency", defaultCurrency.code);
+  }
+  if (isInternational) {
+    const { data } = await fpi.executeGQL(INTERNATIONAL);
+    fpi.custom.setValue("countries", data?.allCountries?.results || []);
+    fpi.custom.setValue(
+      "currencies",
+      data?.applicationConfiguration?.app_currencies?.supported_currency || []
+    );
+  }
+  return response;
+  }
+  catch(error){
+    console.error("globalDataResolverError:", error);
+    return null;
+  }
+  
 }
 
 export async function pageDataResolver({ fpi, router, themeId }) {

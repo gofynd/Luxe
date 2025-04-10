@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { useGlobalStore, useFPI } from "fdk-core/utils";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
 import { FDKLink, BlockRenderer } from "fdk-core/components";
 import { useParams } from "react-router-dom";
 import OutsideClickHandler from "react-outside-click-handler";
-import FyButton from "@gofynd/theme-template/components/core/fy-button/fy-button";
-import Loader from "@gofynd/theme-template/components/loader/loader";
-import "@gofynd/theme-template/components/loader/loader.css";
+import FyButton from "fdk-react-templates/components/core/fy-button/fy-button";
+import Loader from "fdk-react-templates/components/loader/loader";
+import "fdk-react-templates/components/loader/loader.css";
 
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import FyImage from "../components/core/fy-image/fy-image";
@@ -22,32 +22,42 @@ import BreadCrumb from "../page-layouts/pdp/components/breadcrumb/breadcrumb";
 import Badges from "../page-layouts/pdp/components/badges/badges";
 import StickyAddToCart from "../page-layouts/pdp/components/sticky-addtocart/sticky-addtocart";
 import MoreOffers from "../page-layouts/pdp/components/offers/more-offers";
+import StoreModal from "../page-layouts/pdp/components/store/store-modal";
+import EmptyState from "../components/empty-state/empty-state";
 import {
   isEmptyOrNull,
   isRunningOnClient,
   currencyFormat,
+  formatLocale,
 } from "../helper/utils";
 import { useSnackbar } from "../helper/hooks";
 import styles from "../styles/sections/product-description.less";
 import { GET_PRODUCT_DETAILS } from "../queries/pdpQuery";
-import QuantityController from "@gofynd/theme-template/components/quantity-control/quantity-control";
-import "@gofynd/theme-template/components/quantity-control/quantity-control.css";
+import QuantityController from "fdk-react-templates/components/quantity-control/quantity-control";
+import "fdk-react-templates/components/quantity-control/quantity-control.css";
 import useCart from "../page-layouts/cart/useCart";
-import PageNotFound from "../components/page-not-found/page-not-found";
 import { createPortal } from "react-dom";
 
 export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
   const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
+  const { t } = useGlobalTranslation("translation");
   const { icon_color, variant_position, product, enable_buy_now } = props;
 
   const addToCartBtnRef = useRef(null);
   const params = useParams();
   const slug = params?.slug || product?.value;
   const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [showStoreModal, setShowStoreModal] = useState(false);
   const [isLoadingCart, setIsLaodingCart] = useState(false);
 
   const getBlockConfigValue = (block, id) => block?.props?.[id]?.value ?? "";
   const { showSnackbar } = useSnackbar();
+
+  const isSizeWrapperAvailable = useMemo(() => {
+    return !!blocks.find((block) => block.type === "size_wrapper");
+  }, [blocks]);
 
   const blockProps = useMemo(() => {
     const currentProps = {
@@ -57,6 +67,7 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
       tax_label: "",
       mrp_label: false,
       show_offers: false,
+      show_logo: false,
     };
 
     blocks.forEach((block) => {
@@ -85,6 +96,11 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
         currentProps.show_offers =
           getBlockConfigValue(block, "show_offers") || false;
       }
+
+      if (block.type === "pincode") {
+        currentProps.show_logo =
+          getBlockConfigValue(block, "show_logo") || false;
+      }
     });
 
     return currentProps;
@@ -98,29 +114,31 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
     isLoadingPriceBySize,
     productPriceBySlug,
     productMeta,
-    currentPincode,
+    pincode,
     coupons,
     followed,
     promotions,
     selectPincodeError,
     pincodeErrorMessage,
     setCurrentSize,
-    setCurrentPincode,
     addToWishList,
     removeFromWishlist,
     addProductForCheckout,
     checkPincode,
     setPincodeErrorMessage,
     isPageLoading,
-    isIntlShippingEnabled,
-    sellerDetails,
-    pincodeDetails,
-    locationDetails,
+    pincodeInput,
+    isValidDeliveryLocation,
+    deliveryLocation,
+    isServiceabilityPincodeOnly,
     currentSize,
     incrementDecrementUnit,
     maxCartQuantity,
     minCartQuantity,
-  } = useProductDescription(fpi, slug, props, blockProps);
+    allStoresInfo,
+    getProductSellers,
+    buybox,
+  } = useProductDescription({ fpi, slug, props });
 
   const { onUpdateCartItems, isCartUpdating, cartItems } = useCart(fpi);
 
@@ -129,7 +147,7 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
 
     if (currentSize?.value) {
       const cartItemsKey = Object.keys(cartItems || {});
-      const selectedItemKey = `${productDetails?.uid}_${currentSize.value}`;
+      const selectedItemKey = `${productDetails?.uid}_${currentSize.value}_${productPriceBySlug?.store?.uid}`;
 
       cartItemsKey.some((item, index) => {
         if (item === selectedItemKey) {
@@ -142,7 +160,7 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
     }
 
     return selectedItemDetails;
-  }, [currentSize, cartItems]);
+  }, [currentSize, cartItems, productDetails, productPriceBySlug]);
 
   const priceDataDefault = productMeta?.price;
   const [selectedSize, setSelectedSize] = useState("");
@@ -209,20 +227,28 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
   const getProductPrice = (key) => {
     if (selectedSize && !isEmptyOrNull(productPriceBySlug.price)) {
       if (productPriceBySlug?.set) {
-        return currencyFormat(productPriceBySlug?.price_per_piece[key]) || "";
+        return currencyFormat(productPriceBySlug?.price_per_piece[key], "", formatLocale(locale, countryCode, true)) || "";
       }
       const price = productPriceBySlug?.price || "";
-      return currencyFormat(price?.[key], price?.currency_symbol) || "";
+      return currencyFormat(price?.[key], price?.currency_symbol, formatLocale(locale, countryCode, true)) || "";
+    }
+    if (selectedSize && priceDataDefault) {
+      return (
+        currencyFormat(
+          priceDataDefault?.[key]?.min,
+          priceDataDefault?.[key]?.currency_symbol
+        ) || ""
+      );
     }
     if (priceDataDefault) {
       return priceDataDefault?.[key]?.min !== priceDataDefault?.[key]?.max
-        ? `${priceDataDefault?.[key]?.currency_symbol || ""} ${
-            currencyFormat(priceDataDefault?.[key]?.min) || ""
-          } - ${currencyFormat(priceDataDefault?.[key]?.max) || ""}`
+        ? `${priceDataDefault?.[key]?.currency_symbol || ""} ${currencyFormat(priceDataDefault?.[key]?.min, "", formatLocale(locale, countryCode, true)) || ""
+        } - ${currencyFormat(priceDataDefault?.[key]?.max, "", formatLocale(locale, countryCode, true)) || ""}`
         : currencyFormat(
-            priceDataDefault?.[key]?.max,
-            priceDataDefault?.[key]?.currency_symbol
-          ) || "";
+          priceDataDefault?.[key]?.max,
+          priceDataDefault?.[key]?.currency_symbol,
+          formatLocale(locale, countryCode, true)
+        ) || "";
     }
   };
 
@@ -264,23 +290,36 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
     );
   }, [productMeta]);
 
+  const soldBy = useMemo(() => {
+    const sellerInfo = productPriceBySlug?.seller || {};
+    const storeInfo = productPriceBySlug?.store || {};
+
+    return buybox?.is_seller_buybox_enabled
+      ? { ...sellerInfo, count: sellerInfo.count ?? storeInfo.count }
+      : storeInfo;
+  }, [productPriceBySlug, buybox]);
+
+  const isAllowStoreSelection = useMemo(() => {
+    return buybox?.enable_selection && soldBy?.count > 1;
+  }, [buybox, soldBy]);
+
+  const sellerStoreName = useMemo(() => {
+    const sellerName = productPriceBySlug?.seller?.name;
+    const storeName = productPriceBySlug?.store?.name;
+
+    return [sellerName, storeName].filter(Boolean).join(", ") || "";
+  }, [productPriceBySlug]);
+
   if (isRunningOnClient() && isPageLoading) {
-    return (
-      <div className={styles.loader}>
-        <Loader
-          containerClassName={styles.loaderContainer}
-          loaderClassName={styles.customLoader}
-        />
-      </div>
-    );
+    return <div className={styles.loader}></div>;
   }
 
   const handleShare = async () => {
     if (navigator.share && isMobile) {
       try {
         await navigator.share({
-          title: "Amazing Product",
-          text: `Check out this amazing product on ${application?.name}`,
+          title: t("resource.product.amazing_product"),
+          text: `${t("resource.section.product.check_out_amazing_product_on")} ${application?.name}`,
           url: window?.location?.href,
         });
       } catch (error) {
@@ -306,13 +345,13 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
     if (!isMto) {
       if (totalQuantity > maxCartQuantity) {
         totalQuantity = maxCartQuantity;
-        showSnackbar(`Maximum quantity is ${maxCartQuantity}.`, "error");
+        showSnackbar(`${t("resource.product.max_quantity")} ${maxCartQuantity}.`, "error");
       }
 
       if (totalQuantity < minCartQuantity) {
         if (operation === "edit_item") {
           totalQuantity = minCartQuantity;
-          showSnackbar(`Minimum quantity is ${minCartQuantity}.`, "error");
+          showSnackbar(`${t("resource.product.min_quantity")} ${minCartQuantity}.`, "error");
         } else if (itemDetails?.quantity > minCartQuantity) {
           totalQuantity = minCartQuantity;
         } else {
@@ -332,8 +371,34 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
       );
     }
   };
+
+  const toggleStoreModal = () => {
+    setShowStoreModal((modal) => {
+      const updatedModal = !modal;
+
+      if (typeof document !== "undefined") {
+        const classList = document.body?.classList;
+
+        if (updatedModal && classList) {
+          classList.add("remove-scroll");
+        } else {
+          classList.remove("remove-scroll");
+        }
+      }
+
+      return updatedModal;
+    });
+  };
+
+  const onSellerClick = () => {
+    if (isAllowStoreSelection) {
+      toggleStoreModal();
+      getProductSellers();
+    }
+  };
+
   if (isProductNotFound) {
-    return <PageNotFound />;
+    return <EmptyState title={t("resource.common.no_product_found")} />;
   }
 
   return (
@@ -397,7 +462,7 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                               <ShareItem
                                 setShowSocialLinks={setShowSocialLinks}
                                 handleShare={() => handleShare()}
-                                description={`Check out this amazing product on ${application?.name}`}
+                                description={`${t("resource.section.product.check_out_amazing_product_on")} ${application?.name}`}
                               />
                             )}
                           </h1>
@@ -414,12 +479,15 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                 {getProductPrice("effective") &&
                                   getBlockConfigValue(block, "mrp_label") &&
                                   getProductPrice("effective") ===
-                                    getProductPrice("marked") && (
+                                  getProductPrice("marked") && (
                                     <span
                                       className={`${styles.mrpLabel} ${styles["mrpLabel--effective"]}`}
-                                      style={{ marginLeft: 0 }}
+                                      style={{ marginInlineStart: 0 }}
                                     >
-                                      MRP:
+                                      {t(
+                                        "resource.common.mrp"
+                                      )}
+                                      :
                                     </span>
                                   )}
                                 <h4
@@ -432,21 +500,25 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                 {getProductPrice("marked") &&
                                   getBlockConfigValue(block, "mrp_label") &&
                                   getProductPrice("effective") !==
-                                    getProductPrice("marked") && (
+                                  getProductPrice("marked") && (
                                     <span
                                       className={`${styles.mrpLabel} ${styles["mrpLabel--marked"]}`}
                                     >
-                                      &nbsp;MRP:
+                                      &nbsp;
+                                      {t(
+                                        "resource.common.mrp"
+                                      )}
+                                      :
                                     </span>
                                   )}
                                 {getProductPrice("effective") !==
                                   getProductPrice("marked") && (
-                                  <span
-                                    className={styles["product__price--marked"]}
-                                  >
-                                    {getProductPrice("marked")}
-                                  </span>
-                                )}
+                                    <span
+                                      className={styles["product__price--marked"]}
+                                    >
+                                      {getProductPrice("marked")}
+                                    </span>
+                                  )}
                                 {discountLabel && (
                                   <span
                                     className={
@@ -509,7 +581,9 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                         <>
                           {getBlockConfigValue(block, "show_seller") &&
                             selectedSize &&
-                            !isEmptyOrNull(productPriceBySlug) && (
+                            !isEmptyOrNull(productPriceBySlug) &&
+                            buybox?.show_name &&
+                            sellerStoreName && (
                               <div
                                 className={`${styles.sellerInfo} ${styles.fontBody}`}
                               >
@@ -517,293 +591,330 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                   className={`${styles.storeSeller} captionNormal`}
                                 >
                                   <span className={styles.soldByLabel}>
-                                    Seller :
+                                    {t("resource.common.sold_by")} :
                                   </span>
                                   <div
                                     // v-if="showSellerStoreLabel"
-                                    className={`${styles.nameWrapper} ${
-                                      getBlockConfigValue(
-                                        block,
-                                        "seller_store_selection"
-                                      ) && styles.selectable
-                                    }`}
-                                    // @click="onSellerClick(sellerData.loadStores)"
+                                    className={`${styles.nameWrapper} ${isAllowStoreSelection ? styles.selectable : ""}`}
+                                    onClick={onSellerClick}
                                   >
                                     <p className={styles.storeSellerName}>
-                                      {`${productPriceBySlug?.seller?.name || ""}`}
+                                      {soldBy?.name}
                                     </p>
-                                    {productPriceBySlug?.seller?.count > 1 && (
-                                      <span
-                                        className={`captionSemiBold ${styles.otherSellers}`}
-                                      >
-                                        &nbsp;&&nbsp;
-                                        {`${(productPriceBySlug?.seller?.count ?? 2) - 1} Other${
-                                          productPriceBySlug?.seller?.count >
-                                          1 >
-                                          2
-                                            ? "s"
-                                            : ""
-                                        }`}
-                                      </span>
-                                    )}
-
-                                    {getBlockConfigValue(
-                                      block,
-                                      "seller_store_selection"
-                                    ) && (
-                                      <SvgWrapper
-                                        svgSrc="arrow-down"
-                                        className={styles.dropdownArrow}
-                                      />
+                                    {isAllowStoreSelection && (
+                                      <>
+                                        <span
+                                          className={`captionSemiBold ${styles.otherSellers}`}
+                                        >
+                                          &nbsp;&&nbsp;
+                                          {`${soldBy?.count - 1} ${t(productPriceBySlug?.seller?.count > 1 ? 'resource.common.other_plural' : 'resource.common.other')}`}
+                                        </span>
+                                        <SvgWrapper
+                                          svgSrc="arrow-down"
+                                          className={styles.dropdownArrow}
+                                        />
+                                      </>
                                     )}
                                   </div>
                                 </div>
                               </div>
                             )}
+
+                          <StoreModal
+                            isOpen={showStoreModal}
+                            buybox={buybox}
+                            allStoresInfo={allStoresInfo}
+                            onCloseDialog={toggleStoreModal}
+                            addItemForCheckout={(e, isBuyNow, item) =>
+                              addProductForCheckout(
+                                e,
+                                selectedSize,
+                                isBuyNow,
+                                item
+                              )
+                            }
+                            getProductSellers={getProductSellers}
+                          />
                         </>
                       );
 
                     case "size_wrapper":
                       return (
                         <>
-                          <div className={styles.sizeContainer}>
-                            {isSizeSelectionBlock(block) &&
-                              productMeta?.sellable &&
-                              sizes?.sizes?.length && (
-                                <div
-                                  className={`${styles.sizeSelection} ${
-                                    isSizeCollapsed
+                          <div className={styles.sizeWrapperContainer}>
+                            <div className={styles.sizeContainer}>
+                              {isSizeSelectionBlock(block) &&
+                                productMeta?.sellable &&
+                                sizes?.sizes?.length && (
+                                  <div
+                                    className={`${styles.sizeSelection} ${isSizeCollapsed
                                       ? styles["sizeSelection--collapse"]
                                       : ""
-                                  }`}
-                                >
-                                  <div>
-                                    <p
-                                      className={`b2 ${styles.sizeSelection__label}`}
-                                    >
-                                      <span>Size :</span>
-                                    </p>
+                                      }`}
+                                  >
+                                    <div>
+                                      <p
+                                        className={`b2 ${styles.sizeSelection__label}`}
+                                      >
+                                        <span>{t("resource.common.size")} :</span>
+                                      </p>
 
-                                    <div
-                                      className={styles.sizeSelection__wrapper}
-                                    >
-                                      {sizes?.sizes?.map((size) => (
-                                        <button
-                                          type="button"
-                                          key={`${size?.display}`}
-                                          className={`b2 ${
-                                            styles.sizeSelection__block
-                                          } ${
-                                            size.quantity === 0 &&
-                                            !isMto &&
-                                            styles[
+                                      <div
+                                        className={
+                                          styles.sizeSelection__wrapper
+                                        }
+                                      >
+                                        {sizes?.sizes?.map((size) => (
+                                          <button
+                                            type="button"
+                                            key={`${size?.display}`}
+                                            className={`b2 ${styles.sizeSelection__block
+                                              } ${size.quantity === 0 &&
+                                              !isMto &&
+                                              styles[
                                               "sizeSelection__block--disable"
-                                            ]
-                                          } ${
-                                            (size?.quantity !== 0 || isMto) &&
-                                            styles[
+                                              ]
+                                              } ${(size?.quantity !== 0 || isMto) &&
+                                              styles[
                                               "sizeSelection__block--selectable"
-                                            ]
-                                          } ${
-                                            selectedSize === size?.value &&
-                                            styles[
+                                              ]
+                                              } ${selectedSize === size?.value &&
+                                              styles[
                                               "sizeSelection__block--selected"
-                                            ]
-                                          } `}
-                                          title={size?.value}
-                                          onClick={() => onSizeSelection(size)}
-                                        >
-                                          {size?.display}
-                                          {size?.quantity === 0 && !isMto && (
-                                            <svg>
-                                              <line
-                                                x1="0"
-                                                y1="100%"
-                                                x2="100%"
-                                                y2="0"
-                                              />
-                                            </svg>
-                                          )}
-                                        </button>
-                                      ))}
+                                              ]
+                                              } `}
+                                            title={size?.value}
+                                            onClick={() =>
+                                              onSizeSelection(size)
+                                            }
+                                          >
+                                            {size?.display}
+                                            {size?.quantity === 0 && !isMto && (
+                                              <svg>
+                                                <line
+                                                  x1="0"
+                                                  y1="100%"
+                                                  x2="100%"
+                                                  y2="0"
+                                                />
+                                              </svg>
+                                            )}
+                                          </button>
+                                        ))}
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              )}
-                          </div>
-                          <div className={styles.sizeCartContainer}>
-                            {!isSizeSelectionBlock(block) &&
-                              productMeta?.sellable && (
-                                <div
-                                  className={`${styles.sizeWrapper} ${
-                                    isSizeCollapsed &&
-                                    styles["sizeWrapper--collapse"]
-                                  }`}
-                                >
-                                  <div
-                                    className={` ${styles.sizeButton} ${
-                                      styles.flexAlignCenter
-                                    } ${styles.justifyBetween} ${styles.fontBody} ${
-                                      sizes?.sizes?.length &&
-                                      styles.disabledButton
-                                    }`}
-                                    onClick={() =>
-                                      setShowSizeDropdown(!showSizeDropdown)
-                                    }
-                                    disabled={!sizes?.sizes?.length}
-                                  >
-                                    <p
-                                      className={`${styles.buttonFont} ${styles.selectedSize}`}
-                                      title={
-                                        selectedSize
-                                          ? `Size : ${selectedSize}`
-                                          : "SELECT SIZE"
-                                      }
-                                    >
-                                      {selectedSize
-                                        ? `Size : ${selectedSize}`
-                                        : "SELECT SIZE"}
-                                    </p>
-                                    <SvgWrapper
-                                      svgSrc="arrow-down"
-                                      className={`${styles.dropdownArrow} ${
-                                        showSizeDropdown && styles.rotateArrow
-                                      }`}
-                                    />
-                                  </div>
-                                  <OutsideClickHandler
-                                    onOutsideClick={() => {
-                                      setShowSizeDropdown(false);
-                                    }}
-                                  >
-                                    <ul
-                                      className={styles.sizeDropdown}
-                                      style={{
-                                        display: showSizeDropdown
-                                          ? "block"
-                                          : "none",
-                                      }}
-                                    >
-                                      {sizes?.sizes?.map((size) => (
-                                        <li
-                                          onClick={() => onSizeSelection(size)}
-                                          key={size?.value}
-                                          className={`${
-                                            selectedSize === size.display &&
-                                            styles.selected_size
-                                          } ${
-                                            size.quantity === 0 && !isMto
-                                              ? styles.disabled_size
-                                              : styles.selectable_size
-                                          }`}
-                                        >
-                                          {size.display}
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </OutsideClickHandler>
-                                </div>
-                              )}
-
-                            <div
-                              className={`${styles.cartWrapper} ${
-                                isSizeSelectionBlock(block) &&
-                                styles["cartWrapper--half-width"]
-                              }`}
-                            >
-                              {!disable_cart && productMeta?.sellable && (
-                                <>
-                                  {singleItemDetails?.quantity &&
-                                  show_quantity_control ? (
-                                    <>
-                                      <QuantityController
-                                        isCartUpdating={isCartUpdating}
-                                        count={singleItemDetails?.quantity || 0}
-                                        onDecrementClick={(e) =>
-                                          cartUpdateHandler(
-                                            e,
-                                            singleItemDetails,
-                                            currentSize.value,
-                                            -incrementDecrementUnit,
-                                            singleItemDetails?.itemIndex,
-                                            "update_item"
-                                          )
-                                        }
-                                        onIncrementClick={(e) =>
-                                          cartUpdateHandler(
-                                            e,
-                                            singleItemDetails,
-                                            currentSize.value,
-                                            incrementDecrementUnit,
-                                            singleItemDetails?.itemIndex,
-                                            "update_item"
-                                          )
-                                        }
-                                        onQtyChange={(evt, currentNum) =>
-                                          cartUpdateHandler(
-                                            evt,
-                                            singleItemDetails,
-                                            currentSize.value,
-                                            currentNum,
-                                            singleItemDetails?.itemIndex,
-                                            "edit_item"
-                                          )
-                                        }
-                                        maxCartQuantity={maxCartQuantity}
-                                        minCartQuantity={minCartQuantity}
-                                        containerClassName={styles.qtyContainer}
-                                        inputClassName={styles.inputContainer}
-                                      />
-                                    </>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      ref={addToCartBtnRef}
-                                      className={`${styles.button} ${styles.btnSecondary} ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
-                                      onClick={(e) => {
-                                        addProductForCheckout(
-                                          e,
-                                          selectedSize,
-                                          false
-                                        );
-                                        setIsLaodingCart(true);
-                                        setTimeout(() => {
-                                          setIsLaodingCart(false);
-                                        }, 1000);
-                                      }}
-                                      disabled={
-                                        isLoadingCart || isLoadingPriceBySize
-                                      }
-                                    >
-                                      <SvgWrapper
-                                        svgSrc="cart"
-                                        className={styles.cartIcon}
-                                      />
-                                      ADD TO CART
-                                    </button>
-                                  )}
-                                </>
-                              )}
-                              {!productMeta?.sellable && (
-                                <button
-                                  type="button"
-                                  disabled
-                                  className={`${styles.button} btnPrimary ${styles.notAvailable} ${styles.fontBody}`}
-                                >
-                                  PRODUCT NOT AVAILABLE
-                                </button>
-                              )}
+                                )}
                             </div>
+                            <div className={styles.sizeCartContainer}>
+                              {!isSizeSelectionBlock(block) &&
+                                productMeta?.sellable && (
+                                  <div
+                                    className={`${styles.sizeWrapper} ${isSizeCollapsed &&
+                                      styles["sizeWrapper--collapse"]
+                                      }`}
+                                  >
+                                    <div
+                                      className={` ${styles.sizeButton} ${styles.flexAlignCenter
+                                        } ${styles.justifyBetween} ${styles.fontBody} ${sizes?.sizes?.length &&
+                                        styles.disabledButton
+                                        }`}
+                                      onClick={() =>
+                                        setShowSizeDropdown(!showSizeDropdown)
+                                      }
+                                      disabled={!sizes?.sizes?.length}
+                                    >
+                                      <p
+                                        className={`${styles.buttonFont} ${styles.selectedSize}`}
+                                        title={
+                                          selectedSize
+                                            ? `${t("resource.common.size")} : ${selectedSize}`
+                                            : t("resource.common.select_size_caps")
+                                        }
+                                      >
+                                        {selectedSize
+                                          ? `${t("resource.common.size")} : ${selectedSize}`
+                                          : t("resource.common.select_size_caps")}
+                                      </p>
+                                      <SvgWrapper
+                                        svgSrc="arrow-down"
+                                        className={`${styles.dropdownArrow} ${showSizeDropdown && styles.rotateArrow
+                                          }`}
+                                      />
+                                    </div>
+                                    <OutsideClickHandler
+                                      onOutsideClick={() => {
+                                        setShowSizeDropdown(false);
+                                      }}
+                                    >
+                                      <ul
+                                        className={styles.sizeDropdown}
+                                        style={{
+                                          display: showSizeDropdown
+                                            ? "block"
+                                            : "none",
+                                        }}
+                                      >
+                                        {sizes?.sizes?.map((size) => (
+                                          <li
+                                            onClick={() =>
+                                              onSizeSelection(size)
+                                            }
+                                            key={size?.value}
+                                            className={`${selectedSize === size.display &&
+                                              styles.selected_size
+                                              } ${size.quantity === 0 && !isMto
+                                                ? styles.disabled_size
+                                                : styles.selectable_size
+                                              }`}
+                                          >
+                                            {size.display}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </OutsideClickHandler>
+                                  </div>
+                                )}
 
-                            {enable_buy_now?.value &&
-                              isSizeSelectionBlock(block) &&
-                              productMeta?.sellable && (
-                                <div
-                                  className={`${styles.actionBuyNow} ${
-                                    button_options?.includes("addtocart") &&
-                                    styles["actionBuyNow--ml-12"]
+                              <div
+                                className={`${styles.cartWrapper} ${isSizeSelectionBlock(block) &&
+                                  styles["cartWrapper--half-width"]
                                   }`}
-                                >
+                              >
+                                {!disable_cart && productMeta?.sellable && (
+                                  <>
+                                    {singleItemDetails?.quantity &&
+                                      show_quantity_control ? (
+                                      <>
+                                        <QuantityController
+                                          isCartUpdating={isCartUpdating}
+                                          count={
+                                            singleItemDetails?.quantity || 0
+                                          }
+                                          onDecrementClick={(e) =>
+                                            cartUpdateHandler(
+                                              e,
+                                              singleItemDetails,
+                                              currentSize.value,
+                                              -incrementDecrementUnit,
+                                              singleItemDetails?.itemIndex,
+                                              "update_item"
+                                            )
+                                          }
+                                          onIncrementClick={(e) =>
+                                            cartUpdateHandler(
+                                              e,
+                                              singleItemDetails,
+                                              currentSize.value,
+                                              incrementDecrementUnit,
+                                              singleItemDetails?.itemIndex,
+                                              "update_item"
+                                            )
+                                          }
+                                          onQtyChange={(evt, currentNum) =>
+                                            cartUpdateHandler(
+                                              evt,
+                                              singleItemDetails,
+                                              currentSize.value,
+                                              currentNum,
+                                              singleItemDetails?.itemIndex,
+                                              "edit_item"
+                                            )
+                                          }
+                                          maxCartQuantity={
+                                            singleItemDetails?.article
+                                              ?.quantity ?? maxCartQuantity
+                                          }
+                                          minCartQuantity={minCartQuantity}
+                                          containerClassName={
+                                            styles.qtyContainer
+                                          }
+                                          inputClassName={styles.inputContainer}
+                                        />
+                                      </>
+                                    ) : (
+                                      <button
+                                        type="button"
+                                        ref={addToCartBtnRef}
+                                        className={`${styles.button} btnSecondary ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
+                                        onClick={(e) => {
+                                          addProductForCheckout(
+                                            e,
+                                            selectedSize,
+                                            false
+                                          );
+                                          setIsLaodingCart(true);
+                                          setTimeout(() => {
+                                            setIsLaodingCart(false);
+                                          }, 1000);
+                                        }}
+                                        disabled={
+                                          isLoadingCart || isLoadingPriceBySize
+                                        }
+                                      >
+                                        <SvgWrapper
+                                          svgSrc="cart"
+                                          className={styles.cartIcon}
+                                        />
+                                        {t("resource.common.add_to_cart")}
+                                      </button>
+                                    )}
+                                  </>
+                                )}
+                                {!productMeta?.sellable && (
+                                  <button
+                                    type="button"
+                                    disabled
+                                    className={`${styles.button} btnPrimary ${styles.notAvailable} ${styles.fontBody}`}
+                                  >
+                                    {t("resource.common.product_not_available")}
+                                  </button>
+                                )}
+                              </div>
+
+                              {enable_buy_now?.value &&
+                                isSizeSelectionBlock(block) &&
+                                productMeta?.sellable && (
+                                  <div
+                                    className={`${styles.actionBuyNow} ${button_options?.includes("addtocart") &&
+                                      styles["actionBuyNow--ml-12"]
+                                      }`}
+                                  >
+                                    {!disable_cart && productMeta?.sellable && (
+                                      <FyButton
+                                        type="button"
+                                        className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
+                                        onClick={(e) => {
+                                          addProductForCheckout(
+                                            e,
+                                            selectedSize,
+                                            true
+                                          );
+                                          setIsLaodingCart(true);
+                                          setTimeout(() => {
+                                            setIsLaodingCart(false);
+                                          }, 500);
+                                        }}
+                                        disabled={
+                                          isLoadingCart || isLoadingPriceBySize
+                                        }
+                                        startIcon={
+                                          <SvgWrapper
+                                            svgSrc="buyNow"
+                                            className={styles.buyNow__icon}
+                                          />
+                                        }
+                                      >
+                                        {t("resource.common.buy_now_caps")}
+                                      </FyButton>
+                                    )}
+                                  </div>
+                                )}
+                            </div>
+                            {
+                              enable_buy_now?.value &&
+                              !isSizeSelectionBlock(block) && (
+                                <div className={styles.actionBuyNow}>
                                   {!disable_cart && productMeta?.sellable && (
                                     <FyButton
                                       type="button"
@@ -829,45 +940,14 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                         />
                                       }
                                     >
-                                      BUY NOW
+                                      {t(
+                                        "resource.common.buy_now_caps"
+                                      )}
                                     </FyButton>
                                   )}
                                 </div>
                               )}
-                          </div>
-                          {enable_buy_now?.value &&
-                            !isSizeSelectionBlock(block) && (
-                              <div className={styles.actionBuyNow}>
-                                {!disable_cart && productMeta?.sellable && (
-                                  <FyButton
-                                    type="button"
-                                    className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
-                                    onClick={(e) => {
-                                      addProductForCheckout(
-                                        e,
-                                        selectedSize,
-                                        true
-                                      );
-                                      setIsLaodingCart(true);
-                                      setTimeout(() => {
-                                        setIsLaodingCart(false);
-                                      }, 500);
-                                    }}
-                                    disabled={
-                                      isLoadingCart || isLoadingPriceBySize
-                                    }
-                                    startIcon={
-                                      <SvgWrapper
-                                        svgSrc="buyNow"
-                                        className={styles.buyNow__icon}
-                                      />
-                                    }
-                                  >
-                                    BUY NOW
-                                  </FyButton>
-                                )}
-                              </div>
-                            )}
+                          </div >
                         </>
                       );
 
@@ -881,7 +961,11 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                 onClick={() => setShowSizeGuide(true)}
                                 className={`${styles["product__size--guide"]} ${styles.buttonFont} ${styles.fontBody}`}
                               >
-                                <span>SIZE GUIDE</span>
+                                <span>
+                                  {t(
+                                    "resource.common.size_guide"
+                                  )}
+                                </span>
                                 <SvgWrapper
                                   svgSrc="scale"
                                   className={styles.scaleIcon}
@@ -910,15 +994,15 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                                   block,
                                   "custom_button_icon"
                                 ) && (
-                                  <FyImage
-                                    customClass={styles.customIcon}
-                                    src={getBlockConfigValue(
-                                      block,
-                                      "custom_button_icon"
-                                    )}
-                                    globalConfig={globalConfig}
-                                  />
-                                )}
+                                    <FyImage
+                                      customClass={styles.customIcon}
+                                      src={getBlockConfigValue(
+                                        block,
+                                        "custom_button_icon"
+                                      )}
+                                      globalConfig={globalConfig}
+                                    />
+                                  )}
                                 {getBlockConfigValue(
                                   block,
                                   "custom_button_text"
@@ -934,19 +1018,23 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                         <>
                           {productMeta?.sellable && selectedSize && (
                             <DeliveryInfo
-                              pincode={currentPincode}
-                              tat={productPriceBySlug?.delivery_promise}
+                              className={styles.deliveryInfoBlock}
+                              pincode={pincode}
+                              deliveryPromise={
+                                productPriceBySlug?.delivery_promise
+                              }
                               selectPincodeError={selectPincodeError}
                               pincodeErrorMessage={pincodeErrorMessage}
-                              setCurrentPincode={setCurrentPincode}
                               setErrorMessage={setErrorMessage}
                               checkPincode={checkPincode}
                               fpi={fpi}
+                              pincodeInput={pincodeInput}
+                              isValidDeliveryLocation={isValidDeliveryLocation}
+                              deliveryLocation={deliveryLocation}
+                              isServiceabilityPincodeOnly={
+                                isServiceabilityPincodeOnly
+                              }
                               setPincodeErrorMessage={setPincodeErrorMessage}
-                              isIntlShippingEnabled={isIntlShippingEnabled}
-                              sellerDetails={sellerDetails}
-                              pincodeDetails={pincodeDetails}
-                              locationDetails={locationDetails}
                               showLogo={getBlockConfigValue(block, "show_logo")}
                             />
                           )}
@@ -987,33 +1075,44 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                               <>
                                 {productPriceBySlug?.return_config
                                   ?.returnable && (
-                                  <li className={styles.b2}>
-                                    {`${productPriceBySlug?.return_config?.time} ${productPriceBySlug?.return_config?.unit} return`}
-                                  </li>
-                                )}
+                                    <li className={styles.b2}>
+                                      {`${productPriceBySlug?.return_config?.time} ${productPriceBySlug?.return_config?.unit} ${t(
+                                        "resource.facets.return"
+                                      )}`}
+                                    </li>
+                                  )}
                                 {/* v-else-if="returnConfig.returnable === false"  */}
                                 {!productPriceBySlug?.return_config
                                   ?.returnable &&
                                   selectedSize && (
                                     <li className={styles.b2}>
-                                      No return available on this product
+                                      {t(
+                                        "resource.product.no_return_available_message"
+                                      )}
                                     </li>
                                   )}
                               </>
                             )}
-                            {getManufacturingTime() && selectedSize && (
-                              <li className={styles.b2}>
-                                {`Shipping within ${productDetails?.custom_order?.manufacturing_time} ${productDetails?.custom_order?.manufacturing_time_unit}`}
-                              </li>
-                            )}
-                            {/*  */}
-                            {getBlockConfigValue(block, "item_code") &&
-                              productDetails?.item_code && (
+                            {productDetails?.custom_order?.is_custom_order &&
+                              getManufacturingTime() &&
+                              selectedSize && (
                                 <li className={styles.b2}>
-                                  Item code : {productDetails?.item_code}
+                                  {`${t("resource.product.shipping_within")} ${productDetails?.custom_order?.manufacturing_time} ${productDetails?.custom_order?.manufacturing_time_unit}`}
                                 </li>
                               )}
-                          </ul>
+                            {/*  */}
+                            {
+                              getBlockConfigValue(block, "item_code") &&
+                              productDetails?.item_code && (
+                                <li className={styles.b2}>
+                                  {t(
+                                    "resource.product.item_code"
+                                  )}{" "}
+                                  : {productDetails?.item_code}
+                                </li>
+                              )
+                            }
+                          </ul >
                         </>
                       );
 
@@ -1024,7 +1123,13 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                       return <BlockRenderer block={block} />;
 
                     default:
-                      return <div>Invalid block</div>;
+                      return (
+                        <div>
+                          {t(
+                            "resource.common.invalid_block"
+                          )}
+                        </div>
+                      );
                   }
                 })}
 
@@ -1061,14 +1166,16 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
                 ))} */}
 
               {/* ---------- Prod Desc ---------- */}
-              {variant_position?.value === "accordion" && (
-                <div className={styles.productDescDesktop}>
-                  <ProdDesc product={productDetails} config={props} />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+              {
+                variant_position?.value === "accordion" && (
+                  <div className={styles.productDescDesktop}>
+                    <ProdDesc product={productDetails} config={props} />
+                  </div>
+                )
+              }
+            </div >
+          </div >
+        </div >
         <ProdDesc
           customClass={
             variant_position?.value === "tabs"
@@ -1079,15 +1186,15 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
           config={props}
         />
       </div>
-
       {isRunningOnClient() &&
         document?.getElementById("sticky-add-to-cart") &&
         button_options?.includes("addtocart") &&
         !disable_cart &&
-        !singleItemDetails?.quantity &&
         productMeta?.sellable &&
+        isSizeWrapperAvailable &&
         createPortal(
           <StickyAddToCart
+            showBuyNow={enable_buy_now?.value}
             addToCartBtnRef={addToCartBtnRef}
             productMeta={productMeta}
             selectedSize={selectedSize}
@@ -1100,22 +1207,24 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
             productPriceBySlug={productPriceBySlug}
             isSizeGuideAvailable={blockProps.size_guide && isSizeGuideAvailable}
             deliveryInfoProps={{
-              pincode: currentPincode,
-              tat: productPriceBySlug?.delivery_promise,
+              fpi,
+              pincode,
+              deliveryPromise: productPriceBySlug?.delivery_promise,
               selectPincodeError,
               pincodeErrorMessage,
-              setCurrentPincode,
-              setErrorMessage,
+              pincodeInput,
+              isValidDeliveryLocation,
+              deliveryLocation,
+              isServiceabilityPincodeOnly,
               checkPincode,
-              fpi,
-              isIntlShippingEnabled,
-              sellerDetails,
-              pincodeDetails,
-              locationDetails,
+              setErrorMessage,
+              setPincodeErrorMessage,
+              showLogo: blockProps.show_logo,
             }}
           />,
           document?.getElementById("sticky-add-to-cart")
-        )}
+        )
+      }
       <MoreOffers
         isOpen={showMoreOffers}
         onCloseDialog={() => setShowMoreOffers(false)}
@@ -1129,436 +1238,325 @@ export function Component({ props = {}, globalConfig = {}, blocks = [] }) {
         customClass={styles.sizeGuide}
         productMeta={productMeta}
       />
-      {/* {isLoading && <Loader />} */}
     </>
   );
 }
 
 export const settings = {
-  label: "Product Description",
+  label: "t:resource.sections.product_description.product_description",
   props: [
     {
       type: "product",
-      name: "Product",
+      name: "t:resource.common.product",
       id: "product",
-      label: "Select a Product",
-      info: "Product Item to be displayed",
+      label: "t:resource.common.select_a_product",
+      info: "t:resource.common.product_item_display",
     },
     {
       type: "checkbox",
       id: "enable_buy_now",
-      label: "Enable Buy now",
-      info: "Enable buy now feature",
+      label: "t:resource.sections.product_description.enable_buy_now",
+      info: "t:resource.sections.product_description.enable_buy_now_feature",
       default: false,
     },
     {
       type: "checkbox",
       id: "product_details_bullets",
-      label: "Show Bullets in Product Details",
+      label: "t:resource.sections.product_description.show_bullets_in_product_details",
       default: true,
     },
     {
       type: "color",
       id: "icon_color",
-      label: "Play video icon color",
+      label: "t:resource.sections.product_description.play_video_icon_color",
       default: "#D6D6D6",
     },
     {
       type: "checkbox",
       id: "mandatory_pincode",
-      label: "Mandatory Delivery check",
+      label: "t:resource.common.mandatory_delivery_check",
       default: true,
     },
     {
       type: "radio",
       id: "variant_position",
-      label: "Product Detail Postion",
+      label: "t:resource.sections.product_description.product_detail_postion",
       default: "accordion",
       options: [
-        {
-          value: "accordion",
-          text: "Accordion style",
-        },
-        {
-          value: "tabs",
-          text: "Tab style",
-        },
+        { value: "accordion", text: "t:resource.sections.product_description.accordion_style" },
+        { value: "tabs", text: "t:resource.sections.product_description.tab_style" },
       ],
     },
     {
       type: "checkbox",
       id: "show_products_breadcrumb",
-      label: "Show Products breadcrumb",
+      label: "t:resource.sections.product_description.show_products_breadcrumb",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_category_breadcrumb",
-      label: "Show Category breadcrumb",
+      label: "t:resource.sections.product_description.show_category_breadcrumb",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_brand_breadcrumb",
-      label: "Show Brand breadcrumb",
+      label: "t:resource.sections.product_description.show_brand_breadcrumb",
       default: true,
     },
     {
       type: "checkbox",
       id: "first_accordian_open",
-      label: "First Accordian Open",
+      label: "t:resource.sections.product_description.first_accordian_open",
       default: true,
     },
   ],
   blocks: [
     {
       type: "product_name",
-      name: "Product Name",
+      name: "t:resource.sections.product_description.product_name",
       props: [
         {
           type: "checkbox",
           id: "show_brand",
-          label: "Display Brand name",
+          label: "t:resource.sections.product_description.display_brand_name",
           default: true,
         },
       ],
     },
     {
       type: "product_price",
-      name: "Product Price",
+      name: "t:resource.sections.product_description.product_price",
       props: [
         {
           type: "checkbox",
           id: "mrp_label",
-          label: "Display MRP label text",
+          label: "t:resource.sections.product_description.display_mrp_label_text",
           default: true,
         },
       ],
     },
     {
       type: "product_tax_label",
-      name: "Product Tax Label",
+      name: "t:resource.sections.product_description.product_tax_label",
       props: [
         {
           type: "text",
           id: "tax_label",
-          label: "Price tax label text",
+          label: "t:resource.common.price_tax_label_text",
           default: "Price inclusive of all tax",
         },
       ],
     },
-    {
-      type: "short_description",
-      name: "Short Description",
-      props: [],
-    },
-    {
-      type: "product_variants",
-      name: "Product Variants",
-      props: [],
-    },
+    { type: "short_description", name: "t:resource.sections.product_description.short_description", props: [] },
+    { type: "product_variants", name: "t:resource.sections.product_description.product_variants", props: [] },
     {
       type: "seller_details",
-      name: "Seller Details",
+      name: "t:resource.sections.product_description.seller_details",
       props: [
         {
           type: "checkbox",
-          id: "seller_store_selection",
-          label: "Seller Store Selection",
-          default: false,
-        },
-        {
-          type: "checkbox",
           id: "show_seller",
-          label: "Show Seller",
+          label: "t:resource.common.show_seller",
           default: true,
         },
       ],
     },
     {
       type: "size_wrapper",
-      name: "Size Container with Action Buttons",
+      name: "t:resource.sections.product_description.size_container_with_action_buttons",
       props: [
         {
           type: "checkbox",
           id: "hide_single_size",
-          label: "Hide single size",
+          label: "t:resource.common.hide_single_size",
           default: false,
         },
         {
           type: "checkbox",
           id: "preselect_size",
-          label: "Preselect size",
-          info: "Applicable only for multiple-size products",
+          label: "t:resource.common.preselect_size",
+          info: "t:resource.common.applicable_for_multiple_size_products",
           default: true,
         },
         {
           type: "radio",
           id: "size_selection_style",
-          label: "Size selection style",
+          label: "t:resource.common.size_selection_style",
           default: "dropdown",
           options: [
-            {
-              value: "dropdown",
-              text: "Dropdown style",
-            },
-            {
-              value: "block",
-              text: "Block style",
-            },
+            { value: "dropdown", text: "t:resource.common.dropdown_style" },
+            { value: "block", text: "t:resource.common.block_style" },
           ],
         },
       ],
     },
-    {
-      type: "size_guide",
-      name: "Size Guide",
-      props: [],
-    },
+    { type: "size_guide", name: "t:resource.sections.product_description.size_guide", props: [] },
     {
       type: "custom_button",
-      name: "Custom Button",
+      name: "t:resource.common.custom_button",
       props: [
         {
           type: "text",
           id: "custom_button_text",
-          label: "Custom Button text",
+          label: "t:resource.common.custom_button_text",
           default: "Enquire now",
-          info: "Applicable for PDP Section",
+          info: "t:resource.sections.product_description.applicable_for_pdp_section",
         },
         {
           type: "url",
           id: "custom_button_link",
-          label: "Custom Button link",
+          label: "t:resource.common.custom_button_link",
           default: "",
         },
         {
           type: "image_picker",
           id: "custom_button_icon",
-          label: "Custom Button Icon",
+          label: "t:resource.common.custom_button_icon",
           default: "",
-          options: {
-            aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
-          },
+          options: { aspect_ratio: "1:1", aspect_ratio_strict_check: true },
         },
       ],
     },
     {
       type: "pincode",
-      name: "Pincode",
+      name: "t:resource.sections.product_description.pincode",
       props: [
         {
           type: "checkbox",
           id: "show_logo",
-          label: "Show brand logo",
+          label: "t:resource.sections.product_description.show_brand_logo",
           default: true,
-          info: "The pincode section will show the brand logo and name",
+          info: "t:resource.sections.product_description.show_brand_logo_name_in_pincode_section",
         },
       ],
     },
-    {
-      type: "add_to_compare",
-      name: "Add to Compare",
-      props: [],
-    },
+    { type: "add_to_compare", name: "t:resource.sections.product_description.add_to_compare", props: [] },
     {
       type: "offers",
-      name: "Offers",
+      name: "t:resource.sections.product_description.offers",
       props: [
         {
           type: "checkbox",
           id: "show_offers",
-          label: "Show Offers",
+          label: "t:resource.sections.product_description.show_offers",
           default: true,
         },
       ],
     },
     {
       type: "prod_meta",
-      name: "Prod Meta",
+      name: "t:resource.sections.product_description.prod_meta",
       props: [
-        {
-          type: "checkbox",
-          id: "return",
-          label: "Return",
-          default: true,
-        },
+        { type: "checkbox", id: "return", label: "t:resource.sections.product_description.return", default: true },
         {
           type: "checkbox",
           id: "item_code",
-          label: "Show Item code",
+          label: "t:resource.sections.product_description.show_item_code",
           default: true,
         },
       ],
     },
     {
       type: "trust_markers",
-      name: "Trust Markers",
+      name: "t:resource.sections.product_description.trust_markers",
       props: [
         {
           type: "image_picker",
           id: "badge_logo_1",
-          label: "Badge logo 1",
+          label: "t:resource.sections.product_description.badge_logo_1",
           default: "",
-          options: {
-            aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
-          },
+          options: { aspect_ratio: "1:1", aspect_ratio_strict_check: true },
         },
         {
           type: "text",
           id: "badge_label_1",
-          label: "Badge label 1",
+          label: "t:resource.sections.product_description.badge_label_1",
           default: "",
         },
-        {
-          type: "url",
-          id: "badge_url_1",
-          label: "Badge URL 1",
-          default: "",
-        },
+        { type: "url", id: "badge_url_1", label: "t:resource.sections.product_description.badge_url_1", default: "" },
         {
           type: "image_picker",
           id: "badge_logo_2",
-          label: "Badge logo 2",
+          label: "t:resource.sections.product_description.badge_logo_2",
           default: "",
-          options: {
-            aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
-          },
+          options: { aspect_ratio: "1:1", aspect_ratio_strict_check: true },
         },
         {
           type: "text",
           id: "badge_label_2",
-          label: "Badge label 2",
+          label: "t:resource.sections.product_description.badge_label_2",
           default: "",
         },
-        {
-          type: "url",
-          id: "badge_url_2",
-          label: "Badge URL 2",
-          default: "",
-        },
+        { type: "url", id: "badge_url_2", label: "t:resource.sections.product_description.badge_url_2", default: "" },
         {
           type: "image_picker",
           id: "badge_logo_3",
-          label: "Badge logo 3",
+          label: "t:resource.sections.product_description.badge_logo_3",
           default: "",
-          options: {
-            aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
-          },
+          options: { aspect_ratio: "1:1", aspect_ratio_strict_check: true },
         },
         {
           type: "text",
           id: "badge_label_3",
-          label: "Badge label 3",
+          label: "t:resource.sections.product_description.badge_label_3",
           default: "",
         },
-        {
-          type: "url",
-          id: "badge_url_3",
-          label: "Badge URL 3",
-          default: "",
-        },
+        { type: "url", id: "badge_url_3", label: "t:resource.sections.product_description.badge_url_3", default: "" },
         {
           type: "image_picker",
           id: "badge_logo_4",
-          label: "Badge logo 4",
+          label: "t:resource.sections.product_description.badge_logo_4",
           default: "",
-          options: {
-            aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
-          },
+          options: { aspect_ratio: "1:1", aspect_ratio_strict_check: true },
         },
         {
           type: "text",
           id: "badge_label_4",
-          label: "Badge label 4",
+          label: "t:resource.sections.product_description.badge_label_4",
           default: "",
         },
-        {
-          type: "url",
-          id: "badge_url_4",
-          label: "Badge URL 4",
-          default: "",
-        },
+        { type: "url", id: "badge_url_4", label: "t:resource.sections.product_description.badge_url_4", default: "" },
         {
           type: "image_picker",
           id: "badge_logo_5",
-          label: "Badge logo 5",
+          label: "t:resource.sections.product_description.badge_logo_5",
           default: "",
-          options: {
-            aspect_ratio: "1:1",
-            aspect_ratio_strict_check: true,
-          },
+          options: { aspect_ratio: "1:1", aspect_ratio_strict_check: true },
         },
         {
           type: "text",
           id: "badge_label_5",
-          label: "Badge label 5",
+          label: "t:resource.sections.product_description.badge_label_5",
           default: "",
         },
-        {
-          type: "url",
-          id: "badge_url_5",
-          label: "Badge URL 5",
-          default: "",
-        },
+        { type: "url", id: "badge_url_5", label: "t:resource.sections.product_description.badge_url_5", default: "" },
       ],
     },
   ],
   preset: {
     blocks: [
-      {
-        name: "Product Name",
-      },
-      {
-        name: "Product Price",
-      },
-      {
-        name: "Product Tax Label",
-      },
-      {
-        name: "Short Description",
-      },
-      {
-        name: "Product Variants",
-      },
-      {
-        name: "Seller Details",
-      },
-      {
-        name: "Size Guide",
-      },
-      {
-        name: "Custom Button",
-      },
-      {
-        name: "Pincode",
-      },
-      {
-        name: "Add to Compare",
-      },
-      {
-        name: "Offers",
-      },
-      {
-        name: "Prod Meta",
-      },
-      {
-        name: "Size Container with Action Buttons",
-      },
+      { name: "t:resource.sections.product_description.product_name" },
+      { name: "t:resource.sections.product_description.product_price" },
+      { name: "t:resource.sections.product_description.product_tax_label" },
+      { name: "t:resource.sections.product_description.short_description" },
+      { name: "t:resource.sections.product_description.product_variants" },
+      { name: "t:resource.sections.product_description.seller_details" },
+      { name: "t:resource.sections.product_description.size_guide" },
+      { name: "t:resource.common.custom_button" },
+      { name: "t:resource.sections.product_description.pincode" },
+      { name: "t:resource.sections.product_description.add_to_compare" },
+      { name: "t:resource.sections.product_description.offers" },
+      { name: "t:resource.sections.product_description.prod_meta" },
+      { name: "t:resource.sections.product_description.size_container_with_action_buttons" },
     ],
   },
 };
 
 Component.serverFetch = async ({ fpi, router }) => {
   const slug = router?.params?.slug;
-  const values = {
-    slug,
-  };
+  const values = { slug };
 
   fpi.custom.setValue("isPdpSsrFetched", true);
   fpi.custom.setValue("isProductNotFound", false);

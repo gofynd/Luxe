@@ -722,3 +722,75 @@ export const CHECK_PINCODE = `query PincodeDetails($pincode: String!) {
     }
   }
 }`;
+
+export const PRODUCT_SELLERS = `query productSellers(
+  $size: String!
+  $slug: String!
+  $strategy: String
+  $pageNo: Int
+  $pageSize: Int
+) {
+  productSellers(
+    size: $size
+    slug: $slug
+    strategy: $strategy
+    pageNo: $pageNo
+    pageSize: $pageSize
+  ) {
+    items {
+      article_assignment {
+        level
+        strategy
+      }
+      article_id
+      delivery_promise {
+        min
+        max
+      }
+      discount
+      is_cod
+      is_gift
+      item_type
+      long_lat
+      pincode
+      price {
+        currency_code
+        currency_symbol
+        effective
+        marked
+        selling
+      }
+      quantity
+      seller {
+        name
+        count
+        uid
+      }
+      seller_count
+      special_badge
+      store {
+        name
+        count
+        uid
+      }
+      trader
+      is_serviceable
+      tags
+
+    }
+    page {
+      current
+      next_id
+      has_previous
+      has_next
+      item_total
+      type
+      size
+    }
+    sort_on {
+      is_selected
+      name
+      value
+    }
+  }
+}`;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { useGlobalStore } from "fdk-core/utils";
+import { useSearchParams } from "react-router-dom";
+import { useGlobalStore, useNavigate, useGlobalTranslation } from "fdk-core/utils";
 import { CART_DETAILS } from "../../queries/cartQuery";
 import { LOCALITY } from "../../queries/localityQuery";
 import { SELECT_ADDRESS } from "../../queries/checkoutQuery";
@@ -8,22 +8,19 @@ import {
   useAddress,
   useSnackbar,
   useAddressFormSchema,
+  usePincodeInput,
 } from "../../helper/hooks";
 import useInternational from "../../components/header/useInternational";
 import { capitalize } from "../../helper/utils";
 
 const useCartDeliveryLocation = ({ fpi }) => {
+  const { t } = useGlobalTranslation("translation");
   const [searchParams] = useSearchParams();
-
   const navigate = useNavigate();
   const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
-  const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
   const isLoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
   const CART = useGlobalStore(fpi.getters.CART);
   const { cart_items } = CART || {};
-  const [pincode, setPincode] = useState(
-    (pincodeDetails?.localityValue ?? locationDetails?.pincode) || ""
-  );
   const [selectedAddressId, setSelectedAddressId] = useState("");
   const [isPincodeModalOpen, setIsPincodeModalOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
@@ -59,14 +56,18 @@ const useCartDeliveryLocation = ({ fpi }) => {
   }, [allAddress]);
 
   const {
+    isInternational,
     countries,
-    fetchCountrieDetails,
     countryDetails,
     currentCountry,
-    isInternational,
+    deliveryLocation,
+    isServiceabilityPincodeOnly,
+    fetchCountrieDetails,
+    setI18nDetails,
   } = useInternational({
     fpi,
   });
+
   const [selectedCountry, setSelectedCountry] = useState(currentCountry);
   const [countrySearchText, setCountrySearchText] = useState("");
 
@@ -76,19 +77,14 @@ const useCartDeliveryLocation = ({ fpi }) => {
     }
   }, [currentCountry]);
 
-  useEffect(() => {
-    fetchCountrieDetails({
-      countryIsoCode: selectedCountry?.iso2 ?? countries?.[0]?.iso2,
-    });
-  }, [selectedCountry]);
-
   const { formSchema, defaultAddressItem } = useAddressFormSchema({
     fpi,
-    countryCode: selectedCountry?.phone_code,
-    countryIso: selectedCountry?.iso2,
+    countryCode: countryDetails?.phone_code,
+    countryIso: countryDetails?.iso2,
     addressTemplate: countryDetails?.fields?.address_template?.checkout_form,
     addressFields: countryDetails?.fields?.address,
   });
+  const pincodeInput = usePincodeInput();
 
   function convertDropDownField(inputField) {
     return {
@@ -97,11 +93,25 @@ const useCartDeliveryLocation = ({ fpi }) => {
     };
   }
 
-  const setI18nDetails = (e) => {
+  const handleCountryChange = async (e) => {
     const selectedCountry = countries.find(
       (country) => country.display_name === e
     );
     setSelectedCountry(selectedCountry);
+    try {
+      const response = await fetchCountrieDetails({
+        countryIsoCode: selectedCountry?.meta?.country_code,
+      });
+      if (response?.data?.country) {
+        const countryInfo = response.data.country;
+        setI18nDetails({
+          iso: countryInfo.iso2,
+          phoneCode: countryInfo.phone_code,
+          name: countryInfo.display_name,
+          currency: countryInfo.currency.code,
+        });
+      }
+    } catch (error) { }
   };
 
   const handleCountrySearch = (event) => {
@@ -126,7 +136,7 @@ const useCartDeliveryLocation = ({ fpi }) => {
       .executeGQL(LOCALITY, {
         locality: posttype,
         localityValue: `${postcode}`,
-        country: selectedCountry?.iso2,
+        country: selectedCountry?.meta?.country_code,
       })
       .then((res) => {
         const data = { showError: false, errorMsg: "" };
@@ -151,18 +161,20 @@ const useCartDeliveryLocation = ({ fpi }) => {
           return data;
         } else {
           showSnackbar(
-            res?.errors?.[0]?.message || "Pincode verification failed"
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure")
           );
           data.showError = true;
           data.errorMsg =
-            res?.errors?.[0]?.message || "Pincode verification failed";
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure");
           return data;
         }
       });
   };
 
   function handleButtonClick() {
-    if (isLoggedIn) {
+    if (!isServiceabilityPincodeOnly) {
+      fpi.custom.setValue("isI18ModalOpen", true);
+    } else if (isLoggedIn) {
       setIsAddressModalOpen(true);
     } else {
       setIsPincodeModalOpen(true);
@@ -181,18 +193,9 @@ const useCartDeliveryLocation = ({ fpi }) => {
   }
   function gotoCheckout(id) {
     if (cart_items?.id && id) {
-      navigate({
-        pathname: "/cart/checkout",
-        search: `id=${cart_items?.id}&address_id=${id}`,
-        state: {
-          autoNaviagtedFromCart: true,
-          addrId: id,
-        },
-      });
+      navigate(`/cart/checkout?id=${cart_items?.id ?? ""}&address_id=${id ?? ""}`);
     } else {
-      navigate({
-        pathname: "/cart/bag",
-      });
+      navigate("/cart/bag");
     }
   }
 
@@ -239,21 +242,21 @@ const useCartDeliveryLocation = ({ fpi }) => {
   const selectedAddressString = useMemo(() => {
     if (selectedAddress) {
       return getFormattedAddress(selectedAddress);
-    }
-    if (defaultAddress?.id) {
+    } else if (defaultAddress?.id) {
       return getFormattedAddress(defaultAddress);
+    } else {
+      return "";
     }
-    return "";
   }, [selectedAddress, defaultAddress]);
 
   const personName = useMemo(() => {
     if (selectedAddress) {
       return selectedAddress.name;
-    }
-    if (defaultAddress?.id) {
+    } else if (defaultAddress?.id) {
       return defaultAddress.name;
+    } else {
+      return "";
     }
-    return "";
   }, [selectedAddress, defaultAddress]);
 
   const selectAddress = (id = "") => {
@@ -261,7 +264,7 @@ const useCartDeliveryLocation = ({ fpi }) => {
       (item) => item?.id === selectedAddressId
     );
     if (!cart_items?.id) {
-      showSnackbar("Failed to select an address", "error");
+      showSnackbar(t("resource.common.address.address_selection_failure"), "error");
       return;
     }
     const cart_id = cart_items?.id;
@@ -285,12 +288,13 @@ const useCartDeliveryLocation = ({ fpi }) => {
         setAddrError(null);
       } else {
         const errMsg =
-          res?.data?.selectAddress?.message || "Failed to select an address";
+          res?.data?.selectAddress?.message || t("resource.common.address.address_selection_failure");
         setAddrError({ id: addrId, message: errMsg });
         showSnackbar(errMsg, "error");
       }
     });
   };
+
   const setI18NDetails = () => {
     const cookiesData = JSON.stringify({
       currency: { code: selectedCountry?.currency?.code },
@@ -328,21 +332,17 @@ const useCartDeliveryLocation = ({ fpi }) => {
         });
       } else {
         showSnackbar(
-          res?.errors?.[0]?.message ?? "Failed to add an address",
+          res?.errors?.[0]?.message ?? t("resource.common.address.address_addition_failure"),
           "error"
         );
       }
     });
   }
 
-  useEffect(() => {
-    setPincode(
-      (pincodeDetails?.localityValue ?? locationDetails?.pincode) || ""
-    );
-  }, [pincodeDetails, locationDetails]);
-
   return {
-    pincode,
+    pincode: locationDetails?.pincode || "",
+    deliveryLocation: deliveryLocation.join(", "),
+    pincodeInput,
     error,
     isPincodeModalOpen,
     isAddressModalOpen,
@@ -364,7 +364,7 @@ const useCartDeliveryLocation = ({ fpi }) => {
     isInternationalShippingEnabled: isInternational,
     addressFormSchema: formSchema,
     addressItem: defaultAddressItem,
-    setI18nDetails,
+    onCountryChange: handleCountryChange,
     handleCountrySearch,
     getFilteredCountries,
     selectedCountry,

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { replaceQueryPlaceholders } from "../../../helper/utils";
 import styles from "../../../styles/categories-filter.less";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function RangeInputContainer({
   singleFilter,
   updateSelectedFilters,
   categoryNameValue,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const [minVal, setMinVal] = useState(
     singleFilter?.selected_min || singleFilter?.min
   );
@@ -42,8 +44,14 @@ function RangeInputContainer({
   return (
     <div className={styles.rangeContainer}>
       <div className={styles.rangeTitleContainer}>
-        <div>From</div>
-        <div>To</div>
+        <div>
+          {t(
+            "resource.facets.from"
+          )}
+        </div>
+        <div>
+          {t("resource.facets.to")}
+        </div>
       </div>
       <div className={styles.rangeInputContainer}>
         <div>

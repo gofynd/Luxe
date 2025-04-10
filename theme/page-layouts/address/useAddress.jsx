@@ -7,13 +7,9 @@ import {
   REMOVE_ADDRESS,
 } from "../../queries/addressQuery";
 import useInternational from "../../components/header/useInternational";
-import { useAddressFormSchema } from "../../helper/hooks";
+import { useAddressFormSchema, useGoogleMapConfig } from "../../helper/hooks";
 
 const useAddress = (fpi, pageName) => {
-  const INTEGRATION_TOKENS = useGlobalStore(fpi.getters.INTEGRATION_TOKENS);
-  const APP_FEATURES = useGlobalStore(fpi.getters.APP_FEATURES);
-  const [mapApiKey, setMapApiKey] = useState("");
-
   const {
     countries,
     fetchCountrieDetails,
@@ -25,6 +21,7 @@ const useAddress = (fpi, pageName) => {
   });
   const [selectedCountry, setSelectedCountry] = useState(currentCountry);
   const [countrySearchText, setCountrySearchText] = useState("");
+  const { isGoogleMap, mapApiKey } = useGoogleMapConfig({ fpi });
 
   useEffect(() => {
     if (currentCountry) {
@@ -115,23 +112,8 @@ const useAddress = (fpi, pageName) => {
     return fpi.executeGQL(REMOVE_ADDRESS, { id: addressId });
   };
 
-  useEffect(() => {
-    if (
-      INTEGRATION_TOKENS &&
-      APP_FEATURES?.[pageName]?.google_map &&
-      INTEGRATION_TOKENS?.tokens?.google_map?.credentials?.api_key
-    ) {
-      setMapApiKey(
-        Buffer?.from(
-          INTEGRATION_TOKENS?.tokens?.google_map?.credentials?.api_key,
-          "base64"
-        )?.toString()
-      );
-    }
-  }, [INTEGRATION_TOKENS, APP_FEATURES]);
-
   return {
-    mapApiKey,
+    mapApiKey: isGoogleMap ? mapApiKey : "",
     fetchAddresses,
     addAddress,
     updateAddress,

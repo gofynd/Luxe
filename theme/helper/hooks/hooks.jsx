@@ -44,7 +44,6 @@ export const useSnackbar = () => {
     // Create a new snackbar and store it in the ref
     snackbarRef.current = new Snackbar(`${message}`, {
       position: "top-right",
-      timeout: 1000,
       style: {
         container: [["background-color", getBgColor(type)]],
         message: [["color", getColor(type)]],
@@ -52,6 +51,11 @@ export const useSnackbar = () => {
         actionButton: [["color", "white"]],
       },
     });
+
+    const id = setTimeout(() => {
+      snackbarRef.current.hide();
+      clearTimeout(id);
+    }, 1000);
   };
 
   return { showSnackbar };

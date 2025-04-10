@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useGlobalStore } from "fdk-core/utils";
+import { useMemo } from "react";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import {
   ADDRESS_LIST,
   ADD_ADDRESS,
@@ -9,12 +9,12 @@ import {
 import { LOCALITY } from "../../queries/logisticsQuery";
 import { useSnackbar } from "./hooks";
 import { capitalize } from "../utils";
+import { useGoogleMapConfig } from "./useGoogleMapConfig";
 
 export const useAddress = ({ fpi, pageName }) => {
+  const { t } = useGlobalTranslation("translation");
   const { showSnackbar } = useSnackbar();
-  const INTEGRATION_TOKENS = useGlobalStore(fpi.getters.INTEGRATION_TOKENS);
-  const APP_FEATURES = useGlobalStore(fpi.getters.APP_FEATURES);
-  const [mapApiKey, setMapApiKey] = useState("");
+  const { isGoogleMap, mapApiKey } = useGoogleMapConfig({ fpi });
   const addressData = useGlobalStore(fpi.getters.ADDRESS);
   const { loading: isLoading, address: allAddress } = addressData || {};
   const defaultAddress = useMemo(
@@ -26,21 +26,6 @@ export const useAddress = ({ fpi, pageName }) => {
     () => allAddress?.filter((item) => item.is_default_address !== true),
     [allAddress]
   );
-
-  useEffect(() => {
-    if (
-      INTEGRATION_TOKENS &&
-      APP_FEATURES?.[pageName]?.google_map &&
-      INTEGRATION_TOKENS?.tokens?.google_map?.credentials?.api_key
-    ) {
-      setMapApiKey(
-        Buffer?.from(
-          INTEGRATION_TOKENS?.tokens?.google_map?.credentials?.api_key,
-          "base64"
-        )?.toString()
-      );
-    }
-  }, [INTEGRATION_TOKENS, APP_FEATURES]);
 
   const getLocality = (posttype, postcode) => {
     return fpi
@@ -69,14 +54,15 @@ export const useAddress = ({ fpi, pageName }) => {
           });
 
           return data;
+        } else {
+          showSnackbar(
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure")
+          );
+          data.showError = true;
+          data.errorMsg =
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure");
+          return data;
         }
-        showSnackbar(
-          res?.errors?.[0]?.message || "Pincode verification failed"
-        );
-        data.showError = true;
-        data.errorMsg =
-          res?.errors?.[0]?.message || "Pincode verification failed";
-        return data;
       });
   };
 
@@ -123,7 +109,7 @@ export const useAddress = ({ fpi, pageName }) => {
     updateAddress,
     removeAddress,
     mapApiKey,
-    showGoogleMap: mapApiKey?.length > 0,
+    showGoogleMap: isGoogleMap,
     getLocality,
   };
 };

@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
 import { FAQ_CATEGORIES, FAQS_BY_CATEGORY } from "../../queries/faqQuery";
+import { useNavigate } from "fdk-core/utils";
 
 const useFaq = ({ fpi }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const [activeFaqCat, setActiveFaqCat] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const slug = searchParams.get("category");
+  const [isFaqCateoryLoading, setIsFaqCateoryLoading] = useState(false);
   const [faqs, setFaqs] = useState(null);
 
   const { categories: faqCategories } =
@@ -15,7 +19,10 @@ const useFaq = ({ fpi }) => {
   const FAQS = useGlobalStore(fpi?.getters?.FAQS) ?? {};
 
   useEffect(() => {
-    fpi.executeGQL(FAQ_CATEGORIES);
+    setIsLoading(true);
+    fpi.executeGQL(FAQ_CATEGORIES).then(() => {
+      setIsLoading(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -23,21 +30,25 @@ const useFaq = ({ fpi }) => {
   }, [FAQS.faqs]);
 
   useEffect(() => {
-    const slug = searchParams.get("category");
     if (faqCategories?.length && !slug) {
       const defaultSlug = faqCategories?.[0]?.slug ?? "";
+      setIsFaqCateoryLoading(true);
       setActiveFaqCat(
         faqCategories?.find((i) => i.slug === defaultSlug) ?? null
       );
-      fpi.executeGQL(FAQS_BY_CATEGORY, { slug: defaultSlug });
+      fpi.executeGQL(FAQS_BY_CATEGORY, { slug: defaultSlug }).then(() => {
+        setIsFaqCateoryLoading(false);
+      });
     }
   }, [faqCategories]);
 
   useEffect(() => {
-    const slug = searchParams.get("category");
     if (slug) {
+      setIsFaqCateoryLoading(true);
       setActiveFaqCat(faqCategories?.find((i) => i.slug === slug) ?? null);
-      fpi.executeGQL(FAQS_BY_CATEGORY, { slug });
+      fpi.executeGQL(FAQS_BY_CATEGORY, { slug }).then(() => {
+        setIsFaqCateoryLoading(false);
+      });
     }
   }, [location.search, faqCategories]);
 
@@ -60,6 +71,7 @@ const useFaq = ({ fpi }) => {
     setFaqs,
     updateSearchParams,
     hasCatQuery: !!searchParams.get("category"),
+    isLoading: isLoading || isFaqCateoryLoading,
   };
 };
 

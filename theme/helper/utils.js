@@ -1,4 +1,11 @@
 import Pixelbin, { transformations } from "@pixelbin/core";
+import {
+  DEFAULT_CURRENCY_LOCALE,
+  DEFAULT_UTC_LOCALE,
+  DIRECTION_ADAPTIVE_CSS_PROPERTIES,
+  FLOAT_MAP,
+  TEXT_ALIGNMENT_MAP,
+} from "./constant";
 
 export const debounce = (func, wait) => {
   let timeout;
@@ -82,7 +89,7 @@ export const copyToClipboard = (str) => {
   }
 };
 
-export function convertDate(dateString) {
+export function convertDate(dateString, locale = "en-US") {
   const date = new Date(dateString);
 
   const options = {
@@ -95,13 +102,13 @@ export function convertDate(dateString) {
     timeZone: "UTC",
   };
 
-  const formatter = new Intl.DateTimeFormat("en-US", options);
+  const formatter = new Intl.DateTimeFormat(locale, options);
   const formattedDate = formatter.format(date);
 
   return formattedDate;
 }
 
-export const convertUTCDateToLocalDate = (date, format) => {
+export const convertUTCDateToLocalDate = (date, format, locale = "en-US") => {
   let frm = format;
   if (!frm) {
     frm = {
@@ -123,7 +130,7 @@ export const convertUTCDateToLocalDate = (date, format) => {
   };
   // Convert the UTC date and time to the desired format
   const formattedDate = utcDate
-    .toLocaleString("en-US", options)
+    .toLocaleString(locale, options)
     .replace(" at ", ", ");
   return formattedDate;
 };
@@ -247,10 +254,10 @@ export const getProductImgAspectRatio = (
   return defaultAspectRatio;
 };
 
-export const currencyFormat = (value, currencySymbol) => {
+export const currencyFormat = (value, currencySymbol, locale = "en-IN") => {
   // Check if value is defined (including 0) and currencySymbol is provided
   if (value != null) {
-    const formattedValue = value.toLocaleString("en-IN");
+    const formattedValue = value.toLocaleString(locale);
 
     // If currencySymbol is a valid uppercase currency code
     if (currencySymbol && /^[A-Z]+$/.test(currencySymbol)) {
@@ -313,4 +320,78 @@ export function getCookie(key) {
   } else {
     return null;
   }
+}
+
+export const getValidLocales = (languagesList) => {
+  return languagesList.map((lang) => lang.locale);
+};
+
+export const formatLocale = (locale, countryCode, isCurrencyLocale = false) => {
+  if ((locale === "en" || !locale) && isCurrencyLocale) {
+    return DEFAULT_CURRENCY_LOCALE;
+  }
+  if (locale === "en" || !locale) {
+    return DEFAULT_UTC_LOCALE;
+  }
+  if (locale.includes("-")) {
+    return locale;
+  }
+  return `${locale}${countryCode ? "-" + countryCode : ""}`;
+};
+
+export const getDirectionAdaptiveValue = (cssProperty, value) => {
+  switch (cssProperty) {
+    case DIRECTION_ADAPTIVE_CSS_PROPERTIES.TEXT_ALIGNMENT:
+      return TEXT_ALIGNMENT_MAP[value];
+    case DIRECTION_ADAPTIVE_CSS_PROPERTIES.FLOAT:
+      return FLOAT_MAP[value];
+    default:
+      return value;
+  }
+};
+export function createFieldValidation(field, t) {
+  if (!field) return () => {};
+  const {
+    display_name,
+    required,
+    validation: { type, regex },
+  } = field;
+  return (value) => {
+    if (required && !value) {
+      return `${display_name} ${t("resource.common.address.is_required")}.`;
+    }
+
+    if ((required || value) && type === "regex" && regex?.value) {
+      try {
+        const regExp = new RegExp(regex.value);
+        if (!regExp.test(value)) {
+          return `${t("resource.common.invalid")} ${display_name}`;
+        }
+      } catch (error) {
+        return `${t("resource.common.invalid")} ${display_name}`;
+      }
+    }
+    const { min, max } = regex?.length || {};
+    if (
+      (required || value) &&
+      ((max && value.length > max) || (min && value.length < min))
+    ) {
+      return `${display_name} ${t("resource.common.validation_length", { min: min || 0, max: max || "∞" })}`;
+    }
+    return true;
+  };
+}
+
+export function createLocalitiesPayload(slug, fieldsMap, values) {
+  if (!slug) return {};
+  const field = fieldsMap?.[slug];
+  let result = {};
+  if (field?.prev) {
+    result = {
+      ...result,
+      ...createLocalitiesPayload(field?.prev, fieldsMap, values),
+    };
+  }
+  result[slug] = values?.[slug]?.display_name || values?.[slug] || undefined;
+  return result;
 }

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import styles from "./styles/shipments-update-item.less";
 import QuantityCtrl from "./quantity-ctrl";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function ShipmentUpdateItem({ selectedBagId, item }) {
+  const { t } = useGlobalTranslation("translation");
   const [showQuantityError, setShowQuantityError] = useState(false);
   const [showQuantity, setshowQuantity] = useState(true);
   const [currQuantity, setcurrQuantity] = useState(item.quantity);
@@ -65,7 +67,6 @@ function ShipmentUpdateItem({ selectedBagId, item }) {
   //   }));
 
   return (
-    // eslint-disable-next-line react/jsx-no-useless-fragment
     <>
       {item?.bag_ids?.includes(selectedBagId) && (
         <div className={`${styles.updateItem}`}>
@@ -93,9 +94,21 @@ function ShipmentUpdateItem({ selectedBagId, item }) {
                   {showQuantityError && (
                     <div className={`${styles.maxAvail} ${styles.regularxxxs}`}>
                       {currQuantity > 0 && (
-                        <span>Max quantity: {currQuantity}</span>
+                        <span>
+                          {t(
+                            "resource.common.max_quantity"
+                          )}:{" "}
+                          {currQuantity}
+                        </span>
                       )}
-                      {currQuantity === 0 && <span>Min quantity: 0</span>}
+                      {currQuantity === 0 && (
+                        <span>
+                          {t(
+                            "resource.common.min_quantity"
+                          )}:{" "}
+                          0
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
@@ -110,7 +123,22 @@ function ShipmentUpdateItem({ selectedBagId, item }) {
               </span>
               <span className={`${styles.lightxxs}`}>
                 ({item?.quantity}
-                {item?.quantity === 1 ? "Piece" : "Pieces"})
+                {t(
+                  item?.quantity === 1
+                    ? "resource.common.single_piece"
+                    : "resource.common.multiple_piece",
+                  {
+                    count: item?.quantity,
+                  }
+                )}
+                {item?.quantity === 1
+                  ? t(
+                    "resource.common.single_piece"
+                  )
+                  : t(
+                    "resource.common.multiple_piece"
+                  )}
+                )
               </span>
             </div>
           </div>

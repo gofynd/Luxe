@@ -4,7 +4,7 @@
   overflow: hidden !important;
   // position: fixed;
   // top: 0;
-  // right: 0;
+  // inset-inline-end: 0;
   // width: 540px;
   // height: 100%;
   // z-index: 101;
@@ -35,24 +35,36 @@
     }
   }
 
-  .offerCardCode {
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    @media @tablet {
-      font-size: 14px;
+  .offerCard {
+    padding: 16px;
+    border-radius: 16px;
+    background: @PageBackground;
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    .offerCardHead {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
-    @media @mobile {
-      font-size: 14px;
+    .offerCardCode {
+      font-size: 20px;
+      font-weight: 600;
+      @media @tablet {
+        font-size: 14px;
+      }
+      @media @mobile {
+        font-size: 14px;
+      }
     }
-  }
 
-  .offerCardTitle {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 4px;
-    @media @mobile {
-      font-size: 12px;
+    .offerCardTitle {
+      font-size: 14px;
+      font-weight: 500;
+      @media @mobile {
+        font-size: 12px;
+      }
     }
   }
 
@@ -70,7 +82,7 @@
       padding: 0.75rem 0;
       cursor: pointer;
       color: @TextLabel;
-      margin-left: 1.5rem;
+      margin-inline-start: 1.5rem;
     }
   }
 
@@ -100,7 +112,7 @@
       &::-webkit-scrollbar-thumb {
         border-radius: 2.5px;
         background-color: #6b6b6b;
-        border-left: 10px solid #ffffff;
+        border-inline-start: 10px solid #ffffff;
       }
     }
   }
@@ -111,7 +123,7 @@
   height: 100%;
   position: fixed;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   background-color: rgba(20, 19, 14, 0.6);
   opacity: 0;
   transition: all 0.4s;
@@ -124,23 +136,4 @@
   }
 }
 
-.offerCard {
-  padding: 16px;
-  border-radius: 16px;
-  background: #f3f3ed;
-  margin-bottom: 16px;
 
-  &__title {
-    margin-top: 8px;
-  }
-  &__description {
-    margin-top: 16px;
-
-    & > :first-child {
-      margin-top: 0;
-    }
-    & > :last-child {
-      margin-bottom: 0;
-    }
-  }
-}

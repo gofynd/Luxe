@@ -11,6 +11,9 @@ import {
   isRunningOnClient,
 } from "../../../../helper/utils";
 import Viewer3D from "../viewer-3d/viewer-3d";
+import {
+  useGlobalTranslation
+} from "fdk-core/utils";
 
 function LightboxImage({
   images,
@@ -24,9 +27,9 @@ function LightboxImage({
   siteLoading = null,
   showCaption = false,
   lengthToLoadMore = 0,
-  closeText = "Close (Esc)",
+  closeText,
   previousText = "Previous",
-  nextText = "Next",
+  nextText,
   previousThumbText = "Previous",
   nextThumbText = "Next",
   iconColor = "",
@@ -35,6 +38,7 @@ function LightboxImage({
   currentIndex,
   closeGallery,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const [select, setSelect] = useState(startAt);
   const [lightBoxOn, setLightBoxOn] = useState(showLightBox);
   const [timer, setTimer] = useState(null);
@@ -221,11 +225,11 @@ function LightboxImage({
         <div className={styles.lbContent}>
           <div className={styles.lbHeader}>
             <h4>
-              Image ({select + 1}/{images.length})
+              {t("resource.product.image")} ({select + 1}/{images.length})
             </h4>
             <button
               type="button"
-              title={closeText}
+              title={closeText || t("resource.facets.close_esc")}
               className={styles.lbButtonClose}
               aria-label="close"
               onClick={closeGallery}
@@ -239,7 +243,7 @@ function LightboxImage({
           <div
             className={styles.lbFigure}
             onClick={(e) => e.stopPropagation()}
-            // ref={containerRef}
+          // ref={containerRef}
           >
             <div className={styles.mediaWrapper}>
               {images[select].type === "image" && (
@@ -261,7 +265,7 @@ function LightboxImage({
                 <div className={styles.videoContainer}>
                   {images[select].url.includes("youtube") ? (
                     <iframe
-                      title="Youtube"
+                      title={t("resource.common.social_accounts.youtube")}
                       key={images[select]?.url}
                       src={`${images[select]?.url}?enablejsapi=1&html5=1`}
                       srcSet={images[select]?.srcset || ""}
@@ -316,13 +320,12 @@ function LightboxImage({
               {images.length > 1 && (
                 <button
                   type="button"
-                  className={`${styles.lbArrow} ${styles.lbLeft} ${
-                    select === 0 ? styles.disableArrow : ""
-                  }`}
-                  title="previousText"
+                  className={`${styles.lbArrow} ${styles.lbLeft} ${select === 0 ? styles.disableArrow : ""
+                    }`}
+                  title={t("resource.product.previous_text")}
                   onClick={previousImage}
                   disabled={select === 0}
-                  aria-label="prev"
+                  aria-label={t("resource.facets.prev")}
                 >
                   <div name="previous">
                     <SvgWrapper svgSrc="arrow-left-white" />
@@ -333,13 +336,12 @@ function LightboxImage({
               {images.length > 1 && (
                 <button
                   type="button"
-                  className={`${styles.lbArrow} ${styles.lbRight} ${
-                    select === images.length - 1 ? styles.disableArrow : ""
-                  }`}
-                  title={nextText}
+                  className={`${styles.lbArrow} ${styles.lbRight} ${select === images.length - 1 ? styles.disableArrow : ""
+                    }`}
+                  title={nextText || t("resource.facets.next")}
                   onClick={nextImage}
                   disabled={select === images.length - 1}
-                  aria-label="Next"
+                  aria-label={t("resource.facets.next")}
                 >
                   <div name="next">
                     <SvgWrapper svgSrc="arrow-right-white" />
@@ -349,7 +351,7 @@ function LightboxImage({
 
               <div
                 className={styles.lbThumbnailWrapper}
-                // style={`--icon-color: ${iconColor}`}
+              // style={`--icon-color: ${iconColor}`}
               >
                 {showThumbs && (
                   <div className={styles.lbThumbnail}>
@@ -369,11 +371,10 @@ function LightboxImage({
                           <FyImage
                             src={image?.url}
                             alt={image?.alt}
-                            customClass={`${styles.lbModalThumbnail} ${
-                              select === index
-                                ? `${styles["lbModalThumbnail-active"]}`
-                                : ""
-                            }`}
+                            customClass={`${styles.lbModalThumbnail} ${select === index
+                              ? `${styles["lbModalThumbnail-active"]}`
+                              : ""
+                              }`}
                             mobileAspectRatio={getProductImgAspectRatio(
                               globalConfig
                             )}
@@ -388,21 +389,19 @@ function LightboxImage({
                                 alt={image?.alt}
                                 src={getImageURL(image?.url)}
                                 className={`${styles.lbModalVideoThumbnail}
-                          ${
-                            select === index
-                              ? `${styles["lbModalVideoThumbnail-active"]}`
-                              : ""
-                          }`}
+                          ${select === index
+                                    ? `${styles["lbModalVideoThumbnail-active"]}`
+                                    : ""
+                                  }`}
                               />
                             ) : (
                               <video
                                 src={image?.url}
                                 className={`${styles.lbModalVideoThumbnail}
-                          ${
-                            select === index
-                              ? `${styles["lbModalVideoThumbnail-active"]}`
-                              : ""
-                          }`}
+                          ${select === index
+                                    ? `${styles["lbModalVideoThumbnail-active"]}`
+                                    : ""
+                                  }`}
                               />
                             )}
                             <SvgWrapper
@@ -413,11 +412,10 @@ function LightboxImage({
                         )}
                         {image.type === "3d_model" && (
                           <div
-                            className={`${styles.modelThumbnail} ${
-                              select === index
-                                ? styles["lbModalThumbnail-active"]
-                                : ""
-                            }`}
+                            className={`${styles.modelThumbnail} ${select === index
+                              ? styles["lbModalThumbnail-active"]
+                              : ""
+                              }`}
                           >
                             <SvgWrapper
                               svgSrc="3D"

@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { FDKLink } from "fdk-core/components";
 import Slider from "react-slick";
 import styles from "../styles/sections/feature-blog.less";
 import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
-import { isRunningOnClient, throttle } from "../helper/utils";
+import { formatLocale, isRunningOnClient, throttle } from "../helper/utils";
 import { FETCH_BLOGS_LIST } from "../queries/blogQuery";
-import { useGlobalStore, useFPI } from "fdk-core/utils";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
+import { FDKLink } from "fdk-core/components";
 
 export function Component({ props, globalConfig }) {
   const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
+  const { t } = useGlobalTranslation("translation");
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
   const blogItems = customValues?.featuredBlogSectionData ?? [];
   const { heading, description } = props;
@@ -113,7 +116,7 @@ export function Component({ props, globalConfig }) {
     };
     // Convert the UTC date and time to the desired format
     const formattedDate = utcDate
-      .toLocaleString("en-US", options)
+      .toLocaleString(formatLocale(locale, countryCode), options)
       .replace(" at ", ", ");
     return formattedDate;
   };
@@ -124,7 +127,7 @@ export function Component({ props, globalConfig }) {
 
   const dynamicStyles = {
     paddingTop: "16px",
-    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
   };
 
   useEffect(() => {
@@ -148,7 +151,9 @@ export function Component({ props, globalConfig }) {
     <div style={dynamicStyles} className={styles.featureBlogWrapper}>
       <div className={styles.blogSection}>
         {heading?.value && (
-          <h2 className={styles.blogSection__heading}>{heading?.value}</h2>
+          <h2 className={`${styles.blogSection__heading} fontHeader`}>
+            {heading?.value}
+          </h2>
         )}
         {description?.value && (
           <p className={`${styles.blogSection__description} ${styles.b4}`}>
@@ -202,7 +207,7 @@ export function Component({ props, globalConfig }) {
                       </div>
                     )}
 
-                    <h3 className={styles.blog__info__title}>
+                    <h3 className={`fontHeader ${styles.blog__info__title}`}>
                       <FDKLink
                         target="_blank"
                         to={`/blog/${blog.slug}`}
@@ -235,7 +240,7 @@ export function Component({ props, globalConfig }) {
             className={styles.blogSection__cta}
             to="/blog"
           >
-            View All
+            {t("resource.facets.view_all")}
           </FDKLink>
         </div>
       )}
@@ -244,22 +249,22 @@ export function Component({ props, globalConfig }) {
 }
 
 export const settings = {
-  label: "Feature Blog",
+  label: "t:resource.sections.blog.feature_blog",
   props: [
     {
       type: "text",
       id: "heading",
       default: "Feature Blog",
-      label: "Heading",
-      info: "Heading text of the section",
+      label: "t:resource.common.heading",
+      info: "t:resource.common.section_heading_text",
     },
     {
       type: "textarea",
       id: "description",
       default:
         "Chique is a fast-growing indowestern womenswear brand having several stores pan India. Simple, innovative and progressive,",
-      label: "Description",
-      info: "Description text of the section",
+      label: "t:resource.common.description",
+      info: "t:resource.common.section_description_text",
     },
   ],
 };

@@ -1,4 +1,5 @@
 import FPIClient from "@gofynd/fdk-store-gql";
+// import FPIClient from "../../../PlatformCoreLibraries/shadowfire-graphql/lib/index";
 import customTemplates from "./custom-templates";
 import "./styles/base.global.less";
 import sections from "./sections";
@@ -159,5 +160,7 @@ export default async ({
       import(
         /* webpackChunkName:"getSections" */ "./page-layouts/section-render/section-page"
       ),
+    getRefund: () =>
+      import(/* webpackChunkName:"getRefund" */ "./pages/refund-order"),
   };
 };

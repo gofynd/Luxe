@@ -3,31 +3,21 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import styles from "./store-item.less";
-import { currencyFormat } from "../../../../helper/utils";
+import { currencyFormat, formatLocale } from "../../../../helper/utils";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
 
 function StoreItem({
   storeitem,
-  activeStoreInfo,
-  appFeatures,
+  buybox,
   onSelectStoreItem,
 }) {
+  const { t } = useGlobalTranslation("translation");
+  const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
   const isOpen = storeitem.isOpen || false;
-
-  const isActive = () => {
-    if (activeStoreInfo) {
-      if (
-        activeStoreInfo.seller.uid === storeitem.seller.uid &&
-        activeStoreInfo.store.uid === storeitem.store.uid
-      ) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   const getStoreLabel = () => {
-    const isSellerListing =
-      appFeatures?.feature?.buybox?.is_seller_buybox_enabled;
+    const isSellerListing = buybox?.is_seller_buybox_enabled; // Hardcoded for testing purpose
 
     return isSellerListing ? storeitem?.seller?.name : storeitem?.store?.name;
   };
@@ -57,35 +47,37 @@ function StoreItem({
         const pricePerPiece = storeitem?.price_per_piece;
         return currencyFormat(
           pricePerPiece[key],
-          pricePerPiece?.currency_symbol
+          pricePerPiece?.currency_symbol,
+          formatLocale(locale, countryCode, true)
         );
       }
       return currencyFormat(
         storeitem.price[key],
-        storeitem.price.currency_symbol
+        storeitem.price.currency_symbol,
+        formatLocale(locale, countryCode, true)
       );
     }
   };
 
-  const selectStoreItem = (isBuyNow) => {
-    onSelectStoreItem(storeitem, isBuyNow);
+  const selectStoreItem = (event, isBuyNow) => {
+    onSelectStoreItem(event, storeitem, isBuyNow);
   };
 
   return (
     <div className={styles.storeItemWrapper}>
       <p className={`${styles.storeItemWrapperSold} ${styles.b4}`}>
-        Sold by: <span className={styles.sh4}>{getStoreLabel()}</span>
+        {t("resource.common.sold_by")}: <span className={styles.sh4}>{getStoreLabel()}</span>
       </p>
       <div className={styles.priceWrapper}>
-        <span className={`${styles.priceWrapperEffective} ${styles.sh4}`}>
+        <span className={`${styles.effective} ${styles.sh4}`}>
           {getProductPrice("effective")}
         </span>
         {getProductPrice("effective") !== getProductPrice("marked") && (
-          <span className={`${styles.priceWrapperMarked} captionNormal`}>
+          <span className={`${styles.marked} captionNormal`}>
             {getProductPrice("marked")}
           </span>
         )}
-        <span className={`${styles.priceWrapperDiscount} ${styles.sh4}`}>
+        <span className={`${styles.discount} ${styles.sh4}`}>
           {storeitem.discount}
         </span>
       </div>
@@ -98,16 +90,16 @@ function StoreItem({
         <button
           type="button"
           className={`${styles.button} btnSecondary ${styles.flexCenter} ${styles.addToCart} ${styles.fontBody}`}
-          onClick={() => selectStoreItem(false)}
+          onClick={(event) => selectStoreItem(event, false)}
         >
-          ADD TO CART
+          {t("resource.common.add_to_cart")}
         </button>
         <button
           type="button"
           className={`${styles.button} btnPrimary ${styles.buyNow} ${styles.fontBody}`}
-          onClick={() => selectStoreItem(true)}
+          onClick={(event) => selectStoreItem(event, true)}
         >
-          BUY NOW
+          {t("resource.common.buy_now_caps")}
         </button>
       </div>
     </div>

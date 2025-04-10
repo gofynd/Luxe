@@ -1,54 +1,28 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { FDKLink } from "fdk-core/components";
-
-import OrderStatusPage from "@gofynd/theme-template/pages/order-status/order-status";
+import { useSearchParams } from "react-router-dom";
+import OrderStatusPage from "fdk-react-templates/pages/order-status/order-status";
 import { useLoggedInUser } from "../helper/hooks";
 import empty from "../assets/images/empty_state.png";
 import { ORDER_BY_ID } from "../queries/checkoutQuery";
-
-import "@gofynd/theme-template/pages/order-status/order-status.css";
+import "fdk-react-templates/pages/order-status/order-status.css";
 import Loader from "../components/loader/loader";
 import cartClock from "../assets/images/cart-clock.png";
 import FyImage from "../components/core/fy-image/fy-image";
+import { useNavigate, useGlobalTranslation } from "fdk-core/utils";
+import { FDKLink } from "fdk-core/components";
+import EmptyState from "../components/empty-state/empty-state";
+import SVgWrapper from "../components/core/svgWrapper/SvgWrapper";
 
 function OrderPolling({ isLoggedIn }) {
-  const retryStyle = {
-    width: "180px",
-    height: "180px",
-    position: "relative",
-    left: "50%",
-    transform: "translateX(-50%)",
-  };
+  const { t } = useGlobalTranslation("translation");
   return (
-    <>
-      <div style={retryStyle}>
-        <FyImage src={cartClock} />
-      </div>
-      <h3
-        style={{
-          color: "var(--textHeading)",
-          maxWidth: "1000px",
-          margin: "5% auto",
-          textAlign: "center",
-        }}
-        className="h3 fontBody"
-      >
-        Sorry Its Taking Longer. We will notify you once the order is processed.
-        You can also check
-        {isLoggedIn ? " My Orders" : " Track Order"} in sometime to track the
-        order.
-      </h3>
-      <div style={{ textAlign: "center", marginTop: "24px" }}>
-        <FDKLink
-          to="/"
-          className="btnPrimary fontBody"
-          style={{ padding: "10px 20px" }}
-        >
-          RETURN TO HOMEPAGE
-        </FDKLink>
-      </div>
-    </>
+    <EmptyState
+      description={t("resource.order.polling.description")}
+      Icon={<SVgWrapper svgSrc="order-pending" />}
+      title={t("resource.order.polling.pending")}
+      btnLink="/"
+      btnTitle={t("resource.common.continue_shopping")}
+    />
   );
 }
 
@@ -85,6 +59,8 @@ function OrderStatus({ fpi }) {
       }
     }
   }, [success, attempts, fetchOrder, orderData]);
+
+  console.log({ orderData });
 
   return (
     <div className="basePageContainer margin0auto">

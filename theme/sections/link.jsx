@@ -1,23 +1,29 @@
 import React from "react";
 import { FDKLink } from "fdk-core/components";
-import { getGlobalConfigValue } from "../helper/utils";
 
 export function Component({ props, globalConfig }) {
-  const margin_bottom = getGlobalConfigValue(
-    globalConfig,
-    "section_margin_bottom"
-  );
   const { label, url, target } = props;
   return target.value === "_blank" ? (
     <a
       href={url.value}
       target={target.value}
-      style={{ marginBottom: `${margin_bottom}px` }}
+      style={{
+        display: "block",
+        paddingTop: "16px",
+        paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
+      }}
     >
       {label.value}
     </a>
   ) : (
-    <FDKLink to={url.value} style={{ marginBottom: `${margin_bottom}px` }}>
+    <FDKLink
+      to={url.value}
+      style={{
+        display: "block",
+        paddingTop: "16px",
+        paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
+      }}
+    >
       {label.value}
     </FDKLink>
   );
@@ -28,26 +34,26 @@ export const settings = {
   props: [
     {
       id: "label",
-      label: "Link Label",
+      label: "t:resource.sections.link.link_label",
       type: "text",
       default: "Section Link",
-      info: "Label to show for link",
+      info: "t:resource.sections.link.link_label_info",
     },
     {
       id: "url",
-      label: "URL",
+      label: "t:resource.sections.link.url",
       type: "text",
       default: "/",
-      info: "URl for link",
+      info: "t:resource.sections.link.url_for_link",
     },
     {
       id: "target",
-      label: "Link Target",
+      label: "t:resource.sections.link.link_target",
       type: "text",
       default: "",
-      info: "HTML target attribute for link",
+      info: "t:resource.sections.link.html_target",
     },
   ],
   blocks: [],
 };
-export default Component
+export default Component;

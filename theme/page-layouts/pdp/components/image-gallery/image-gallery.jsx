@@ -11,6 +11,9 @@ import {
 import styles from "./image-gallery.less";
 import LightboxImage from "../lightbox-image/lightbox-image";
 import MobileSlider from "../mobile-slider/mobile-slider";
+import {
+  useGlobalTranslation
+} from "fdk-core/utils";
 
 function PdpImageGallery({
   images,
@@ -28,6 +31,7 @@ function PdpImageGallery({
   handleShare,
   showShareIcon = true,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [enableLightBox, setEnableLightBox] = useState(false);
   const [src, setSrc] = useState(images?.[0]?.url || "");
@@ -105,9 +109,8 @@ function PdpImageGallery({
           <div>
             <SvgWrapper
               svgSrc="carousel-nav-arrow"
-              className={`${styles.carouselArrow} ${
-                styles["carouselArrow--left"]
-              } ${currentImageIndex <= 0 ? styles.disableArrow : ""}`}
+              className={`${styles.carouselArrow} ${styles["carouselArrow--left"]
+                } ${currentImageIndex <= 0 ? styles.disableArrow : ""}`}
               onClick={prevSlide}
             />
           </div>
@@ -130,18 +133,17 @@ function PdpImageGallery({
             />
             {product?.custom_order?.is_custom_order && (
               <div className={`${styles.badge} ${styles.b4}`}>
-                Made to Order
+                {t("resource.product.made_to_order")}
               </div>
             )}
           </div>
           <div>
             <SvgWrapper
               svgSrc="carousel-nav-arrow"
-              className={`${styles.carouselArrow} ${
-                currentImageIndex >= images.length - 1
-                  ? styles.disableArrow
-                  : ""
-              }`}
+              className={`${styles.carouselArrow} ${currentImageIndex >= images.length - 1
+                ? styles.disableArrow
+                : ""
+                }`}
               onClick={nextSlide}
             />
           </div>
@@ -149,42 +151,37 @@ function PdpImageGallery({
 
         {!hiddenDots && (
           <div
-            className={`${styles.thumbSlider} ${
-              displayThumbnail ? "" : styles.hidden
-            }}`}
+            className={`${styles.thumbSlider} ${displayThumbnail ? "" : styles.hidden
+              }}`}
           >
             <div
-              className={`${styles.thumbWrapper} ${
-                images && images.length < 5 ? styles.removeWidth : ""
-              }`}
+              className={`${styles.thumbWrapper} ${images && images.length < 5 ? styles.removeWidth : ""
+                }`}
             >
               <button
                 type="button"
                 className={`${styles.prevBtn} ${styles.btnNavGallery}`}
                 onClick={prevSlide}
-                aria-label="Prev"
+                aria-label={t("resource.facets.prev")}
               >
                 <SvgWrapper
                   svgSrc="arrow-left"
-                  className={`${
-                    currentImageIndex <= 0 ? styles.disableArrow : ""
-                  } ${styles.navArrowIcon}`}
+                  className={`${currentImageIndex <= 0 ? styles.disableArrow : ""
+                    } ${styles.navArrowIcon}`}
                 />
               </button>
               <ul
                 ref={itemWrapperRef}
-                className={`${styles.imageGallery__list} ${
-                  styles.scrollbarHidden
-                } ${images && images?.length < 5 ? styles.fitContent : ""}`}
+                className={`${styles.imageGallery__list} ${styles.scrollbarHidden
+                  } ${images && images?.length < 5 ? styles.fitContent : ""}`}
               >
                 {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */}
                 {images.map((item, index) => (
                   <li
                     key={index}
                     onClick={(e) => setMainImage(e, index)}
-                    className={`${styles.gap} ${
-                      item.type === "video" ? styles.flexAlign : ""
-                    } ${currentImageIndex === index ? styles.active : ""}`}
+                    className={`${styles.gap} ${item.type === "video" ? styles.flexAlign : ""
+                      } ${currentImageIndex === index ? styles.active : ""}`}
                     style={{ "--icon-color": iconColor }}
                   >
                     {item.type === "image" && (
@@ -231,15 +228,14 @@ function PdpImageGallery({
                 type="button"
                 className={`${styles.nextBtn} ${styles.btnNavGallery}`}
                 onClick={nextSlide}
-                aria-label="Next"
+                aria-label={t("resource.facets.next")}
               >
                 <SvgWrapper
                   svgSrc="arrow-right"
-                  className={`${
-                    currentImageIndex >= images.length - 1
-                      ? styles.disableArrow
-                      : ""
-                  } ${styles.navArrowIcon}`}
+                  className={`${currentImageIndex >= images.length - 1
+                    ? styles.disableArrow
+                    : ""
+                    } ${styles.navArrowIcon}`}
                 />
               </button>
             </div>

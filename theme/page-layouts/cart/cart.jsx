@@ -1,10 +1,10 @@
 import React from "react";
 import { SectionRenderer } from "fdk-core/components";
-import CartNew from "@gofynd/theme-template/pages/cart/cart";
+import CartNew from "fdk-react-templates/pages/cart/cart";
 import styles from "./cart.less";
-import "@gofynd/theme-template/pages/cart/cart.css";
-// import PriceBreakup from "@gofynd/theme-template/components/price-breakup.js";
-// import "@gofynd/theme-template/components/price-breakup.css";
+import "fdk-react-templates/pages/cart/cart.css";
+// import PriceBreakup from "fdk-react-templates/components/price-breakup.js";
+// import "fdk-react-templates/components/price-breakup.css";
 import Loader from "../../components/loader/loader";
 import EmptyState from "../../components/empty-state/empty-state";
 import useCart from "./useCart";
@@ -13,10 +13,11 @@ import useCartShare from "./useCartShare";
 import useCartComment from "./useCartComment";
 import useCartGst from "./useCartGst";
 import useCartCoupon from "./useCartCoupon";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function Cart({ fpi, globalConfig, sections }) {
+  const { t } = useGlobalTranslation("translation");
   const { isLoading, cartData, currencySymbol, ...restProps } = useCart(fpi);
-
   const cartDeliveryLocation = useCartDeliveryLocation({ fpi });
   const cartShare = useCartShare({ fpi, cartData });
   const cartComment = useCartComment({ fpi, cartData });
@@ -26,7 +27,7 @@ function Cart({ fpi, globalConfig, sections }) {
   if (isLoading) {
     return <Loader />;
   } else if (cartData?.items?.length === 0) {
-    return <EmptyState title="Your Shopping Bag is empty" />;
+    return <EmptyState title={t("resource.cart.empty_shopping_bag")} />;
   }
 
   return (

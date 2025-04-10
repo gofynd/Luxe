@@ -1,4 +1,4 @@
-export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBreakup: Boolean, $includeAllItems: Boolean, $includeCodCharges: Boolean) {
+export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBreakup: Boolean, $includeAllItems: Boolean, $includeCodCharges: Boolean, $id: String) {
   addresses {
     address {
       custom_json
@@ -338,6 +338,28 @@ export const CHECKOUT_LANDING = `query Addresses( $buyNow: Boolean, $includeBrea
       symbol
     }
     success
+  }
+  coupons(buyNow: $buyNow, id: $id) {
+    available_coupon_list {
+      coupon_amount
+      coupon_applicable_message
+      coupon_code
+      coupon_type
+      coupon_value
+      description
+      end_date
+      expires_on
+      is_applicable
+      is_applied
+      is_bank_offer
+      max_discount_value
+      message
+      minimum_cart_value
+      offer_text
+      start_date
+      sub_title
+      title
+    }
   }
 }`;
 
@@ -817,6 +839,13 @@ export const PAYMENT_OPTIONS = `query PaymentModeRoutes($amount: Float!,$cartId:
           payment_flow_data
         }
       }
+      aggregator_details {
+        api_link
+        data
+        payment_flow
+        aggregator_key
+        type
+      }
       payment_option {
         add_card_enabled
         aggregator_name
@@ -824,6 +853,39 @@ export const PAYMENT_OPTIONS = `query PaymentModeRoutes($amount: Float!,$cartId:
         display_name
         display_priority
         is_pay_by_card_pl
+        name
+        save_card
+        suggested_list
+        flow
+        supported_methods
+        {
+          name
+          logo
+        }
+      stored_payment_details {
+          card_number
+          card_reference
+          card_issuer
+          compliant_with_tokenisation_guidelines
+          card_fingerprint
+          expired
+          exp_year
+          exp_month
+          card_id
+          card_brand
+          nickname
+          card_name
+          card_type
+          card_brand_image
+          display_name
+          card_isin
+          cvv_length
+          cvv_less
+          card_token
+          name
+          meta
+          vpa
+      }
         list {
           aggregator_name
           card_brand
@@ -1564,6 +1626,15 @@ export const ORDER_BY_ID = `query Order($orderId: String!) {
         payment_mode
         status
       }
+      payment_info {
+        display_name
+        logo
+        mode
+        mop
+        payment_mode
+        status
+        amount
+      }
       prices {
         added_to_fynd_cash
         amount_paid
@@ -1647,5 +1718,17 @@ export const ORDER_BY_ID = `query Order($orderId: String!) {
       mobile
       name
     }
+  }
+}`;
+export const VALID_UPI = `mutation validateVPA($validateVPARequestInput: ValidateVPARequestInput) {
+  validateVPA(validateVPARequestInput: $validateVPARequestInput) {
+    data {
+      customer_name
+      is_valid
+      status
+      upi_vpa
+    }
+    success
+    customer_name
   }
 }`;

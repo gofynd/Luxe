@@ -29,6 +29,7 @@ import mute from "../assets/images/mute.svg";
 import unmute from "../assets/images/unmute.svg";
 import autoRotate from "../assets/images/auto-rotate.svg";
 import crossBlack from "../assets/images/cross-black.svg";
+import crossContainedBlack from "../assets/images/cross-contained-black.svg";
 import carouselNavArrow from "../assets/images/carousel-nav-arrow.svg";
 import g3D from "../assets/images/3D.svg";
 import arrowLeftWhite from "../assets/images/arrow-left-white.svg";
@@ -76,6 +77,7 @@ import callSupport from "../assets/images/call-support.svg";
 import share from "../assets/images/share.svg";
 import shareDesktop from "../assets/images/share-desktop.svg";
 import wattsappShare from "../assets/images/wattsapp-share.svg";
+import twitterShare from "../assets/images/twitter-share.svg";
 import facebookShare from "../assets/images/facebook-share.svg";
 import SocailTwitter from "../assets/images/socail-twitter.svg";
 import SocailFacebook from "../assets/images/socail-facebook.svg";
@@ -100,6 +102,11 @@ import arrowRightBlack from "../assets/images/arrow-right-black.svg";
 import fyndLogo from "../assets/images/fynd-logo.svg";
 import emptyCart from "../assets/images/empty-cart.svg";
 import email404 from "../assets/images/email404.svg";
+import orderPending from "../assets/images/order-pending.svg";
+import noFaq from "../assets/images/no-faq.svg";
+import compareWarning from "../assets/images/compare-warning.svg";
+import bankVerified from "../assets/images/bankVerified.svg";
+import orderDelivery from "../assets/images/order-delivery.svg";
 
 /* eslint-disable  import/prefer-default-export */
 export const svgTitleComponentsMappings = {
@@ -144,6 +151,7 @@ export const svgTitleComponentsMappings = {
   unmute,
   "auto-rotate": autoRotate,
   "cross-black": crossBlack,
+  "cross-contained-black": crossContainedBlack,
   "carousel-nav-arrow": carouselNavArrow,
   "3D": g3D,
   "arrow-right-white": arrowRightWhite,
@@ -191,6 +199,7 @@ export const svgTitleComponentsMappings = {
   share,
   shareDesktop,
   wattsappShare,
+  twitterShare,
   facebookShare,
   polygon,
   locationOn,
@@ -205,4 +214,9 @@ export const svgTitleComponentsMappings = {
   "fynd-logo": fyndLogo,
   "empty-cart": emptyCart,
   "email-404": email404,
+  "order-pending": orderPending,
+  "no-faq": noFaq,
+  "compare-warning": compareWarning,
+  "bank-verified": bankVerified,
+  "order-delivery": orderDelivery,
 };

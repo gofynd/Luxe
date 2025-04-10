@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-
-import { FDKLink } from "fdk-core/components";
 // import ProductCard from "../components/product-card/product-card";
 import styles from "../styles/brands.less";
 import useBrandListing from "../page-layouts/brands/useBrandListing";
@@ -9,8 +7,12 @@ import InfiniteLoader from "../components/infinite-loader/infinite-loader";
 import ScrollToTop from "../components/scroll-to-top/scroll-to-top";
 import { detectMobileWidth } from "../helper/utils";
 import { BRAND_LISTING } from "../queries/brandsQuery";
+import { FDKLink } from "fdk-core/components";
+import { useGlobalTranslation } from "fdk-core/utils";
+import EmptyState from "../components/empty-state/empty-state";
 
 function Brands({ fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const { brands, isLoading, pageConfig, pageData, fetchBrands, globalConfig } =
     useBrandListing(fpi);
   const { title, description, infinite_scroll, logo_only, back_top } =
@@ -22,15 +24,17 @@ function Brands({ fpi }) {
   }, []);
   //   const { page, items = [], loading } = product_lists || {};
 
+  if (!isLoading && !brands?.length) {
+    return <EmptyState title={t("resource.brand.no_brand_found")} />;
+  }
+
   return (
     <div className={`${styles.brands} basePageContainer margin0auto fontBody`}>
-      <div
-        className={`${styles.brands__breadcrumbs} ${styles.desktop} captionNormal`}
-      >
+      <div className={`${styles.brands__breadcrumbs} captionNormal`}>
         <span>
-          <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
+          <FDKLink to="/">{t("resource.common.breadcrumb.home")}</FDKLink>&nbsp; / &nbsp;
         </span>
-        <span className={styles.active}>Brands</span>
+        <span className={styles.active}>{t("resource.common.breadcrumb.brands")}</span>
       </div>
       <div>
         {title && (
@@ -63,22 +67,14 @@ function Brands({ fpi }) {
                 onClick={() => fetchBrands()}
                 className={`${styles.viewMoreBtn} btn-secondary`}
               >
-                View More
+                {t("resource.facets.view_more")}
               </button>
             </div>
           )}
         </div>
       </div>
-      <div
-        className={`${styles.brands__breadcrumbs} ${styles.mobile} captionNormal`}
-      >
-        <span>
-          <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
-        </span>
-        <span className={styles.active}>Brands</span>
-      </div>
       {!!back_top && <ScrollToTop />}
-    </div>
+    </div >
   );
 }
 // Brands.serverFetch = async ({ fpi }) => {
@@ -90,34 +86,34 @@ export const settings = JSON.stringify({
     {
       type: "checkbox",
       id: "infinite_scroll",
-      label: "Infinity Scroll",
+      label: "t:resource.common.infinity_scroll",
       default: true,
-      info: "If it is enabled, view more button will not be shown, only on scroll products will be displayed",
+      info: "t:resource.common.infinite_scroll_info",
     },
     {
       type: "checkbox",
       id: "back_top",
-      label: "Back to top",
+      label: "t:resource.common.back_to_top",
       default: true,
     },
     {
       type: "checkbox",
       id: "logo_only",
       default: false,
-      label: "Only Logo",
-      info: "Show Logo of brands",
+      label: "t:resource.sections.brand_listing.only_logo",
+      info: "t:resource.common.show_logo_of_brands",
     },
     {
       type: "text",
       id: "title",
       default: "",
-      label: "Heading",
+      label: "t:resource.common.heading",
     },
     {
       type: "textarea",
       id: "description",
       default: "",
-      label: "Description",
+      label: "t:resource.common.description",
     },
   ],
 });

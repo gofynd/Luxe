@@ -2,28 +2,28 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import StoreItem from "./store-item";
-// eslint-disable-next-line import/no-unresolved
-import styles from "./StoreModal.module.css"; // Import the module CSS file
+import styles from "./store-modal.less"; // Import the module CSS file
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
+import { useGlobalTranslation } from "fdk-core/utils";
+import Loader from "../../../../components/loader/loader";
 
 function StoreModal({
   isOpen,
-  sellerData,
-  activeStoreInfo,
-  appFeatures,
+  buybox,
   allStoresInfo,
   onCloseDialog,
+  addItemForCheckout,
+  getProductSellers,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [isViewMore, setIsViewMore] = useState(true);
   const pageSize = 4;
 
-  const isDataLoading = allStoresInfo === null;
-  const isSellerListing =
-    !!appFeatures?.feature?.buybox?.is_seller_buybox_enabled;
-  const availableCounts = `${allStoresInfo?.items?.length} ${
-    isSellerListing ? "Seller" : "Store"
-  }${allStoresInfo.items.length > 1 ? "s" : ""} Available`;
+  const isDataLoading = !Object.keys(allStoresInfo || {}).length;
+  const isSellerListing = buybox?.is_seller_buybox_enabled;
+  const availableCounts = `${allStoresInfo?.items?.length} ${isSellerListing ? t("resource.common.seller") : t("resource.common.store")
+    }${allStoresInfo?.items?.length > 1 ? "s" : ""} ${t("resource.common.available")}`;
 
   const listingItems = allStoresInfo?.items || [];
   const getListingItems = isViewMore
@@ -36,25 +36,13 @@ function StoreModal({
     setShowSortDropdown(false);
   };
 
-  const loadMoreData = () => {
-    if (allStoresInfo.page.has_next) {
-      sellerData.loadMoreStores().then(() => {
-        // Handle loading completion if needed
-      });
-    }
-  };
-
   const selectionChange = (selected) => {
-    // Handle store filter change
-    // You can use this function to pass the selected value to the parent component
-    // this.props.onStoreFilter(selected);
+    getProductSellers(selected);
     closeSortDropdown();
   };
 
-  const storeSelected = (activeStoreData, cart, isBuyNow) => {
-    // Handle store item selection
-    // You can use this function to pass the selected store info to the parent component
-    // this.props.onStoreItemSelect(activeStoreData, cart, isBuyNow);
+  const storeSelected = (event, item, isBuyNow) => {
+    addItemForCheckout(event, isBuyNow, item);
   };
 
   const onViewMore = () => {
@@ -72,10 +60,10 @@ function StoreModal({
         <div className={`${styles.sidebarContainer} ${styles.fontBody}`}>
           <div className={styles.sidebarHeader}>
             <h3 className={`${styles.sellerLabel} ${styles.fontHeader}`}>
-              {isSellerListing ? "Select Sellers" : "Select Stores"}
+              {isSellerListing ? t("resource.product.select_sellers") : t("resource.product.select_stores")}
             </h3>
             <SvgWrapper
-              svgSrc="sidebar-close"
+              svgSrc="close"
               className={styles.closeIcon}
               onClick={closeDialog}
             />
@@ -83,7 +71,7 @@ function StoreModal({
 
           <div className={styles.sidebarBody}>
             {isDataLoading ? (
-              <fdk-loader className={styles.loaderWs} />
+              <Loader />
             ) : (
               <>
                 <div
@@ -102,29 +90,21 @@ function StoreModal({
                     </p>
                     <SvgWrapper
                       svgSrc="arrow-down"
-                      className={[
-                        styles.dropdownArrow,
-                        { [styles.rotateArrow]: showSortDropdown },
-                      ]}
+                      className={`${styles.dropdownArrow} ${showSortDropdown ? styles.rotateArrow : ""}`}
                     />
                   </button>
                   <ul
                     className={styles.sortDropdown}
                     style={{ display: showSortDropdown ? "block" : "none" }}
                   >
-                    {allStoresInfo.sort_on.map((opt, index) => (
+                    {allStoresInfo?.sort_on?.map((opt, index) => (
                       <li
                         key={index}
-                        className={`b1 ${
-                          opt.is_selected ? styles.selectedOption : ""
-                        }`}
+                        className={`b1 ${opt.is_selected ? styles.selectedOption : ""
+                          }`}
+                        onClick={() => selectionChange(opt.value)}
                       >
-                        <button
-                          onClick={() => selectionChange(opt.value)}
-                          type="button"
-                        >
-                          {opt.name}
-                        </button>
+                        {opt.name}
                       </li>
                     ))}
                   </ul>
@@ -132,48 +112,46 @@ function StoreModal({
 
                 <h5 className={styles.storeCounts}>{availableCounts}</h5>
 
-                <fdk-infinite-scrolling
-                  onLoadMore={loadMoreData}
-                  loadingData={false}
-                >
-                  <div className={styles.data}>
-                    {getListingItems.map((item, index) => (
-                      <StoreItem
-                        key={index}
-                        storeitem={item}
-                        appFeatures={appFeatures}
-                        activeStoreInfo={activeStoreInfo}
-                        onSelectStoreItem={storeSelected}
-                      />
-                    ))}
-                  </div>
-                  {isViewMore && listingItems.length > pageSize && (
-                    <div
-                      className={`${styles.viewMoreWrapper} ${styles.flexCenter}`}
+                <div className={styles.data}>
+                  {getListingItems?.map((item, index) => (
+                    <StoreItem
+                      key={index}
+                      storeitem={item}
+                      buybox={buybox}
+                      onSelectStoreItem={(event, item, isBuyNow) =>
+                        storeSelected(event, item, isBuyNow)
+                      }
+                    />
+                  ))}
+                </div>
+                {isViewMore && listingItems?.length > pageSize && (
+                  <div
+                    className={`${styles.viewMoreWrapper} ${styles.flexCenter}`}
+                  >
+                    <button
+                      type="button"
+                      onClick={onViewMore}
+                      className={styles.viewMoreBtn}
                     >
-                      <button
-                        type="button"
-                        onClick={onViewMore}
-                        className={styles.viewMoreBtn}
-                      >
-                        View More
-                      </button>
-                    </div>
-                  )}
-                </fdk-infinite-scrolling>
+                      {t("resource.facets.view_more")}
+                    </button>
+                  </div>
+                )}
               </>
             )}
-          </div>
-        </div>
+          </div >
+        </div >
       )}
       {/* eslint-disable jsx-a11y/no-static-element-interactions */}
-      {isOpen && (
-        <div
-          className={`${styles.overlay} ${styles.show}`}
-          onClick={closeDialog}
-        />
-      )}
-    </div>
+      {
+        isOpen && (
+          <div
+            className={`${styles.overlay} ${styles.show}`}
+            onClick={closeDialog}
+          />
+        )
+      }
+    </div >
   );
 }
 

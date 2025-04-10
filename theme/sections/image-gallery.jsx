@@ -1,14 +1,14 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { FDKLink } from "fdk-core/components";
 import Slider from "react-slick";
 import styles from "../styles/sections/image-gallery.less";
-import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
-import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import "fdk-react-templates/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient } from "../helper/utils";
-import placeholder from "../assets/images/img-placeholder-1.png";
+import placeholderImage from "../assets/images/placeholder/image-gallery.png";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
 import { useWindowWidth } from "../helper/hooks";
+import { FDKLink } from "fdk-core/components";
 
 export function Component({ props, blocks = [], globalConfig = {}, preset }) {
   const {
@@ -66,13 +66,15 @@ export function Component({ props, blocks = [], globalConfig = {}, preset }) {
     <div
       style={{
         paddingTop: "16px",
-        paddingBottom: `${globalConfig?.section_margin_bottom}px`,
+        paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
         "--bd-radius": `${(cardRadius || 0) / 2}%`,
       }}
     >
       <div>
         <div className={styles.titleBlock}>
-          {title && <h2 className={styles.sectionHeading}>{title}</h2>}
+          {title && (
+            <h2 className={`${styles.sectionHeading} fontHeader`}>{title}</h2>
+          )}
           {description && (
             <p className={`${styles.description} b2`}>{description}</p>
           )}
@@ -90,7 +92,7 @@ export function Component({ props, blocks = [], globalConfig = {}, preset }) {
                 <FDKLink to={block?.link?.value || ""}>
                   <FyImage
                     customClass={styles.imageGallery}
-                    src={block?.image?.value || placeholder}
+                    src={block?.image?.value || placeholderImage}
                     sources={getImgSrcSet}
                     isFixedAspectRatio={false}
                   />
@@ -106,8 +108,8 @@ export function Component({ props, blocks = [], globalConfig = {}, preset }) {
                 <HorizontalLayout
                   items={galleryItems}
                   globalConfig={globalConfig}
-                  colCount={itemCount}
-                  colCountMobile={itemCountMobile}
+                  colCount={Number(itemCount)}
+                  colCountMobile={Number(itemCountMobile)}
                   sources={getImgSrcSet}
                   autoplay={autoplay}
                   autoplaySpeed={playSlides * 1000}
@@ -149,7 +151,7 @@ const StackLayout = ({
           <FDKLink to={block?.link?.value || ""}>
             <FyImage
               customClass={styles.imageGallery}
-              src={block?.image?.value || placeholder}
+              src={block?.image?.value || placeholderImage}
               sources={sources}
               globalConfig={globalConfig}
               isFixedAspectRatio={false}
@@ -173,9 +175,11 @@ const HorizontalLayout = ({
   const config = useMemo(
     () => ({
       dots: items.length > colCount,
+      arrows: items?.length > colCount,
+      infinite: items?.length > colCount,
       speed: 500,
-      slidesToShow: items?.length < 4 ? items.length : 4,
-      slidesToScroll: items?.length < 4 ? items.length : 4,
+      slidesToShow: colCount,
+      slidesToScroll: colCount,
       swipeToSlide: true,
       lazyLoad: "ondemand",
       autoplay,
@@ -184,14 +188,13 @@ const HorizontalLayout = ({
       // arrows: getGallery.length > item_count?.value || false,
       nextArrow: <SvgWrapper svgSrc="glideArrowRight" />,
       prevArrow: <SvgWrapper svgSrc="glideArrowLeft" />,
-      arrows: items?.length > colCount,
       responsive: [
         {
           breakpoint: 800,
           settings: {
             arrows: false,
-            slidesToShow: items.length < 3 ? items.length : 3,
-            slidesToScroll: items.length < 3 ? items.length : 3,
+            slidesToShow: colCount,
+            slidesToScroll: colCount,
             swipe: true,
             swipeToSlide: false,
             touchThreshold: 80,
@@ -204,6 +207,7 @@ const HorizontalLayout = ({
           settings: {
             dots: true,
             arrows: false,
+            infinite: items?.length > colCountMobile,
             slidesToShow: colCountMobile,
             slidesToScroll: colCountMobile,
             centerMode: false,
@@ -236,7 +240,7 @@ const HorizontalLayout = ({
             <FDKLink to={block?.link?.value || ""}>
               <FyImage
                 customClass={styles.imageGallery}
-                src={block?.image?.value || placeholder}
+                src={block?.image?.value || placeholderImage}
                 sources={sources}
                 globalConfig={globalConfig}
                 isFixedAspectRatio={false}
@@ -250,20 +254,20 @@ const HorizontalLayout = ({
 };
 
 export const settings = {
-  label: "Image Gallery",
+  label: "t:resource.sections.image_gallery.image_gallery",
   props: [
     {
       type: "text",
       id: "title",
       default: "Customize Your Style",
-      label: "Heading",
+      label: "t:resource.common.heading",
     },
     {
       type: "text",
       id: "description",
       default:
         "This flexible gallery lets you highlight key products and promotions, guiding customers to the right places.",
-      label: "Description",
+      label: "t:resource.common.description",
     },
     {
       type: "range",
@@ -272,7 +276,7 @@ export const settings = {
       max: 100,
       step: 1,
       unit: "%",
-      label: "Card Radius",
+      label: "t:resource.sections.image_gallery.card_radius",
       default: 0,
     },
     {
@@ -281,16 +285,16 @@ export const settings = {
       options: [
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal scroll",
+          text: "t:resource.common.horizontal_scroll",
         },
       ],
       default: "horizontal",
-      label: "Desktop Layout",
-      info: "Items per row should be less than number of blocks to show horizontal scroll",
+      label: "t:resource.common.desktop_layout",
+      info: "t:resource.sections.image_gallery.items_per_row_limit_for_scroll",
     },
     {
       type: "range",
@@ -299,7 +303,7 @@ export const settings = {
       max: 10,
       step: 1,
       unit: "",
-      label: "Items per row (Desktop)",
+      label: "t:resource.sections.image_gallery.items_per_row_desktop",
       default: 5,
     },
     {
@@ -308,16 +312,16 @@ export const settings = {
       options: [
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal scroll ",
+          text: "t:resource.common.horizontal_scroll",
         },
       ],
       default: "grid",
-      label: "Mobile Layout",
-      info: "Alignment of content",
+      label: "t:resource.common.mobile_layout",
+      info: "t:resource.common.alignment_of_content",
     },
     {
       type: "range",
@@ -326,14 +330,14 @@ export const settings = {
       max: 5,
       step: 1,
       unit: "",
-      label: "Items per row (Mobile)",
+      label: "t:resource.sections.image_gallery.items_per_row_mobile",
       default: 2,
     },
     {
       type: "checkbox",
       id: "autoplay",
       default: false,
-      label: "Auto Play Slides",
+      label: "t:resource.common.auto_play_slides",
     },
     {
       type: "range",
@@ -342,19 +346,19 @@ export const settings = {
       max: 10,
       step: 1,
       unit: "sec",
-      label: "Change slides every",
+      label: "t:resource.common.change_slides_every",
       default: 3,
     },
   ],
   blocks: [
     {
-      name: "Image card",
+      name: "t:resource.common.image_card",
       type: "gallery",
       props: [
         {
           type: "image_picker",
           id: "image",
-          label: "Image",
+          label: "t:resource.common.image",
           default: "",
           options: {
             aspect_ratio: "1:1",
@@ -363,9 +367,9 @@ export const settings = {
         {
           type: "url",
           id: "link",
-          label: "Redirect",
+          label: "t:resource.common.redirect",
           default: "",
-          info: "Search Link Type",
+          info: "t:resource.sections.image_gallery.search_link_type"
         },
       ],
     },
@@ -373,7 +377,7 @@ export const settings = {
   preset: {
     blocks: [
       {
-        name: "Image card",
+        name: "t:resource.common.image_card",
         props: {
           image: {
             type: "image_picker",
@@ -384,7 +388,7 @@ export const settings = {
         },
       },
       {
-        name: "Image card",
+        name: "t:resource.common.image_card",
         props: {
           image: {
             type: "image_picker",
@@ -395,7 +399,7 @@ export const settings = {
         },
       },
       {
-        name: "Image card",
+        name: "t:resource.common.image_card",
         props: {
           image: {
             type: "image_picker",
@@ -406,7 +410,7 @@ export const settings = {
         },
       },
       {
-        name: "Image card",
+        name: "t:resource.common.image_card",
         props: {
           image: {
             type: "image_picker",

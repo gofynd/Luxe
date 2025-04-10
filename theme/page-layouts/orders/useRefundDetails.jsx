@@ -53,12 +53,18 @@ const useRefundDetails = (fpi) => {
       const values = {
         ifscCode: ifscCode || "",
       };
+
       return fpi.executeGQL(VERIFY_IFSC_CODE, values).then((res) => {
-        if (res?.data?.payment) {
-          const data = res?.data?.payment;
+        let data = {};
+
+        if (res?.errors?.[0]) {
+          data = res?.errors?.[0];
+        } else if (res?.data?.payment) {
+          data = res?.data?.payment;
           setIfscDetails(data);
-          return data;
         }
+
+        return data;
       });
     } catch (error) {
       console.log({ error });
@@ -76,6 +82,8 @@ const useRefundDetails = (fpi) => {
           setBeneficiaryDetails(data);
           return data;
         }
+
+        return res;
       });
     } catch (error) {
       console.log({ error });

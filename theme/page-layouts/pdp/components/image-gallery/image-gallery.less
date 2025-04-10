@@ -6,7 +6,7 @@
 .wishlist {
   position: absolute;
   top: 25px;
-  right: 24px;
+  inset-inline-end: 24px;
   cursor: pointer;
   width: 25px;
   height: 23px;
@@ -33,16 +33,16 @@
   text-align: center;
   z-index: 2;
   bottom: 8px !important;
-  left: 8px !important;
+  inset-inline-start: 8px !important;
   top: unset !important;
-  left: unset !important;
+  inset-inline-start: unset !important;
   padding: 4px var(--scale-8-px, 8px);
   height: fit-content;
   width: fit-content;
 }
 .b4 {
   bottom: 8px !important;
-  left: 8px !important;
+  inset-inline-start: 8px !important;
   font-size: 14px;
   font-weight: 400;
   line-height: 18px;
@@ -115,10 +115,16 @@
           transform: translateY(-50%);
         }
         .nextBtn {
-          right: -39px;
+          inset-inline-end: -39px;
+          [dir="rtl"] & {
+            transform: rotate(180deg);
+          }
         }
         .prevBtn {
-          left: -39px;
+          inset-inline-start: -39px;
+          [dir="rtl"] & {
+            transform: rotate(180deg);
+          }
         }
       }
     }
@@ -140,10 +146,13 @@
           width: 24px;
           height: 24px;
           top: 50%;
-          left: 50%;
-          right: unset;
+          inset-inline-start: 50%;
+          inset-inline-end: unset;
           bottom: unset;
           transform: translate(-50%, -50%);
+          [dir="rtl"] & {
+            transform: translate(50%, -50%);
+          }
 
           /deep/ svg path {
             fill: var(--icon-color);
@@ -163,7 +172,7 @@
       }
 
       .gap {
-        margin-right: 8px;
+        margin-inline-end: 8px;
         border: 2px solid transparent;
       }
 
@@ -173,7 +182,7 @@
       }
 
       .gap:last-child {
-        margin-right: 0;
+        margin-inline-end: 0;
       }
     }
     /* Hide scrollbar for Chrome, Safari and Opera */
@@ -225,8 +234,11 @@
   position: absolute;
   cursor: pointer;
   top: 50%;
-  left: 50%;
+  inset-inline-start: 50%;
   transform: translate(-50%, -50%);
+  [dir="rtl"] & {
+    transform: translate(50%, -50%);
+  }
   fill: var(--icon-color);
   svg {
     fill: var(--icon-color);
@@ -237,6 +249,9 @@
   width: 48px;
   height: 48px;
   cursor: pointer;
+  [dir="rtl"] & {
+    transform: rotate(180deg);
+  }
   rect:nth-of-type(1) {
     fill: @PageBackground !important;
   }
@@ -246,6 +261,9 @@
   }
   &--left {
     transform: rotate(180deg);
+    [dir="rtl"] & {
+      transform: unset;
+    }
   }
 }
 

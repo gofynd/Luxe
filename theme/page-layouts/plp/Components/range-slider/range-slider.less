@@ -20,7 +20,7 @@
       font-size: 12px;
       line-height: 14px;
       color: @TextDisabled;
-      margin-right: 8px;
+      margin-inline-end: 8px;
     }
   }
   input {
@@ -39,7 +39,7 @@
       width: 12.5%;
       height: 100%;
       top: 0;
-      right: 0;
+      inset-inline-end: 0;
     }
   }
 }
@@ -75,10 +75,10 @@
       bottom: calc(100% + 5px);
     }
     &:nth-child(1) .vue-slider-tooltip-top {
-      left: 0;
+      inset-inline-start: 0;
     }
     &:nth-child(2) .vue-slider-tooltip-top {
-      right: 0;
+      inset-inline-end: 0;
     }
   }
 }

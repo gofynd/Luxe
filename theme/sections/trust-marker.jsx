@@ -1,13 +1,13 @@
 import React, { useMemo } from "react";
-import { FDKLink } from "fdk-core/components";
 import Slider from "react-slick";
 import styles from "../styles/trust-marker.less";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
-import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
-import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import "fdk-react-templates/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { useWindowWidth } from "../helper/hooks";
 import { isRunningOnClient } from "../helper/utils";
+import { FDKLink } from "fdk-core/components";
 
 export function Component({ props, globalConfig, blocks, preset }) {
   const {
@@ -50,7 +50,7 @@ export function Component({ props, globalConfig, blocks, preset }) {
   const dynamicStyles = {
     paddingTop: "16px",
     paddingBottom: `
-      ${globalConfig?.section_margin_bottom}px`,
+      ${globalConfig?.section_margin_bottom + 16}px`,
     maxWidth: "100vw",
     "--img-background-color": card_background?.value
       ? card_background?.value
@@ -76,16 +76,16 @@ export function Component({ props, globalConfig, blocks, preset }) {
           <StackLayout
             trustMarker={getTrustMarker}
             globalConfig={globalConfig}
-            colCount={perRowDesktop?.value}
-            colCountMobile={perRowMobile?.value}
+            colCount={Number(perRowDesktop?.value)}
+            colCountMobile={Number(perRowMobile?.value)}
           />
         )}
         {isHorizontalView && (
           <HorizontalLayout
             trustMarker={getTrustMarker}
             globalConfig={globalConfig}
-            colCount={perRowDesktop?.value}
-            colCountMobile={perRowMobile?.value}
+            colCount={Number(perRowDesktop?.value)}
+            colCountMobile={Number(perRowMobile?.value)}
             windowWidth={windowWidth}
           />
         )}
@@ -94,20 +94,19 @@ export function Component({ props, globalConfig, blocks, preset }) {
         <div className="section Trust-marker">
           <div
             className={styles["Trust-marker-image-container"]}
-            // style={{
-            //   gridTemplateColumns:
-            //     getTrustMarker().length < 5 &&
-            //     desktopWidth &&
-            //     `repeat(${getTrustMarker().length}, 1fr)`,
-            // }}
+          // style={{
+          //   gridTemplateColumns:
+          //     getTrustMarker().length < 5 &&
+          //     desktopWidth &&
+          //     `repeat(${getTrustMarker().length}, 1fr)`,
+          // }}
           >
             {getTrustMarker.map((block, i) => (
               <FDKLink
                 key={i}
                 to={block?.props?.marker_link?.value}
-                className={`${
-                  styles["marker-link"]
-                } animation-fade-up ${"animate"}`}
+                className={`${styles["marker-link"]
+                  } animation-fade-up ${"animate"}`}
                 style={{
                   "--delay": `${150 * (i + 1)}ms `,
                 }}
@@ -163,9 +162,8 @@ const StackLayout = ({
           <FDKLink
             key={i}
             to={block?.props?.marker_link?.value}
-            className={`${
-              styles["marker-link"]
-            } animation-fade-up ${"animate"}`}
+            className={`${styles["marker-link"]
+              } animation-fade-up ${"animate"}`}
             style={{
               "--delay": `${150 * (i + 1)}ms `,
             }}
@@ -212,11 +210,10 @@ const HorizontalLayout = ({
       dots: trustMarker?.length > colCount,
       arrows: trustMarker?.length > colCount,
       focusOnSelect: true,
-      infinite: trustMarker?.length > 1,
+      infinite: trustMarker?.length > colCount,
       speed: 600,
-      slidesToShow:
-        trustMarker?.length < colCount ? trustMarker?.length : colCount,
-      slidesToScroll: trustMarker?.length < colCount ? 1 : colCount,
+      slidesToShow: Number(colCount),
+      slidesToScroll: Number(colCount),
       autoplay: false,
       // autoplaySpeed: slide_interval?.value * 1000,
       centerMode: false,
@@ -247,14 +244,11 @@ const HorizontalLayout = ({
         {
           breakpoint: 480,
           settings: {
-            dots: trustMarker?.length > colCountMobile,
+            dots: trustMarker?.length > Number(colCountMobile),
             arrows: false,
-            slidesToShow:
-              trustMarker?.length < colCountMobile
-                ? trustMarker?.length
-                : Number(colCountMobile),
-            slidesToScroll:
-              trustMarker?.length < colCountMobile ? 1 : Number(colCountMobile),
+            infinite: trustMarker?.length > Number(colCountMobile),
+            slidesToShow: Number(colCountMobile),
+            slidesToScroll: Number(colCountMobile),
             // centerMode: trustMarker.length !== 1,
             centerPadding: "50px",
           },
@@ -273,18 +267,15 @@ const HorizontalLayout = ({
       }}
     >
       <Slider
-        className={`${styles.testimonial__carousel} ${
-          trustMarker?.length - 1 >= columnValue ? "" : "no-nav"
-        }`}
+        className={`${trustMarker?.length - 1 >= columnValue ? "" : "no-nav"}`}
         {...slickSetting}
       >
         {trustMarker?.map((block, i) => (
           <FDKLink
             key={i}
             to={block?.props?.marker_link?.value}
-            className={`${
-              styles["marker-link"]
-            } animation-fade-up ${"animate"}`}
+            className={`${styles["marker-link"]
+              } animation-fade-up ${"animate"}`}
             style={{ "--delay": `${150 * (i + 1)}ms` }}
           >
             {block?.props?.marker_logo?.value && (
@@ -317,25 +308,25 @@ const HorizontalLayout = ({
 };
 
 export const settings = {
-  label: "Trust Marker",
+  label: "t:resource.sections.trust_marker.trust_marker",
   props: [
     {
       type: "text",
       id: "title",
       default: "Title ",
-      label: "Heading",
+      label: "t:resource.common.heading",
     },
     {
       type: "text",
       id: "description",
       default: "Add description",
-      label: "Description",
+      label: "t:resource.common.description",
     },
     {
       type: "color",
       id: "card_background",
-      label: "Card Background Color",
-      info: "This color will be used as card background",
+      label: "t:resource.sections.trust_marker.card_background_color",
+      info: "t:resource.sections.trust_marker.card_background_color_info",
       default: "",
     },
     {
@@ -344,25 +335,25 @@ export const settings = {
       options: [
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal scroll",
+          text: "t:resource.common.horizontal_scroll",
         },
       ],
       default: "horizontal",
-      label: "Desktop/Tablet Layout",
-      info: "Alignment of content",
+      label: "t:resource.sections.trust_marker.desktop_tablet_layout",
+      info: "t:resource.common.alignment_of_content",
     },
     {
       type: "range",
       id: "per_row_desktop",
-      label: "Display column per row (desktop/Tablet)",
+      label: "t:resource.sections.trust_marker.columns_per_row_desktop_tablet",
       min: "3",
       max: "10",
       step: "1",
-      info: "It'll not work for mobile layout",
+      info: "t:resource.common.not_applicable_for_mobile",
       default: "5",
     },
     {
@@ -371,38 +362,38 @@ export const settings = {
       options: [
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal scroll",
+          text: "t:resource.common.horizontal_scroll",
         },
       ],
       default: "horizontal",
-      label: "Mobile Layout",
-      info: "Alignment of content",
+      label: "t:resource.common.mobile_layout",
+      info: "t:resource.common.alignment_of_content",
     },
     {
       type: "range",
       id: "per_row_mobile",
-      label: "Display column per row (Mobile)",
+      label: "t:resource.sections.trust_marker.columns_per_row_mobile",
       min: "1",
       max: "5",
       step: "1",
-      info: "It'll not work for desktop layout",
+      info: "t:resource.sections.trust_marker.not_applicable_desktop",
       default: "2",
     },
   ],
   blocks: [
     {
       type: "trustmarker",
-      name: "Trust Marker",
+      name: "t:resource.sections.trust_marker.trust_marker",
       props: [
         {
           type: "image_picker",
           id: "marker_logo",
           default: "",
-          label: "Icon",
+          label: "t:resource.common.icon",
           options: {
             aspect_ratio: "1:1",
           },
@@ -411,19 +402,19 @@ export const settings = {
           type: "text",
           id: "marker_heading",
           default: "Free Delivery",
-          label: "Heading",
+          label: "t:resource.common.heading",
         },
         {
           type: "text",
           id: "marker_description",
           default: "Don`t love it? Don`t worry. Return delivery is free.",
-          label: "Description",
+          label: "t:resource.common.description",
         },
         {
           type: "url",
           id: "marker_link",
           default: "",
-          label: "Redirect link",
+          label: "t:resource.common.redirect_link",
         },
       ],
     },
@@ -431,7 +422,7 @@ export const settings = {
   preset: {
     blocks: [
       {
-        name: "Trust Marker",
+        name: "t:resource.sections.trust_marker.trust_marker",
         props: {
           marker_heading: {
             type: "text",
@@ -444,7 +435,7 @@ export const settings = {
         },
       },
       {
-        name: "Trust Marker",
+        name: "t:resource.sections.trust_marker.trust_marker",
         props: {
           marker_heading: {
             type: "text",
@@ -457,7 +448,7 @@ export const settings = {
         },
       },
       {
-        name: "Trust Marker",
+        name: "t:resource.sections.trust_marker.trust_marker",
         props: {
           marker_heading: {
             type: "text",
@@ -470,7 +461,7 @@ export const settings = {
         },
       },
       {
-        name: "Trust Marker",
+        name: "t:resource.sections.trust_marker.trust_marker",
         props: {
           marker_heading: {
             type: "text",
@@ -483,7 +474,7 @@ export const settings = {
         },
       },
       {
-        name: "Trust Marker",
+        name: "t:resource.sections.trust_marker.trust_marker",
         props: {
           marker_heading: {
             type: "text",

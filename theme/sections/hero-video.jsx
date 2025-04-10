@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/hero-video.less";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
-import placeholder from "../assets/images/hero-desktop-placeholder.png";
+import placeholderImage from "../assets/images/placeholder/hero-video.png";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 export function Component({ props, globalConfig }) {
   const {
@@ -14,7 +15,7 @@ export function Component({ props, globalConfig }) {
     title,
     coverUrl,
   } = props;
-
+  const { t } = useGlobalTranslation("translation");
   const [isMobile, setIsMobile] = useState(false);
   const [showOverlay, setShowOverlay] = useState(!autoplay?.value);
   const [ytOverlay, setYtOverlay] = useState(false);
@@ -334,7 +335,7 @@ export function Component({ props, globalConfig }) {
   };
 
   const dynamicStyles = {
-    marginBottom: `${globalConfig?.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
   };
   return (
     <div style={dynamicStyles}>
@@ -411,8 +412,8 @@ export function Component({ props, globalConfig }) {
         )}
         {!videoFile?.value && !videoUrl?.value && (
           <img
-            src={coverUrl?.value || placeholder}
-            alt="placeholder"
+            src={coverUrl?.value || placeholderImage}
+            alt={t("resource.common.placeholder")}
             style={{ width: "100%" }}
           />
         )}
@@ -422,52 +423,52 @@ export function Component({ props, globalConfig }) {
 }
 
 export const settings = {
-  label: "Hero Video",
+  label: "t:resource.sections.hero_video.hero_video",
   props: [
     {
       type: "video",
       id: "videoFile",
       default: false,
-      label: "Primary Video",
+      label: "t:resource.sections.hero_video.primary_video",
     },
     {
       id: "videoUrl",
       type: "text",
-      label: "Video URL",
+      label: "t:resource.sections.hero_video.video_url",
       default: "",
-      info: "Supports MP4 Video & Youtube Video URL",
+      info: "t:resource.sections.hero_video.video_support_mp4_youtube",
     },
     {
       type: "checkbox",
       id: "autoplay",
       default: true,
-      label: "Autoplay",
-      info: "Check to enable autoplay (Video will be muted if autoplay is active)",
+      label: "t:resource.sections.hero_video.autoplay",
+      info: "t:resource.sections.hero_video.enable_autoplay_muted",
     },
     {
       type: "checkbox",
       id: "hidecontrols",
       default: true,
-      label: "Hide Video Controls",
-      info: "check to disable video controls",
+      label: "t:resource.sections.hero_video.hide_video_controls",
+      info: "t:resource.sections.hero_video.disable_video_controls",
     },
     {
       type: "checkbox",
       id: "showloop",
       default: "true",
-      label: "Play Video in Loop",
-      info: "check to disable Loop",
+      label: "t:resource.sections.hero_video.play_video_loop",
+      info: "t:resource.sections.hero_video.disable_video_loop",
     },
     {
       type: "text",
       id: "title",
       default: "",
-      label: "Heading",
+      label: "t:resource.common.heading",
     },
     {
       id: "coverUrl",
       type: "image_picker",
-      label: "Thumbnail Image",
+      label: "t:resource.sections.hero_video.thumbnail_image",
       default: "",
       options: {
         aspect_ratio: "16:9",

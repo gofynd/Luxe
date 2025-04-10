@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import { FETCH_LOCALITIES } from "../../queries/internationlQuery";
 
 export const useAddressFormSchema = ({
@@ -10,72 +10,95 @@ export const useAddressFormSchema = ({
   addressFields,
   addressItem,
 }) => {
+  const { t } = useGlobalTranslation("translation");
   const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
   const [formFields, SetFormFields] = useState(null);
   const [dropdownData, setDropdownData] = useState(null);
   const [disableField, setDisableField] = useState(null);
   const cityRef = useRef(null);
 
-  function createValidation(validation, required, error_text, slug) {
+  function createValidation(field) {
+    const { slug, display_name, required, validation } = field;
     const result = {};
     if (slug === "phone") {
       result.validate = (value) => {
-        if (!value || (required && !value.mobile) || !value.isValidNumber) {
-          return error_text ?? "Invalid";
+        if (required && !value?.mobile) {
+          return `${display_name} ${t("resource.common.address.is_required")}.`;
         }
-        if (validation?.regex?.value) {
-          try {
-            const regex = new RegExp(validation.regex.value);
-            const isValid = regex.test(value.mobile);
-            if (!isValid) {
-              return error_text ?? "Invalid";
-            }
-          } catch (error) {}
+        if (!value || !value.isValidNumber) {
+          return t("resource.common.address.invalid_phone_number");
         }
+        // if (validation?.regex?.value) {
+        //   try {
+        //     const regex = new RegExp(validation.regex.value);
+        //     const isValid = regex.test(value.mobile);
+        //     if (!isValid) {
+        //       return error_text ?? "Invalid";
+        //     }
+        //   } catch (error) {}
+        // }
         return true;
       };
       return result;
     }
 
-    if (required) {
-      result.required = error_text ?? "Field is required";
-    }
-    if (validation?.type === "regex") {
-      result.pattern = {
-        value: new RegExp(validation?.regex.value),
-        message: error_text ?? "Invalid",
-      };
-      if (validation?.regex?.length?.max) {
-        result.maxLength = {
-          value: validation?.regex?.length?.max,
-          message: error_text ?? "Invalid",
-        };
+    result.validate = (value) => {
+      if (required && !value) {
+        return `${display_name} ${t("resource.common.address.is_required")}.`;
       }
-      if (validation?.regex?.length?.min) {
-        result.minLength = {
-          value: validation?.regex?.length?.min,
-          message: error_text ?? "Invalid",
-        };
+
+      if (
+        (required || value) &&
+        validation?.type === "regex" &&
+        validation?.regex?.value
+      ) {
+        try {
+          const regex = new RegExp(validation.regex.value);
+          if (!regex.test(value)) {
+            return `${t("resource.common.invalid")} ${display_name}`;
+          }
+        } catch (error) {
+          return t("resource.common.invalid_regex");
+        }
       }
-    }
+      const { min, max } = validation?.regex?.length || {};
+      if (
+        (required || value) &&
+        ((max && value.length > max) || (min && value.length < min))
+      ) {
+        return `${display_name} ${t("resource.common.validation_length", { min: min || 0, max: max || "∞" })}.`;
+      }
+      return true;
+    };
     return result;
   }
 
+  const resetNextFieldRecursively = (slug, setValue) => {
+    const field = addressFieldsMap?.[slug];
+    if (!field) return;
+    if (field.next) {
+      resetNextFieldRecursively(field.next, setValue);
+    }
+    const key = slug === "pincode" ? "area_code" : slug;
+    setValue(key, "");
+  };
+
   const handleFieldChange =
     ({ next, slug }) =>
-    (value) => {
-      if (!next) return;
-      const key = next === "pincode" ? "area_code" : next;
-      if (slug === "city") {
-        cityRef.current = value;
-      }
-      getLocalityValues({
-        slug: next,
-        key,
-        city: next !== "city" && cityRef.current ? cityRef.current : "",
-      });
-      setDisableField((prev) => ({ ...prev, [key]: false }));
-    };
+      (value, setValue) => {
+        if (!next) return;
+        const key = next === "pincode" ? "area_code" : next;
+        if (slug === "city") {
+          cityRef.current = value;
+        }
+        resetNextFieldRecursively(next, setValue);
+        getLocalityValues({
+          slug: next,
+          key,
+          city: next !== "city" && cityRef.current ? cityRef.current : "",
+        });
+        setDisableField((prev) => ({ ...prev, [key]: false }));
+      };
 
   function convertField(field) {
     const {
@@ -87,6 +110,7 @@ export const useAddressFormSchema = ({
       error_text,
       next,
       prev,
+      edit,
     } = field;
 
     const type =
@@ -99,8 +123,9 @@ export const useAddressFormSchema = ({
       type,
       required,
       fullWidth: false,
-      validation: createValidation(validation, required, error_text, slug),
+      validation: createValidation(field),
       disabled: addressItem?.[key] ? !addressItem[key] : !!prev,
+      readOnly: !edit,
     };
 
     if (slug === "phone") {
@@ -145,7 +170,7 @@ export const useAddressFormSchema = ({
           });
         }
       });
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const renderTemplate = (template) => {
@@ -238,7 +263,10 @@ export const useAddressFormSchema = ({
   const defaultAddressItem = useMemo(() => {
     const addressfields = Object.keys(addressFieldsMap);
     return addressfields.reduce((acc, field) => {
-      if (locationDetails?.[field]) {
+      if (
+        locationDetails?.country_iso_code === countryIso &&
+        locationDetails?.[field]
+      ) {
         const key = field === "pincode" ? "area_code" : field;
         acc[key] = locationDetails[field];
       }

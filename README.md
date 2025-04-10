@@ -6,51 +6,92 @@ FDK React Theme is a React Theme designed specifically for Fynd Commerce. It inc
 
 ## Features
 
-- **Dynamic Entry Points:** Automatically includes all `.jsx` files from the `src` directory.
+- **Dynamic Entry Points:** Automatically includes all `.jsx` files from `pages` and `sections` directory.
 - **Support for CSS and Less:** Handles both CSS modules and global CSS, as well as Less files.
 - **Comprehensive Asset Management:** Supports various asset types including fonts and SVGs.
 - **Powerful Plugins:** Utilizes `MiniCssExtractPlugin` for efficient build processes.
 - **Advanced Optimization:** Configured with `CssMinimizerPlugin` for CSS minification and faster load times in production.
 
-## Installation
+## Development
 
 ### Prerequisites
 
-- Node.js (v18 or later recommended)
-- npm (v8 or later)
-- fdk-cli
-- All the packages in themes node modules
+Before you begin creating a theme, you need:
 
-### Installation Steps For development
+1. To [create](https://partners.fynd.com/help/docs/guide/become-fynd-partner) or have access to a Partner account on Fynd Partners. To have at least 1 development account or live account available in your partner organization.
 
-1. Clone the repository:
+2. [Click here](https://partners.fynd.com/help/docs/guide/partner-panel/accounts) to know how to create development account or get access to a live account through your partner panel. It is recommended to use development account for this tutorial.
+
+3. [FDK-CLI](https://github.com/gofynd/fdk-cli) latest version.
+
+4. [Node.js](https://nodejs.org/en) v16.19 or above.
+
+5. [Git](https://git-scm.com/) installed.
+
+6. [ReactJS](https://react.dev/).
+
+### Initialize new theme using base theme template
+
+1. **Install FDK CLI**
 
    ```bash
-   git clone https://GoFynd@dev.azure.com/GoFynd/PlatformThemes/_git/react-starter
-   cd react-starter
+   npm install -g @gofynd/fdk-cli
+   fdk --version
    ```
 
-2. Install dependencies:
+2. **Login your partner account into FDK/CLI**
+
    ```bash
-   npm install
+      fdk login
    ```
 
-### Development
+   And after running the login command you will be redirected to the homepage of the partner’s panel of that specific env.
 
-For development, use:
-To test locally package in your local system
+3. **Select Partner Organization**
 
-1. Login to the Fynd Platform and select the desired company on which the theme is published
+   Select the Partner Organization through which you want to create your theme.
 
-```bash
-    fdk login
-```
+4. **Login Successful**
 
-2. Serve the theme locally
+   As soon as you select the partner organization you will be redirected to the Login Successful page in browser. You will get User logged in successfully message in terminal
 
-```bash
-    fdk theme serve
-```
+5. **Initialize a new theme**
+
+   ```bash
+      fdk theme new --name name-of-the-theme
+   ```
+
+6. **Select account type**
+
+   Select account type as `development` or `live` depending on the account type you want to use for creating your theme.
+
+7. **Select Account**
+
+   FDK-CLI will list the development accounts available in your partner organization. Select the account in which you want to create the theme.
+
+8. **Select Sales Channel**
+
+   FDK-CLI will list the sales channels available in the account chosen. Select the sales channel in which you want to create your theme.
+
+   A folder with the theme name will be created into your machine with theme code cloned into it.
+
+9. **Navigate to your project folder**
+
+   ```bash
+      cd theme-name
+   ```
+
+10. **Preview your theme**
+
+    Once you are into your theme’s directory, run the following command to serve your theme locally and preview your theme.
+
+    ```bash
+       fdk theme serve
+    ```
+
+**NOTE:** `fdk theme serve` wouldn't work without the `.fdk` folder setup, which needs the `fdk theme init` command.
+
+For more information [click here](https://partners.fynd.com/help/docs/partners/themes/vuejs/theme-creation)
 
 ## Project Structure
 
@@ -88,19 +129,18 @@ entry: {
 
 The configuration includes several plugins to enhance the build process:
 
-- `MiniCssExtractPlugin`:Extracts CSS into separate files, allowing for parallel loading of CSS and JavaScript.
-- `NodeJSPolyfill`: Adds polyfills for Node.js features to ensure compatibility in the browser environment.
-- `Overlay`: Provides a development overlay for React hydration, useful for debugging during development.
+- [MiniCssExtractPlugin](https://www.npmjs.com/package/mini-css-extract-plugin):Extracts CSS into separate files, allowing for parallel loading of CSS and JavaScript.
+- [NodeJSPolyfill](https://www.npmjs.com/package/node-polyfill-webpack-plugin): Adds polyfills for Node.js features to ensure compatibility in the browser environment.
+- [Overlay](https://www.npmjs.com/package/react-hydration-overlay): Provides a development overlay for React hydration, useful for debugging during development.
 
 ### Loaders
 
 Various loaders are configured to handle different types of files:
 
-- `babel-loader`: Transpiles JavaScript and TypeScript files using Babel presets.
-- `css-loader`: Handles CSS files with support for CSS modules.
-- `MiniCssExtractPlugin.loader`: Extracts CSS into separate files, enabling CSS to be loaded in parallel with JavaScript.
-- `less-loader`: Compiles Less files, with support for both modules and global styles.
-- `@svgr/webpack`: Processes SVG files to be used as React components.
+- [babel-loader](https://www.npmjs.com/package/babel-loader): Transpiles JavaScript and TypeScript files using Babel presets.
+- [css-loader](https://www.npmjs.com/package/css-loader): Handles CSS files with support for CSS modules.
+- [less-loader](https://www.npmjs.com/package/less-loader): Compiles Less files, with support for both modules and global styles.
+- [svgr/webpack](https://www.npmjs.com/package/@svgr/webpack): Processes SVG files to be used as React components.
 - `asset/resource`: Manages font files and other static assets.
 
 ### Optimization

@@ -3,17 +3,17 @@
 .featured_product_container {
   position: relative;
   padding-top: 16px;
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
+  padding-inline-start: 2.5rem;
+  padding-inline-end: 2.5rem;
   @media @tablet {
-    padding-left: 1.5rem;
-    padding-right: 0.75rem;
-    margin-right: 1.5rem;
+    padding-inline-start: 1.5rem;
+    padding-inline-end: 0.75rem;
+    margin-inline-end: 1.5rem;
   }
   @media @mobile {
-    padding-left: 16px;
-    padding-right: 16px;
-    margin-right: 0;
+    padding-inline-start: 16px;
+    padding-inline-end: 16px;
+    margin-inline-end: 0;
   }
 }
 .featured-products-header {
@@ -88,19 +88,22 @@
 .wishlistIcon {
   position: absolute;
   top: 10px;
-  right: 50px;
+  inset-inline-end: 50px;
   z-index: 1;
   cursor: pointer;
 
   @media @mobile {
     top: 15px;
-    right: 30px;
+    inset-inline-end: 30px;
   }
 }
 
 /deep/.productDetails {
   margin-top: 20px;
-  padding: 0 20px 20px 20px;
+  padding-top: 0px;
+  padding-inline-end: 20px;
+  padding-bottom: 20px;
+  padding-inline-start: 20px;
   h2 {
     text-align: center;
     padding: 20px 0;
@@ -180,14 +183,14 @@
         }
 
         .slick-slide {
-          border-right: none;
+          border-inline-end: none;
           @media @mobile {
             border-width: 0;
           }
         }
       }
       width: 50%;
-      margin-right: 2rem;
+      margin-inline-end: 2rem;
 
       // @media @tablet {
       //   width: 100%;
@@ -263,7 +266,7 @@
             .ratingIcon {
               width: 14px;
               height: 14px;
-              margin-left: 4px;
+              margin-inline-start: 4px;
 
               /deep/ svg path {
                 fill: @ThemeAccentD2;
@@ -272,7 +275,7 @@
           }
 
           .separator {
-            border-left: 1px solid @DividerStokes;
+            border-inline-start: 1px solid @DividerStokes;
             height: 100%;
             margin: 0 6px;
             width: 1px;
@@ -302,7 +305,7 @@
           }
 
           &--marked {
-            margin-left: 0.25rem;
+            margin-inline-start: 0.25rem;
             color: @TextLabel;
             font-weight: 400;
             font-size: 12px;
@@ -317,11 +320,11 @@
             background-color: @SaleBadgeBackground;
             color: @SaleDiscountText;
             font-size: 12px;
-            margin-left: 1rem;
+            margin-inline-start: 1rem;
             display: inline-block;
 
             @media @tablet {
-              margin-left: 0.5rem;
+              margin-inline-start: 0.5rem;
             }
           }
           .mrpLabel {
@@ -331,10 +334,10 @@
             line-height: 14px;
             letter-spacing: -0.02em;
             &--effective {
-              margin-right: 4px;
+              margin-inline-end: 4px;
             }
             &--marked {
-              margin-left: 0.25rem;
+              margin-inline-start: 0.25rem;
             }
           }
         }
@@ -350,7 +353,7 @@
             background-color: transparent;
 
             span {
-              margin-right: 2px;
+              margin-inline-end: 2px;
             }
 
             .scaleIcon {
@@ -377,10 +380,10 @@
     }
 
     &--ml-12 {
-      margin-left: 12px;
+      margin-inline-start: 12px;
 
       @media @tablet {
-        margin-left: 8px;
+        margin-inline-start: 8px;
       }
     }
   }
@@ -391,15 +394,15 @@
     flex-grow: 0;
     transition: all 0.5s;
     flex-basis: 33.33%;
-    margin-right: 12px;
+    margin-inline-end: 12px;
     &.sizeWrapper--collapse {
       overflow: hidden;
       flex-basis: 0;
-      margin-right: 0;
+      margin-inline-end: 0;
     }
 
     @media @tablet {
-      margin-right: 8px;
+      margin-inline-end: 8px;
     }
 
     .sizeButton {
@@ -422,7 +425,7 @@
       }
 
       .selectedSize {
-        text-align: left;
+        text-align: start;
         color: @TextHeading;
         border-radius: unset;
         .text-line-clamp();
@@ -498,7 +501,7 @@
       .cartIcon {
         height: 14px;
         width: 13px;
-        margin-right: 5px;
+        margin-inline-end: 5px;
 
         /deep/ svg path {
           fill: @ButtonPrimary;
@@ -543,7 +546,7 @@
   &__icon {
     width: 11px;
     height: 14px;
-    margin-right: 6.83px;
+    margin-inline-end: 6.83px;
   }
 
   @media @tablet {
@@ -553,7 +556,7 @@
   .customIcon {
     width: 16px;
     height: 16px;
-    margin-right: 4px;
+    margin-inline-end: 4px;
   }
 }
 .compareBtn {
@@ -598,7 +601,7 @@
 
 .productDetail {
   list-style: outside;
-  padding-left: 1rem;
+  padding-inline-start: 1rem;
   margin-top: 24px;
 
   @media @tablet {
@@ -627,7 +630,7 @@
     .nameWrapper {
       display: flex;
       align-items: center;
-      margin-left: 5px;
+      margin-inline-start: 5px;
       overflow: hidden;
 
       .storeSellerName {
@@ -644,7 +647,7 @@
       .dropdownArrow {
         height: 12px;
         width: 12px;
-        margin-left: 2px;
+        margin-inline-start: 2px;
 
         /deep/ svg {
           width: 12px;
@@ -723,7 +726,7 @@
       width: 100%;
       height: 100%;
       top: 0;
-      left: 0;
+      inset-inline-start: 0;
 
       line {
         stroke: @DividerStokes;

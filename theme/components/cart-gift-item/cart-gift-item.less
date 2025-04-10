@@ -19,7 +19,7 @@
   display: grid;
   grid-template-columns: 50% 50%;
   .free-items:nth-child(odd) {
-    margin-right: 10px;
+    margin-inline-end: 10px;
   }
 }
 .free-gift-scroll-items {
@@ -69,7 +69,7 @@
     .ncc-free-gift-item-name {
       display: flex;
       flex-direction: column;
-      margin-left: 8px;
+      margin-inline-start: 8px;
       gap: 10px;
       @media @mobile {
         gap: 10px;
@@ -86,7 +86,7 @@
         font-size: 10px;
         line-height: 12px;
         .ncc-free-gift {
-          margin-left: 8px;
+          margin-inline-start: 8px;
           color: @TextBody;
           font-weight: 400;
         }
@@ -94,7 +94,7 @@
     }
 
     @media @tablet {
-      margin-left: 0 !important;
+      margin-inline-start: 0 !important;
     }
   }
   .free-article-container {
@@ -104,7 +104,7 @@
     scrollbar-width: none; /* Firefox */
 
     .free-gift-item:nth-child(odd) {
-      margin-right: 10px;
+      margin-inline-end: 10px;
     }
 
     @media @mobile {
@@ -117,7 +117,7 @@
         display: inline-block;
         vertical-align: top;
         white-space: normal;
-        margin-right: 10px;
+        margin-inline-end: 10px;
       }
     }
   }

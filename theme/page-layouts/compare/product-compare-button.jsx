@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import SvgWrapper from "../../components/core/svgWrapper/SvgWrapper";
-import Modal from "../../components/core/modal/modal";
+import Modal from "fdk-react-templates/components/core/modal/modal";
+import "fdk-react-templates/components/core/modal/modal.css";
 import { PRODUCT_COMPARISON } from "../../queries/compareQuery";
 import { useSnackbar } from "../../helper/hooks";
 import styles from "./compare.less";
-import compareWarning from "../../assets/images/compare-warning.png";
+import { useNavigate, useGlobalTranslation } from "fdk-core/utils";
 
 const ProductCompareButton = ({ slug, fpi, customClass }) => {
+  const { t } = useGlobalTranslation("translation");
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
 
@@ -24,7 +25,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
     } else if (existingSlugs.length < 4) {
       compareProducts({ existingSlugs });
     } else {
-      setWarning("You can only compare 4 products at a time");
+      setWarning(t("resource.compare.product_comparison_limit"));
       setIsOpen(true);
     }
   };
@@ -43,9 +44,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
           .executeGQL(PRODUCT_COMPARISON, { slug: productsToBeCompared })
           .then(({ data, errors }) => {
             if (errors) {
-              setWarning(
-                "Select products from the same category for comparison"
-              );
+              setWarning(t("resource.compare.cannot_compare_different_categories"));
               setIsOpen(true);
               return;
             }
@@ -59,7 +58,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
           });
       }
     } catch (error) {
-      showSnackbar("Something went wrong!", "error");
+      showSnackbar(t("resource.common.error_message"), "error");
       throw error;
     }
   };
@@ -75,21 +74,27 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
         onClick={addCompareProducts}
       >
         <SvgWrapper svgSrc="compare-icon" className={styles.compareIcon} />
-        Add to Compare
+        {t("resource.compare.add_to_compare")}
       </button>
-      <Modal isOpen={isOpen} closeDialog={closeDialog}>
+      <Modal
+        isOpen={isOpen}
+        closeDialog={closeDialog}
+        hideHeader
+        modalType="center-modal"
+        containerClassName={styles.modal}
+      >
         <div className={styles.compareModal}>
           <button
             type="button"
             className={styles.crossBtn}
             onClick={closeDialog}
           >
-            <SvgWrapper svgSrc="close" alt="close" />
+            <SvgWrapper svgSrc="close" alt={t("resource.facets.close_alt")} />
           </button>
           <div className={styles.modalBody}>
             <div className={styles.modalContent}>
               <div className={styles.image}>
-                <img src={compareWarning} alt="Warning" />
+                <SvgWrapper svgSrc="compare-warning" />
               </div>
               <div className={`${styles["bold-md"]} ${styles["primary-text"]}`}>
                 {warning}
@@ -102,7 +107,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
                   className={`${styles.button} btnSecondary`}
                   onClick={() => compareProducts({ action: "reset" })}
                 >
-                  Reset
+                  {t("resource.facets.reset")}
                 </button>
               </div>
               <div>
@@ -111,7 +116,7 @@ const ProductCompareButton = ({ slug, fpi, customClass }) => {
                   className={`${styles.button} btnPrimary ${styles.btnNoBorder}`}
                   onClick={() => compareProducts({ action: "goToCompare" })}
                 >
-                  Go to Compare
+                  {t("resource.compare.go_to_compare")}
                 </button>
               </div>
             </div>

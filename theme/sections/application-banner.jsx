@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback } from "react";
-import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
-import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
-import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import "fdk-react-templates/components/core/fy-image/fy-image.css";
+import placeholderDesktop from "../assets/images/placeholder/application-banner-desktop.png";
+import placeholderMobile from "../assets/images/placeholder/application-banner-mobile.png";
+import { FDKLink } from "fdk-core/components";
 import styles from "../styles/sections/application-banner.less";
 import { isRunningOnClient } from "../helper/utils";
 import Hotspot from "../components/hotspot/product-hotspot";
@@ -74,15 +76,9 @@ export function Component({ props, blocks, globalConfig }) {
     [tooltipHeight, tooltipWidth]
   );
 
-  const getMobileImage = () =>
-    image_mobile?.value !== ""
-      ? image_mobile?.value
-      : require("../assets/images/img-placeholder-1.png");
+  const getMobileImage = () => image_mobile?.value || placeholderMobile;
 
-  const getDesktopImage = () =>
-    image_desktop?.value !== ""
-      ? image_desktop?.value
-      : require("../assets/images/banner-placeholder.png");
+  const getDesktopImage = () => image_desktop?.value || placeholderDesktop;
 
   const getImgSrcSet = useCallback(() => {
     if (globalConfig?.img_hd?.value) {
@@ -119,7 +115,7 @@ export function Component({ props, blocks, globalConfig }) {
   };
 
   const dynamicStyles = {
-    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
   };
 
   return (
@@ -220,12 +216,12 @@ export function Component({ props, blocks, globalConfig }) {
 }
 
 export const settings = {
-  label: "Application Banner",
+  label: "t:resource.sections.application_banner.application_banner",
   props: [
     {
       type: "image_picker",
       id: "image_desktop",
-      label: "Desktop Image",
+      label: "t:resource.common.desktop_image",
       default: "",
       options: {
         aspect_ratio: "19:6",
@@ -234,7 +230,7 @@ export const settings = {
     {
       type: "image_picker",
       id: "image_mobile",
-      label: "Mobile Image",
+      label: "t:resource.common.mobile_image",
       default: "",
       options: {
         aspect_ratio: "4:5",
@@ -244,26 +240,26 @@ export const settings = {
       type: "url",
       id: "banner_link",
       default: "",
-      label: "Redirect Link",
+      label: "t:resource.common.redirect_link",
     },
   ],
   blocks: [
     {
       type: "hotspot_desktop",
-      name: "Hotspot Desktop",
+      name: "t:resource.common.hotspot_desktop",
       props: [
         {
           type: "select",
           id: "pointer_type",
-          label: "Pointer Type",
+          label: "t:resource.common.pointer_type",
           options: [
             {
               value: "box",
-              text: "Box",
+              text: "t:resource.common.box",
             },
             {
               value: "pointer",
-              text: "Pointer",
+              text: "t:resource.common.pointer",
             },
           ],
           default: "box",
@@ -272,7 +268,7 @@ export const settings = {
           type: "checkbox",
           id: "edit_visible",
           default: true,
-          label: "Show Clickable Area",
+          label: "t:resource.common.show_clickable_area",
         },
         {
           type: "range",
@@ -281,7 +277,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Horizontal Position",
+          label: "t:resource.common.horizontal_position",
           default: 50,
         },
         {
@@ -291,7 +287,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Vertical Position",
+          label: "t:resource.common.vertical_position",
           default: 50,
         },
         {
@@ -301,8 +297,9 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Width",
+          label: "t:resource.common.width",
           default: 15,
+          info: "t:resource.sections.application_banner.box_pointer_only",
         },
         {
           type: "range",
@@ -311,62 +308,66 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Height",
+          label: "t:resource.common.height",
           default: 15,
+          info: "t:resource.sections.application_banner.box_pointer_only",
         },
         {
           type: "image_picker",
           id: "hotspot_image",
-          label: "Hotspot Hover Image",
+          label: "t:resource.common.hotspot_hover_image",
           options: {
             aspect_ratio: "1:1",
             aspect_ratio_strict_check: true,
           },
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "text",
           id: "hotspot_header",
-          label: "Header",
-          placeholder: "Header",
+          label: "t:resource.common.header",
+          placeholder: "t:resource.common.header",
           value: "",
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "textarea",
           id: "hotspot_description",
-          label: "Description",
+          label: "t:resource.common.description",
           default: "",
-          info: "Write the description value",
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "text",
           id: "hotspot_link_text",
-          label: "Hover Link Text",
-          placeholder: "Link text",
+          label: "t:resource.common.hover_link_text",
+          placeholder: "t:resource.common.link_text",
           value: "",
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "url",
           id: "redirect_link",
-          label: "Redirect Link",
+          label: "t:resource.common.redirect_link",
         },
       ],
     },
     {
       type: "hotspot_mobile",
-      name: "Hotspot Mobile",
+      name: "t:resource.common.hotspot_mobile",
       props: [
         {
           type: "select",
           id: "pointer_type",
-          label: "Pointer Type",
+          label: "t:resource.common.pointer_type",
           options: [
             {
               value: "box",
-              text: "Box",
+              text: "t:resource.common.box",
             },
             {
               value: "pointer",
-              text: "Pointer",
+              text: "t:resource.common.pointer",
             },
           ],
           default: "box",
@@ -375,7 +376,7 @@ export const settings = {
           type: "checkbox",
           id: "edit_visible",
           default: true,
-          label: "Show Clickable Area",
+          label: "t:resource.common.show_clickable_area",
         },
         {
           type: "range",
@@ -384,7 +385,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Horizontal Position",
+          label: "t:resource.common.horizontal_position",
           default: 50,
         },
         {
@@ -394,7 +395,7 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Vertical Position",
+          label: "t:resource.common.vertical_position",
           default: 50,
         },
         {
@@ -404,8 +405,9 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Width",
+          label: "t:resource.common.width",
           default: 15,
+          info: "t:resource.sections.application_banner.box_pointer_only",
         },
         {
           type: "range",
@@ -414,43 +416,47 @@ export const settings = {
           max: 100,
           step: 1,
           unit: "%",
-          label: "Height",
+          label: "t:resource.common.height",
           default: 15,
+          info: "t:resource.sections.application_banner.box_pointer_only",
         },
         {
           type: "image_picker",
           id: "hotspot_image",
-          label: "Hotspot Hover Image",
+          label: "t:resource.common.hotspot_hover_image",
           options: {
             aspect_ratio: "1:1",
             aspect_ratio_strict_check: true,
           },
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "text",
           id: "hotspot_header",
-          label: "Header",
-          placeholder: "Header",
+          label: "t:resource.common.header",
+          placeholder: "t:resource.common.header",
           value: "",
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "textarea",
           id: "hotspot_description",
-          label: "Description",
+          label: "t:resource.common.description",
           default: "",
-          info: "Write the description value",
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "text",
           id: "hotspot_link_text",
-          label: "Hover Link Text",
-          placeholder: "Link text",
+          label: "t:resource.common.hover_link_text",
+          placeholder: "t:resource.common.link_text",
           value: "",
+          info: "t:resource.sections.application_banner.circular_pointer_only",
         },
         {
           type: "url",
           id: "redirect_link",
-          label: "Redirect Link",
+          label: "t:resource.common.redirect_link",
         },
       ],
     },

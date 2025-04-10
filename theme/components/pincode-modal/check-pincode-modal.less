@@ -17,8 +17,11 @@
   background-color: #fff;
   position: absolute;
   top: 50%;
-  left: 50%;
+  inset-inline-start: 50%;
   transform: translate(-50%, -50%);
+  [dir="rtl"] & {
+    transform: translate(50%, -50%);
+  }
   z-index: 2;
   .headingContainer {
     display: flex;
@@ -41,6 +44,9 @@
       height: 48px;
       display: flex;
       transform: rotate(-90deg);
+      [dir="rtl"] & {
+        transform: rotate(90deg);
+      }
       padding: 8px;
       justify-content: center;
       align-items: center;

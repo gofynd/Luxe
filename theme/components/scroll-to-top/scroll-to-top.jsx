@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 import styles from "./scroll-to-top.less";
 import { isRunningOnClient } from "../../helper/utils";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 const ScrollToTop = () => {
+  const { t } = useGlobalTranslation("translation");
   const [isToTopActive, setIsToTopActive] = useState(false);
 
   useEffect(() => {
@@ -37,7 +39,7 @@ const ScrollToTop = () => {
           svgSrc="back-top"
         ></SvgWrapper>
         <span className={`${styles.text} ${styles["caption-normal"]} fontBody`}>
-          Back to top
+          {t("resource.common.back_to_top")}
         </span>
       </button>
     )

@@ -5,6 +5,7 @@ import FyImage from "../../../../components/core/fy-image/fy-image";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import styles from "./pic-zoom.less";
 import { getProductImgAspectRatio } from "../../../../helper/utils";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function PicZoom({
   source,
@@ -21,6 +22,7 @@ function PicZoom({
   isLoading,
   hideImagePreview = false,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const [imageFullyLoaded, setImageFullyLoaded] = useState(true);
   const [imageLoading, setImageLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -167,7 +169,7 @@ function PicZoom({
               src={getOriginalImage()}
               allowFullScreen
               onLoad={iframeload}
-              title="Youtube"
+              title={t("resource.common.social_accounts.youtube")}
             />
           )}
           {isFrameLoading && <div id="loader" />}
@@ -188,7 +190,7 @@ function PicZoom({
       )}
       <button
         type="button"
-        aria-label="Wishlist"
+        aria-label={t("resource.common.breadcrumb.wishlist")}
         className={styles.wishlistIcon}
         onClick={(e) => (followed ? removeFromWishlist(e) : addToWishList(e))}
       >

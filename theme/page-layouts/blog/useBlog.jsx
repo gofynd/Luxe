@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
 import { FETCH_BLOGS_LIST, GET_BLOG } from "../../queries/blogQuery";
 import { isRunningOnClient } from "../../helper/utils";
+import placeholderImage from "../../assets/images/blog-placeholder.png";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
@@ -53,7 +54,7 @@ const useBlog = ({ fpi }) => {
       show_search: pageConfig?.show_search || "",
       show_tags: pageConfig?.show_tags || "",
       show_top_blog: pageConfig?.show_top_blog || "",
-      fallback_image: pageConfig?.fallback_image || "",
+      fallback_image: pageConfig?.fallback_image || placeholderImage,
       button_text: pageConfig?.button_text || "",
       autoplay: pageConfig?.autoplay || false,
       slide_interval: pageConfig?.slide_interval || 3.5,
@@ -88,11 +89,11 @@ const useBlog = ({ fpi }) => {
 
     if (index <= 1) {
       return 1;
-    }
-    if (index > lastIndex) {
+    } else if (index > lastIndex) {
       return lastIndex;
+    } else {
+      return index;
     }
-    return index;
   };
 
   const paginationProps = useMemo(() => {
@@ -228,11 +229,12 @@ const useBlog = ({ fpi }) => {
       });
   }
 
-  function getBlog(slug) {
+  function getBlog(slug, preview) {
     try {
       setIsBlogDetailsLoading(true);
       const values = {
         slug: slug || "",
+        preview:preview || false
       };
       return fpi
         .executeGQL(GET_BLOG, values)

@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, useLocation } from "react-router-dom";
-import OrdersHeader from "@gofynd/theme-template/components/order-header/order-header";
-import "@gofynd/theme-template/components/order-header/order-header.css";
-import ShipmentUpdateItem from "@gofynd/theme-template/components/shipments-update-item/shipments-update-item";
-import "@gofynd/theme-template/components/shipments-update-item/shipments-update-item.css";
-import BeneficiaryList from "@gofynd/theme-template/components/beneficiary-list/beneficiary-list";
-import "@gofynd/theme-template/components/beneficiary-list/beneficiary-list.css";
-import BeneficiaryItem from "@gofynd/theme-template/components/beneficiary-list/beneficiary-list-item/beneficiary-list-item";
-import "@gofynd/theme-template/components/beneficiary-list/beneficiary-list-item/beneficiary-list-item.css";
-import ReasonsList from "@gofynd/theme-template/components/reasons-list/reasons-list";
-import "@gofynd/theme-template/components/reasons-list/reasons-list.css";
-import ReasonItem from "@gofynd/theme-template/components/reasons-list/reason-item/reason-item";
-import "@gofynd/theme-template/components/reasons-list/reason-item/reason-item.css";
+import { useLocation } from "react-router-dom";
+import OrdersHeader from "fdk-react-templates/components/order-header/order-header";
+import "fdk-react-templates/components/order-header/order-header.css";
+import ShipmentUpdateItem from "fdk-react-templates/components/shipments-update-item/shipments-update-item";
+import "fdk-react-templates/components/shipments-update-item/shipments-update-item.css";
+import BeneficiaryList from "fdk-react-templates/components/beneficiary-list/beneficiary-list";
+import "fdk-react-templates/components/beneficiary-list/beneficiary-list.css";
+import BeneficiaryItem from "fdk-react-templates/components/beneficiary-list/beneficiary-list-item/beneficiary-list-item";
+import "fdk-react-templates/components/beneficiary-list/beneficiary-list-item/beneficiary-list-item.css";
+import ReasonsList from "fdk-react-templates/components/reasons-list/reasons-list";
+import "fdk-react-templates/components/reasons-list/reasons-list.css";
+import ReasonItem from "fdk-react-templates/components/reasons-list/reason-item/reason-item";
+import "fdk-react-templates/components/reasons-list/reason-item/reason-item.css";
 import styles from "./styles/profile-shipment-update-page.less";
 import useShipmentDetails from "../orders/useShipmentDetails";
 import useRefundDetails from "../orders/useRefundDetails";
@@ -22,11 +22,17 @@ import Loader from "../../components/loader/loader";
 import SvgWrapper from "../../components/core/svgWrapper/SvgWrapper";
 import ProfileRoot from "../../components/profile/profile-root";
 import AddPayment from "../../components/orders/add-payment";
+import { useNavigate, useGlobalTranslation } from "fdk-core/utils";
+import {
+  COMPLETE_MEDIA_UPLOAD,
+  START_MEDIA_UPLOAD,
+} from "../../queries/shipmentQuery";
 
 function ProfileShipmentUpdatePage({ fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const navigate = useNavigate();
   const location = useLocation();
-  const DEFAULT_ERROR_TEXT = "Something went wrong";
+  const DEFAULT_ERROR_TEXT = t("resource.common.error_message");
   const [updatedQty, setUpdatedQty] = useState("");
   const [selectedBagId, setSelectedBagId] = useState("");
   const [extraComment, setExtraComment] = useState("");
@@ -34,7 +40,6 @@ function ProfileShipmentUpdatePage({ fpi }) {
   const [reasonList, setReasonsList] = useState([]);
   const [previewList, setPreviewList] = useState([]);
   const [imageList, setImageList] = useState([]);
-  const [cdnUrls, setCdnUrls] = useState([]);
   const [accordianlv1, setAccordianlv1] = useState({});
   const [selectedReason, setSelectedReason] = useState({});
   const [showReasonsAccordion, setShowReasonsAccordion] = useState({ 0: true });
@@ -45,7 +50,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
   const [inProgress, setInProgress] = useState(false);
   const [updateError, setUpdateError] = useState(false);
   const [showError, setShowError] = useState(false);
-  const [errorText, setErrorText] = useState("Something went wrong");
+  const [errorText, setErrorText] = useState(t("resource.common.error_message"));
   const [reasonOtherText, setReasonOtherText] = useState("");
   const { showSnackbar } = useSnackbar();
   const {
@@ -62,10 +67,9 @@ function ProfileShipmentUpdatePage({ fpi }) {
   const updateType = () => {
     if (shipmentDetails) {
       if (shipmentDetails?.can_cancel) {
-        return "Cancel";
-      }
-      if (shipmentDetails?.can_return) {
-        return "Return";
+        return t("resource.facets.cancel");
+      } else if (shipmentDetails?.can_return) {
+        return t("resource.facets.return");
       }
       return "";
     }
@@ -78,14 +82,14 @@ function ProfileShipmentUpdatePage({ fpi }) {
       });
       getRefundDetails(shipmentDetails?.order_id);
     }
-    return () => {};
+    return () => { };
   }, [shipmentDetails?.order_id]);
 
   useEffect(() => {
     setAccordianlv1({
       0: reasonsList.reasons,
     });
-    return () => {};
+    return () => { };
   }, [reasonsList]);
   useEffect(() => {
     if (shipmentDetails) {
@@ -117,9 +121,11 @@ function ProfileShipmentUpdatePage({ fpi }) {
       return finalbag;
     }
   }, [shipmentDetails?.bags]);
-  const UpdatedQuantity = (qty) => {
+
+  const updatedQuantity = (qty) => {
     setUpdatedQty(qty);
   };
+
   const onDontUpdate = () => {
     navigate(`/profile/orders/shipment/${shipmentDetails?.shipment_id}`);
   };
@@ -136,9 +142,8 @@ function ProfileShipmentUpdatePage({ fpi }) {
   const getStatusForUpdate = () => {
     if (shipmentDetails?.can_cancel) {
       return "cancelled_customer";
-    }
-    if (shipmentDetails?.can_return) {
-      return selectedReason[selectLast()].qc_type.includes("pre_qc")
+    } else if (shipmentDetails?.can_return) {
+      return selectedReason?.[selectLast()]?.qc_type?.includes?.("pre_qc")
         ? "return_pre_qc"
         : "return_initiated";
     }
@@ -200,8 +205,8 @@ function ProfileShipmentUpdatePage({ fpi }) {
   };
   const beneficiaryError = () => {
     return refundDetails?.user_beneficiaries_detail?.beneficiaries?.length > 0
-      ? "Please select any one refund option"
-      : "Please add a payment method";
+      ? t("resource.profile.select_one_refund_option")
+      : t("resource.profile.add_payment_method");
   };
   const showSuccess = (type) => {
     if (type === "payment") {
@@ -216,11 +221,8 @@ function ProfileShipmentUpdatePage({ fpi }) {
   };
   const onBeneficiariesChange = (beneficiary) => {
     setSelectedBeneficary(beneficiary);
-    accordianBeneficiaries();
   };
-  const accordianBeneficiaries = () => {
-    setShowBeneficiariesAccordion(!showBeneficiariesAccordion);
-  };
+
   const deleteNext = (obj, idx) => {
     const select = { ...obj };
     for (const key in select) {
@@ -234,10 +236,10 @@ function ProfileShipmentUpdatePage({ fpi }) {
     return shipmentDetails?.can_cancel
       ? !(selectLast() && !selectedReason[selectLast()].reasons?.length > 0)
       : !(
-          selectLast() &&
-          !selectedReason[selectLast()].reasons?.length > 0 &&
-          (showimg() ? imageList.length > 0 : true)
-        );
+        selectLast() &&
+        !selectedReason[selectLast()].reasons?.length > 0 &&
+        (showimg() ? imageList.length > 0 : true)
+      );
   }, [shipmentDetails, selectedReason, imageList]);
   const getUpdatedBagsList = () => {
     const arrBags = [];
@@ -295,48 +297,62 @@ function ProfileShipmentUpdatePage({ fpi }) {
         selected_reason: { ...reason[selectLast()] },
         other_reason_text: extraComment,
       };
-    }
-    return {
-      shipmentId: shipmentDetails?.shipment_id,
-      updateShipmentStatusRequestInput: {
-        force_transition: true,
+    } else {
+      return {
+        shipmentId: shipmentDetails?.shipment_id,
+        updateShipmentStatusRequestInput: {
+          force_transition: true,
 
-        statuses: [
-          {
-            shipments: [
-              {
-                identifier: shipmentDetails?.shipment_id,
-                products: getProducts,
-                reasons: {
-                  products: [
-                    {
-                      data: {
-                        reason_id: reason[selectLast()]?.id,
-                        reason_text:
-                          reason[selectLast()]?.reason_other_text ||
-                          reasonOtherText,
+          statuses: [
+            {
+              shipments: [
+                {
+                  data_updates: {
+                    products: [
+                      {
+                        data: {
+                          meta: {
+                            return_qc_json: {
+                              images: cdn_urls,
+                            },
+                          },
+                        },
                       },
-                      filters: getProducts,
-                    },
-                  ],
+                    ],
+                  },
+                  identifier: shipmentDetails?.shipment_id,
+                  products: getProducts,
+                  reasons: {
+                    products: [
+                      {
+                        data: {
+                          reason_id: reason[selectLast()]?.id,
+                          reason_text:
+                            reason[selectLast()]?.reason_other_text ||
+                            reasonOtherText,
+                        },
+                        filters: getProducts,
+                      },
+                    ],
+                  },
                 },
-              },
-            ],
-            status: "return_initiated",
-          },
-        ],
-      },
-      shimpment_id: shipmentDetails?.shipment_id,
-      order_id: shipmentDetails?.order_id,
-      selected_reason: { ...reason[selectLast()] },
-      other_reason_text: extraComment,
-      beneficiary_id: refundDetails?.user_beneficiaries_detail
-        ?.show_beneficiary_details
-        ? selectedBeneficary?.beneficiary_id
-        : "",
-      qc_image_urls: cdn_urls,
-      products: getProducts,
-    };
+              ],
+              status: "return_initiated",
+            },
+          ],
+        },
+        shimpment_id: shipmentDetails?.shipment_id,
+        order_id: shipmentDetails?.order_id,
+        selected_reason: { ...reason[selectLast()] },
+        other_reason_text: extraComment,
+        beneficiary_id: refundDetails?.user_beneficiaries_detail
+          ?.show_beneficiary_details
+          ? selectedBeneficary?.beneficiary_id
+          : "",
+        qc_image_urls: cdn_urls,
+        products: getProducts,
+      };
+    }
   };
 
   const setUpdatedOrders = (obj) => {
@@ -362,7 +378,9 @@ function ProfileShipmentUpdatePage({ fpi }) {
       showSnackbar(DEFAULT_ERROR_TEXT, "error");
     }
   };
-  const onUpdate = () => {
+  const onUpdate = async () => {
+    let cdnUrls = [];
+
     if (getStatusForUpdate() === "return_pre_qc") {
       const images = imageList.filter((item) =>
         ["image/png", "image/jpg", "image/jpeg"].includes(item.type)
@@ -371,23 +389,23 @@ function ProfileShipmentUpdatePage({ fpi }) {
         ["video/quicktime", "video/mp4"].includes(item.type)
       );
       if (images.length > 4)
-        return showUpdateErrorText("Maximum 4 images are allowed to upload");
+        return showUpdateErrorText(t("resource.profile.max_4_images_allowed_upload"));
       if (videos.length > 1)
-        return showUpdateErrorText("Maximum 1 video is allowed to upload");
+        return showUpdateErrorText(t("resource.profile.max_1_video_allowed_upload"));
       if (images.length < 2)
-        return showUpdateErrorText("Minimum 2 images are required to upload");
+        return showUpdateErrorText(t("resource.profile.min_2_images_required_upload"));
 
       const filesizecheck = images.every((item) => item.size / 1000 < 5000);
 
       if (!filesizecheck)
-        return showUpdateErrorText("Image size should not be more than 5MB");
+        return showUpdateErrorText(t("resource.profile.image_size_max_5mb"));
       if (videos?.length) {
         const filesizecheckvideo = videos.every(
           (item) => item.size / 1000 < 25000
         );
 
         if (!filesizecheckvideo)
-          return showUpdateErrorText("video size should not be more than 25MB");
+          return showUpdateErrorText(t("resource.profile.video_size_max_25mb"));
       }
 
       const filetype = imageList.every((item) =>
@@ -400,9 +418,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
         ].includes(item.type)
       );
       if (!filetype)
-        return showUpdateErrorText(
-          "Only JPG,PNG images and MOV,MP4 videos are supported. Please upload a valid file."
-        );
+        return showUpdateErrorText(t("resource.profile.valid_file_formats_required"));
     }
 
     // if (!confirmReturn) {
@@ -411,27 +427,58 @@ function ProfileShipmentUpdatePage({ fpi }) {
     // }
     if (getStatusForUpdate() === "return_pre_qc") {
       setInProgress(true);
-      const imgRes = [];
-      //   const imgRes = Promise.all(
-      //     imageList.map((item) => {
-      //         return media.upload({
-      //           data: item,
-      //           content_type: item.type,
-      //           file_name: item.name,
-      //           size: item.size,
-      //           namespace: "misc",
-      //           params: {},
-      //         });
-      //     })
-      //   );
-      setInProgress(false);
-      setCdnUrls(
-        imgRes.map((item) => {
-          return { desc: "", url: item.cdn.url };
+
+      const startUploadResponse = await Promise.all(
+        imageList.map((item) => {
+          return fpi.executeGQL(START_MEDIA_UPLOAD, {
+            startUploadReqInput: {
+              file_name: item.name,
+              content_type: item.type,
+              size: item.size,
+            },
+            namespace: "misc",
+          });
         })
       );
-    } else {
-      setCdnUrls([]);
+
+      await Promise.all(
+        startUploadResponse.map((mediaObj, index) => {
+          const item = mediaObj.data?.startUpload || {};
+
+          return fetch(item.upload?.url, {
+            method: item.method,
+            body: imageList[index].file,
+            headers: {
+              "Content-Type": item.content_type,
+            },
+          });
+        })
+      );
+
+      const completeUploadResponse = await Promise.all(
+        startUploadResponse.map((mediaObj) => {
+          const item = mediaObj.data?.startUpload || {};
+
+          return fpi.executeGQL(COMPLETE_MEDIA_UPLOAD, {
+            completeUploadReqInput: {
+              file_name: item.file_name,
+              file_path: item.file_path,
+              content_type: item.content_type,
+              method: item.method,
+              namespace: item.namespace,
+              operation: item.operation,
+              size: item.size,
+              upload: item.upload,
+            },
+            namespace: "misc", // Storage location
+          });
+        })
+      );
+
+      setInProgress(false);
+      cdnUrls = completeUploadResponse.map((item) => {
+        return { desc: "", url: item.data?.completeUpload?.cdn?.url };
+      });
     }
 
     const reason = selectedReason;
@@ -441,13 +488,11 @@ function ProfileShipmentUpdatePage({ fpi }) {
     // } else
     if (reason[0]?.display_name === "Others" && reasonOtherText.length <= 0) {
       return showUpdateErrorText(
-        "Please write a reason for cancellation, as it will help us serve you better"
+        t("resource.profile.write_reason_for_cancellation")
       );
-    }
-    if (!reason) {
-      return showUpdateErrorText("Please select any one of the below reason");
-    }
-    if (
+    } else if (!reason) {
+      return showUpdateErrorText(t("resource.profile.select_one_reason_below"));
+    } else if (
       !selectedBeneficary &&
       shipmentDetails?.can_return &&
       shipmentDetails?.beneficiary_details &&
@@ -459,6 +504,30 @@ function ProfileShipmentUpdatePage({ fpi }) {
     const config = getUpdateConfigParams(reason, cdnUrls);
     setUpdatedOrders(config);
   };
+
+  const handleFileUpload = (event) => {
+    const files = Array.from(event.target.files);
+
+    const newFiles = files.map((file) => ({
+      id: Date.now() + file.name, // Unique ID for each file
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      preview: URL.createObjectURL(file),
+      file,
+    }));
+
+    setImageList((prevList) => [...prevList, ...newFiles]);
+  };
+
+  const handleRemoveFile = (id) => {
+    // Revoke URL for the removed file to free memory
+    const removedFile = imageList.find((file) => file.id === id);
+    if (removedFile) URL.revokeObjectURL(removedFile.preview);
+
+    setImageList((prevList) => prevList.filter((file) => file.id !== id));
+  };
+
   return (
     <ProfileRoot fpi={fpi}>
       {isLoading ? (
@@ -483,7 +552,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
               {shipmentDetails && (
                 <OrdersHeader
                   flag={true}
-                  title={`Please select an item to ${updateType()?.toLowerCase()}`}
+                  title={`${t("resource.profile.select_item_to")} ${updateType()?.toLowerCase()}`}
                 ></OrdersHeader>
               )}
               {getBag?.map(
@@ -491,7 +560,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
                   <ShipmentUpdateItem
                     key={`shipment_item${index}`}
                     selectedBagId={selected_bag_id}
-                    UpdatedQuantity={(e) => UpdatedQuantity(e)}
+                    updatedQuantity={(e) => updatedQuantity(e)}
                     item={item}
                   ></ShipmentUpdateItem>
                 )
@@ -509,14 +578,14 @@ function ProfileShipmentUpdatePage({ fpi }) {
                         <OrdersHeader
                           flag={true}
                           className={`${styles.refundTitle}`}
-                          title={`Reason for ${updateType()?.toLowerCase()}`}
+                          title={`${t("resource.profile.reason_for")} ${updateType()?.toLowerCase()}`}
                         ></OrdersHeader>
                       )}
                       {i !== 0 && (
                         <OrdersHeader
                           flag={true}
                           className={`${styles.refundTitle}`}
-                          title="More Details"
+                          title={t("resource.profile.more_details")}
                         ></OrdersHeader>
                       )}
                       <SvgWrapper
@@ -557,124 +626,136 @@ function ProfileShipmentUpdatePage({ fpi }) {
                 refundDetails?.user_beneficiaries_detail
                   ?.show_beneficiary_details && (
                   <div>
-                    <div className={`${styles.accordion}`}>
-                      <div
-                        className={`${styles.accordion__header}`}
-                        onClick={accordianBeneficiaries}
-                      >
-                        <OrdersHeader
-                          flag={true}
-                          className={`${styles.refundTitle}`}
-                          title="Select refund option"
-                        ></OrdersHeader>
-                        <SvgWrapper
-                          svgSrc="arrowDropdownBlack"
-                          //   onBlur={close}
-                          className={`${showBeneficiariesAccordion ? styles.rotate : ""} ${styles.animate}`}
-                        />
-                      </div>
+                    <div className={styles.refundOption}>
+                      {t("resource.profile.select_refund_option")}
                     </div>
                     {/* <ukt-accordion> */}
                     <div>
-                      {showBeneficiariesAccordion && (
-                        <>
-                          <BeneficiaryList
-                            className={`${styles.beneficiaryList}`}
-                            beneficiaries={
-                              refundDetails?.user_beneficiaries_detail
-                                ?.beneficiaries || []
-                            }
-                            change={onBeneficiariesChange}
-                            selectedBeneficiary={selectedBeneficary}
-                          ></BeneficiaryList>
-                          {shipmentDetails && (
-                            <AddPayment
-                              shipment={shipmentDetails}
-                              fpi={fpi}
-                              getBeneficiaryDetails={getBeneficiaryDetails}
-                            ></AddPayment>
-                          )}
-                        </>
+                      <BeneficiaryList
+                        className={`${styles.beneficiaryList}`}
+                        beneficiaries={
+                          refundDetails?.user_beneficiaries_detail
+                            ?.beneficiaries || []
+                        }
+                        change={onBeneficiariesChange}
+                        selectedBeneficiary={selectedBeneficary}
+                      ></BeneficiaryList>
+                      {shipmentDetails && (
+                        <AddPayment
+                          shipment={shipmentDetails}
+                          fpi={fpi}
+                          getBeneficiaryDetails={getBeneficiaryDetails}
+                        ></AddPayment>
                       )}
                     </div>
                     {/* // </ukt-accordion> */}
-                    {selectedBeneficary && !showBeneficiariesAccordion && (
+                    {selectedBeneficary && (
                       <BeneficiaryItem
                         beneficiary={selectedBeneficary}
                         selectedBeneficiary={selectedBeneficary}
                       ></BeneficiaryItem>
                     )}
                   </div>
-                )}
+                )
+              }
               {showimg() && <div className={`${styles.divider}`}></div>}
-              {showimg() && (
-                <div className={`${styles.cancelimg}`}>
-                  <div className={`${styles.header} ${styles.boldmd}`}>
-                    Add product images <span>*</span>
-                  </div>
-                  <div className={`${styles.addPhoto} ${styles.boldmd}`}>
-                    <SvgWrapper svgSrc="add-photo" />
-                    <div className={`${styles.addImg}`} htmlFor="my-file">
-                      Add Images / Videos
-                    </div>
-                    <input
-                      type="file"
-                      accept="video/*, image/*"
-                      multiple="multiple"
-                      onChange="previewMultiImage"
-                      className={`${styles.formControlFile}`}
-                      id="my-file"
-                    />
-                  </div>
-                  <div className={`${styles.makesure}`}>
-                    Make sure the product tag is visible in the picture.
-                  </div>
-                  <div className={`${styles.accept}`}>
-                    Accepted image formats jpg & png , File size should be less
-                    than 5mb
-                  </div>
-                  <div className={`${styles.accept}`}>
-                    Accepted Video formats MP4, MOV , File size should be less
-                    than 25mb
-                  </div>
-                  {previewList.length > 0 && (
-                    <div className={`${styles.previewImg}`}>
-                      {previewList?.map((item, index) => (
-                        <div key={index}>
-                          <span></span>
-                          {item.includes("data:video") && (
-                            <video
-                              width="120px"
-                              height="120px"
-                              muted
-                              autoPlay
-                              loop
-                            >
-                              <source src="item" type="video/quicktime" />
-                              <source src="item" type="video/mp4" />
-                            </video>
-                          )}
-                          <div onClick="removeImg(index)">
+              {
+                showimg() && (
+                  <div className={`${styles.cancelimg}`}>
+                    <div className={`${styles.header} ${styles.boldmd}`}>
+                      {t("resource.profile.add_product_images")}
+                    </div >
+                    <div className={`${styles.addPhoto} ${styles.boldmd}`}>
+                      <SvgWrapper svgSrc="add-photo" />
+                      <label className={`${styles.addImg}`} htmlFor="my-file">
+                        {t("resource.profile.add_images_videos")}
+                        <input
+                          type="file"
+                          accept="video/*, image/*"
+                          multiple="multiple"
+                          onChange={handleFileUpload}
+                          className={`${styles.formControlFile}`}
+                          id="my-file"
+                        />
+                      </label>
+
+                      <ul className={styles.fileList}>
+                        {imageList.map((file) => (
+                          <li key={file.id} className={styles.fileItem}>
+                            {file.type.includes("image") ? (
+                              <img
+                                className={styles.uploadedImage}
+                                src={file.preview}
+                                alt={file.name}
+                              />
+                            ) : (
+                              <video
+                                className={styles.uploadedImage}
+                                src={file.preview}
+                              />
+                            )}
+
                             <SvgWrapper
-                              svgSrc="close-photo"
-                              className={`${styles.svg}`}
+                              className={styles.cancel}
+                              onClick={() => handleRemoveFile(file.id)}
+                              svgSrc="cross-contained-black"
                             />
-                          </div>
-                        </div>
-                      ))}
+                          </li>
+                        ))}
+                      </ul>
+                    </div >
+                    <div className={`${styles.makesure}`}>
+                      {t("resource.profile.ensure_product_tag_visible")}
                     </div>
-                  )}
-                </div>
-              )}
+                    <div className={`${styles.accept}`}>
+                      {t("resource.profile.accepted_image_formats_and_size")}
+                    </div>
+                    <div className={`${styles.accept}`}>
+                      {t("resource.profile.accepted_video_formats_and_size")}
+                    </div>
+                    {
+                      previewList.length > 0 && (
+                        <div className={`${styles.previewImg}`}>
+                          {previewList?.map((item, index) => (
+                            <div key={index}>
+                              <span></span>
+                              {item.includes("data:video") && (
+                                <video
+                                  width="120px"
+                                  height="120px"
+                                  muted
+                                  autoPlay
+                                  loop
+                                >
+                                  <source src="item" type="video/quicktime" />
+                                  <source src="item" type="video/mp4" />
+                                </video>
+                              )}
+                              <div onClick="removeImg(index)">
+                                <SvgWrapper
+                                  svgSrc="close-photo"
+                                  className={`${styles.svg}`}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    }
+                  </div >
+                )
+              }
               <div className={`${styles.divider}`}></div>
               <div className={`${styles.textarea}`}>
                 <div>
-                  Comments <span>(Optional)</span>
+                  {t("resource.common.comments")} <span>({t("resource.common.optional")})</span>
                 </div>
                 <textarea
-                  placeholder="Enter reason"
+                  placeholder={t("resource.common.enter_reason")}
                   value={extraComment}
-                  onChange={(e) => setExtraComment(e.target.value)}
+                  onChange={(e) =>
+                    setExtraComment(e.target.value.slice(0, 1000))
+                  }
                 ></textarea>
               </div>
 
@@ -684,7 +765,7 @@ function ProfileShipmentUpdatePage({ fpi }) {
                   className={`${styles.commonBtn} ${styles.btn} ${styles.cancelBtn}`}
                   onClick={onDontUpdate}
                 >
-                  Don&apos;t {updateType()}
+                  {t("resource.common.dont")} {updateType()}
                 </button>
                 <button
                   type="button"
@@ -692,14 +773,14 @@ function ProfileShipmentUpdatePage({ fpi }) {
                   disabled={buttondisable}
                   onClick={() => onUpdate()}
                 >
-                  Continue
+                  {t("resource.common.continue")}
                 </button>
               </div>
-            </div>
+            </div >
           )}
-        </motion.div>
+        </motion.div >
       )}
-    </ProfileRoot>
+    </ProfileRoot >
   );
 }
 

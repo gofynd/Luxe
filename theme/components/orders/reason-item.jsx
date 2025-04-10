@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import styles from "./styles/reason-item.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function ReasonItem({ reason, selectedReason, change, otherReason }) {
+  const { t } = useGlobalTranslation("translation");
   const [reasonOtherText, setReasonOtherText] = useState("");
   return (
     <div className={`${styles.reasonItem}`}>
@@ -25,7 +27,9 @@ function ReasonItem({ reason, selectedReason, change, otherReason }) {
             <textarea
               className={`${styles.textarea}`}
               value={reasonOtherText}
-              placeholder="Enter reason"
+              placeholder={t(
+                "resource.common.enter_reason"
+              )}
               onChange={(e) => setReasonOtherText(e.target.value)}
               onBlur={() => otherReason(reasonOtherText)}
             ></textarea>

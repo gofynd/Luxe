@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { FDKLink } from "fdk-core/components";
 import styles from "./empty-state.less";
 import { detectMobileWidth } from "../../helper/utils";
+import { useGlobalTranslation } from "fdk-core/utils";
+import { FDKLink } from "fdk-core/components";
 
 const EmptyState = ({
-  title = "No Data Found",
+  title,
   description,
   btnLink = "/",
-  btnTitle = "RETURN TO HOMEPAGE",
+  btnTitle,
   iconSrc,
   Icon = <></>,
   showButton = true,
+  showTitle = true,
 }) => {
+  const { t } = useGlobalTranslation("translation");
   const [isMobile, setIsMobile] = useState(true);
   useEffect(() => {
     setIsMobile(detectMobileWidth());
@@ -20,7 +23,7 @@ const EmptyState = ({
     <div className={`${styles.error} fontBody`}>
       {iconSrc && <img src={iconSrc} alt="" />}
       {Icon}
-      <h3 className={`${styles.heading} fontHeader`}>{title}</h3>
+      {showTitle && <h3 className={`${styles.heading} fontHeader`}>{title || t("resource.common.no_data_found")}</h3>}
       {description && (
         <div
           className={`${styles.description} ${isMobile ? styles.b2 : styles.b1}`}
@@ -30,7 +33,7 @@ const EmptyState = ({
       )}
       {showButton && (
         <FDKLink to={btnLink} className={`${styles.button} btn-secondary`}>
-          {btnTitle}
+          {btnTitle || t("resource.common.return_home")}
         </FDKLink>
       )}
     </div>

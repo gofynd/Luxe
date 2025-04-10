@@ -2,9 +2,9 @@
 .hotspot {
   position: absolute;
   top: var(--top);
-  left: var(--left);
+  inset-inline-start: var(--left);
   bottom: var(--bottom);
-  right: var(--right);
+  inset-inline-end: var(--right);
   transform: var(--transform);
   &:hover {
     z-index: 1;
@@ -43,9 +43,12 @@
       height: 10px;
       background-color: @PageBackground;
       position: absolute;
-      left: 50%;
+      inset-inline-start: 50%;
       top: -9px;
       transform: translateX(-50%);
+      [dir="rtl"] & {
+        transform: translateX(50%);
+      }
       clip-path: polygon(50% 0, 0% 100%, 100% 100%);
     }
   }
@@ -53,14 +56,19 @@
   &__tooltip-wrapper {
     visibility: hidden;
     position: absolute;
-    left: 50%;
+    inset-inline-start: 50%;
     top: 100%;
     padding-top: 10px;
     transform: translateX(-50%);
-    width: 272px;
+    [dir="rtl"] & {
+      transform: translateX(50%);
+    }
+    max-width: 272px;
     z-index: 99;
+    width: max-content;
+
     @media @mobile-up {
-      width: 329px;
+      max-width: 329px;
     }
 
     &--active {
@@ -70,11 +78,11 @@
     @media @mobile-up {
       &.tooltip-right {
         transform: unset;
-        left: 0;
+        inset-inline-start: 0;
 
         .hotspot__tooltip {
           &::before {
-            left: 8px;
+            inset-inline-start: 8px;
             transform: unset;
           }
         }
@@ -82,13 +90,13 @@
 
       &.tooltip-left {
         transform: unset;
-        right: 0;
-        left: unset;
+        inset-inline-end: 0;
+        inset-inline-start: unset;
 
         .hotspot__tooltip {
           &::before {
-            right: 8px;
-            left: unset;
+            inset-inline-end: 8px;
+            inset-inline-start: unset;
             transform: unset;
           }
         }
@@ -98,11 +106,11 @@
     @media @mobile {
       &.tooltip-mob-right {
         transform: unset;
-        left: 0;
+        inset-inline-start: 0;
 
         .hotspot__tooltip {
           &::before {
-            left: 8px;
+            inset-inline-start: 8px;
             transform: unset;
           }
         }
@@ -110,13 +118,13 @@
 
       &.tooltip-mob-left {
         transform: unset;
-        right: 0;
-        left: unset;
+        inset-inline-end: 0;
+        inset-inline-start: unset;
 
         .hotspot__tooltip {
           &::before {
-            right: 8px;
-            left: unset;
+            inset-inline-end: 8px;
+            inset-inline-start: unset;
             transform: unset;
           }
         }
@@ -129,8 +137,8 @@
   display: flex;
 
   &__image {
-    flex: 0 0 84px;
-    border-radius: 8px 0 0 8px;
+    width: 84px;
+    border-radius: 8px;
   }
 
   &__meta {
@@ -138,13 +146,16 @@
     align-items: center;
     gap: 0.5rem;
     flex: 1;
-    padding: 0.75rem 0.5rem 0.75rem 0.75rem;
+    padding: 0.75rem 0;
 
     .icon-right {
       width: 24px;
       height: 24px;
       flex: 0 0 24px;
       transform: rotate(-90deg);
+      [dir="rtl"] & {
+        transform: rotate(90deg);
+      }
     }
   }
 
@@ -153,21 +164,26 @@
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    padding: 0 0.5rem;
+
+    &:empty {
+      display: none;
+    }
   }
 
   &__brand {
     .h4(mobile);
-    .text-line-clamp();
+    // .text-line-clamp();
   }
 
   &__name {
-    .text-line-clamp();
+    // .text-line-clamp();
     .b5(desktop);
   }
 
   &__price {
     .b2(desktop);
-    .text-line-clamp();
+    // .text-line-clamp();
     color: @TextHeading;
     &.linkText {
       text-decoration: underline;

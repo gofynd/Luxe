@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import { useLocation } from "react-router-dom";
 import { useAccounts } from "../../helper/hooks";
 import useLoginOtp from "./useLoginOtp";
@@ -8,6 +8,7 @@ import { isRunningOnClient } from "../../helper/utils";
 import { useThemeConfig } from "../../helper/hooks";
 
 const useLogin = ({ fpi }) => {
+  const { t } = useGlobalTranslation("translation");
   const location = useLocation();
   const { pageConfig } = useThemeConfig({ fpi, page: "login" });
 
@@ -28,12 +29,12 @@ const useLogin = ({ fpi }) => {
       desktop: {
         link: "/",
         url: platformData?.desktop_image,
-        alt: "Logo Image Desktop",
+        alt: t("resource.auth.login.desktop_logo_alt"),
       },
       mobile: {
         link: "/",
         url: platformData?.mobile_image || platformData?.desktop_image,
-        alt: "Logo Image Mobile",
+        alt: t("resource.auth.login.mobile_logo_alt"),
       },
     }),
     [platformData]

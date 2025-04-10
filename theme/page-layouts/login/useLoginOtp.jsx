@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useAccounts } from "../../helper/hooks";
 import useInternational from "../../components/header/useInternational";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 const useLoginOtp = ({ fpi, isLoginToggle }) => {
+  const { t } = useGlobalTranslation("translation");
   const [submittedMobile, setSubmittedMobile] = useState("");
   const [otpResendTime, setOtpResendTime] = useState(0);
   const [isFormSubmitSuccess, setIsFormSubmitSuccess] = useState(false);
@@ -12,7 +14,7 @@ const useLoginOtp = ({ fpi, isLoginToggle }) => {
   const resendTimerRef = useRef(null);
 
   const { sendOtp, signInWithOtp, resendOtp } = useAccounts({ fpi });
-  const { currentCountry } = useInternational({ fpi });
+  const { countryDetails } = useInternational({ fpi });
 
   const clearTimer = () => {
     if (resendTimerRef.current) {
@@ -60,7 +62,7 @@ const useLoginOtp = ({ fpi, isLoginToggle }) => {
       isRedirection: true,
     };
     signInWithOtp(payload)
-      .then((res) => {})
+      .then((res) => { })
       .catch((err) => {
         if (err?.details?.meta?.is_deleted) {
           // return this.$router.push({
@@ -68,7 +70,7 @@ const useLoginOtp = ({ fpi, isLoginToggle }) => {
           //     query: this.$router.currentRoute.query,
           // });
         }
-        setOtpError({ message: err?.message || "Something went wrong" });
+        setOtpError({ message: err?.message || t("resource.common.error_message") });
       });
   };
   const handleResendOtp = ({ phone }) => {
@@ -100,7 +102,7 @@ const useLoginOtp = ({ fpi, isLoginToggle }) => {
 
   return {
     mobileInfo: {
-      countryCode: currentCountry?.phone_code?.replace("+", "") ?? "91",
+      countryCode: countryDetails?.phone_code?.replace("+", "") ?? "91",
       mobile: "",
       isValidNumber: false,
     },

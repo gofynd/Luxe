@@ -17,15 +17,15 @@
     background: transparent;
     top: 0;
     bottom: 0;
-    left: 0;
-    right: 0;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
     z-index: -1;
   }
 
   .dropdown {
     box-sizing: border-box;
     border: 1px solid @DividerStokes;
-    border-radius: 8px;
+    border-radius: @ButtonRadius;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -41,7 +41,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      cursor: pointer;
+      &:not([disabled]){
+        cursor: pointer;
+      }
 
       .dropdownIcon {
         transition: all linear 0.3s;
@@ -65,7 +67,7 @@
 .dropdownList {
   max-height: 200px;
   overflow-y: auto;
-  border-radius: 8px;
+  border-radius: @ButtonRadius;
   padding: 8px 0;
   z-index: 999;
   box-shadow:
@@ -77,7 +79,7 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.5s;
-  background-color: @White;
+  background-color: @PageBackground;
 
   .listWrapper {
     overflow: hidden;
@@ -116,7 +118,7 @@
 
     &.hover {
       &:hover {
-        background: @Gray;
+        background: @HighlightColor;
       }
     }
 
@@ -138,13 +140,21 @@
 .text_field {
   border: none;
   width: 100%;
+  color: @TextBody;
+  &:disabled::placeholder {
+    color: @TextSecondary;
+  }
+  // To be removed once viewport meta is updated
+  @media @mobile {
+    font-size: 16px;
+  }
 }
 
 // .label {
 //   position: absolute;
 //   top: 0;
 //   bottom: 0;
-//   left: 14px;
+//   inset-inline-start: 14px;
 //   display: flex;
 //   align-items: center;
 //   pointer-events: none;
@@ -165,8 +175,8 @@
 //   font-size: 12px;
 //   transform: translate(0, -100%);
 //   background-color: white;
-//   padding-left: 4px;
-//   padding-right: 4px;
+//   padding-inline-start: 4px;
+//   padding-inline-end: 4px;
 // }
 
 // .text_field:focus + .label .text {

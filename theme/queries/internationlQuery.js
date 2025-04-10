@@ -117,6 +117,10 @@ export const COUNTRY_DETAILS = `query Country(
                     type
                     regex {
                         value
+                        length {
+                            max
+                            min
+                        }
                     }
                 }
             }
@@ -137,14 +141,16 @@ export const FETCH_LOCALITIES = `query Localities (
   $pageNo: Int
   $pageSize: Int
   $country: String!
-  $city:String!
+  $city: String
+  $state: String
 ){
     localities(
     locality: $locality, 
     pageNo: $pageNo
     pageSize: $pageSize
     country: $country
-    city: $city) {
+    city: $city
+    state: $state) {
         items {
             display_name
             id

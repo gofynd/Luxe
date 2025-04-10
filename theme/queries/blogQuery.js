@@ -59,8 +59,8 @@ export const FETCH_BLOGS_LIST = `query ApplicationContent(
 }
 `;
 
-export const GET_BLOG = `query blog($slug: String!) {
-  blog(slug: $slug) {
+export const GET_BLOG = `query blog($slug: String!,$preview: Boolean) {
+  blog(slug: $slug,preview:$preview) {
     custom_json
     id
     application

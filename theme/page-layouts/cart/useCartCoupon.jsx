@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import couponSuccessGif from "../../assets/images/coupon-success.gif";
 import { APPLY_COUPON, REMOVE_COUPON } from "../../queries/cartQuery";
+import { fetchCartDetails } from "./useCart";
 
 const useCartCoupon = ({ fpi, cartData }) => {
+  const { t } = useGlobalTranslation("translation");
   const coupons = useGlobalStore(fpi.getters.COUPONS);
 
   const [isCouponListModalOpen, setIsCouponListModalOpen] = useState(false);
@@ -17,7 +19,7 @@ const useCartCoupon = ({ fpi, cartData }) => {
   const { breakup_values: breakUpValues } = cartData;
   const couponAttrs = useMemo(() => {
     let attrs = {
-      title: "COUPONS",
+      title: t("resource.cart.coupons_title"),
     };
     if (breakUpValues?.coupon?.is_applied && breakUpValues?.coupon?.code) {
       attrs = {
@@ -28,7 +30,7 @@ const useCartCoupon = ({ fpi, cartData }) => {
         hasCancel: true,
       };
     } else {
-      attrs = { ...attrs, subtitle: "View all offers" };
+      attrs = { ...attrs, subtitle: t("resource.cart.view_all_offers") };
     }
     return attrs;
   }, [breakUpValues]);
@@ -57,11 +59,19 @@ const useCartCoupon = ({ fpi, cartData }) => {
       const couponBreakup =
         res?.data?.applyCoupon?.breakup_values?.coupon || {};
       if (couponBreakup?.code && couponBreakup?.is_applied) {
+        fpi.custom.setValue("isCouponApplied", couponBreakup?.is_applied);
         setError(null);
         setIsCouponListModalOpen(false);
         setIsCouponSuccessModalOpen(true);
+        fetchCartDetails(fpi, { buyNow });
+
+        const id = setTimeout(() => {
+          setIsCouponSuccessModalOpen(false);
+
+          clearTimeout(id);
+        }, 2000);
       } else {
-        setError({ message: couponBreakup?.message || "Something went wrong" });
+        setError({ message: couponBreakup?.message || t("resource.common.error_message") });
       }
     });
   };
@@ -71,14 +81,18 @@ const useCartCoupon = ({ fpi, cartData }) => {
       removeCouponId: couponId?.toString(),
       buyNow,
     };
-    fpi.executeGQL(REMOVE_COUPON, payload);
+    fpi.executeGQL(REMOVE_COUPON, payload).then((res) => {
+      const isApplied = res?.data?.removeCoupon?.coupon?.is_applied;
+      fpi.custom.setValue("isCouponApplied", isApplied);
+      fetchCartDetails(fpi, { buyNow });
+    });
   };
 
   return {
     ...couponAttrs,
     isCouponListModalOpen,
     isCouponSuccessModalOpen,
-    availableCouponList: coupons?.available_coupon_list || [],
+    availableCouponList: coupons?.available_coupon_list,
     error,
     successCoupon: breakUpValues?.coupon,
     couponSuccessGif,

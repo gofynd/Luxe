@@ -28,6 +28,7 @@ import React, {
 import styles from "./fy-dropdown-lib.less";
 import SvgWrapper from "../svgWrapper/SvgWrapper";
 import { createPortal } from "react-dom";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 const FyDropdown = ({
   options = [],
@@ -41,10 +42,11 @@ const FyDropdown = ({
   value,
   disabled = false,
   // optionLabel = "display",
-  onChange = (value) => {},
+  onChange = (value) => { },
   dataKey = "key",
   getOptionLabel = (option) => option.display ?? option,
 }) => {
+  const { t } = useGlobalTranslation("translation");
   const [selectedValue, setSelectedValue] = useState();
   const [isOpen, setIsOpen] = useState(false);
   const dropdown = useRef(null);
@@ -95,10 +97,12 @@ const FyDropdown = ({
       const buttonRect = dropdownButtonElement.getBoundingClientRect();
       const menuRect = dropdownListElement.getBoundingClientRect();
 
-      let topPosition = buttonRect.bottom + 4;
+      const { scrollY } = window;
 
-      if (topPosition + menuRect.height > window.innerHeight) {
-        topPosition = buttonRect.top - menuRect.height - 4;
+      let topPosition = buttonRect.bottom + scrollY + 4;
+
+      if (topPosition + menuRect.height > window.innerHeight + scrollY) {
+        topPosition = buttonRect.top + scrollY - menuRect.height - 4;
       }
 
       setDropdownStyles({
@@ -156,7 +160,7 @@ const FyDropdown = ({
     return () => {
       clearEventListeners();
     };
-  }, [isOpen]);
+  }, [isOpen, filteredOptions]);
 
   const handleClear = () => {
     setQuery("");
@@ -198,6 +202,7 @@ const FyDropdown = ({
         </div> */}
         <div
           className={styles.dropdownButton}
+          disabled={disabled}
           onClick={toggleDropdown}
           ref={dropdownButton}
         >
@@ -207,19 +212,19 @@ const FyDropdown = ({
             type="text"
             value={query}
             onChange={handleInputChange}
+            onFocus={adjustDropdownMenuPosition}
             placeholder={placeholder}
             disabled={disabled}
-            autocomplete="off"
+            autoComplete="off"
           />
-          {/* onFocus={() => setIsOpen(true)} */}
           {/* <label className={styles.label} for="input-query" id="label-fname">
             <div className={styles.text}>First Name</div>
           </label> */}
-          {query && (
+          {/* {query && (
             <span className={styles.clear_icon} onClick={handleClear}>
               &times;
             </span>
-          )}
+          )} */}
 
           <SvgWrapper
             svgSrc="arrow-down"
@@ -246,7 +251,7 @@ const FyDropdown = ({
                 ))
               ) : (
                 <li className={`${styles.dropdownOption} ${styles.noOption}`}>
-                  No options
+                  {t("resource.common.no_options")}
                 </li>
               )}
             </div>

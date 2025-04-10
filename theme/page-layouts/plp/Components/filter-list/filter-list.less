@@ -7,7 +7,10 @@
     .text {
       font-size: 12px;
       line-height: 14px;
-      padding: 15px 15px 15px 44px;
+      padding-top: 15px;
+      padding-inline-end: 15px;
+      padding-bottom: 15px;
+      padding-inline-start: 44px;
       width: 100%;
       border: 1px solid @DividerStokes;
       background-color: transparent;
@@ -16,7 +19,7 @@
       width: 18px;
       height: 18px;
       position: absolute;
-      left: 12px;
+      inset-inline-start: 12px;
     }
   }
   &--items {
@@ -28,7 +31,7 @@
       .checkbox-icon {
         width: 26px;
         height: 26px;
-        margin-right: 8px;
+        margin-inline-end: 8px;
         stroke: @DividerStokes;
         &.selected {
           fill: @ButtonPrimary;
@@ -39,12 +42,12 @@
         width: 16px;
         height: 16px;
         border-radius: 50%;
-        margin-right: 8px;
+        margin-inline-end: 8px;
         border: 1px solid @DividerStokes;
       }
       &--value {
         color: @TextBody;
-        margin-right: 4px;
+        margin-inline-end: 4px;
       }
       &--count {
         color: @TextDisabled;
@@ -79,8 +82,11 @@
     background-color: @DialogBackground;
     position: fixed;
     top: calc(50% + (var(--headerHeight) / 2));
-    left: 50%;
+    inset-inline-start: 50%;
     transform: translate(-50%, -50%);
+    [dir="rtl"] & {
+      transform: translate(50%, -50%);
+    }
     z-index: 41;
     border-radius: 8px;
     &--header {
@@ -92,7 +98,7 @@
           padding: 16px;
           width: 264px;
           border: 1px solid @DividerStokes;
-          margin-right: 32px;
+          margin-inline-end: 32px;
         }
       }
       .alphabets {
@@ -111,7 +117,7 @@
         }
       }
       .close-icon {
-        margin-left: auto;
+        margin-inline-start: auto;
         width: 24px;
         height: 24px;
         fill: @TextHeading;
@@ -126,16 +132,16 @@
       padding: 24px 12px;
       overflow-x: auto;
       scroll-behavior: smooth;
-      scroll-margin-left: 24px;
+      scroll-margin-inline-start: 24px;
       .alphabet-label {
-        padding-left: 12px;
+        padding-inline-start: 12px;
         margin-bottom: 11px;
         & > h4 {
           color: @ButtonPrimary;
         }
       }
       .filter {
-        padding-left: 12px;
+        padding-inline-start: 12px;
         margin-bottom: 5px;
         &__item {
           font-size: 12px;
@@ -147,7 +153,7 @@
           .checkbox-icon {
             width: 26px;
             height: 26px;
-            margin-right: 8px;
+            margin-inline-end: 8px;
             stroke: @DividerStokes;
             &.selected {
               fill: @ButtonPrimary;
@@ -155,7 +161,7 @@
           }
           &--value {
             color: @TextBody;
-            margin-right: 4px;
+            margin-inline-end: 4px;
           }
           &--count {
             color: @TextDisabled;

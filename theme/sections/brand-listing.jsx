@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import Slider from "react-slick";
-import { FDKLink } from "fdk-core/components";
-import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
 import { isRunningOnClient } from "../helper/utils";
 import styles from "../styles/sections/brand-listing.less";
+import Slider from "react-slick";
 import { BRAND_DETAILS } from "../queries/brandsQuery";
 import placeHolder1X1 from "../assets/images/brand-small-placeholder.png";
-import placeHolder9X16 from "../assets/images/brand-placeholder-1.png";
-import { useGlobalStore, useFPI } from "fdk-core/utils";
-import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
+import placeholderImage from "../assets/images/placeholder/brand-listing.png";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import "fdk-react-templates/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
+import { FDKLink } from "fdk-core/components";
 
 export function Component({ props, globalConfig, blocks, id: sectionId }) {
+  const { t } = useGlobalTranslation("translation");
   const fpi = useFPI();
   const {
     heading,
@@ -23,13 +24,14 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
     img_fill,
     button_text,
     img_container_bg,
+    alignment,
   } = props;
 
   const placeholderBrands = [
-    "Brand1",
-    "Brand2",
-    "Brand3",
-    "Brand4",
+    "brand1",
+    "brand2",
+    "brand3",
+    "brand4",
   ];
 
   const [isLoading, setIsLoading] = useState(false);
@@ -232,11 +234,11 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
   };
 
   const dynamicStyles = {
-    padding: `16px 0 ${globalConfig?.section_margin_bottom}px`,
+    padding: `16px 0 ${globalConfig?.section_margin_bottom + 16}px`,
   };
 
   const getPlaceHolder = () => {
-    return logoOnly?.value ? placeHolder1X1 : placeHolder9X16;
+    return logoOnly?.value ? placeHolder1X1 : placeholderImage;
   };
 
   const logoPlaceholderSrc = () => {
@@ -249,9 +251,8 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
         <div>
           {heading?.value && (
             <h2
-              className={`${styles["section-heading"]} fontHeader ${
-                logoOnly?.value ? styles["logo-only"] : ""
-              }`}
+              className={`${styles["section-heading"]} fontHeader ${logoOnly?.value ? styles["logo-only"] : ""
+                }`}
             >
               {heading.value}
             </h2>
@@ -264,9 +265,8 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
         </div>
         {showStackedView() && (
           <div
-            className={`${styles["categories-block"]} ${
-              logoOnly?.value ? styles.logoWidth : styles.nonLogoMaxWidth
-            } ${styles[`card-count-${per_row?.value}`]}`}
+            className={`${styles["categories-block"]} ${logoOnly?.value ? styles.logoWidth : styles.nonLogoMaxWidth
+              } ${styles[`card-count-${per_row?.value}`]} ${styles[alignment?.value]}`}
             style={{ "--brand-item": per_row?.value }}
           >
             {getBrandCount()?.map((card, index) => (
@@ -327,11 +327,9 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
         )}
         {showScrollView() && getBrandCount()?.length > 0 && (
           <div
-            className={`${styles["categories-horizontal"]} ${
-              styles[`card-count-${per_row?.value}`]
-            } ${logoOnly?.value ? "logoWidth" : ""} ${
-              getBrandCount()?.length === 1 ? styles["single-card"] : ""
-            }`}
+            className={`${styles["categories-horizontal"]} ${styles[`card-count-${per_row?.value}`]
+              } ${logoOnly?.value ? styles.logoWidth : ""} ${getBrandCount()?.length === 1 ? styles["single-card"] : ""
+              }`}
             style={{
               "--brand-item": per_row?.value,
               "--slick-dots": `${Math.ceil(getBrandCount()?.length / per_row?.value) * 22 + 10}px`,
@@ -339,7 +337,7 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
           >
             <Slider
               style={{ maxWidth: "100vw" }}
-              className={`${styles["brands-carousel"]} ${logoOnly?.value ? styles[`logo-carousel`] : ""} ${logoOnly?.value ? styles[`card-count-${per_row?.value}`] : ""} ${getBrandCount()?.length <= per_row?.value || windowWidth <= 480 ? "no-nav" : ""}`}
+              className={`${styles["brands-carousel"]} ${logoOnly?.value ? styles[`logo-carousel`] : ""} ${logoOnly?.value ? styles[`card-count-${per_row?.value}`] : ""} ${getBrandCount()?.length <= per_row?.value || windowWidth <= 480 ? "no-nav" : ""} ${styles[alignment?.value]}`}
               {...slickSetting}
             >
               {!isLoading &&
@@ -355,7 +353,7 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
                         <div
                           data-cardtype="BRANDS"
                           style={{ position: "relative" }}
-                          // className={`${logoOnly?.value ? styles["logo-carousel"] : ""}`}
+                        // className={`${logoOnly?.value ? styles["logo-carousel"] : ""}`}
                         >
                           <FyImage
                             backgroundColor={img_container_bg?.value}
@@ -401,9 +399,8 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
 
         {isDemoBlock() && (
           <div
-            className={`${styles.defaultBrandBlock} ${
-              logoOnly?.value ? styles.logoWidth : styles.nonLogoMaxWidth
-            } ${styles["card-count-4"]}`}
+            className={`${styles.defaultBrandBlock} ${logoOnly?.value ? styles.logoWidth : styles.nonLogoMaxWidth
+              } ${styles["card-count-4"]}`}
           >
             {placeholderBrands?.map((item, index) => (
               <div key={index}>
@@ -432,7 +429,9 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
                           ]}
                         />
                       </div>
-                      <span className={styles.fontBody}>{item}</span>
+                      <span className={styles.fontBody}>
+                        {t(`resource.section.brand.default_brands.${item}`)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -462,24 +461,24 @@ export function Component({ props, globalConfig, blocks, id: sectionId }) {
 }
 
 export const settings = {
-  label: "Brands Listing",
+  label: "t:resource.sections.brand_listing.brands_listing",
   props: [
     {
       type: "range",
       id: "per_row",
-      label: "Display brands per row (desktop)",
+      label: "t:resource.sections.brand_listing.brands_per_row_desktop",
       min: "3",
       max: "5",
       step: "1",
-      info: "It'll not work for mobile layout",
+      info: "t:resource.common.not_applicable_for_mobile",
       default: "4",
     },
     {
       type: "checkbox",
       id: "logoOnly",
       default: false,
-      label: "Logo Only",
-      info: "Show Logo of brands",
+      label: "t:resource.sections.brand_listing.logo_only",
+      info: "t:resource.common.show_logo_of_brands",
     },
     {
       id: "layout_mobile",
@@ -487,16 +486,16 @@ export const settings = {
       options: [
         {
           value: "stacked",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal",
+          text: "t:resource.common.horizontal",
         },
       ],
       default: "stacked",
-      label: "Mobile Layout",
-      info: "Alignment of content",
+      label: "t:resource.common.mobile_layout",
+      info: "t:resource.common.alignment_of_content",
     },
     {
       id: "layout_desktop",
@@ -504,63 +503,84 @@ export const settings = {
       options: [
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal",
+          text: "t:resource.common.horizontal",
         },
       ],
       default: "grid",
-      label: "Desktop Layout",
-      info: "Alignment of content",
+      label: "t:resource.sections.brand_listing.desktop_layout",
+      info: "t:resource.common.alignment_of_content",
+    },
+    {
+      id: "alignment",
+      type: "select",
+      options: [
+        {
+          value: "left",
+          text: "t:resource.common.left",
+        },
+        {
+          value: "right",
+          text: "t:resource.common.right",
+        },
+        {
+          value: "center",
+          text: "t:resource.common.center",
+        },
+      ],
+      default: "center",
+      label: "t:resource.sections.brand_listing.align_brands",
+      info: "t:resource.sections.brand_listing.brand_alignment",
     },
     {
       type: "color",
       id: "img_container_bg",
-      category: "Image Container",
+      category: "t:resource.common.image_container",
       default: "#00000000",
-      label: "Container Background Color",
-      info: "This color will be used as the container background color of the Product/Collection/Category/Brand images wherever applicable",
+      label: "t:resource.common.container_background_color",
+      info: "t:resource.common.image_container_bg_color"
     },
     {
       type: "checkbox",
       id: "img_fill",
-      category: "Image Container",
+      category: "t:resource.common.image_container",
       default: true,
-      label: "Fit image to the container",
-      info: "If the image aspect ratio is different from the container, the image will be clipped to fit the container. The aspect ratio of the image will be maintained",
+      label: "t:resource.common.fit_image_to_container",
+      info: "t:resource.common.clip_image_to_fit_container",
     },
     {
       type: "text",
       id: "heading",
       default: "Our Top Brands",
-      label: "Heading",
-      info: "Heading text of the section",
+      label: "t:resource.common.heading",
+      info: "t:resource.common.section_heading_text",
     },
     {
       type: "textarea",
       id: "description",
       default: "All is unique no matter how you put it",
-      label: "Description",
-      info: "Description text of the section",
+      label: "t:resource.common.description",
+      info: "t:resource.common.section_description_text",
     },
     {
       type: "text",
       id: "button_text",
       default: "VIEW ALL",
-      label: "Button Text",
+      label: "t:resource.common.button_text",
     },
   ],
   blocks: [
     {
       type: "category",
-      name: "Brand Item",
+      name: "t:resource.sections.brand_listing.brand_item",
       props: [
         {
           type: "brand",
           id: "brand",
-          label: "Select Brand",
+          label: "t:resource.sections.brand_listing.select_brand",
         },
       ],
     },
@@ -568,16 +588,16 @@ export const settings = {
   preset: {
     blocks: [
       {
-        name: "Brand Item",
+        name: "t:resource.sections.brand_listing.brand_item",
       },
       {
-        name: "Brand Item",
+        name: "t:resource.sections.brand_listing.brand_item",
       },
       {
-        name: "Brand Item",
+        name: "t:resource.sections.brand_listing.brand_item",
       },
       {
-        name: "Brand Item",
+        name: "t:resource.sections.brand_listing.brand_item",
       },
     ],
   },

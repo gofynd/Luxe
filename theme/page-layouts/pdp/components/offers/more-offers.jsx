@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import Modal from "@gofynd/theme-template/components/core/modal/modal";
 import styles from "./more-offers.less";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import { HTMLContent } from "../../../marketing/HTMLContent";
-import "@gofynd/theme-template/components/core/modal/modal.css";
+import Modal from "fdk-react-templates/components/core/modal/modal";
+import "fdk-react-templates/components/core/modal/modal.css";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function MoreOffers({
   isOpen,
@@ -13,85 +14,91 @@ function MoreOffers({
   sidebarActiveTab,
   onCloseDialog,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const [activeTab, setActiveTab] = useState("coupons");
 
   useEffect(() => {
     if (isOpen) {
-      setActiveTab(sidebarActiveTab);
+      if (sidebarActiveTab === "coupons" && couponsList.length > 0) {
+        setActiveTab("coupons");
+      } else if (sidebarActiveTab === "promotions" && promotionsList.length > 0) {
+        setActiveTab("promotions");
+      } else {
+        setActiveTab(couponsList.length > 0 ? "coupons" : "promotions");
+      }
     }
-  }, [isOpen, sidebarActiveTab]);
+  }, [isOpen, sidebarActiveTab, couponsList, promotionsList]);
 
   const closeDialog = () => {
     onCloseDialog();
   };
 
   const getListingItems = () => {
-    let listingItems = [];
-
     if (activeTab === "coupons") {
-      listingItems = couponsList.map((coupon) => ({
+      return couponsList.map((coupon) => ({
         ...coupon,
         title: coupon.coupon_code || "",
         subtitle: coupon.title || "",
         bodyText: coupon.description || "",
       }));
     } else {
-      listingItems = promotionsList.map((promo) => ({
+      return promotionsList.map((promo) => ({
         ...promo,
         title: promo.promotion_name || "",
         subtitle: promo.offer_text || "",
         bodyText: promo.description || "",
       }));
     }
-
-    return listingItems;
   };
 
   return (
     <Modal
       modalType="right-modal"
       isOpen={isOpen}
-      title="Best Offers"
+      title={t("resource.product.best_offers")}
       closeDialog={() => closeDialog(false)}
       headerClassName={styles.sidebarHeader}
       bodyClassName={styles.moreOffersContainer}
     >
       <div className={styles.sizeTabs}>
-        <button
-          type="button"
-          className={`b2 ${styles.tab} ${
-            activeTab === "coupons" ? styles.active : ""
-          }`}
-          onClick={() => setActiveTab("coupons")}
-        >
-          Coupons
-        </button>
-        <button
-          type="button"
-          className={`b2 ${styles.tab} ${
-            activeTab === "promotions" ? styles.active : ""
-          }`}
-          onClick={() => setActiveTab("promotions")}
-        >
-          Promotions
-        </button>
-      </div>
+        {couponsList.length > 0 && (
+          <button
+            type="button"
+            className={`b2 ${styles.tab} ${activeTab === "coupons" ? styles.active : ""}`}
+            onClick={() => setActiveTab("coupons")}
+          >
+            {t("resource.product.coupons")}
+          </button>
+        )}
+        {promotionsList.length > 0 && (
+          <button
+            type="button"
+            className={`b2 ${styles.tab} ${activeTab === "promotions" ? styles.active : ""}`}
+            onClick={() => setActiveTab("promotions")}
+          >
+            {t("resource.product.promotions")}
+          </button>
+        )}
+      </div >
+
       <div className={styles.sidebarBody}>
         <div
-          className={`${styles.sidebarBodyWrapper} ${
-            !getListingItems().length ? styles.flexCenter : ""
-          }`}
+          className={`${styles.sidebarBodyWrapper} ${!getListingItems().length ? styles.flexCenter : ""}`}
         >
-          {getListingItems().length ? (
+          {getListingItems().length > 0 ? (
             getListingItems().map((item, index) => (
               <div className={styles.offerCard} key={index}>
-                {item.title && (
-                  <h4 className={styles.offerCardCode}>{item.title}</h4>
-                )}
-                {item.subtitle && (
-                  <p className={`${styles.offerCardTitle} h5`}>
-                    {item.subtitle}
-                  </p>
+                {(!!item.title || !!item.subtitle) && (
+                  <div className={styles.offerCardHead}>
+                    {item.title && (
+                      <h4 className={styles.offerCardCode}>{item.title}</h4>
+                    )}
+                    {item.subtitle && (
+                      <p className={`${styles.offerCardTitle} h5`}>
+                        {item.subtitle}
+                      </p>
+                    )}
+                  </div>
                 )}
                 {item.bodyText && (
                   <HTMLContent
@@ -102,11 +109,11 @@ function MoreOffers({
               </div>
             ))
           ) : (
-            <h3 className={styles.fontHeader}>No {activeTab} available</h3>
+            <h3 className={styles.fontHeader}>{t("resource.product.no_items_available", { activeTab: "products" })}</h3>
           )}
         </div>
       </div>
-    </Modal>
+    </Modal >
   );
 }
 

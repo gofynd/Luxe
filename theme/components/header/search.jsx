@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { isRunningOnClient, debounce } from "../../helper/utils";
 
@@ -8,6 +7,8 @@ import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 
 import styles from "./styles/search.less";
 import { SEARCH_PRODUCT, AUTOCOMPLETE } from "../../queries/headerQuery";
+import { useGlobalTranslation } from "fdk-core/utils";
+import { useNavigate } from "fdk-core/utils";
 
 function Search({
   screen,
@@ -19,6 +20,7 @@ function Search({
   showCloseButton = true,
   alwaysOnSearch = false,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const [searchData, setSearchData] = useState([]);
   const [showSearch, setShowSearch] = useState(alwaysOnSearch);
   const [searchText, setSearchText] = useState("");
@@ -26,6 +28,7 @@ function Search({
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const isDoubleRowHeader = globalConfig?.header_layout === "double";
+  const isAlgoliaEnabled = globalConfig?.algolia_enabled;
 
   const openSearch = () => {
     setShowSearch(!showSearch);
@@ -48,28 +51,49 @@ function Search({
   };
 
   const getEnterSearchData = (searchText) => {
-    const payload = {
-      pageNo: 1,
-      search: searchText,
-      filterQuery: "",
-      enableFilter: false,
-      sortOn: "",
-      first: 8,
-      after: "",
-      pageType: "number",
-    };
-    fpi
-      .executeGQL(SEARCH_PRODUCT, payload, { skipStoreUpdate: true })
-      .then((res) => {
-        setSearchData(res?.data?.products?.items);
-      });
+    if (isAlgoliaEnabled) {
+      const BASE_URL = `${window.location.origin}/ext/algolia/application/api/v1.0/products`;
+      const url = new URL(BASE_URL);
+      url.searchParams.append("page_size", "4");
+      url.searchParams.append("q", searchText);
+
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          const productDataNormalization = data.items?.map((item) => ({
+            ...item,
+            media: item.medias,
+          }));
+          if (productDataNormalization.length) {
+            setSearchData(productDataNormalization);
+          } else {
+            setSearchData([]);
+          }
+        });
+    } else {
+      const payload = {
+        pageNo: 1,
+        search: searchText,
+        filterQuery: "",
+        enableFilter: false,
+        sortOn: "",
+        first: 8,
+        after: "",
+        pageType: "number",
+      };
+      fpi
+        .executeGQL(SEARCH_PRODUCT, payload, { skipStoreUpdate: true })
+        .then((res) => {
+          setSearchData(res?.data?.products?.items);
+        });
+    }
     fpi.executeGQL(AUTOCOMPLETE, { query: searchText });
   };
 
   const setEnterSearchData = debounce((e) => {
     setSearchText(e.target.value);
     getEnterSearchData(e.target.value);
-  }, 250);
+  }, 400);
   const redirectToProduct = (link) => {
     navigate(link);
     closeSearch();
@@ -153,7 +177,11 @@ function Search({
                 id="searchInput"
                 autoComplete="off"
                 defaultValue={searchText}
-                placeholder={isDoubleRowHeader ? "Search" : ""}
+                placeholder={
+                  isDoubleRowHeader
+                    ? t("resource.facets.search")
+                    : ""
+                }
                 onChange={(e) => setEnterSearchData(e)}
                 onKeyUp={(e) =>
                   e.key === "Enter" &&
@@ -174,12 +202,11 @@ function Search({
               <label
                 htmlFor="searchInput"
                 id="search-input-label"
-                className={`${styles["search__input--label"]} b1 ${
-                  styles.fontBody
-                } ${isSearchFocused ? styles.active : ""}`}
+                className={`${styles["search__input--label"]} b1 ${styles.fontBody
+                  } ${isSearchFocused ? styles.active : ""}`}
                 style={{ display: !isDoubleRowHeader ? "block" : "none" }}
               >
-                Search
+                {t("resource.facets.search")}
               </label>
             </div>
             {showCloseButton && (
@@ -203,7 +230,7 @@ function Search({
                         : "none",
                   }}
                 >
-                  PRODUCTS
+                  {t("resource.header.products_title_text")}
                 </div>
                 <ul
                   style={{
@@ -252,7 +279,7 @@ function Search({
                     <li
                       className={`${styles["search__suggestions--item "]} ${styles.flexAlignCenter} ${styles.noResult} ${styles.fontBody}`}
                     >
-                      No match found
+                      {t("resource.common.no_match_found")}
                     </li>
                   </button>
                 </ul>
@@ -269,7 +296,7 @@ function Search({
                       redirectToProduct(`/products/?q=${searchText}`)
                     }
                   >
-                    <span>VIEW ALL</span>
+                    <span>{t("resource.facets.view_all")}</span>
                     <SvgWrapper
                       className={styles.showMoreIcon}
                       svgSrc="arrow-left-long"

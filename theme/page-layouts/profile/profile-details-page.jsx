@@ -1,10 +1,11 @@
 import React from "react";
-import ProfileDetails from "@gofynd/theme-template/pages/profile";
-import "@gofynd/theme-template/pages/profile/profile-details.css";
-import { useGlobalStore } from "fdk-core/utils";
+import ProfileDetails from "fdk-react-templates/pages/profile";
+import "fdk-react-templates/pages/profile/profile-details.css";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import { useAccounts, useSnackbar } from "../../helper/hooks";
 
 function ProfileDetailsPage({ fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const { first_name, last_name, gender, user } = useGlobalStore(
     fpi.getters.USER_DATA
   );
@@ -27,7 +28,7 @@ function ProfileDetailsPage({ fpi }) {
         gender,
       });
 
-      showSnackbar("Updated Successfully", "success");
+      showSnackbar(t("resource.common.updated_success"), "success");
     } catch (error) {
       showSnackbar(error?.message, "error");
     }

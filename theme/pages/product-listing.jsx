@@ -11,25 +11,25 @@ export const settings = JSON.stringify({
     {
       type: "image_picker",
       id: "desktop_banner",
-      label: "Desktop Banner Image",
+      label: "t:resource.sections.products_listing.desktop_banner_image",
       default: "",
     },
     {
       type: "image_picker",
       id: "mobile_banner",
-      label: "Mobile Banner Image",
+      label: "t:resource.sections.products_listing.mobile_banner_image",
       default: "",
     },
     {
       type: "url",
       id: "banner_link",
       default: "",
-      label: "Redirect",
+      label: "t:resource.common.redirect",
     },
     {
       type: "checkbox",
       id: "product_number",
-      label: "Show product numbers",
+      label: "t:resource.common.show_product_numbers",
       default: true,
     },
     {
@@ -38,39 +38,39 @@ export const settings = JSON.stringify({
       options: [
         {
           value: "view_more",
-          text: "View More",
+          text: "t:resource.common.view_more",
         },
         {
           value: "infinite",
-          text: "Infinite Loading",
+          text: "t:resource.common.infinite_loading",
         },
         {
           value: "pagination",
-          text: "Pagination",
+          text: "t:resource.common.pagination",
         },
       ],
       default: "pagination",
-      label: "Loading Options",
+      label: "t:resource.common.loading_options",
     },
     {
       type: "checkbox",
       id: "back_top",
-      label: "Show back to top button",
+      label: "t:resource.common.show_back_to_top",
       default: true,
     },
     {
       type: "checkbox",
       id: "in_new_tab",
-      label: "Open product in new tab",
+      label: "t:resource.common.open_product_in_new_tab",
       default: true,
-      info: "Open product in new tab for desktop",
+      info: "t:resource.common.open_product_in_new_tab_desktop",
     },
     {
       type: "checkbox",
       id: "hide_brand",
-      label: "Hide Brand Name",
+      label: "t:resource.common.hide_brand_name",
       default: false,
-      info: "Check to hide Brand name",
+      info: "t:resource.common.hide_brand_name_info",
     },
     {
       id: "grid_desktop",
@@ -78,15 +78,15 @@ export const settings = JSON.stringify({
       options: [
         {
           value: "4",
-          text: "4 Cards",
+          text: "t:resource.common.four_cards",
         },
         {
           value: "2",
-          text: "2 Cards",
+          text: "t:resource.common.two_cards",
         },
       ],
       default: "4",
-      label: "Default grid layout desktop",
+      label: "t:resource.common.default_grid_layout_desktop",
     },
     {
       id: "grid_tablet",
@@ -94,15 +94,15 @@ export const settings = JSON.stringify({
       options: [
         {
           value: "3",
-          text: "3 Cards",
+          text: "t:resource.common.three_cards",
         },
         {
           value: "2",
-          text: "2 Cards",
+          text: "t:resource.common.two_cards",
         },
       ],
       default: "3",
-      label: "Default grid layout tablet",
+      label: "t:resource.common.default_grid_layout_tablet",
     },
     {
       id: "grid_mob",
@@ -110,72 +110,73 @@ export const settings = JSON.stringify({
       options: [
         {
           value: "2",
-          text: "2 Cards",
+          text: "t:resource.common.two_cards",
         },
         {
           value: "1",
-          text: "1 Card",
+          text: "t:resource.common.one_card",
         },
       ],
       default: "1",
-      label: "Default grid layout mobile",
+      label: "t:resource.common.default_grid_layout_mobile",
     },
     {
       id: "description",
       type: "textarea",
       default: "",
-      label: "Description",
+      label: "t:resource.common.description",
     },
     {
       type: "checkbox",
       id: "show_add_to_cart",
-      label: "Show Add to Cart",
+      label: "t:resource.common.show_add_to_cart",
+      info: "t:resource.common.not_applicable_international_websites",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_size_guide",
-      label: "Show Size Guide",
+      label: "t:resource.common.show_size_guide",
       default: true,
     },
     {
       type: "text",
       id: "tax_label",
-      label: "Price tax label text",
+      label: "t:resource.common.price_tax_label_text",
       default: "Price inclusive of all tax",
     },
     {
       type: "checkbox",
       id: "mandatory_pincode",
-      label: "Mandatory Delivery check",
+      label: "t:resource.common.mandatory_delivery_check",
       default: true,
     },
     {
       type: "checkbox",
       id: "hide_single_size",
-      label: "Hide single size",
+      label: "t:resource.common.hide_single_size",
       default: false,
     },
     {
       type: "checkbox",
       id: "preselect_size",
-      label: "Preselect size",
-      info: "Applicable only for multiple-size products",
+      label: "t:resource.common.preselect_size",
+      info: "t:resource.common.applicable_for_multiple_size_products",
       default: true,
     },
     {
       type: "radio",
       id: "size_selection_style",
-      label: "Size selection style",
+      label: "t:resource.common.size_selection_style",
       default: "dropdown",
       options: [
         {
           value: "dropdown",
-          text: "Dropdown style",
+          text: "t:resource.common.dropdown_style",
         },
         {
           value: "block",
-          text: "Block style",
+          text: "t:resource.common.block_style",
         },
       ],
     },
@@ -189,6 +190,13 @@ ProductListing.serverFetch = async ({ fpi, router }) => {
   let sortQuery = "";
   let search = "";
   let pageNo = null;
+  const fpiState = fpi.store.getState();
+
+  const globalConfig =
+    fpiState?.theme?.theme?.config?.list?.[0]?.global_config?.custom?.props ||
+    {};
+  const isAlgoliaEnabled = globalConfig?.algolia_enabled || false;
+
   Object.keys(router.filterQuery)?.forEach((key) => {
     if (key === "page_no") {
       pageNo = parseInt(router.filterQuery[key], 10);
@@ -226,6 +234,32 @@ ProductListing.serverFetch = async ({ fpi, router }) => {
     }
   });
 
+  if (isAlgoliaEnabled) {
+    const filterParams = [];
+    const skipKeys = new Set(["q", "sort_on", "page_no"]);
+
+    for (const [key, value] of Object.entries(router?.filterQuery || {})) {
+      if (skipKeys.has(key)) continue;
+      // Decode value to handle URL encoding
+      const decodedValue = Array.isArray(value)
+        ? value.map((v) => decodeURIComponent(v)).join("||")
+        : decodeURIComponent(value);
+
+      const existingParam = filterParams.find((param) =>
+        param.startsWith(`${key}:`)
+      );
+
+      if (existingParam) {
+        const updatedParam = `${existingParam}||${decodedValue}`;
+        filterParams[filterParams.indexOf(existingParam)] = updatedParam;
+      } else {
+        filterParams.push(`${key}:${decodedValue}`);
+      }
+    }
+
+    filterQuery = filterParams.join(":::");
+  }
+
   const payload = {
     filterQuery,
     sortOn: sortQuery,
@@ -236,9 +270,53 @@ ProductListing.serverFetch = async ({ fpi, router }) => {
   };
   if (pageNo) payload.pageNo = pageNo;
 
-  fpi.custom.setValue("isPlpSsrFetched", true);
+  if (isAlgoliaEnabled) {
+    const BASE_URL = `https://${fpiState?.custom?.appHostName}/ext/algolia/application/api/v1.0/products`;
 
-  return fpi.executeGQL(PLP_PRODUCTS, payload);
+    const url = new URL(BASE_URL);
+    url.searchParams.append(
+      "page_id",
+      payload?.pageNo === 1 || !payload?.pageNo ? "*" : payload?.pageNo - 1
+    );
+    url.searchParams.append("page_size", payload?.first);
+
+    if (payload?.sortOn) {
+      url.searchParams.append("sort_on", payload?.sortOn);
+    }
+    if (filterQuery) {
+      url.searchParams.append("f", filterQuery);
+    }
+    if (payload?.search) {
+      url.searchParams.append("q", payload?.search);
+    }
+
+    return fetch(url)
+      .then((response) => response.json())
+      .then((data) => {
+        const productDataNormalization = data.items?.map((item) => ({
+          ...item,
+          media: item.medias,
+        }));
+
+        data.page.current = payload?.pageNo || 1;
+
+        const productList = {
+          filters: data?.filters,
+          items: productDataNormalization,
+          page: data?.page,
+          sort_on: data?.sort_on,
+        };
+        fpi.custom.setValue("customProductList", productList);
+        fpi.custom.setValue("isPlpSsrFetched", true);
+      });
+  } else {
+    return fpi
+      .executeGQL(PLP_PRODUCTS, payload, { skipStoreUpdate: false })
+      .then(({ data }) => {
+        fpi.custom.setValue("customProductList", data?.products);
+        fpi.custom.setValue("isPlpSsrFetched", true);
+      });
+  }
 };
 
 export default ProductListing;

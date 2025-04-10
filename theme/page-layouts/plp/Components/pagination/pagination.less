@@ -12,9 +12,15 @@
 
     &.left-arrow {
       transform: rotate(90deg);
+      [dir="rtl"] & {
+        transform: rotate(-90deg);
+      }
     }
     &.right-arrow {
       transform: rotate(-90deg);
+      [dir="rtl"] & {
+        transform: rotate(90deg);
+      }
     }
   }
 

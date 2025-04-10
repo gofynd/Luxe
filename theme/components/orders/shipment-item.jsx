@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { FDKLink } from "fdk-core/components";
 import styles from "./styles/shipment-item.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import { useGlobalTranslation } from "fdk-core/utils";
+import { FDKLink } from "fdk-core/components";
 
 function ShipmentItem({
   bag,
@@ -12,6 +13,7 @@ function ShipmentItem({
   onChangeValue,
   type,
 }) {
+  const { t } = useGlobalTranslation("translation");
   const numberWithCommas = (number) => {
     if (number !== 0 && !number) {
       return "";
@@ -28,9 +30,9 @@ function ShipmentItem({
       let no =
         num.toString().split(".")[0].length > 3
           ? `${num
-              .toString()
-              .substring(0, num.toString().split(".")[0].length - 3)
-              .replace(/\B(?=(\d{2})+(?!\d))/g, ",")} , ${num
+            .toString()
+            .substring(0, num.toString().split(".")[0].length - 3)
+            .replace(/\B(?=(\d{2})+(?!\d))/g, ",")} , ${num
               .toString()
               .substring(num.toString().split(".")[0].length - 3)}`
           : num.toString();
@@ -39,8 +41,9 @@ function ShipmentItem({
         no = ` - ${no}`;
       }
       return no;
+    } else {
+      return 0;
     }
-    return 0;
   };
 
   const priceFormatCurrencySymbol = (symbol, price) => {
@@ -105,7 +108,9 @@ function ShipmentItem({
               <span>{` | `}</span>
               <span className={`${styles.lightxxs}`}>
                 {bag?.quantity}
-                {bag?.quantity === 1 ? "Piece" : "Pieces"}
+                {t("resource.order.piece_count", {
+                  count: bag?.quantity,
+                })}
               </span>
             </div>
             {bag?.prices?.currency_symbol && bag?.prices?.price_effective && (

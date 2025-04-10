@@ -60,13 +60,14 @@ body {
     min-height: 45vh;
   }
 }
-
-body,
-button,
-input,
-textarea,
-select {
-  .fontBody;
+html {
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    .fontBody;
+  }
 }
 
 input:focus,
@@ -388,7 +389,7 @@ button {
   height: 63px;
 }
 .order-item .oder-header .filter-arrow-up {
-  margin-right: none !important;
+  margin-inline-end: none !important;
 }
 
 // guest checkout
@@ -421,12 +422,12 @@ img::selection {
 
 .mr-5,
 .mr5 {
-  margin-right: 30px !important;
+  margin-inline-end: 30px !important;
 }
 
 .mr-2,
 .mr2 {
-  margin-right: 5px !important;
+  margin-inline-end: 5px !important;
 }
 
 .py-5,
@@ -544,17 +545,26 @@ img::selection {
 }
 .slick-next {
   transform: translate(100%, 100%);
-  right: calc(50% - var(--slick-dots) / 2);
+  [dir="rtl"] & {
+    transform: translate(-100%, 100%) rotate(180deg);
+  }
+  inset-inline-end: calc(50% - var(--slick-dots) / 2);
 }
 .slick-prev {
   transform: translate(-100%, 100%);
-  left: calc(50% - var(--slick-dots) / 2);
+  [dir="rtl"] & {
+    transform: translate(100%, 100%) rotate(180deg);
+  }
+  inset-inline-start: calc(50% - var(--slick-dots) / 2);
 }
 .slick-dots {
   font-size: 0;
   position: absolute;
-  left: 50%;
+  inset-inline-start: 50%;
   transform: translate(-50%, 100%);
+  [dir="rtl"] & {
+    transform: translate(50%, -50%);
+  }
   bottom: 0px;
   padding: 13.5px 0;
   @media @tablet {
@@ -617,17 +627,27 @@ img::selection {
   .snackbar {
     top: 80px !important; /* Remove the top position */
     bottom: 20px; /* Ensure it shows at the bottom if needed */
-    left: auto; /* Override if it has a specific left value */
-    right: 0; /* Start from the right side */
+    inset-inline-start: auto; /* Override if it has a specific left value */
+    inset-inline-end: 0; /* Start from the right side */
     animation: slideInRight 0.5s ease-out forwards; /* New animation */
   }
 
   @keyframes slideInRight {
     from {
       transform: translateX(100%); /* Start off-screen from the right */
+      [dir="rtl"] & {
+        transform: translateX(-100%);
+      }
     }
     to {
       transform: translateX(0); /* Move into the viewport */
     }
   }
+}
+
+.page-not-found-wrapper {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

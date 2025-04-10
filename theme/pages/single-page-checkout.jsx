@@ -1,29 +1,38 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import { useSearchParams } from "react-router-dom";
-import CheckoutPage from "@gofynd/theme-template/pages/checkout/checkout";
-import "@gofynd/theme-template/pages/checkout/checkout.css";
-// import PriceBreakup from "@gofynd/theme-template/components/price-breakup/price-breakup";
-// import "@gofynd/theme-template/components/price-breakup/price-breakup.css";
+import CheckoutPage from "fdk-react-templates/pages/checkout/checkout";
+import "fdk-react-templates/pages/checkout/checkout.css";
+// import PriceBreakup from "fdk-react-templates/components/price-breakup/price-breakup";
+// import "fdk-react-templates/components/price-breakup/price-breakup.css";
 
 import { CHECKOUT_LANDING, PAYMENT_OPTIONS } from "../queries/checkoutQuery";
-import { useHyperlocalTat } from "../helper/hooks";
+import { useHyperlocalTat, useGoogleMapConfig } from "../helper/hooks";
 import useAddress from "../page-layouts/single-checkout/address/useAddress";
 import usePayment from "../page-layouts/single-checkout/payment/usePayment";
+import useCart from "../page-layouts/cart/useCart";
 import Loader from "../components/loader/loader";
 import useCartCoupon from "../page-layouts/cart/useCartCoupon";
 import useCartComment from "../page-layouts/cart/useCartComment";
 
 function SingleCheckoutPage({ fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const bagData = useGlobalStore(fpi?.getters?.CART_ITEMS) || {};
   const shipments = useGlobalStore(fpi.getters.SHIPMENTS) || {};
-  const INTEGRATION_TOKENS = useGlobalStore(fpi.getters.INTEGRATION_TOKENS);
-  const APP_FEATURES = useGlobalStore(fpi.getters.APP_FEATURES);
+  const { buybox } = useGlobalStore(fpi.getters.APP_FEATURES);
   const breakupValues = bagData?.breakup_values?.display || [];
   const [showShipment, setShowShipment] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
-  const [mapApiKey, setMapApiKey] = useState("");
+  const [currentStepIdx, setCurrentStepIdx] = useState(0);
+  const { onPriceDetailsClick } = useCart(fpi);
+  const steps = [
+    { label: t("resource.checkout.address") },
+    { label: t("resource.checkout.summary") },
+    { label: t("resource.checkout.payment") },
+  ];
+
   const { isHyperlocal, convertUTCToHyperlocalTat } = useHyperlocalTat({ fpi });
+  const { isGoogleMap, mapApiKey } = useGoogleMapConfig({ fpi });
   const [searchParams] = useSearchParams();
   const cart_id = searchParams.get("id");
   const buy_now = searchParams.get("buy_now") || false;
@@ -36,55 +45,54 @@ function SingleCheckoutPage({ fpi }) {
     [bagData]
   );
 
-  const executeCheckoutLanding = useCallback(
-    (reqBody = {}) => {
-      const payload = {
-        buyNow: false,
-        includeAllItems: true,
-        includeBreakup: true,
-        includeCodCharges: true,
-        ...reqBody,
-      };
-      fpi.executeGQL(CHECKOUT_LANDING, payload);
-    },
-    [fpi]
-  );
-
   useEffect(() => {
-    executeCheckoutLanding({ buyNow: buy_now === "true" });
-    return () => {
-      if (buy_now === "true") executeCheckoutLanding();
+    const payload = {
+      buyNow: buy_now === "true",
+      includeAllItems: true,
+      includeBreakup: true,
     };
-  }, [executeCheckoutLanding, buy_now]);
-
-  useEffect(() => {
-    if (
-      INTEGRATION_TOKENS &&
-      APP_FEATURES?.cart?.google_map &&
-      INTEGRATION_TOKENS?.tokens?.google_map?.credentials?.api_key
-    ) {
-      setMapApiKey(
-        Buffer?.from(
-          INTEGRATION_TOKENS?.tokens?.google_map?.credentials?.api_key,
-          "base64"
-        )?.toString()
-      );
-    }
-  }, [INTEGRATION_TOKENS, APP_FEATURES]);
+    fpi.executeGQL(CHECKOUT_LANDING, payload);
+    const paymentPayload = {
+      pincode: localStorage?.getItem("pincode") || "",
+      cartId: cart_id,
+      checkoutMode: "self",
+      amount: (shipments?.breakup_values?.raw?.total || 0.1) * 100,
+    };
+    fpi.executeGQL(PAYMENT_OPTIONS, paymentPayload);
+  }, [fpi, buy_now]);
 
   function showPaymentOptions() {
     const payload = {
-      pincode: localStorage?.getItem("pincode") || "",
+      pincode: "",
       cartId: cart_id,
       checkoutMode: "self",
       amount: (shipments?.breakup_values?.raw?.total || 0.1) * 100,
     };
     fpi.executeGQL(PAYMENT_OPTIONS, payload);
     setShowShipment(false);
-    setShowPayment(true);
+    showPaymentHandler(true);
   }
 
-  const address = useAddress(setShowShipment, setShowPayment, fpi);
+  function showPaymentHandler(flag) {
+    setShowPayment(flag);
+    if (flag) {
+      setCurrentStepIdx(2);
+    }
+  }
+
+  function showShipmentHandler(flag) {
+    setShowShipment(flag);
+    if (flag) {
+      setCurrentStepIdx(1);
+    }
+  }
+  useEffect(() => {
+    if (!showPayment && !showShipment) {
+      setCurrentStepIdx(0);
+    }
+  }, [showShipment, showPayment]);
+
+  const address = useAddress(showShipmentHandler, showPaymentHandler, fpi);
   const payment = usePayment(fpi);
 
   useEffect(() => {
@@ -92,7 +100,6 @@ function SingleCheckoutPage({ fpi }) {
       address?.selectAddress();
     }
   }, []);
-
   return (
     <>
       <CheckoutPage
@@ -109,17 +116,20 @@ function SingleCheckoutPage({ fpi }) {
         }}
         cartCommentProps={cartComment}
         setShowPayment={setShowPayment}
-        setShowShipment={setShowShipment}
+        setShowShipment={showShipmentHandler}
+        onPriceDetailsClick={onPriceDetailsClick}
         shipments={shipments?.shipments || []}
         showPaymentOptions={() => {
           showPaymentOptions();
         }}
+        stepperProps={{ steps, currentStepIdx }}
         // mapApiKey={"AIzaSyAVCJQAKy6UfgFqZUNABAuGQp2BkGLhAgI"}
-        showGoogleMap={APP_FEATURES?.cart?.google_map}
+        showGoogleMap={isGoogleMap}
         mapApiKey={mapApiKey}
         isHyperlocal={isHyperlocal}
         convertHyperlocalTat={convertUTCToHyperlocalTat}
         loader={<Loader />}
+        buybox={buybox}
       />
       {/* <PriceBreakup breakUpValues={breakupValues}></PriceBreakup> */}
     </>

@@ -1,105 +1,90 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useMemo } from "react";
 import { useGlobalStore } from "fdk-core/utils";
 import {
-  COUNTRIES,
-  CURRENCIES,
-  DEFAULT_CURRENCY,
   COUNTRY_DETAILS,
   FETCH_LOCALITIES,
 } from "../../queries/internationlQuery";
 import { useThemeFeature } from "../../helper/hooks";
 
 const useInternational = ({ fpi }) => {
-  const { countries, currencies, defaultCurrencyInfo, countryDetails } =
-    useGlobalStore(fpi?.getters?.CUSTOM_VALUE) ?? {};
+  const {
+    countries,
+    currencies,
+    defaultCurrency: defaultCurrencyCode,
+    countryDetails,
+  } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE) ?? {};
   const { isInternational } = useThemeFeature({ fpi });
-  let i18nDetails = useGlobalStore(fpi.getters.i18N_DETAILS);
-  const loading = useRef({ country: false, currency: false });
+  const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
+  const i18nDetails = useGlobalStore(fpi.getters.i18N_DETAILS);
 
   const currentCountry = useMemo(() => {
-    return countries?.list?.find(
-      (country) => country?.iso2 === i18nDetails?.countryCode
+    return countries?.find(
+      (country) => country.meta.country_code === i18nDetails?.countryCode
     );
   }, [countries, i18nDetails?.countryCode]);
 
   const currentCurrency = useMemo(() => {
     if (!i18nDetails?.currency?.code) {
-      return currencies?.list?.find(
-        (data) => data?.code === defaultCurrencyInfo?.code
-      );
+      return currencies?.find((data) => data?.code === defaultCurrencyCode);
     }
-    return currencies?.list?.find(
+    return currencies?.find(
       (data) => data?.code === i18nDetails?.currency?.code
     );
-  }, [currencies, i18nDetails?.currency?.code, defaultCurrencyInfo?.code]);
+  }, [currencies, i18nDetails?.currency?.code, defaultCurrencyCode]);
 
   const defaultCurrency = useMemo(() => {
-    return currencies?.list?.find(
-      (data) => data?.code === defaultCurrencyInfo?.code
-    );
-  }, [currencies, defaultCurrencyInfo]);
+    return currencies?.find((data) => data?.code === defaultCurrencyCode);
+  }, [currencies, defaultCurrencyCode]);
 
-  function fetchCurrencies() {
-    if (
-      loading.current.currency ||
-      currencies?.isLoaded ||
-      currencies?.list?.length
-    )
-      return;
-    loading.current = { ...loading.current, currency: true };
-    try {
-      return fpi.executeGQL(CURRENCIES).then((res) => {
-        if (res?.data?.currencies) {
-          fpi.custom.setValue("currencies", {
-            isLoaded: true,
-            list: res?.data?.currencies ?? [],
-          });
-        }
-        loading.current = { ...loading.current, currency: false };
-        return res;
-      });
-    } catch (error) {
-      console.log({ error });
-    }
-  }
-
-  function fetchCountries() {
-    if (
-      loading.current.country ||
-      countries?.isLoaded ||
-      countries?.list?.length
-    )
-      return;
-    loading.current = { ...loading.current, country: true };
-    try {
-      return fpi.executeGQL(COUNTRIES).then((res) => {
-        if (res?.data?.countries) {
-          fpi.custom.setValue("countries", {
-            isLoaded: true,
-            list: res?.data?.countries?.items ?? [],
-          });
-        }
-        loading.current = { ...loading.current, country: false };
-        return res;
-      });
-    } catch (error) {
-      console.log({ error });
-    }
-  }
-
-  function fetchDefaultCurrencies() {
-    return fpi.executeGQL(DEFAULT_CURRENCY).then((res) => {
-      if (
-        res?.data?.applicationConfiguration?.app_currencies?.default_currency
-      ) {
-        fpi.custom.setValue(
-          "defaultCurrencyInfo",
-          res.data.applicationConfiguration.app_currencies.default_currency
-        );
+  const countryAddressFieldMap = useMemo(() => {
+    const addressFields = countryDetails?.fields?.address;
+    if (!addressFields) return {};
+    const prevFieldMap = addressFields.reduce((acc, field) => {
+      if (field.next) {
+        acc[field.next] = field.slug;
       }
-      return res;
-    });
-  }
+      return acc;
+    }, {});
+    return addressFields.reduce((acc, field) => {
+      acc[field.slug] = prevFieldMap[field.slug]
+        ? { ...field, prev: prevFieldMap[field.slug] }
+        : field;
+      return acc;
+    }, {});
+  }, [countryDetails?.fields?.address]);
+
+  const isValidDeliveryLocation = useMemo(() => {
+    if (!countryDetails) return false;
+    if (locationDetails?.country_iso_code === countryDetails?.iso2) {
+      const requiredFields =
+        countryDetails?.fields?.serviceability_fields || [];
+      return requiredFields.every((field) => field in locationDetails);
+    }
+
+    return false;
+  }, [locationDetails, countryDetails]);
+
+  const deliveryLocation = useMemo(() => {
+    if (!countryDetails || !locationDetails) return [];
+    return (
+      countryDetails?.fields?.serviceability_fields?.reduce((acc, field) => {
+        if (
+          locationDetails?.country_iso_code === countryDetails?.iso2 &&
+          locationDetails?.[field]
+        ) {
+          acc.push(locationDetails[field]);
+        }
+        return acc;
+      }, []) || []
+    );
+  }, [locationDetails, countryDetails]);
+
+  const isServiceabilityPincodeOnly = useMemo(
+    () =>
+      countryDetails?.fields?.serviceability_fields?.length === 1 &&
+      countryDetails?.fields?.serviceability_fields?.[0] === "pincode",
+    [countryDetails]
+  );
 
   function fetchCountrieDetails(payload, options = {}) {
     if (!payload.countryIsoCode) return;
@@ -112,23 +97,25 @@ const useInternational = ({ fpi }) => {
     });
   }
 
-  useEffect(() => {
-    try {
-      if (isInternational) {
-        fetchCountries();
-        fetchCurrencies();
-        fetchDefaultCurrencies();
-      }
-    } catch (error) {
-      console.log({ error });
+  function setI18nDetails({ iso, phoneCode, name, currency }, currencyCode) {
+    let newCurrency = currencyCode;
+    if (!newCurrency) {
+      const countryCurrency = currencies?.find(
+        (data) => data?.code === currency
+      );
+      newCurrency = countryCurrency?.code ?? defaultCurrencyCode;
     }
-  }, []);
-
-  useEffect(() => {
-    if (currentCountry?.iso2) {
-      fetchCountrieDetails({ countryIsoCode: currentCountry?.iso2 });
-    }
-  }, [currentCountry]);
+    const cookiesData = {
+      currency: { code: newCurrency },
+      country: {
+        iso_code: iso,
+        isd_code: phoneCode,
+      },
+      display_name: name,
+      countryCode: iso,
+    };
+    fpi.setI18nDetails(cookiesData);
+  }
 
   function fetchLocalities(payload) {
     return fpi.executeGQL(FETCH_LOCALITIES, payload).then((res) => {
@@ -140,17 +127,21 @@ const useInternational = ({ fpi }) => {
   }
 
   return {
-    countries: countries?.list ?? [],
-    currencies: currencies?.list ?? [],
+    isInternational,
+    i18nDetails,
+    countries,
+    currencies,
     defaultCurrency,
     countryDetails,
     currentCountry,
     currentCurrency,
-    fetchCurrencies,
-    fetchCountries,
+    countryAddressFieldMap,
+    isValidDeliveryLocation,
+    deliveryLocation,
+    isServiceabilityPincodeOnly,
     fetchCountrieDetails,
     fetchLocalities,
-    isInternational,
+    setI18nDetails,
   };
 };
 

@@ -26,6 +26,9 @@
 }
 .arrowRightIcon {
   transform: rotate(-90deg);
+  [dir="rtl"] & {
+    transform: rotate(90deg);
+  }
 }
 .icon {
   width: 32px;
@@ -71,7 +74,7 @@
       }
       .l2NavigationList {
         position: absolute;
-        left: 0;
+        inset-inline-start: 0;
         top: 100%;
         width: 216px;
         border-radius: 8px;
@@ -104,7 +107,7 @@
       .l3NavigationList {
         position: absolute;
         top: 0;
-        left: 100%;
+        inset-inline-start: 100%;
         width: 216px;
         border-radius: 8px;
         padding: 8px 0;
@@ -190,7 +193,10 @@
       &.title {
         .arrowLeftIcon {
           transform: rotate(90deg);
-          margin-left: -8px;
+          [dir="rtl"] & {
+            transform: rotate(-90deg);
+          }
+          margin-inline-start: -8px;
         }
       }
       .nav-link {
@@ -249,7 +255,7 @@
             all: revert;
             width: 20px;
             height: 20px;
-            margin-right: 8px;
+            margin-inline-end: 8px;
             fill: @TextHeading;
           }
         }
@@ -272,7 +278,7 @@
       .social {
         margin-top: 36px;
         flex-wrap: wrap;
-        padding-right: 60px;
+        padding-inline-end: 60px;
         .grid-gap(12px, 24px);
         @media @mobile-up {
           .grid-gap(0);
@@ -292,4 +298,8 @@
 }
 .overlaySingle {
   top: var(--headerHeight);
+}
+.languageWrapper {
+  margin-inline-start: -4px;
+  font-weight: 600
 }

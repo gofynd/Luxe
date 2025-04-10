@@ -1,11 +1,12 @@
 import { useState, useMemo } from "react";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import { useLocation } from "react-router-dom";
 import { useAccounts } from "../../helper/hooks";
 import useVerifyDetails from "../auth/useVerifyDetails";
 // import { useLocation, useNavigate, createSearchParams } from 'react-router-dom';
 
 const useRegister = ({ fpi }) => {
+  const { t } = useGlobalTranslation("translation");
   const { pathname } = useLocation();
 
   const THEME = useGlobalStore(fpi.getters.THEME);
@@ -42,6 +43,11 @@ const useRegister = ({ fpi }) => {
     const user = { ...formData, registerToken: "" };
     signUp(user)
       .then((res) => {
+        window?.scrollTo({
+          top: 0,
+          left: 0,
+          behavior: "smooth",
+        });
         setVerifyBothData(res);
         if (res?.verify_mobile_otp || res?.verify_email_otp) {
           setIsFormSubmitSuccess(true);
@@ -51,7 +57,7 @@ const useRegister = ({ fpi }) => {
       })
       .catch((err) => {
         setError({
-          message: err?.message || "Something went wrong",
+          message: err?.message || t("resource.common.error_message"),
         });
       });
   };
@@ -64,7 +70,7 @@ const useRegister = ({ fpi }) => {
     isMobile,
     mobileLevel,
     error,
-    loginButtonLabel: "GO TO LOGIN",
+    loginButtonLabel: t("resource.auth.login.go_to_login"),
     verifyDetailsProp,
     onLoginButtonClick: handleLoginClick,
     onRegisterFormSubmit: handleFormSubmit,

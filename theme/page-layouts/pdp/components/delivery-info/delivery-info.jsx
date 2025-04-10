@@ -1,61 +1,60 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
-import {
-  convertUTCDateToLocalDate,
-  isEmptyOrNull,
-} from "../../../../helper/utils";
-import { useHyperlocalTat } from "../../../../helper/hooks";
+import { convertUTCDateToLocalDate, formatLocale } from "../../../../helper/utils";
+import { useHyperlocalTat, useSyncedState } from "../../../../helper/hooks";
 import styles from "./delivery-info.less"; // Import the module CSS
+import {
+  useGlobalStore,
+  useGlobalTranslation
+} from "fdk-core/utils";
 
 function DeliveryInfo({
+  className,
   selectPincodeError,
-  storeInfo,
-  tat,
+  deliveryPromise,
   pincode,
   pincodeErrorMessage,
-  setCurrentPincode,
   checkPincode,
   setPincodeErrorMessage,
-  isIntlShippingEnabled,
-  sellerDetails,
+  pincodeInput,
+  isValidDeliveryLocation,
+  deliveryLocation,
+  isServiceabilityPincodeOnly,
   fpi,
-  pincodeDetails,
-  locationDetails,
   showLogo = false,
 }) {
+  const { t } = useGlobalTranslation("translation");
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
   const [postCode, setPostCode] = useState(pincode || "");
   const [tatMessage, setTatMessage] = useState("");
-  const [isValid, setIsValid] = useState(false);
-  const pinCodeRegex = /^[1-9][0-9]{5}$/;
   const { isHyperlocal, convertUTCToHyperlocalTat } = useHyperlocalTat({ fpi });
+  const { displayName, maxLength, validatePincode } = pincodeInput;
 
   useEffect(() => {
-    setPostCode(pincode);
-  }, [pincode]);
-
-  useEffect(() => {
-    let flag = false;
-    if (isIntlShippingEnabled) {
-      if (sellerDetails?.country?.iso_code) {
-        flag = true;
-      } else flag = false;
-    } else {
-      flag = postCode?.length > 5;
-    }
-    if (flag) {
+    if (isValidDeliveryLocation) {
       getDeliveryDate();
     }
-  }, [tat, isIntlShippingEnabled, sellerDetails]);
+  }, [deliveryPromise, isValidDeliveryLocation]);
 
-  function changePostCode(e) {
-    setPostCode(e?.target?.value);
-    setCurrentPincode(e.target.value);
+  function changePostCode(pincode) {
+    setPostCode(pincode);
     setTatMessage("");
     setPincodeErrorMessage("");
-    if (e?.target?.value?.length === 6) {
-      checkPincode(e.target.value);
+    if (validatePincode(pincode) === true) {
+      checkPincode(pincode);
     }
   }
+
+  const handlePincodeSubmit = (pincode) => {
+    const result = validatePincode(pincode);
+    if (result !== true) {
+      setPincodeErrorMessage(result);
+      return;
+    }
+    setPincodeErrorMessage("");
+    checkPincode(pincode);
+  };
 
   const getDeliveryDate = () => {
     const options = {
@@ -63,7 +62,7 @@ function DeliveryInfo({
       month: "short",
       day: "numeric",
     };
-    const { min, max } = tat || {};
+    const { min, max } = deliveryPromise || {};
 
     if (!min) {
       return false;
@@ -74,57 +73,45 @@ function DeliveryInfo({
       return;
     }
 
-    const minDate = convertUTCDateToLocalDate(min, options);
-    const maxDate = convertUTCDateToLocalDate(max, options);
+    const minDate = convertUTCDateToLocalDate(min, options, formatLocale(locale, countryCode));
+    const maxDate = convertUTCDateToLocalDate(max, options, formatLocale(locale, countryCode));
+
+    const deliveryMessage = min === max
+      ? t('resource.product.delivery_on', { date: minDate })
+      : t('resource.product.delivery_between', { minDate, maxDate });
+
     setTimeout(() => {
       setTatMessage(
-        `Will be delivered ${
-          min === max ? `on ${minDate}` : `between ${minDate} - ${maxDate}`
-        }`
+        deliveryMessage
       );
     }, 1000);
   };
 
-  const getDeliveryLoc = useMemo(() => {
-    return (
-      pincodeDetails?.localityValue ??
-      (locationDetails?.pincode || locationDetails?.sector)
-    );
-  }, [pincodeDetails, locationDetails]);
-
-  const shouldShowTatMsg = useMemo(() => {
-    if (isIntlShippingEnabled) {
-      if (sellerDetails?.country?.iso_code) {
-        return true;
-      } else return false;
-    } else {
-      return postCode?.length === 6;
-    }
-  }, [postCode, sellerDetails]);
   const openInternationalDropdown = () => {
     fpi.custom.setValue("isI18ModalOpen", true);
   };
+
   const deliveryLocForIntlShipping = () => {
     return (
       <>
-        {!getDeliveryLoc || isEmptyOrNull(sellerDetails) ? (
+        {!isValidDeliveryLocation ? (
           <h4
             className={`${styles.deliveryLabel} b2 ${styles.cursor}`}
             onClick={openInternationalDropdown}
           >
-            Select delivery location
+            {t("resource.common.address.select_delivery_location")}
           </h4>
         ) : (
           <span className={`${styles.flexAlignCenter}`}>
             <span className={styles.deliveryLocation}>
               <span className={styles.deliveryLocation__bold}>
-                Delivery at{" "}
+                {t("resource.product.delivery_at")}{" "}
               </span>
               <span
                 onClick={openInternationalDropdown}
                 className={styles.deliveryLocation__addrs}
               >
-                {getDeliveryLoc}
+                {deliveryLocation}
               </span>
             </span>
           </span>
@@ -132,30 +119,31 @@ function DeliveryInfo({
       </>
     );
   };
+
   const deliveryLoc = () => {
     return (
       <>
         <h4 className={`${styles.deliveryLabel} b2`}>
-          Select delivery location
+          {t("resource.common.address.select_delivery_location")}
         </h4>
         <div className={styles.delivery}>
           <input
             autoComplete="off"
             value={postCode}
-            placeholder="Check delivery time"
+            placeholder={t("resource.product.check_delivery_time")}
             className={`b2 ${styles.pincodeInput} ${styles.fontBody}`}
             type="text"
-            maxLength="6"
-            onChange={(e) => changePostCode(e)}
+            maxLength={maxLength}
+            onChange={(e) => changePostCode(e?.target?.value)}
           />
           <button
             type="button"
             className={`${styles.button} ${styles.fontBody}`}
-            onClick={() => checkPincode(postCode)}
-            disabled={postCode.length !== 6}
+            onClick={() => handlePincodeSubmit(postCode)}
+            disabled={!postCode.length}
           >
             <span className={`${styles.flexAlignCenter}`}>
-              CHECK
+              {t("resource.facets.check")}
               <SvgWrapper
                 svgSrc="delivery"
                 pincode
@@ -166,26 +154,31 @@ function DeliveryInfo({
         </div>
         {selectPincodeError && !pincodeErrorMessage.length && (
           <div className={`captionNormal ${styles.emptyPincode}`}>
-            Please enter valid pincode before Add to cart/ Buy now
-          </div>
-        )}
+            {t("resource.product.enter_valid_pincode")}
+          </div >
+        )
+        }
       </>
     );
   };
 
   return (
-    <div className={styles.deliveryInfo}>
-      <div className={isIntlShippingEnabled ? styles.deliveryWrapper : ""}>
-        {isIntlShippingEnabled && <SvgWrapper svgSrc="locationOn" />}
+    <div className={`${styles.deliveryInfo} ${className}`}>
+      <div
+        className={!isServiceabilityPincodeOnly ? styles.deliveryWrapper : ""}
+      >
+        {!isServiceabilityPincodeOnly && <SvgWrapper svgSrc="locationOn" />}
         <div className={styles.deliveryInfoWrapper}>
-          {isIntlShippingEnabled ? deliveryLocForIntlShipping() : deliveryLoc()}
+          {isServiceabilityPincodeOnly
+            ? deliveryLoc()
+            : deliveryLocForIntlShipping()}
           {!pincodeErrorMessage && !selectPincodeError && (
             <div
               className={`${styles.deliveryDate} ${styles.dateInfoContainer}`}
             >
-              {shouldShowTatMsg && tatMessage?.length > 0 && (
+              {isValidDeliveryLocation && tatMessage?.length > 0 && (
                 <>
-                  {!isIntlShippingEnabled && (
+                  {isServiceabilityPincodeOnly && (
                     <div>
                       <SvgWrapper
                         svgSrc="delivery"
@@ -193,13 +186,13 @@ function DeliveryInfo({
                       />
                     </div>
                   )}
-                  <div className="captionNormal">
+                  <div className={`${styles.deliveryText} captionNormal`}>
                     {tatMessage}
                     {showLogo && (
                       <div className={styles.fyndLogo}>
-                        <span>with</span>
+                        <span>{t("resource.common.with")}</span>
                         <SvgWrapper
-                          style={{ marginLeft: "4px" }}
+                          style={{ marginInlineStart: "2px" }}
                           svgSrc="fynd-logo"
                         />
                         <span className={styles.fyndText}>Fynd</span>

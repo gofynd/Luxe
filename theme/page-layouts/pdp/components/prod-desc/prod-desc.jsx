@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import FyAccordion from "../../../../components/core/fy-accordion/fy-accordion";
 import styles from "./prod-desc.less";
 import { useRichText } from "../../../../helper/hooks";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function ProdDesc({ product, config, customClass }) {
+  const { t } = useGlobalTranslation("translation");
   const getInitialActiveTab = (product) => {
     if ((product?.highlights || []).length) {
       return 0; // If highlights exist, set to tab 0
@@ -17,11 +19,11 @@ function ProdDesc({ product, config, customClass }) {
   const [activeTab, setActiveTab] = useState(getInitialActiveTab(product));
   const [productDescription, setProductDescription] = useState({
     details: product?.description || "",
-    title: "Product Description",
+    title: t("resource.product.product_description"),
   });
   const [productHighlight, setProductHighlight] = useState({
     details: product?.highlights || [],
-    title: "Product Highlights",
+    title: t("resource.product.product_highlights"),
   });
 
   useEffect(() => {
@@ -45,6 +47,7 @@ function ProdDesc({ product, config, customClass }) {
         counter += 1;
         return {
           ...item,
+          details: item?.details?.filter(({ value }) => value),
           tabId: counter,
         };
       }) || []
@@ -73,9 +76,8 @@ function ProdDesc({ product, config, customClass }) {
     <div className={customClass}>
       {isDisplayDataAvailable() && (
         <div
-          className={`${styles.descContainerMobile} ${
-            isDescriptionTabs() && styles.isDesktopHidden
-          }`}
+          className={`${styles.descContainerMobile} ${isDescriptionTabs() && styles.isDesktopHidden
+            }`}
         >
           <FyAccordion isOpen={config?.first_accordian_open?.value}>
             {[
@@ -95,7 +97,7 @@ function ProdDesc({ product, config, customClass }) {
                   </div>
                 )}
                 {productDescription?.details?.length === 0 && (
-                  <div className={styles.noDataPlaceholder}>No Data Found</div>
+                  <div className={styles.noDataPlaceholder}>{t("resource.common.no_data_found")}</div>
                 )}
               </>,
             ]}
@@ -111,10 +113,10 @@ function ProdDesc({ product, config, customClass }) {
                 <div className={styles.pdpDetail}>
                   {attribute?.details?.length > 0 ? (
                     <ul
-                      className={`b2  ${
-                        config?.product_details_bullets?.value &&
-                        styles.bulletSpacing
-                      }`}
+                      className={`b2  ${config?.product_details_bullets?.value
+                        ? styles.bulletSpacing
+                        : styles.removeBullets
+                        }`}
                     >
                       {attribute.details.map((property, val) => (
                         <li key={`${val}${index}`}>
@@ -123,7 +125,6 @@ function ProdDesc({ product, config, customClass }) {
                           </span>
                           <span
                             className={styles.val}
-                            // eslint-disable-next-line react/no-danger
                             dangerouslySetInnerHTML={{ __html: property.value }}
                           />
                         </li>
@@ -131,7 +132,7 @@ function ProdDesc({ product, config, customClass }) {
                     </ul>
                   ) : (
                     <div className={styles.noDataPlaceholder}>
-                      No Data Found
+                      {t("resource.common.no_data_found")}
                     </div>
                   )}
                 </div>,
@@ -166,9 +167,8 @@ function ProdDesc({ product, config, customClass }) {
               <button
                 type="button"
                 key={attribute.tabId}
-                className={`${styles.tabs} ${
-                  activeTab === attribute.tabId && styles.active
-                }`}
+                className={`${styles.tabs} ${activeTab === attribute.tabId && styles.active
+                  }`}
                 onClick={() => setActiveTab(attribute.tabId)}
               >
                 {attribute.title}
@@ -185,7 +185,7 @@ function ProdDesc({ product, config, customClass }) {
                     ))
                   ) : (
                     <div className={styles.noDataPlaceholder}>
-                      No Data Found
+                      {t("resource.common.no_data_found")}
                     </div>
                   )}
                 </ul>
@@ -202,7 +202,7 @@ function ProdDesc({ product, config, customClass }) {
                     />
                   ) : (
                     <div className={styles.noDataPlaceholder}>
-                      No Data Found
+                      {t("resource.common.no_data_found")}
                     </div>
                   )}
                 </div>
@@ -225,7 +225,7 @@ function ProdDesc({ product, config, customClass }) {
                     ))
                   ) : (
                     <div className={styles.noDataPlaceholder}>
-                      No Data Found
+                      {t("resource.common.no_data_found")}
                     </div>
                   )}
                 </ul>

@@ -1,18 +1,24 @@
-import React, { useMemo, useEffect } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import Values from "values.js";
+import { useLocation } from "react-router-dom";
 import { useFPI, useGlobalStore } from "fdk-core/utils";
-// eslint-disable-next-line import/no-unresolved
 import { Helmet } from "react-helmet-async";
-import { getProductImgAspectRatio } from "../helper/utils";
+import { getProductImgAspectRatio, getValidLocales, isRunningOnClient } from "../helper/utils";
+import { useParams } from "react-router-dom";
 import { useThemeConfig } from "../helper/hooks";
+import useInternational from "../components/header/useInternational";
 
 export function ThemeProvider({ children }) {
   const fpi = useFPI();
+  const location = useLocation();
   const locationDetails = useGlobalStore(fpi.getters.LOCATION_DETAILS);
+  const { defaultCurrency } = useGlobalStore(fpi.getters.CUSTOM_VALUE);
   const sellerDetails = JSON.parse(
     useGlobalStore(fpi.getters.SELLER_DETAILS) || "{}"
   );
   const { globalConfig, pallete } = useThemeConfig({ fpi });
+  const { i18nDetails, countryDetails, fetchCountrieDetails } =
+    useInternational({ fpi });
 
   const fontStyles = useMemo(() => {
     let styles = "";
@@ -96,17 +102,43 @@ export function ThemeProvider({ children }) {
     return styles.replace(/\s+/g, "");
   }, [globalConfig]);
 
+  // to scroll top whenever path changes
   useEffect(() => {
-    if (!locationDetails?.country_iso_code) {
+    if (isRunningOnClient()) {
+      window?.scrollTo?.(0, 0);
+    }
+  }, [location?.pathname]);
+
+
+  useEffect(() => {
+    if (
+      !locationDetails?.country_iso_code ||
+      !i18nDetails?.currency?.code ||
+      !i18nDetails?.countryCode
+    ) {
       fpi.setI18nDetails({
+        currency: { code: i18nDetails?.currency?.code || defaultCurrency },
         countryCode: sellerDetails.country_code,
       });
     }
   }, []);
 
+  useEffect(() => {
+    if (
+      i18nDetails?.countryCode &&
+      i18nDetails?.countryCode !== countryDetails?.iso2
+    ) {
+      fetchCountrieDetails({ countryIsoCode: i18nDetails?.countryCode });
+    }
+  }, [i18nDetails?.countryCode]);
+
   return (
     <>
       <Helmet>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1"
+        />
         <style type="text/css">{fontStyles}</style>
       </Helmet>
       {children}
@@ -119,6 +151,7 @@ export const getHelmet = ({ seo }) => {
     <Helmet>
       <title>{seo?.title}</title>
       <meta name="description" content={seo?.description} />
+      {seo?.canonical_url && <link rel="canonical" href={seo?.canonical_url} />}
     </Helmet>
   );
 };

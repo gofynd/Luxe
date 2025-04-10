@@ -75,8 +75,8 @@
     flex-direction: column;
     padding: 16px;
     position: absolute;
-    left: 12px;
-    right: 12px;
+    inset-inline-start: 12px;
+    inset-inline-end: 12px;
     bottom: 12px;
     border-radius: @ButtonRadius;
     align-items: center;
@@ -86,8 +86,8 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      left: 0;
-      right: 0;
+      inset-inline-start: 0;
+      inset-inline-end: 0;
       background: @Overlay;
       opacity: 0.6;
       z-index: -1;
@@ -188,15 +188,15 @@
   }
   &.single-card {
     @media @mobile {
-      padding-right: 16px;
+      padding-inline-end: 16px;
     }
   }
 
   .custom-slick-list {
-    margin-left: calc(var(--gap) / 2 * -1);
-    margin-right: calc(var(--gap) / 2 * -1);
+    margin-inline-start: calc(var(--gap) / 2 * -1);
+    margin-inline-end: calc(var(--gap) / 2 * -1);
     @media @mobile {
-      padding-left: 16px;
+      padding-inline-start: 16px;
       padding-bottom: 0;
       margin-bottom: 0;
     }
@@ -267,7 +267,7 @@ div[data-cardtype="COLLECTIONS"] {
   .slick-list {
     // margin: 0 calc(var(--gap) / 2 * -1) !important;
     @media @mobile {
-      padding-left: 0 !important;
+      padding-inline-start: 0 !important;
     }
   }
 }

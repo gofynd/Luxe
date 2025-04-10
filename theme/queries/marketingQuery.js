@@ -30,6 +30,7 @@ export const GET_PAGE = `query Page($slug: String!) {
     seo {
       description
       title
+      canonical_url
     }
     slug
     tags

@@ -1,19 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useGlobalStore } from "fdk-core/utils";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   CART_DETAILS,
   CART_UPDATE,
   CART_META_UPDATE,
 } from "../../queries/cartQuery";
 import { useAccounts, useWishlist, useSnackbar } from "../../helper/hooks";
+import useInternational from "../../components/header/useInternational";
 import useHeader from "../../components/header/useHeader";
+import { useNavigate, useGlobalTranslation } from "fdk-core/utils";
 
 export function fetchCartDetails(fpi, payload = {}) {
   const defaultPayload = {
     buyNow: false,
     includeAllItems: true,
-    includeCodCharges: true,
     includeBreakup: true,
     ...payload,
   };
@@ -21,21 +22,25 @@ export function fetchCartDetails(fpi, payload = {}) {
 }
 
 const useCart = (fpi) => {
+  const { t } = useGlobalTranslation("translation");
   const [searchParams] = useSearchParams();
-  const [checkoutMode, setCheckoutMode] = useState("");
   const CART = useGlobalStore(fpi.getters.CART);
   const appFeatures = useGlobalStore(fpi.getters.APP_FEATURES);
+  const buybox = appFeatures?.buybox;
+  const i18nDetails = useGlobalStore(fpi.getters.i18N_DETAILS);
   const THEME = useGlobalStore(fpi.getters.THEME);
   const mode = THEME?.config?.list.find(
     (f) => f.name === THEME?.config?.current
   );
   const globalConfig = mode?.global_config?.custom?.props;
+  const { countryDetails } = useInternational({ fpi });
   const isLoggedIn = useGlobalStore(fpi.getters.LOGGED_IN);
   const { cartItemCount } = useHeader(fpi);
   const navigate = useNavigate();
   const { showSnackbar } = useSnackbar();
   const [isLoading, setIsLoading] = useState(true);
   const [isCartUpdating, setIsCartUpdating] = useState(false);
+  const [modeLoading, setIsModeLoading] = useState(false);
   const { buy_now_cart_items, cart_items, cart_items_count } = CART || {};
   const {
     breakup_values,
@@ -47,6 +52,7 @@ const useCart = (fpi) => {
   const { loading: cartItemsCountLoading } = cart_items_count || {};
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
+  const [customerCheckoutMode, setCustomerCheckoutMode] = useState("");
 
   const { openLogin } = useAccounts({ fpi });
   const { addToWishList } = useWishlist({ fpi });
@@ -54,27 +60,33 @@ const useCart = (fpi) => {
   const buyNow = JSON.parse(searchParams?.get("buy_now") || "false");
 
   useEffect(() => {
-    setCheckoutMode(cart_items?.checkout_mode ?? "");
-  }, [cart_items]);
-
-  useEffect(() => {
     setIsLoading(true);
     fetchCartDetails(fpi, { buyNow }).then(() => setIsLoading(false));
-  }, [fpi]);
+  }, [fpi, i18nDetails?.currency?.code]);
 
   const isAnonymous = appFeatures?.landing_page?.continue_as_guest;
-  const isGstInput = appFeatures?.cart?.gst_input;
+  const isGstInput =
+    appFeatures?.cart?.gst_input && countryDetails?.iso2 === "IN";
   // disabling isPlacingForCustomer feature now as flow is not decided yet, please remove && false once need to be enabled.
   const isPlacingForCustomer = appFeatures?.cart?.placing_for_customer;
+  const checkoutMode = cart_items?.checkout_mode ?? "";
+
+  useEffect(() => {
+    setCustomerCheckoutMode(checkoutMode);
+  }, [cart_items]);
 
   const cartItemsByItemId = useMemo(() => {
     if (items?.length > 0) {
       const cartItemsObj = {};
+
       items.forEach((singleItem) => {
         if (singleItem?.key) {
-          cartItemsObj[singleItem.key] = singleItem;
+          cartItemsObj[
+            `${singleItem?.key}_${singleItem?.article?.store?.uid}`
+          ] = singleItem;
         }
       });
+
       return cartItemsObj;
     }
     return {};
@@ -111,60 +123,66 @@ const useCart = (fpi) => {
     if (event) {
       event.stopPropagation();
     }
-
-    const payload = {
-      b: true,
-      i: true,
-      buyNow,
-      updateCartRequestInput: {
-        items: [
-          {
-            article_id: `${itemDetails?.product?.uid}_${itemSize}`,
-            item_id: itemDetails?.product?.uid,
-            item_size: itemSize,
-            item_index: itemIndex,
-            quantity: totalQuantity,
-            identifiers: {
-              identifier: itemDetails?.identifiers?.identifier,
-            },
-          },
-        ],
-        operation,
-      },
-    };
     setIsCartUpdating(true);
-    return fpi
-      .executeGQL(CART_UPDATE, payload, { skipStoreUpdate: true })
-      .then((res) => {
-        setIsCartUpdating(false);
-        if (res?.data?.updateCart?.success) {
-          if (!moveToWishList) {
+
+    try {
+      const payload = {
+        b: true,
+        i: true,
+        buyNow,
+        updateCartRequestInput: {
+          items: [
+            {
+              article_id: `${itemDetails?.product?.uid}_${itemSize}`,
+              item_id: itemDetails?.product?.uid,
+              item_size: itemSize,
+              item_index: itemIndex,
+              quantity: totalQuantity,
+              identifiers: {
+                identifier: itemDetails?.identifiers?.identifier,
+              },
+            },
+          ],
+          operation,
+        },
+      };
+
+      return fpi
+        .executeGQL(CART_UPDATE, payload, { skipStoreUpdate: false })
+        .then(async (res) => {
+          if (res?.data?.updateCart?.success) {
+            if (!moveToWishList) {
+              showSnackbar(
+                res?.data?.updateCart?.message || t("resource.cart.cart_update_success"),
+                "success"
+              );
+            }
+            await fetchCartDetails(fpi, { buyNow }); // Wait for fetchCartDetails to complete
+          } else {
             showSnackbar(
-              res?.data?.updateCart?.message || "Cart is updated",
-              "success"
+              res?.data?.updateCart?.message || t("resource.cart.cart_update_success"),
+              "error"
             );
           }
-          fetchCartDetails(fpi, { buyNow });
-        } else {
-          showSnackbar(
-            res?.data?.updateCart?.message || "Cart is updated",
-            "error"
-          );
-        }
-        return res?.data?.updateCart;
-      });
+          return res?.data?.updateCart;
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          setIsCartUpdating(false); // Small delay to ensure UI updates
+        });
+    } catch (error) {
+      console.log(error);
+      setIsCartUpdating(false); // Ensure it resets if an error occurs synchronously
+    }
   }
 
   function gotoCheckout() {
     if (cart_items?.id) {
-      navigate({
-        pathname: "/cart/checkout",
-        search: `id=${cart_items?.id}`,
-      });
+      navigate("/cart/checkout" + (cart_items?.id ? `?id=${cart_items.id}` : ""));
     } else {
-      navigate({
-        pathname: "/cart/bag",
-      });
+      navigate("/cart/bag");
     }
   }
 
@@ -224,16 +242,18 @@ const useCart = (fpi) => {
     }
   }
 
-  const updateCartCheckoutMode = () => {
-    const mode = checkoutMode === "other" ? "self" : "other";
+  const updateCartCheckoutMode = async (mode) => {
+    const checkout_mode =
+      mode || (customerCheckoutMode === "other" ? "self" : "other");
     const payload = {
       cartMetaRequestInput: {
-        checkout_mode: mode,
+        checkout_mode,
       },
       buyNow,
     };
-    setCheckoutMode(mode);
-    fpi.executeGQL(CART_META_UPDATE, payload);
+    setCustomerCheckoutMode(checkout_mode);
+    await fpi.executeGQL(CART_META_UPDATE, payload);
+    fetchCartDetails(fpi);
   };
 
   return {
@@ -255,6 +275,7 @@ const useCart = (fpi) => {
     isPlacingForCustomer,
     isRemoveModalOpen,
     isPromoModalOpen,
+    buybox,
     onUpdateCartItems: updateCartItems,
     onGotoCheckout: gotoCheckout,
     onRemoveIconClick: openRemoveModal,
@@ -265,6 +286,7 @@ const useCart = (fpi) => {
     updateCartCheckoutMode,
     onOpenPromoModal,
     onClosePromoModal,
+    customerCheckoutMode,
   };
 };
 

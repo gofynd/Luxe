@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
-
 import Slider from "react-slick";
 import { useFPI } from "fdk-core/utils";
 import styles from "../styles/sections/category-listing.less";
@@ -10,9 +9,15 @@ import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient, throttle } from "../helper/utils";
 import useCategories from "../page-layouts/categories/useCategories";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
-import placeholder from "../assets/images/img-placeholder-1.png";
+import placeholderImage from "../assets/images/placeholder/categories-listing.png";
+import CategoriesCard from "../components/categories-card/categories-card";
+import { useGlobalTranslation } from "fdk-core/utils";
+import { useParams } from "react-router-dom";
 
+// check for FDKLink here
 export function Component({ props, blocks, preset, globalConfig }) {
+  const { locale } = useParams();
+  const { t } = useGlobalTranslation("translation");
   const fpi = useFPI();
   const {
     getCategoriesByDepartment,
@@ -20,7 +25,8 @@ export function Component({ props, blocks, preset, globalConfig }) {
     departmentCategories,
   } = useCategories(fpi);
   const getGallery = departmentCategories.length ? departmentCategories : [];
-  const defaultCategories = ["Chair", "Sofa", "Plants & Flowers", "Bags"];
+  const defaultCategories = ["chair", "sofa", "plants_and_flowers", "bags"];
+
   const {
     autoplay,
     play_slides,
@@ -32,6 +38,10 @@ export function Component({ props, blocks, preset, globalConfig }) {
     img_fill,
     img_container_bg,
     button_text,
+    show_category_name,
+    category_name_position,
+    category_name_placement,
+    category_name_text_alignment,
   } = props;
   const [windowWidth, setWindowWidth] = useState();
   // const [departmentCategories, setDepartmentCategories] = useState([]);
@@ -148,7 +158,7 @@ export function Component({ props, blocks, preset, globalConfig }) {
   }, []);
 
   function getDesktopImage(block) {
-    return block?.banners?.portrait?.url || placeholder;
+    return block?.banners?.portrait?.url || placeholderImage;
   }
 
   function getImgSrcSet() {
@@ -223,15 +233,19 @@ export function Component({ props, blocks, preset, globalConfig }) {
   return (
     <div
       style={{
-        padding: windowWidth > 768 ? `16px` : `16px 0`,
+        padding:
+          windowWidth > 768
+            ? `16px 16px ${(globalConfig?.section_margin_bottom || 0) + 16}px`
+            : `16px 0  ${(globalConfig?.section_margin_bottom || 0) + 16}px`,
         "--bg-color": `${img_container_bg?.value || "#00000000"}`,
-        marginBottom: `${globalConfig?.section_margin_bottom}px`,
       }}
     >
       <div>
         <div className={styles.titleBlock}>
           {(title?.value?.length > 0 || cta_text?.value?.length > 0) && (
-            <h2 className={styles.sectionHeading}>{title?.value}</h2>
+            <h2 className={`${styles.sectionHeading} fontHeader`}>
+              {title?.value}
+            </h2>
           )}
           {cta_text?.value?.length > 0 && (
             <p className={`${styles.description} b2`}>{cta_text?.value}</p>
@@ -247,54 +261,48 @@ export function Component({ props, blocks, preset, globalConfig }) {
             >
               <Slider
                 className={`
-                  ${
-                    imagesForScrollView()?.length <= item_count?.value
-                      ? "no-nav"
-                      : ""
+                  ${imagesForScrollView()?.length <= item_count?.value
+                    ? "no-nav"
+                    : ""
                   } ${styles.customSlider}`}
                 {...config}
               >
                 {imagesForScrollView()?.map((category, index) => (
                   <div data-cardtype="'Categories'" key={index}>
-                    <FDKLink
-                      to={convertActionToUrl(category.action)}
-                      key={index}
-                    >
-                      {getDesktopImage(category).length > 0 && (
-                        <div className={styles.sliderView}>
-                          <FyImage
-                            backgroundColor={img_container_bg?.value}
-                            customClass={`${styles.imageGallery} ${
-                              img_fill?.value ? styles.streach : ""
-                            }`}
-                            src={getDesktopImage(category)}
-                            sources={getImgSrcSet()}
-                            aspectRatio={0.8}
-                            mobileAspectRatio={0.8}
-                          />
-                          <div
-                            className={`${styles.flexJustifyCenter} ${styles["pos-relative"]}`}
-                          >
-                            {category?.name && (
-                              <div
-                                className={`${styles["categories-name"]} h5 ${styles.fontBody} ${styles.inlineBlock}`}
-                                title={category.name}
-                              >
-                                {category.name}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </FDKLink>
-                  </div>
-                ))}
-              </Slider>
+                    {getDesktopImage(category).length > 0 && (
+                      <div className={styles.sliderView}>
+                        <CategoriesCard
+                          config={{
+                            category_name_placement:
+                              category_name_placement?.value,
+                            category_name_position:
+                              category_name_position?.value,
+                            category_name_text_alignment:
+                              category_name_text_alignment?.value,
+                            show_category_name: show_category_name?.value,
+                            img_container_bg: img_container_bg?.value,
+                            img_fill: img_fill?.value,
+                          }}
+                          url={convertActionToUrl(category.action)}
+                          category={category}
+                          img={{
+                            src: getDesktopImage(category) || placeholderImage,
+                            srcSet: getImgSrcSet(),
+                          }}
+                        />
+                      </div>
+                    )}
+                  </div >
+                ))
+                }
+              </Slider >
               {button_text?.value && (
                 <div
                   className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
                 >
-                  <FDKLink to="/categories/">
+                  <FDKLink
+                    to={"/categories/"}
+                  >
                     <button
                       type="button"
                       className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
@@ -304,96 +312,96 @@ export function Component({ props, blocks, preset, globalConfig }) {
                   </FDKLink>
                 </div>
               )}
-            </div>
+            </div >
           )}
-          {showStackedView() && departmentCategories.length && (
-            <div
-              className={`${styles.imageGrid} ${
-                imagesForStackedView().length === 1 && styles.singleItem
-              }`}
-              style={{
-                "--per_row": item_count?.value,
-                "--brand-item": getWidthByCount() || 1,
-              }}
-            >
-              {imagesForStackedView().map((category, index) => (
-                <div
-                  key={index}
-                  data-cardtype="'Categories'"
-                  className={styles["pos-relative"]}
-                >
-                  <FDKLink to={convertActionToUrl(category.action)}>
-                    {getDesktopImage(category).length > 0 && (
-                      <div>
-                        <FyImage
-                          backgroundColor={img_container_bg?.value}
-                          customClass={`${styles.imageGallery} ${
-                            img_fill?.value ? styles.streach : ""
+          {
+            showStackedView() && !!departmentCategories.length && (
+              <div
+                className={`${styles.imageGrid} ${imagesForStackedView().length === 1 && styles.singleItem
+                  }`}
+                style={{
+                  "--per_row": item_count?.value,
+                  "--brand-item": getWidthByCount() || 1,
+                }}
+              >
+                {imagesForStackedView().map((category, index) => (
+                  <div
+                    key={index}
+                    data-cardtype="'Categories'"
+                    className={styles["pos-relative"]}
+                  >
+                    <CategoriesCard
+                      config={{
+                        category_name_placement: category_name_placement?.value,
+                        category_name_position: category_name_position?.value,
+                        category_name_text_alignment:
+                          category_name_text_alignment?.value,
+                        show_category_name: show_category_name?.value,
+                        img_container_bg: img_container_bg?.value,
+                        img_fill: img_fill?.value,
+                      }}
+                      category={category}
+                      url={convertActionToUrl(category.action)}
+                      img={{
+                        src: getDesktopImage(category) || placeholderImage,
+                        srcSet: getImgSrcSet(),
+                      }}
+                    />
+                  </div >
+                ))
+                }
+              </div >
+            )}
+          {
+            !departmentCategories.length && (
+              <div
+                className={`${styles.imageGrid} `}
+                style={{
+                  "--per_row": item_count?.value,
+                  "--brand-item": getWidthByCount() || 1,
+                }}
+              >
+                {preset?.blocks?.map((category, index) => (
+                  <div
+                    key={index}
+                    data-cardtype="'Categories'"
+                    className={styles["pos-relative"]}
+                  >
+                    <div
+                      style={{ "--gap": "24px" }}
+                      className={`${styles[category_name_placement?.value]} ${styles[category_name_position?.value]}`}
+                    >
+                      <FyImage
+                        backgroundColor={img_container_bg?.value}
+                        customClass={`${styles.imageGallery} ${img_fill?.value ? styles.streach : ""
                           }`}
-                          src={getDesktopImage(category)}
-                          sources={getImgSrcSet()}
-                          aspectRatio={0.8}
-                          mobileAspectRatio={0.8}
-                        />
-                        <div className={styles.flexJustifyCenter}>
-                          {category?.name && (
-                            <div
-                              className={`${styles["categories-name"]} h5 ${styles.fontBody} ${styles.inlineBlock}`}
-                              title={category.name}
-                            >
-                              {category.name}
-                            </div>
+                        src={placeholderImage}
+                      />
+                      {show_category_name?.value && (
+                        <div
+                          className={`${styles["categories-name"]} h5 ${styles.fontBody} ${styles.inlineBlock}  ${styles[category_name_position?.value]} ${styles[category_name_text_alignment?.value]}`}
+                          title={t(
+                            `resource.section.categories.default_categories.${defaultCategories[index]}`
+                          )}
+                        >
+                          {t(
+                            `resource.section.categories.default_categories.${defaultCategories[index]}`
                           )}
                         </div>
-                      </div>
-                    )}
-                  </FDKLink>
-                </div>
-              ))}
-            </div>
-          )}
-          {!departmentCategories.length && (
-            <div
-              className={`${styles.imageGrid} `}
-              style={{
-                "--per_row": item_count?.value,
-                "--brand-item": getWidthByCount() || 1,
-              }}
-            >
-              {preset?.blocks?.map((category, index) => (
-                <div
-                  key={index}
-                  data-cardtype="'Categories'"
-                  className={styles["pos-relative"]}
-                >
-                  <div style={{ padding: "0 12px" }}>
-                    <FyImage
-                      backgroundColor={img_container_bg?.value}
-                      customClass={`${styles.imageGallery} ${
-                        img_fill?.value ? styles.streach : ""
-                      }`}
-                      src={placeholder}
-                    />
-                    <div className={styles.flexJustifyCenter}>
-                      <div
-                        className={`${styles["categories-name"]} h5 ${styles.fontBody} ${styles.inlineBlock}`}
-                        title={defaultCategories?.[index]}
-                      >
-                        {defaultCategories?.[index]}
-                      </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </IntersectionObserverComponent>
+                ))}
+              </div>
+            )
+          }
+        </IntersectionObserverComponent >
         {button_text?.value &&
           (showStackedView() || !departmentCategories.length) && (
             <div
               className={`${styles["flex-justify-center"]} ${styles["gap-above-button"]}`}
             >
-              <FDKLink to="/categories/">
+              <FDKLink to={"/categories/"}>
                 <button
                   type="button"
                   className={`btn-secondary ${styles["section-button"]} ${styles.fontBody}`}
@@ -403,19 +411,84 @@ export function Component({ props, blocks, preset, globalConfig }) {
               </FDKLink>
             </div>
           )}
-      </div>
-    </div>
+      </div >
+    </div >
   );
 }
 
 export const settings = {
-  label: "Categories Listing",
+  label: "t:resource.sections.categories_listing.categories_listing",
   props: [
     {
       type: "checkbox",
       id: "autoplay",
       default: false,
-      label: "Auto Play Slides",
+      label: "t:resource.common.auto_play_slides",
+    },
+    {
+      type: "checkbox",
+      id: "show_category_name",
+      default: true,
+      label: "t:resource.common.show_category_name",
+    },
+    {
+      type: "select",
+      id: "category_name_placement",
+      label: "t:resource.sections.categories_listing.category_name_placement",
+      default: "inside",
+      info: "t:resource.common.category_name_placement_info",
+      options: [
+        {
+          value: "inside",
+          text: "t:resource.sections.categories_listing.inside_the_image",
+        },
+        {
+          value: "outside",
+          text: "t:resource.sections.categories_listing.outside_the_image",
+        },
+      ],
+    },
+    {
+      id: "category_name_position",
+      type: "select",
+      options: [
+        {
+          value: "top",
+          text: "t:resource.sections.categories_listing.top",
+        },
+        {
+          value: "center",
+          text: "t:resource.common.center",
+        },
+        {
+          value: "bottom",
+          text: "t:resource.sections.categories_listing.bottom",
+        },
+      ],
+      default: "bottom",
+      label: "t:resource.sections.categories_listing.category_name_position",
+      info: "t:resource.sections.categories_listing.category_name_alignment",
+    },
+    {
+      id: "category_name_text_alignment",
+      type: "select",
+      options: [
+        {
+          value: "text-left",
+          text: "t:resource.common.left",
+        },
+        {
+          value: "text-center",
+          text: "t:resource.common.center",
+        },
+        {
+          value: "text-right",
+          text: "t:resource.common.right",
+        },
+      ],
+      default: "text-center",
+      label: "t:resource.sections.categories_listing.category_name_text_alignment",
+      info: "t:resource.sections.categories_listing.align_category_name",
     },
     {
       type: "range",
@@ -424,7 +497,7 @@ export const settings = {
       max: 10,
       step: 1,
       unit: "sec",
-      label: "Change slides every",
+      label: "t:resource.common.change_slides_every",
       default: 3,
     },
     {
@@ -434,25 +507,25 @@ export const settings = {
       max: 5,
       step: 1,
       unit: "",
-      label: "Items per row(Desktop)",
+      label: "t:resource.sections.categories_listing.items_per_row_desktop",
       default: 4,
-      info: "Maximum items allowed per row for Horizontal view, for gallery max 5 are viewable and only 5 blocks are required",
+      info: "t:resource.sections.categories_listing.max_items_per_row_horizontal",
     },
     {
       type: "color",
       id: "img_container_bg",
-      category: "Image Container",
+      category: "t:resource.common.image_container",
       default: "#00000000",
-      label: "Container Background Color",
-      info: "This color will be used as the container background color of the Product/Collection/Category/Brand images wherever applicable",
+      label: "t:resource.common.container_background_color",
+      info: "t:resource.common.image_container_bg_color",
     },
     {
       type: "checkbox",
       id: "img_fill",
-      category: "Image Container",
+      category: "t:resource.common.image_container",
       default: true,
-      label: "Fit image to the container",
-      info: "If the image aspect ratio is different from the container, the image will be clipped to fit the container. The aspect ratio of the image will be maintained",
+      label: "t:resource.common.fit_image_to_container",
+      info: "t:resource.common.clip_image_to_fit_container",
     },
     {
       id: "mobile_layout",
@@ -460,16 +533,16 @@ export const settings = {
       options: [
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal scroll ",
+          text: "t:resource.common.horizontal_scroll",
         },
       ],
       default: "grid",
-      label: "Mobile Layout",
-      info: "Alignment of content",
+      label: "t:resource.common.mobile_layout",
+      info: "t:resource.common.alignment_of_content",
     },
     {
       id: "desktop_layout",
@@ -477,45 +550,45 @@ export const settings = {
       options: [
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "horizontal",
-          text: "Horizontal scroll",
+          text: "t:resource.common.horizontal_scroll",
         },
       ],
       default: "horizontal",
-      label: "Desktop Layout",
-      info: "Alignment of content",
+      label: "t:resource.sections.categories_listing.desktop_layout",
+      info: "t:resource.common.alignment_of_content",
     },
     {
       type: "text",
       id: "title",
       default: "A True Style",
-      label: "Heading",
+      label: "t:resource.common.heading",
     },
     {
       type: "text",
       id: "cta_text",
       default: "Be exclusive, Be Divine, Be yourself",
-      label: "Description",
+      label: "t:resource.common.description",
     },
     {
       type: "text",
       id: "button_text",
       default: "",
-      label: "Button Text",
+      label: "t:resource.common.button_text",
     },
   ],
   blocks: [
     {
-      name: "Category Item",
+      name: "t:resource.sections.categories_listing.category_item",
       type: "category",
       props: [
         {
           type: "department",
           id: "department",
-          label: "Select Department",
+          label: "t:resource.sections.categories_listing.select_department",
         },
       ],
     },
@@ -523,46 +596,46 @@ export const settings = {
   preset: {
     blocks: [
       {
-        name: "Category Item",
+        name: "t:resource.sections.categories_listing.category_item",
         type: "category",
         props: [
           {
             type: "department",
             id: "department",
-            label: "Select Department",
+            label: "t:resource.sections.categories_listing.select_department",
           },
         ],
       },
       {
-        name: "Category Item",
+        name: "t:resource.sections.categories_listing.category_item",
         type: "category",
         props: [
           {
             type: "department",
             id: "department",
-            label: "Select Department",
+            label: "t:resource.sections.categories_listing.select_department",
           },
         ],
       },
       {
-        name: "Category Item",
+        name: "t:resource.sections.categories_listing.category_item",
         type: "category",
         props: [
           {
             type: "department",
             id: "department",
-            label: "Select Department",
+            label: "t:resource.sections.categories_listing.select_department",
           },
         ],
       },
       {
-        name: "Category Item",
+        name: "t:resource.sections.categories_listing.category_item",
         type: "category",
         props: [
           {
             type: "department",
             id: "department",
-            label: "Select Department",
+            label: "t:resource.sections.categories_listing.select_department",
           },
         ],
       },

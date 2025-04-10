@@ -1,6 +1,7 @@
 @import "../../styles/main.less";
 
 .error {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -12,9 +13,8 @@
 .heading {
   font-size: 32px;
   line-height: 42px;
-  margin: 0 0 32px;
-  text-transform: lowercase;
   text-align: center;
+  margin-top: 24px;
   &::first-letter {
     text-transform: capitalize;
   }
@@ -28,7 +28,7 @@
   display: flex;
   justify-content: center;
   max-width: 480px;
-  margin: 12px auto 32px;
+  margin-top: 8px;
   text-align: center;
   line-height: 18px;
   letter-spacing: -0.02em;
@@ -47,7 +47,8 @@
   font-weight: 500;
   border-radius: @ButtonRadius;
   font-size: 14px;
-  line-height: 16.42px;
+  line-height: 16px;
+  margin-top: 16px;
   @media @mobile {
     font-size: 12px;
     line-height: 14.08px;

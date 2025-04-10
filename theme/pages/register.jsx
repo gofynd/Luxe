@@ -14,25 +14,25 @@ export const settings = JSON.stringify({
       options: [
         {
           value: "no_banner",
-          text: "No Banner",
+          text: "t:resource.common.no_banner",
         },
         {
           value: "right_banner",
-          text: "Right Banner",
+          text: "t:resource.common.right_banner",
         },
         {
           value: "left_banner",
-          text: "Left Banner",
+          text: "t:resource.common.left_banner",
         },
       ],
       default: "no_banner",
-      label: "Image Layout",
+      label: "t:resource.common.image_layout",
     },
     {
       type: "image_picker",
       id: "image_banner",
       default: "",
-      label: "Image Banner",
+      label: "t:resource.common.image_banner",
     },
   ],
 });

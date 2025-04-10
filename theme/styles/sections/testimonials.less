@@ -1,17 +1,18 @@
 @import "../main.less";
+@lg-min: 1024px;
 
 .testimonial {
   padding: 0 16px;
   @media @mobile {
-    padding-left: 16px;
-    padding-right: 10px;
-    margin-right: 16px;
+    padding-inline-start: 16px;
+    padding-inline-end: 10px;
+    margin-inline-end: 16px;
   }
 
   @media @tablet-strict {
-    padding-left: 24px;
-    padding-right: 12px;
-    margin-right: 24px;
+    padding-inline-start: 24px;
+    padding-inline-end: 12px;
+    margin-inline-end: 24px;
   }
   &__title {
     margin-bottom: 24px;
@@ -35,14 +36,14 @@
     @media @tablet {
       --gap: 12px;
     }
-    // padding-left: 16px;
-    // padding-right: var(--p-right-mob);
+    // padding-inline-start: 16px;
+    // padding-inline-end: var(--p-right-mob);
     // // @media @tablet {
-    // //   padding-left: 24px;
+    // //   padding-inline-start: 24px;
     // // }
     // @media @mobile-up {
-    //   padding-left: 24px;
-    //   padding-right: var(--p-right-tablet);
+    //   padding-inline-start: 24px;
+    //   padding-inline-end: var(--p-right-tablet);
     // }
     // @media @desktop {
     --gap: 24px;
@@ -52,7 +53,7 @@
     :global {
       .slick-list {
         margin: 0 calc(var(--gap) / 2 * -1);
-        padding-left: 0 !important;
+        padding-inline-start: 0 !important;
         @media @tablet {
           margin: 0;
         }
@@ -85,13 +86,14 @@
     background-color: @ThemeAccentL4;
     border: 1px solid @DividerStokes;
     height: 100%;
+
     @media @tablet {
       flex-direction: column;
       justify-content: flex-start;
     }
 
     @media @desktop {
-      // align-items: center;
+      align-items: flex-start;
       padding: 16px;
       .column-gap(16px);
     }
@@ -106,7 +108,7 @@
     &__info {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       @media @tablet {
         padding: 16px;
       }

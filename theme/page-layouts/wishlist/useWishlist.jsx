@@ -1,32 +1,25 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { useGlobalStore } from "fdk-core/utils";
-import { FETCH_FOLLOWED_PRODUCTS } from "../../queries/wishlistQuery";
-import { useWishlist } from "../../helper/hooks/index";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
+import {
+  FETCH_FOLLOWED_PRODUCTS,
+  FOLLOWED_PRODUCTS_IDS,
+} from "../../queries/wishlistQuery";
+import { useThemeConfig, useWishlist } from "../../helper/hooks/index";
 import EmptyState from "../../components/empty-state/empty-state";
 import { getProductImgAspectRatio } from "../../helper/utils";
 import placeholder from "../../assets/images/placeholder3x4.png";
 
 const useWishlistPage = ({ fpi }) => {
+  const { t } = useGlobalTranslation("translation");
   const followedlList = useGlobalStore(fpi.getters.FOLLOWED_LIST);
-  const [productList, setProductList] = useState([]);
-  const userLoggedin = useGlobalStore(fpi.getters.LOGGED_IN);
+  const [wishListData, setWishListData] = useState({});
   const [loading, setLoading] = useState(false);
   const [isFetchingProducts, setIsFetchingProducts] = useState(false);
-  const pageSizeRef = useRef(12);
 
-  const THEME = useGlobalStore(fpi.getters.THEME);
-  const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
-  const listingPrice =
-    CONFIGURATION?.app_features?.common?.listing_price?.value || "range";
-
-  const mode = THEME?.config?.list.find(
-    (f) => f.name === THEME?.config?.current
-  );
-
-  const globalConfig = mode?.global_config?.custom?.props;
+  const { globalConfig } = useThemeConfig({ fpi });
 
   const breadcrumb = useMemo(
-    () => [{ label: "Home", link: "/" }, { label: "Wishlist" }],
+    () => [{ label: t("resource.common.breadcrumb.home"), link: "/" }, { label: t("resource.common.breadcrumb.wishlist") }],
     []
   );
 
@@ -35,7 +28,7 @@ const useWishlistPage = ({ fpi }) => {
     const wishlistPayload = {
       ...payload,
       collectionType: "products",
-      pageSize: pageSizeRef.current,
+      pageSize: 12,
     };
     return fpi
       .executeGQL(FETCH_FOLLOWED_PRODUCTS, wishlistPayload)
@@ -44,16 +37,23 @@ const useWishlistPage = ({ fpi }) => {
           throw res?.errors?.[0];
         }
         if (append) {
-          setProductList((prevState) => {
-            return prevState.concat(res?.data?.followedListing?.items || []);
+          setWishListData((prevState) => {
+            return {
+              ...prevState,
+              ...res?.data?.followedListing,
+              items: prevState?.items?.concat(
+                res?.data?.followedListing?.items || []
+              ),
+            };
           });
         } else {
-          setProductList(res?.data?.followedListing?.items || []);
+          setWishListData(res?.data?.followedListing);
         }
+
         return res?.data?.followedListing;
       })
       .catch((err) => {
-        // Do Nothing
+        console.error(err);
       })
       .finally(() => {
         setIsFetchingProducts(false);
@@ -63,41 +63,47 @@ const useWishlistPage = ({ fpi }) => {
   const handleLoadmore = () => {
     fetchProducts(
       {
-        pageId: followedlList?.page?.next_id,
+        pageId: wishListData?.page?.next_id,
       },
       true
     );
   };
+
   useEffect(() => {
-    console.log(followedlList, "followedlList");
-    if (!followedlList.items?.[0]?.name) {
-      setLoading(true);
-      fetchProducts().finally(() => {
-        setLoading(false);
-      });
-    } else {
-      setProductList(followedlList?.items || []);
-    }
+    setLoading(true);
+    fetchProducts().finally(() => {
+      setLoading(false);
+    });
   }, []);
 
   const EmptyStateComponent = () => (
     <EmptyState
-      title="You do not have any product added to wishlist"
-      description="Add products to wishlist"
-      btnTitle="CONTINUE SHOPPING"
+      title={t("resource.wishlist.no_product_in_wishlist")}
+      btnTitle={t("resource.common.continue_shopping")}
     />
   );
+
   const { removeFromWishlist } = useWishlist({ fpi });
 
-  const handleWishistClick = ({ product }) => {
-    removeFromWishlist(product, true).then(() => fetchProducts());
+  const handleWishistClick = ({ product }, index) => {
+    removeFromWishlist(product, true).then(() => {
+      const updatedProductList = [...wishListData?.items];
+      updatedProductList.splice(index, 1);
+
+      setWishListData((prevState) => ({
+        ...prevState,
+        items: updatedProductList,
+      }));
+
+      fpi.executeGQL(FOLLOWED_PRODUCTS_IDS);
+    });
   };
 
   return {
     loading,
     breadcrumb,
-    productList,
-    title: "Wishlist",
+    productList: wishListData?.items,
+    title: t("resource.common.breadcrumb.wishlist"),
     totalCount: followedlList?.page?.item_total || 0,
     isImageFill: globalConfig?.img_fill,
     imageBackgroundColor: globalConfig?.img_container_bg,
@@ -110,7 +116,7 @@ const useWishlistPage = ({ fpi }) => {
     aspectRatio: getProductImgAspectRatio(globalConfig),
     isProductOpenInNewTab: false,
     listingPrice: "range",
-    hasNext: !!followedlList?.page?.has_next,
+    hasNext: !!wishListData?.page?.has_next,
     isLoading: isFetchingProducts,
     onLoadMore: handleLoadmore,
     EmptyStateComponent,

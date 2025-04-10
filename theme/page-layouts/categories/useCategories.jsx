@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useGlobalStore } from "fdk-core/utils";
 import { CATEGORIES_LISTING } from "../../queries/categoryQuery";
 
 const useCategories = (fpi) => {
   const THEME = useGlobalStore(fpi.getters.THEME);
+  const CATEGORIES = useGlobalStore(fpi.getters.CATEGORIES);
   const mode = THEME?.config?.list.find(
     (f) => f.name === THEME?.config?.current
   );
@@ -11,8 +12,17 @@ const useCategories = (fpi) => {
   const pageConfig =
     mode?.page?.find((f) => f.page === "categories")?.settings?.props || {};
 
+  const tranformCategoriesData = useCallback((data) => {
+    return data
+      ?.flatMap((item) => item?.items?.map((m) => m.childs))
+      .flat()
+      .flatMap((i) => i?.childs);
+  }, []);
+
+  const categoriesData = tranformCategoriesData(CATEGORIES?.data);
+
   const [departmentCategories, setDepartmentCategories] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(categoriesData || undefined);
   const [isLoading, setIsloading] = useState(false);
 
   function fetchAllCategories() {
@@ -22,11 +32,10 @@ const useCategories = (fpi) => {
       .executeGQL(CATEGORIES_LISTING)
       .then((res) => {
         if (res?.data?.categories?.data?.length > 0) {
-          const data = res?.data?.categories?.data;
-          const categoriesList = data
-            .flatMap((item) => item?.items?.map((m) => m.childs))
-            .flat()
-            .flatMap((i) => i?.childs);
+          const categoriesList = tranformCategoriesData(
+            res?.data?.categories?.data
+          );
+
           setCategories(categoriesList);
         } else {
           setCategories([]); // Ensure categories is cleared if no data is returned
@@ -64,7 +73,7 @@ const useCategories = (fpi) => {
   };
 
   return {
-    categories,
+    categories: categories || categoriesData,
     pageConfig,
     globalConfig,
     departmentCategories,

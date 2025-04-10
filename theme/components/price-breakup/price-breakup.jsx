@@ -25,9 +25,10 @@
  */
 
 import React, { useMemo } from "react";
-import { currencyFormat, numberWithCommas } from "../../helper/utils";
+import { currencyFormat, formatLocale, numberWithCommas } from "../../helper/utils";
 import styles from "./price-breakup.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import { useGlobalTranslation, useGlobalStore, useFPI } from "fdk-core/utils";
 
 function PriceBreakup({
   title,
@@ -41,6 +42,10 @@ function PriceBreakup({
   greetingIcon,
   cardBorderRadius,
 }) {
+  const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
+  const { t } = useGlobalTranslation("translation");
   const cssVar = {
     "--card-border-radius": `${cardBorderRadius}`,
   };
@@ -61,20 +66,20 @@ function PriceBreakup({
   return (
     <div className={styles.priceSummaryContainer} style={cssVar}>
       <div className={`fontBody ${styles.priceSummaryHeading}`}>
-        {title}
+        {title || t("resource.common.price_summary")}
         {showItemsCount && (
-          <span>{` ( ${cartItemCount} ${
-            cartItemCount > 1 ? "ITEMS" : "ITEM"
-          } )`}</span>
+          <span>{` ( ${cartItemCount} ${cartItemCount > 1
+            ? t("resource.common.items_caps_plural")
+            : t("resource.common.items_caps_singular")
+            } )`}</span>
         )}
       </div>
       {breakUpValuesList?.map((item, index) => (
         <div
-          className={`fontBody ${
-            index !== breakUpValuesList.length - 1
-              ? styles.priceSummaryItem
-              : styles.priceSummaryItemTotal
-          }`}
+          className={`fontBody ${index !== breakUpValuesList.length - 1
+            ? styles.priceSummaryItem
+            : styles.priceSummaryItemTotal
+            }`}
           key={item?.key}
         >
           {index !== breakUpValuesList.length - 1 ? (
@@ -100,10 +105,11 @@ function PriceBreakup({
         <div className={styles.discountPreviewContiner}>
           <span>{greetingIcon}</span>
           <span className={styles.discountPreviewMessage}>
-            {discountGreetingMessage}
+            {discountGreetingMessage ||
+              t("resource.common.discount_greeting_message")}
           </span>
           <span className={styles.discountPreviewAmount}>
-            {currencyFormat(numberWithCommas(totalDiscount), currencySymbol)}
+            {currencyFormat(numberWithCommas(totalDiscount), currencySymbol, formatLocale(locale, countryCode, true))}
           </span>
         </div>
       )}
@@ -112,14 +118,12 @@ function PriceBreakup({
 }
 
 PriceBreakup.defaultProps = {
-  title: "PRICE SUMMARY",
   breakUpValues: [],
   showItemsCount: true,
   cartItemCount: 0,
   currencySymbol: "₹",
   showTotalDiscount: true,
   includeZeroValues: false,
-  discountGreetingMessage: "Yayy!!! You've saved",
   greetingIcon: <SvgWrapper svgSrc="celebration" className={styles.svgIcon} />,
   cardBorderRadius: "8px",
 };

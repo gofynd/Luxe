@@ -1,13 +1,23 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import styles from "./styles/order-shipment.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import {
+  useGlobalTranslation,
+  useGlobalStore,
+  useFPI
+} from "fdk-core/utils";
+import { useNavigate } from "fdk-core/utils";
+import { formatLocale } from "../../helper/utils";
 
 function OrderShipment({
   orderInfo,
-  onBuyAgainClick = () => {},
+  onBuyAgainClick = () => { },
   isBuyAgainEligible,
 }) {
+  const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
+  const { t } = useGlobalTranslation("translation");
   const [isOpen, setIsOpen] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
@@ -33,7 +43,7 @@ function OrderShipment({
     };
     // Convert the UTC date and time to the desired format
     const formattedDate = utcDate
-      .toLocaleString("en-US", options)
+      .toLocaleString(formatLocale(locale, countryCode), options)
       .replace(" at ", ", ");
     return formattedDate;
   };
@@ -69,14 +79,20 @@ function OrderShipment({
     return [];
   };
   const getTotalItems = (items) => {
-    return items === 1 ? `${items} Item` : `${items} Items`;
+    return t(
+      `resource.order.${items === 1 ? "single" : "multiple"}`,
+      { count: items }
+    );
   };
   const getTotalPieces = (pieces) => {
     const total = pieces.reduce((pre, curr) => {
       return pre + curr.quantity;
     }, 0);
 
-    return total === 1 ? `${total} Piece` : `${total} Pieces`;
+    return t(
+      `resource.order.${total === 1 ? "single_piece" : "multiple_piece"}`,
+      { count: total }
+    );
   };
 
   return (
@@ -110,8 +126,8 @@ function OrderShipment({
                     />
                     {item?.bags?.length > 1 && (
                       <div id="total-item">
-                        + {(item?.bags?.length || 0) - 1 || 0}
-                        more
+                        <>+</> {(item?.bags?.length || 0) - 1 || 0}
+                        {t("resource.facets.more")}
                       </div>
                     )}
                   </div>
@@ -121,7 +137,7 @@ function OrderShipment({
                         <div>
                           {getProductsName(item?.bags)?.[0]} +
                           {item.bags.length - 1}
-                          more
+                          {t("resource.facets.more")}
                         </div>
                       ) : (
                         <div>{getProductsName(item?.bags)?.[0]}</div>
@@ -130,7 +146,8 @@ function OrderShipment({
                     <div
                       className={`${styles.shipmentId} ${styles.boldls} ${styles.uktLinks}`}
                     >
-                      Shipment: {item?.shipment_id}
+                      {t("resource.common.shipment")}:{" "}
+                      {item?.shipment_id}
                     </div>
                     <div className={`${styles.shipmentStats} ${styles.light}`}>
                       <span>{getTotalItems(item?.bags?.length)}</span>
@@ -148,8 +165,10 @@ function OrderShipment({
                     </div>
                     {isAdmin && (
                       <div className={`${styles.shipmentBrands}`}>
-                        <span className={`${styles.bold}`}>Brand</span> :
-                        {item?.brand_name}
+                        <span className={`${styles.bold}`}>
+                          {t("resource.common.brand")}
+                        </span>{" "}
+                        :{item?.brand_name}
                       </div>
                     )}
                   </div>
@@ -168,7 +187,7 @@ function OrderShipment({
                   className={`${styles.reorderIcon}`}
                   svgSrc="re-order"
                 />
-                BUY AGAIN
+                {t("resource.common.buy_again")}
               </button>
             </div>
           )}

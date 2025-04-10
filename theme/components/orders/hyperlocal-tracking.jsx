@@ -18,11 +18,16 @@ import {
   Circle,
 } from "@react-google-maps/api";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
 import { STORE_HYPERLOCAL } from "../../queries/logisticsQuery";
 import { useThemeConfig } from "../../helper/hooks";
+import { formatLocale } from "../../helper/utils";
 
 const HyperlocalTracking = ({ shipmentInfo }) => {
+  const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
+  const { t } = useGlobalTranslation("translation");
   const { pallete } = useThemeConfig({ fpi });
   // const INTEGRATION_TOKENS = useGlobalStore(fpi.getters.INTEGRATION_TOKENS);
   // const mapApiKey = Buffer?.from(
@@ -263,7 +268,7 @@ const HyperlocalTracking = ({ shipmentInfo }) => {
         minute: "2-digit",
         hour12: true,
       };
-      return date.toLocaleString("en-US", options);
+      return date.toLocaleString(formatLocale(locale, countryCode), options);
     }
     return "";
   }, [riderDetails]);
@@ -272,9 +277,13 @@ const HyperlocalTracking = ({ shipmentInfo }) => {
     if (riderDetails?.duration) {
       const arrivingTimeInMin = Math.round(riderDetails?.duration / 60);
       if (arrivingTimeInMin === 0) {
-        return "Arrived at your location";
+        return t(
+          "resource.order.arrived_at_your_location"
+        );
       }
-      return `Delivery in ${arrivingTimeInMin} Minute${arrivingTimeInMin > 1 ? "s" : ""}`;
+      return t("resource.order.delivery_in", {
+        time: arrivingTimeInMin,
+      });
     }
 
     if (shippingDetailsRef?.current?.data?.delivery_eta) {
@@ -289,11 +298,13 @@ const HyperlocalTracking = ({ shipmentInfo }) => {
         minute: "2-digit",
         hour12: true,
       };
-      return `Delivery By ${deliveryETA.toLocaleString("en-US", options)}`;
+      return `${t("resource.common.delivery_by")} ${deliveryETA.toLocaleString(formatLocale(locale, countryCode), options)}`;
     }
 
     if (shipmentInfo?.promise?.timestamp?.min) {
-      return "We are processing your order";
+      return t(
+        "resource.order.processing_your_order"
+      );
     }
 
     return null;
@@ -419,7 +430,9 @@ const HyperlocalTracking = ({ shipmentInfo }) => {
                 <div>
                   <p className={styles.timingLabel}>{getArrivalTime}</p>
                   <div className={styles.timingShipmentId}>
-                    {`Shipment ID: ${shipmentId}`}
+                    {`${t(
+                      "resource.common.shipment_id"
+                    )}: ${shipmentId}`}
                   </div>
                 </div>
                 <p className={styles.timingStatus}>
@@ -445,14 +458,23 @@ const HyperlocalTracking = ({ shipmentInfo }) => {
           <div>
             <p className={styles.deliveredInfoLabel}>
               {isOrderDelivered
-                ? "Your order is delivered"
+                ? t(
+                  "resource.order.order_is_delivered"
+                )
                 : isOrderCancelled
-                  ? "Order cancelled"
-                  : "Something went wrong"}
+                  ? t(
+                    "resource.order.order_cancelled"
+                  )
+                  : t(
+                    "resource.common.error_message"
+                  )}
             </p>
             {getDeliveredTime && (isOrderDelivered || isOrderCancelled) && (
               <p className={styles.deliveredInfoTime}>
-                {`${isOrderDelivered ? "Delivered" : "Cancelled"} on: ${getDeliveredTime}`}
+                {t(
+                  `resource.order.status.${isOrderDelivered ? "delivered" : "cancelled"}`,
+                  { time: getDeliveredTime }
+                )}
               </p>
             )}
           </div>
@@ -496,7 +518,9 @@ const HyperlocalTracking = ({ shipmentInfo }) => {
               <div className={styles.cardInfo}>
                 <div className={styles.cardInfoName}>{riderDetails.name}</div>
                 <div className={styles.cardInfoAddress}>
-                  Your delivery partner
+                  {t(
+                    "resource.order.your_delivery_partner"
+                  )}
                 </div>
               </div>
             </div>

@@ -1,31 +1,35 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FDKLink } from "fdk-core/components";
 import { useGlobalStore, useFPI } from "fdk-core/utils";
 
 import Slider from "react-slick";
-import ProductCard from "@gofynd/theme-template/components/product-card/product-card";
+import ProductCard from "fdk-react-templates/components/product-card/product-card";
 import styles from "../styles/sections/featured-collection.less";
 import FyImage from "../components/core/fy-image/fy-image";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
-import { isRunningOnClient, throttle } from "../helper/utils";
+import {
+  getDirectionAdaptiveValue,
+  isRunningOnClient,
+  throttle,
+} from "../helper/utils";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
-import placeholder from "../assets/images/img-placeholder-1.png";
 import { FEATURED_COLLECTION } from "../queries/collectionsQuery";
-import "@gofynd/theme-template/components/product-card/product-card.css";
-import bannerPlaceholder from "../assets/images/collection-banner-placeholder.png";
-import imagePlaceholder from "../assets/images/placeholder3x4.png";
+import "fdk-react-templates/components/product-card/product-card.css";
+import placeholderBanner from "../assets/images/placeholder/featured-collection-banner.png";
+import placeholderProduct from "../assets/images/placeholder/featured-collection-product.png";
 import useAddToCartModal from "../page-layouts/plp/useAddToCartModal";
-import Modal from "@gofynd/theme-template/components/core/modal/modal";
-import AddToCart from "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart";
-import "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart.css";
-import SizeGuide from "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide";
-import "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide.css";
+import Modal from "fdk-react-templates/components/core/modal/modal";
+import AddToCart from "fdk-react-templates/page-layouts/plp/Components/add-to-cart/add-to-cart";
+import "fdk-react-templates/page-layouts/plp/Components/add-to-cart/add-to-cart.css";
+import SizeGuide from "fdk-react-templates/page-layouts/plp/Components/size-guide/size-guide";
+import "fdk-react-templates/page-layouts/plp/Components/size-guide/size-guide.css";
 import {
   useViewport,
   useAccounts,
   useWishlist,
   useThemeFeature,
 } from "../helper/hooks";
+import { DIRECTION_ADAPTIVE_CSS_PROPERTIES } from "../helper/constant";
 
 export function Component({ props, globalConfig }) {
   const fpi = useFPI();
@@ -72,7 +76,7 @@ export function Component({ props, globalConfig }) {
     show_badge,
     max_count,
     text_alignment,
-    title_size,
+    // title_size,
   } = props;
 
   const showAddToCart =
@@ -83,7 +87,7 @@ export function Component({ props, globalConfig }) {
       ?.collection?.products?.items ?? [];
   const bannerUrl =
     customValues?.[`featuredCollectionData-${collection?.value}`]?.data
-      ?.collection?.banners?.portrait?.url || bannerPlaceholder;
+      ?.collection?.banners?.portrait?.url || placeholderBanner;
   const imgAlt =
     customValues?.[`featuredCollectionData-${collection?.value}`]?.data
       ?.collection?.banners?.portrait?.alt || "collection";
@@ -94,7 +98,7 @@ export function Component({ props, globalConfig }) {
   // const [getGallery, setGetGallery] = useState([]);
   // const [slug, setSlug] = useState("");
   const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
-  const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
+  const i18nDetails = useGlobalStore(fpi.getters.i18N_DETAILS);
   const [isClient, setIsClient] = useState(false);
   const [config, setConfig] = useState({
     dots: true,
@@ -104,6 +108,7 @@ export function Component({ props, globalConfig }) {
     swipeToSlide: true,
     lazyLoad: "ondemand",
     autoplay: false,
+    infinite: false,
     autoplaySpeed: 3000,
     cssEase: "linear",
     arrows: false,
@@ -144,24 +149,10 @@ export function Component({ props, globalConfig }) {
     ],
   });
 
-  const pincode = useMemo(() => {
-    if (!isRunningOnClient()) {
-      return "";
-    }
-    return pincodeDetails?.localityValue || locationDetails?.pincode || "";
-  }, [pincodeDetails, locationDetails]);
-
-  const lastPincodeRef = useRef(pincode);
-
   useEffect(() => {
     setWindowWidth(isRunningOnClient() ? window.innerWidth : 0);
     setIsClient(true);
-    if (
-      (collection?.value &&
-        !customValues?.[`featuredCollectionData-${collection?.value}`]) ||
-      lastPincodeRef.current !== pincode
-    ) {
-      lastPincodeRef.current = pincode;
+    if (collection?.value) {
       const payload = {
         slug: collection?.value,
         first: 12,
@@ -174,7 +165,7 @@ export function Component({ props, globalConfig }) {
         );
       });
     }
-  }, [collection, pincode]);
+  }, [collection, locationDetails?.pincode, i18nDetails?.currency?.code]);
 
   const bannerConfig = {
     dots: false,
@@ -340,25 +331,26 @@ export function Component({ props, globalConfig }) {
     toggleWishlist(data);
   };
 
-  const titleSizeDesktop =
-    title_size?.value === "small"
-      ? "24px"
-      : title_size?.value === "medium"
-        ? "40px"
-        : "52px";
+  const titleSizeDesktop = "32px";
+  // title_size?.value === "small"
+  //   ? "24px"
+  //   : title_size?.value === "medium"
+  //     ? "40px"
+  //     : "52px";
 
-  const titleSizeTablet =
-    title_size?.value === "small"
-      ? "20px"
-      : title_size?.value === "medium"
-        ? "30px"
-        : "40px";
+  const titleSizeTablet = "28px";
+  // title_size?.value === "small"
+  //   ? "20px"
+  //   : title_size?.value === "medium"
+  //     ? "30px"
+  //     : "40px";
 
   return (
     <div
       className={styles.sectionWrapper}
       style={{
-        paddingBottom: `${globalConfig?.section_margin_bottom}px`,
+        paddingTop: "16px",
+        paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
         "--bg-color": `${img_container_bg?.value || "#00000000"}`,
       }}
     >
@@ -377,9 +369,12 @@ export function Component({ props, globalConfig }) {
           >
             {heading?.value?.length > 0 && (
               <h2
-                className={styles.sectionHeading}
+                className={`${styles.sectionHeading} fontHeader`}
                 style={{
-                  textAlign: text_alignment?.value,
+                  textAlign: getDirectionAdaptiveValue(
+                    DIRECTION_ADAPTIVE_CSS_PROPERTIES.TEXT_ALIGNMENT,
+                    text_alignment?.value
+                  ),
                   fontSize:
                     windowWidth > 768 ? titleSizeDesktop : titleSizeTablet,
                 }}
@@ -390,7 +385,12 @@ export function Component({ props, globalConfig }) {
             {description?.value?.length > 0 && (
               <p
                 className={`${styles.description} b2`}
-                style={{ textAlign: text_alignment?.value }}
+                style={{
+                  textAlign: getDirectionAdaptiveValue(
+                    DIRECTION_ADAPTIVE_CSS_PROPERTIES.TEXT_ALIGNMENT,
+                    text_alignment?.value
+                  ),
+                }}
               >
                 {description?.value}
               </p>
@@ -425,14 +425,17 @@ export function Component({ props, globalConfig }) {
                             : text_alignment?.value === "right"
                               ? "flex-end"
                               : "center",
-                        paddingLeft: "10px",
+                        paddingInlineStart: "10px",
                       }}
                     >
                       {heading?.value?.length > 0 && (
                         <h2
-                          className={styles.sectionHeading}
+                          className={`${styles.sectionHeading} fontHeader`}
                           style={{
-                            textAlign: text_alignment?.value,
+                            textAlign: getDirectionAdaptiveValue(
+                              DIRECTION_ADAPTIVE_CSS_PROPERTIES.TEXT_ALIGNMENT,
+                              text_alignment?.value
+                            ),
                             fontSize:
                               windowWidth > 768
                                 ? titleSizeDesktop
@@ -445,7 +448,12 @@ export function Component({ props, globalConfig }) {
                       {description?.value?.length > 0 && (
                         <p
                           className={`${styles.description} b2`}
-                          style={{ textAlign: text_alignment?.value }}
+                          style={{
+                            textAlign: getDirectionAdaptiveValue(
+                              DIRECTION_ADAPTIVE_CSS_PROPERTIES.TEXT_ALIGNMENT,
+                              text_alignment?.value
+                            ),
+                          }}
                         >
                           {description?.value}
                         </p>
@@ -466,7 +474,13 @@ export function Component({ props, globalConfig }) {
                       )}
                     </div>
                     <div className={styles.slWrap}>
-                      <Slider {...bannerConfig} ref={bannerRef}>
+                      <Slider
+                        className={
+                          imagesForScrollView()?.length <= 3 ? "no-nav" : ""
+                        }
+                        {...bannerConfig}
+                        ref={bannerRef}
+                      >
                         {imagesForScrollView()?.map((product, index) => (
                           <div key={index} className={styles.sliderView}>
                             <FDKLink to={`/product/${product.slug}`}>
@@ -484,18 +498,25 @@ export function Component({ props, globalConfig }) {
                                 centerAlign={
                                   windowWidth <= 480
                                     ? mobile_layout?.value !==
-                                      "banner_horizontal_scroll"
+                                    "banner_horizontal_scroll"
                                     : desktop_layout?.value !==
-                                      "banner_horizontal_scroll"
+                                    "banner_horizontal_scroll"
                                 }
-                                imagePlaceholder={imagePlaceholder}
+                                imagePlaceholder={placeholderProduct}
                                 showAddToCart={showAddToCart}
                                 handleAddToCart={handleAddToCart}
+                                isSlider
                               />
                             </FDKLink>
                           </div>
                         ))}
                       </Slider>
+                      <span
+                        className={styles.customPrevBtn}
+                        onClick={() => bannerRef.current.slickPrev()}
+                      >
+                        <SvgWrapper svgSrc="arrow-right" />
+                      </span>
                       <span
                         className={styles.customNextBtn}
                         onClick={() => bannerRef.current.slickNext()}
@@ -527,7 +548,12 @@ export function Component({ props, globalConfig }) {
                     "--slick-dots": `${Math.ceil(imagesForScrollView()?.length / item_count?.value) * 22 + 10}px`,
                   }}
                 >
-                  <Slider {...config}>
+                  <Slider
+                    className={
+                      imagesForScrollView()?.length <= 3 ? "no-nav" : ""
+                    }
+                    {...config}
+                  >
                     {imagesForScrollView()?.map((product, index) => (
                       <div key={index} className={styles.sliderView}>
                         <FDKLink to={`/product/${product.slug}`}>
@@ -536,19 +562,22 @@ export function Component({ props, globalConfig }) {
                             isSaleBadgeDisplayed={false}
                             showBadge={show_badge?.value}
                             isWishlistDisplayed={false}
+                            onWishlistClick={handleWishlistToggle}
+                            followedIdList={followedIdList}
                             isWishlistIcon={show_wishlist_icon?.value}
                             isImageFill={img_fill?.value}
                             isPrice={globalConfig?.show_price}
                             centerAlign={
                               windowWidth <= 480
                                 ? mobile_layout?.value !==
-                                  "banner_horizontal_scroll"
+                                "banner_horizontal_scroll"
                                 : desktop_layout?.value !==
-                                  "banner_horizontal_scroll"
+                                "banner_horizontal_scroll"
                             }
-                            imagePlaceholder={imagePlaceholder}
+                            imagePlaceholder={placeholderProduct}
                             showAddToCart={showAddToCart}
                             handleAddToCart={handleAddToCart}
+                            isSlider
                           />
                         </FDKLink>
                       </div>
@@ -578,9 +607,8 @@ export function Component({ props, globalConfig }) {
                     )}
 
                   <div
-                    className={`${styles.imageGrid} ${
-                      imagesForStackedView().length === 1 && styles.singleItem
-                    }`}
+                    className={`${styles.imageGrid} ${imagesForStackedView().length === 1 && styles.singleItem
+                      }`}
                     style={{
                       "--per_row": item_count?.value,
                       "--brand-item": getWidthByCount() || 1,
@@ -594,19 +622,22 @@ export function Component({ props, globalConfig }) {
                             isSaleBadgeDisplayed={false}
                             showBadge={show_badge?.value}
                             isWishlistDisplayed={false}
+                            onWishlistClick={handleWishlistToggle}
+                            followedIdList={followedIdList}
                             isWishlistIcon={show_wishlist_icon?.value}
                             isImageFill={img_fill?.value}
                             isPrice={globalConfig?.show_price}
                             centerAlign={
                               windowWidth <= 480
                                 ? mobile_layout?.value !==
-                                  "banner_horizontal_scroll"
+                                "banner_horizontal_scroll"
                                 : desktop_layout?.value !==
-                                  "banner_horizontal_scroll"
+                                "banner_horizontal_scroll"
                             }
-                            imagePlaceholder={imagePlaceholder}
+                            imagePlaceholder={placeholderProduct}
                             showAddToCart={showAddToCart}
                             handleAddToCart={handleAddToCart}
+                            isSlider
                           />
                         </FDKLink>
                       </div>
@@ -620,7 +651,7 @@ export function Component({ props, globalConfig }) {
                   <div className={styles.bannerImage}>
                     <FyImage
                       globalConfig={globalConfig}
-                      src={bannerUrl || bannerPlaceholder}
+                      src={bannerUrl || placeholderBanner}
                       sources={getImgSrcSet()}
                       aspectRatio="0.8"
                       mobileAspectRatio="0.8"
@@ -629,11 +660,11 @@ export function Component({ props, globalConfig }) {
                   <div className={styles.slideWrapBanner}>
                     <div
                       className={styles.titleBlock}
-                      style={{ paddingLeft: "10px" }}
+                      style={{ paddingInlineStart: "10px" }}
                     >
                       {heading?.value?.length > 0 && (
                         <h2
-                          className={styles.sectionHeading}
+                          className={`${styles.sectionHeading} fontHeader`}
                           style={{ textAlign: "left" }}
                         >
                           {heading?.value}
@@ -658,10 +689,9 @@ export function Component({ props, globalConfig }) {
                         >
                           <div style={{ padding: "0 12px" }}>
                             <FyImage
-                              customClass={`${styles.imageGallery} ${
-                                img_fill?.value ? styles.streach : ""
-                              }`}
-                              src={placeholder}
+                              customClass={`${styles.imageGallery} ${img_fill?.value ? styles.streach : ""
+                                }`}
+                              src={placeholderProduct}
                             />
                           </div>
                         </div>
@@ -689,9 +719,8 @@ export function Component({ props, globalConfig }) {
         </IntersectionObserverComponent>
         <noscript>
           <div
-            className={`${styles.imageGrid} ${
-              imagesForStackedView().length === 1 && styles.singleItem
-            }`}
+            className={`${styles.imageGrid} ${imagesForStackedView().length === 1 && styles.singleItem
+              }`}
             style={{
               "--per_row": item_count?.value,
               "--brand-item": getWidthByCount() || 1,
@@ -705,6 +734,8 @@ export function Component({ props, globalConfig }) {
                     isSaleBadgeDisplayed={false}
                     showBadge={show_badge?.value}
                     isWishlistDisplayed={false}
+                    onWishlistClick={handleWishlistToggle}
+                    followedIdList={followedIdList}
                     isWishlistIcon={show_wishlist_icon?.value}
                     isImageFill={img_fill?.value}
                     centerAlign={
@@ -712,9 +743,10 @@ export function Component({ props, globalConfig }) {
                         ? mobile_layout?.valuet !== "banner_horizontal_scroll"
                         : desktop_layout?.value !== "banner_horizontal_scroll"
                     }
-                    imagePlaceholder={imagePlaceholder}
+                    imagePlaceholder={placeholderProduct}
                     showAddToCart={showAddToCart}
                     handleAddToCart={handleAddToCart}
+                    isSlider
                   />
                 </FDKLink>
               </div>
@@ -727,7 +759,8 @@ export function Component({ props, globalConfig }) {
           !showBannerScrollView() &&
           getGallery?.length > 0 && (
             <div
-              className={`${styles["flex-justify-center"]} ${showScrollView() && isClient ? styles["gap-above-button-horizontal"] : styles["gap-above-button"]}`}
+              className={`${styles["flex-justify-center"]} ${imagesForScrollView()?.length <= 3 ? styles.lessGap : ""
+                } ${showScrollView() && isClient ? styles["gap-above-button-horizontal"] : styles["gap-above-button"]}`}
             >
               <FDKLink to={`/collection/${slug}`}>
                 <button
@@ -766,13 +799,13 @@ export function Component({ props, globalConfig }) {
 }
 
 export const settings = {
-  label: "Featured Collection",
+  label: "t:resource.sections.featured_collection.featured_collection",
   props: [
     {
       type: "collection",
       id: "collection",
-      label: "Collection",
-      info: "Select a collection to display its products",
+      label: "t:resource.sections.featured_collection.collection",
+      info: "t:resource.sections.featured_collection.select_collection_for_products",
     },
     {
       id: "desktop_layout",
@@ -780,20 +813,20 @@ export const settings = {
       options: [
         {
           value: "horizontal",
-          text: "Horizontal scroll",
+          text: "t:resource.common.horizontal_scroll",
         },
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "banner_horizontal_scroll",
-          text: "Banner with horizontal carousel",
+          text: "t:resource.sections.featured_collection.banner_horizontal_carousel",
         },
       ],
       default: "banner_horizontal_scroll",
-      label: "Layout (Desktop)",
-      info: "Alignment of content in desktop",
+      label: "t:resource.sections.featured_collection.layout_desktop",
+      info: "t:resource.sections.featured_collection.desktop_content_alignment",
     },
     {
       id: "mobile_layout",
@@ -801,55 +834,55 @@ export const settings = {
       options: [
         {
           value: "horizontal",
-          text: "Horizontal scroll",
+          text: "t:resource.common.horizontal_scroll",
         },
         {
           value: "grid",
-          text: "Stack",
+          text: "t:resource.common.stack",
         },
         {
           value: "banner_horizontal_scroll",
-          text: "Banner with horizontal scroll",
+          text: "t:resource.sections.featured_collection.banner_horizontal_scroll",
         },
         {
           value: "banner_stacked",
-          text: "Banner with Stack",
+          text: "t:resource.sections.featured_collection.banner_with_stack",
         },
       ],
       default: "horizontal",
-      label: "Layout (Mobile)",
-      info: "Alignment of content in mobile",
+      label: "t:resource.sections.featured_collection.layout_mobile",
+      info: "t:resource.sections.featured_collection.content_alignment_mobile",
     },
     {
       type: "color",
       id: "img_container_bg",
-      category: "Image Container",
+      category: "t:resource.common.image_container",
       default: "#00000000",
-      label: "Container Background Color",
-      info: "This color will be used as the container background color of the Product/Collection/Category/Brand images wherever applicable",
+      label: "t:resource.common.container_background_color",
+      info: "t:resource.common.image_container_bg_color",
     },
     {
       type: "checkbox",
       id: "img_fill",
-      category: "Image Container",
+      category: "t:resource.common.image_container",
       default: true,
-      label: "Fit image to the container",
-      info: "If the image aspect ratio is different from the container, the image will be clipped to fit the container. The aspect ratio of the image will be maintained",
+      label: "t:resource.common.fit_image_to_container",
+      info: "t:resource.common.clip_image_to_fit_container",
     },
     {
       type: "text",
       id: "heading",
       default: "New Arrivals",
-      label: "Heading",
-      info: "Heading text of the section",
+      label: "t:resource.common.heading",
+      info: "t:resource.common.section_heading_text",
     },
     {
       type: "text",
       id: "description",
       default:
         "Showcase your top collections here! Whether it's new arrivals, trending items, or special promotions, use this space to draw attention to what's most important in your store.",
-      label: "Description",
-      info: "Description text of the section",
+      label: "t:resource.common.description",
+      info: "t:resource.common.section_description_text",
     },
     {
       id: "text_alignment",
@@ -857,47 +890,47 @@ export const settings = {
       options: [
         {
           value: "left",
-          text: "Left",
+          text: "t:resource.common.start",
         },
         {
           value: "right",
-          text: "Right",
+          text: "t:resource.common.end",
         },
         {
           value: "center",
-          text: "Center",
+          text: "t:resource.common.center",
         },
       ],
       default: "center",
-      label: "Text Alignment",
-      info: "Alignment of text content",
+      label: "t:resource.sections.featured_collection.text_alignment",
+      info: "t:resource.sections.featured_collection.alignment_of_text_content",
     },
-    {
-      id: "title_size",
-      type: "select",
-      options: [
-        {
-          value: "small",
-          text: "Small",
-        },
-        {
-          value: "medium",
-          text: "Medium",
-        },
-        {
-          value: "large",
-          text: "Large",
-        },
-      ],
-      default: "medium",
-      label: "Title size",
-      info: "Select title size",
-    },
+    // {
+    //   id: "title_size",
+    //   type: "select",
+    //   options: [
+    //     {
+    //       value: "small",
+    //       text: "t:resource.sections.featured_collection.small",
+    //     },
+    //     {
+    //       value: "medium",
+    //       text: "t:resource.sections.featured_collection.medium",
+    //     },
+    //     {
+    //       value: "large",
+    //       text: "t:resource.sections.featured_collection.large",
+    //     },
+    //   ],
+    //   default: "medium",
+    //   label: "t:resource.sections.featured_collection.title_size",
+    //   info: "t:resource.sections.featured_collection.select_title_size",
+    // },
     {
       type: "text",
       id: "button_text",
       default: "View all",
-      label: "Button text",
+      label: "t:resource.common.button_text"
     },
     {
       type: "range",
@@ -906,9 +939,9 @@ export const settings = {
       max: 6,
       step: 1,
       unit: "",
-      label: "Products per row (Desktop)",
+      label: "t:resource.sections.featured_collection.products_per_row_desktop",
       default: 4,
-      info: "Maximum items allowed per row in horizontal scroll",
+      info: "t:resource.sections.featured_collection.max_items_per_row_horizontal_scroll",
     },
     {
       type: "range",
@@ -917,9 +950,9 @@ export const settings = {
       max: 2,
       step: 1,
       unit: "",
-      label: "Products per row (Mobile)",
+      label: "t:resource.sections.featured_collection.products_per_row_mobile",
       default: 1,
-      info: "Maximum items allowed per row in horizontal scroll",
+      info: "t:resource.sections.featured_collection.max_items_per_row_horizontal_scroll",
     },
     {
       type: "range",
@@ -928,32 +961,33 @@ export const settings = {
       max: 25,
       step: 1,
       unit: "",
-      label: "Maximum products to show",
+      label: "t:resource.sections.featured_collection.maximum_products_to_show",
       default: 10,
-      info: "Maximu products to show in horizontal scroll",
+      info: "t:resource.sections.featured_collection.max_products_horizontal_scroll",
     },
     {
       type: "checkbox",
       id: "show_add_to_cart",
-      label: "Show Add to Cart",
+      label: "t:resource.common.show_add_to_cart",
+      info: "t:resource.common.not_applicable_international_websites",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_wishlist_icon",
-      label: "Show Wish List Icon",
+      label: "t:resource.common.show_wish_list_icon",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_badge",
-      label: "Show Badge",
+      label: "t:resource.sections.featured_collection.show_badge",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_view_all",
-      label: "Show View All Button",
+      label: "t:resource.sections.featured_collection.show_view_all_button",
       default: true,
     },
   ],

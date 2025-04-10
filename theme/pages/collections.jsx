@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-
-import { FDKLink } from "fdk-core/components";
 import Loader from "../components/loader/loader";
 // import ProductCard from "../components/product-card/product-card";
 import styles from "../styles/collections.less";
@@ -11,8 +9,11 @@ import EmptyState from "../components/empty-state/empty-state";
 import InfiniteLoader from "../components/infinite-loader/infinite-loader";
 import ScrollToTop from "../components/scroll-to-top/scroll-to-top";
 import { COLLECTIONS } from "../queries/collectionsQuery";
+import { FDKLink } from "fdk-core/components";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function Collections({ fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const {
     collections,
     pageConfig,
@@ -29,6 +30,10 @@ function Collections({ fpi }) {
   }, []);
   //   const { page, items = [], loading } = product_lists || {};
 
+  if (!isLoading && !collections?.length) {
+    return <EmptyState title={t("resource.collections.empty_state")} />;
+  }
+
   return (
     <div
       className={`${styles.collections} basePageContainer margin0auto fontBody`}
@@ -37,13 +42,11 @@ function Collections({ fpi }) {
         <Loader />
       ) : (
         <>
-          <div
-            className={`${styles.collections__breadcrumbs} ${styles.desktop} captionNormal`}
-          >
+          <div className={`${styles.collections__breadcrumbs} captionNormal`}>
             <span>
-              <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
+              <FDKLink to="/">{t("resource.common.breadcrumb.home")}</FDKLink>&nbsp; / &nbsp;
             </span>
-            <span className={styles.active}>Collections</span>
+            <span className={styles.active}>{t("resource.common.breadcrumb.collections")}</span>
           </div>
           <div>
             {title && (
@@ -58,34 +61,21 @@ function Collections({ fpi }) {
                 <p>{description}</p>
               </div>
             )}
-            {collections?.length ? (
-              <div className={styles.collections__cards}>
-                <InfiniteLoader
-                  isLoading={isLoading}
-                  infiniteLoaderEnabled={infinite_scroll}
-                  hasNext={pageData?.has_next}
-                  loadMore={fetchCollection}
-                >
-                  <CardList
-                    cardList={collections}
-                    cardType="COLLECTIONS"
-                    showOnlyLogo={!!logo_only}
-                    globalConfig={globalConfig}
-                  />
-                </InfiniteLoader>
-              </div>
-            ) : (
-              !isLoading &&
-              !collections?.length && <EmptyState title="No collection found" />
-            )}
-          </div>
-          <div
-            className={`${styles.collections__breadcrumbs} ${styles.mobile} captionNormal`}
-          >
-            <span>
-              <FDKLink to="/">Home</FDKLink>&nbsp; / &nbsp;
-            </span>
-            <span className={styles.active}>Collections</span>
+            <div className={styles.collections__cards}>
+              <InfiniteLoader
+                isLoading={isLoading}
+                infiniteLoaderEnabled={infinite_scroll}
+                hasNext={pageData?.has_next}
+                loadMore={fetchCollection}
+              >
+                <CardList
+                  cardList={collections}
+                  cardType="COLLECTIONS"
+                  showOnlyLogo={!!logo_only}
+                  globalConfig={globalConfig}
+                />
+              </InfiniteLoader>
+            </div>
           </div>
           {!!back_top && <ScrollToTop />}
         </>
@@ -99,27 +89,27 @@ export const settings = JSON.stringify({
     {
       type: "checkbox",
       id: "infinite_scroll",
-      label: "Infinity Scroll",
+      label: "t:resource.common.infinity_scroll",
       default: true,
-      info: "If it is enabled, view more button will not be shown, only on scroll products will be displayed",
+      info: "t:resource.common.infinite_scroll_info",
     },
     {
       type: "checkbox",
       id: "back_top",
-      label: "Back to top",
+      label: "t:resource.common.back_to_top",
       default: true,
     },
     {
       type: "text",
       id: "title",
       default: "",
-      label: "Heading",
+      label: "t:resource.common.heading",
     },
     {
       type: "textarea",
       id: "description",
       default: "",
-      label: "Description",
+      label: "t:resource.common.description",
     },
   ],
 });

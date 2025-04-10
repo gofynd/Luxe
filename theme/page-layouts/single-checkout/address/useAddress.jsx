@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useGlobalStore } from "fdk-core/utils";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import {
   CHECKOUT_LANDING,
   FETCH_SHIPMENTS,
@@ -10,10 +10,13 @@ import { useSnackbar } from "../../../helper/hooks";
 import { LOCALITY } from "../../../queries/logisticsQuery";
 import { capitalize } from "../../../helper/utils";
 import useInternational from "../../../components/header/useInternational";
+import { useNavigate, useGlobalTranslation } from "fdk-core/utils";
 import { useAddressFormSchema } from "../../../helper/hooks";
 
 const useAddress = (setShowShipment, setShowPayment, fpi) => {
-  const allAddresses = useGlobalStore(fpi.getters.ADDRESS)?.address || [];
+  const { t } = useGlobalTranslation("translation");
+  const allAddresses =
+    useGlobalStore(fpi.getters.ADDRESS)?.address || undefined;
   const isAddressLoading =
     useGlobalStore(fpi.getters.ADDRESS)?.loading || false;
   const navigate = useNavigate();
@@ -34,15 +37,17 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     allAddresses?.filter((item) => item?.is_default_address) || [];
   const getOtherAddress =
     allAddresses?.filter((item) => !item?.is_default_address) || [];
-
+  const CART = useGlobalStore(fpi.getters.CART);
+  const { cart_items } = CART || {};
   const { showSnackbar } = useSnackbar();
 
   const {
+    isInternational,
     countries,
-    fetchCountrieDetails,
     countryDetails,
     currentCountry,
-    isInternational,
+    fetchCountrieDetails,
+    setI18nDetails,
   } = useInternational({
     fpi,
   });
@@ -50,21 +55,25 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
   const [countrySearchText, setCountrySearchText] = useState("");
 
   useEffect(() => {
+    resetAddressState();
+    if (
+      cart_items?.checkout_mode === "other" ||
+      (allAddresses && !allAddresses.length)
+    ) {
+      showAddNewAddressModal();
+    }
+  }, [allAddresses]);
+
+  useEffect(() => {
     if (currentCountry) {
       setSelectedCountry(currentCountry);
     }
   }, [currentCountry]);
 
-  useEffect(() => {
-    fetchCountrieDetails({
-      countryIsoCode: selectedCountry?.iso2 ?? countries?.[0]?.iso2,
-    });
-  }, [selectedCountry]);
-
-  const { formSchema } = useAddressFormSchema({
+  const { formSchema, defaultAddressItem } = useAddressFormSchema({
     fpi,
-    countryCode: selectedCountry?.phone_code,
-    countryIso: selectedCountry?.iso2,
+    countryCode: countryDetails?.phone_code,
+    countryIso: countryDetails?.iso2,
     addressTemplate: countryDetails?.fields?.address_template?.checkout_form,
     addressFields: countryDetails?.fields?.address,
   });
@@ -76,12 +85,25 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     };
   }
 
-  const setI18nDetails = (e) => {
+  const handleCountryChange = async (e) => {
     const selectedCountry = countries.find(
       (country) => country.display_name === e
     );
     setSelectedCountry(selectedCountry);
-    fetchCountrieDetails({ countryIsoCode: selectedCountry?.iso2 });
+    try {
+      const response = await fetchCountrieDetails({
+        countryIsoCode: selectedCountry?.meta?.country_code,
+      });
+      if (response?.data?.country) {
+        const countryInfo = response.data.country;
+        setI18nDetails({
+          iso: countryInfo.iso2,
+          phoneCode: countryInfo.phone_code,
+          name: countryInfo.display_name,
+          currency: countryInfo.currency.code,
+        });
+      }
+    } catch (error) { }
   };
 
   const handleCountrySearch = (event) => {
@@ -138,8 +160,12 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
   };
 
   const editAddress = (item) => {
-    setModalTitle("Edit Address");
-    setI18nDetails(item?.country);
+    setModalTitle(t("resource.common.address.edit_address"));
+    setI18nDetails({
+      iso: item.country_iso_code,
+      phoneCode: item.country_code,
+      name: item.country,
+    });
     setAddressItem({
       ...item,
       phone: {
@@ -150,19 +176,6 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     });
     setIssNewAddress(false);
     setOpenModal(true);
-  };
-
-  const setI18NDetails = () => {
-    const cookiesData = JSON.stringify({
-      currency: { code: selectedCountry?.currency?.code },
-      country: {
-        iso_code: selectedCountry?.iso2,
-        isd_code: selectedCountry?.phone_code,
-      },
-      display_name: selectedCountry?.display_name,
-      countryCode: selectedCountry?.country?.iso2,
-    });
-    fpi.setI18nDetails(cookiesData);
   };
 
   const addAddress = (obj) => {
@@ -179,7 +192,6 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     }
     obj.country_phone_code = `+${obj.phone.countryCode}`;
     obj.phone = obj.phone.mobile;
-    fpi.setI18nDetails({ countryCode: countryDetails?.iso2 });
     setAddressLoader(true);
     const payload = {
       address2Input: {
@@ -200,8 +212,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
       .then((res) => {
         setAddressLoader(false);
         if (res?.data?.addAddress?.success) {
-          setI18NDetails();
-          showSnackbar("Address added successfully", "success");
+          showSnackbar(t("resource.common.address.address_addition_success"), "success");
           resetAddressState();
           fpi
             .executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow })
@@ -212,7 +223,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
         } else {
           fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
           showSnackbar(
-            res?.errors?.[0]?.message ?? "Failed to create new address",
+            res?.errors?.[0]?.message ?? t("resource.common.address.new_address_creation_failure"),
             "error"
           );
           setAddressLoader(false);
@@ -241,7 +252,6 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     /* eslint-disable no-underscore-dangle */
     delete add?.__typename;
 
-    fpi.setI18nDetails({ countryCode: countryDetails?.iso2 });
     const payload = {
       id: selectedAddressId,
       address2Input: {
@@ -266,12 +276,14 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
           fpi
             .executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow })
             .then(() => selectAddress());
-          showSnackbar("Address updated successfully", "success");
+          showSnackbar(t("resource.common.address.address_update_success"), "success");
           resetAddressState();
         } else {
           fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
-          showSnackbar("Failed to update an address", "error");
-          resetAddressState();
+          showSnackbar(
+            res?.errors?.[0]?.message || t("resource.common.address.address_update_failure"),
+            "error"
+          );
         }
       });
   };
@@ -291,10 +303,10 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
       .then((res) => {
         if (res?.data?.removeAddress?.is_deleted) {
           fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
-          showSnackbar("Address deleted successfully", "success");
+          showSnackbar(t("resource.common.address.address_deletion_success"), "success");
         } else {
           fpi.executeGQL(CHECKOUT_LANDING, { includeBreakup: true, buyNow });
-          showSnackbar("Failed to delete an address", "error");
+          showSnackbar(t("resource.common.address.address_deletion_failure"), "error");
           resetAddressState();
         }
       });
@@ -316,11 +328,11 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     }
 
     const updatedSearch = searchParameter.toString();
-    navigate({ search: updatedSearch });
+    navigate(`${location.pathname}?${updatedSearch}`);
   };
 
   const selectAddress = (id = "") => {
-    const findAddress = allAddresses.find(
+    const findAddress = allAddresses?.find(
       (item) => item?.id === selectedAddressId
     );
     const payload = {
@@ -341,6 +353,13 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
           id: `${cart_id}`,
           buyNow,
         });
+        if (findAddress?.area_code) {
+          fpi.executeGQL(LOCALITY, {
+            locality: "pincode",
+            localityValue: findAddress?.area_code,
+            country: findAddress?.country_iso_code,
+          });
+        }
         setShowShipment(true);
         setAddressLoader(false);
         setInvalidAddressError(null);
@@ -351,10 +370,18 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
       } else {
         setInvalidAddressError({
           id: id.length ? id : findAddress?.id,
-          message: res?.data?.selectAddress?.message,
+          message:
+            res?.data?.selectAddress?.message || res?.errors?.[0]?.message,
         });
-        //showSnackbar("Failed to select an address", "error");
       }
+    });
+  };
+
+  const onFailedGetCartShipmentDetails = async () => {
+    await fpi.executeGQL(FETCH_SHIPMENTS, {
+      addressId: `${selectedAddressId}`,
+      id: `${cart_id}`,
+      buyNow,
     });
   };
 
@@ -366,7 +393,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
 
     const updatedSearch = searchParam.toString();
 
-    navigate({ search: updatedSearch });
+    navigate(updatedSearch ? `?${updatedSearch}` : "");
   };
 
   function backToEdit() {
@@ -376,7 +403,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
   }
 
   function showAddNewAddressModal() {
-    setModalTitle("Add New Address");
+    setModalTitle(t("resource.common.address.add_new_address"));
     setOpenModal(true);
   }
 
@@ -385,7 +412,7 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
       .executeGQL(LOCALITY, {
         locality: posttype,
         localityValue: `${postcode}`,
-        country: selectedCountry?.iso2,
+        country: selectedCountry?.meta?.country_code,
       })
       .then((res) => {
         const data = { showError: false, errorMsg: "" };
@@ -408,20 +435,21 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
           });
 
           return data;
+        } else {
+          showSnackbar(
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure")
+          );
+          data.showError = true;
+          data.errorMsg =
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure");
+          return data;
         }
-        showSnackbar(
-          res?.errors?.[0]?.message || "Pincode verification failed"
-        );
-        data.showError = true;
-        data.errorMsg =
-          res?.errors?.[0]?.message || "Pincode verification failed";
-        return data;
       });
   }
 
   return {
     allAddresses,
-    addressItem,
+    addressItem: addressItem || defaultAddressItem,
     selectedAddressId,
     invalidAddressError,
     getDefaultAddress,
@@ -447,11 +475,12 @@ const useAddress = (setShowShipment, setShowPayment, fpi) => {
     getLocality,
     isInternationalShippingEnabled: isInternational,
     defaultFormSchema: formSchema,
-    setI18nDetails,
+    setI18nDetails: handleCountryChange,
     handleCountrySearch,
     getFilteredCountries,
-    selectedCountry,
+    selectedCountry: selectedCountry || countryDetails,
     countryDetails,
+    onFailedGetCartShipmentDetails,
   };
 };
 

@@ -1,35 +1,39 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
-import Loader from "@gofynd/theme-template/components/loader/loader";
-import AddressForm from "@gofynd/theme-template/components/address-form/address-form";
-import AddressItem from "@gofynd/theme-template/components/address-item/address-item";
 import { LOCALITY } from "../../queries/logisticsQuery";
 import useAddress from "../address/useAddress";
 import EmptyState from "../../components/empty-state/empty-state";
-import "@gofynd/theme-template/components/loader/loader.css";
+import Loader from "fdk-react-templates/components/loader/loader";
+import "fdk-react-templates/components/loader/loader.css";
 import { useSnackbar, useAddressFormSchema } from "../../helper/hooks";
 import { capitalize } from "../../helper/utils";
 import styles from "./profile-address-page.less";
-import "@gofynd/theme-template/components/address-form/address-form.css";
-import "@gofynd/theme-template/components/address-item/address-item.css";
+import AddressForm from "fdk-react-templates/components/address-form/address-form";
+import AddressItem from "fdk-react-templates/components/address-item/address-item";
+import "fdk-react-templates/components/address-form/address-form.css";
+import "fdk-react-templates/components/address-item/address-item.css";
 import useInternational from "../../components/header/useInternational";
+import { useNavigate, useGlobalTranslation } from "fdk-core/utils";
 
 const DefaultAddress = () => {
-  return <span className={styles.defaultAdd}>Default</span>;
+  const { t } = useGlobalTranslation("translation");
+  return <span className={styles.defaultAdd}>{t("resource.common.default")}</span>;
 };
 
 const ProfileAddressPage = ({ fpi }) => {
+  const { t } = useGlobalTranslation("translation");
   const location = useLocation();
   const navigate = useNavigate();
   const searchParams = new URLSearchParams(location?.search);
   const allAddresses = useGlobalStore(fpi.getters.ADDRESS)?.address || [];
   const {
-    countries,
-    fetchCountrieDetails,
-    countryDetails,
-    currentCountry,
     isInternational,
+    countries,
+    currentCountry,
+    countryDetails,
+    fetchCountrieDetails,
+    setI18nDetails,
   } = useInternational({
     fpi,
   });
@@ -52,18 +56,19 @@ const ProfileAddressPage = ({ fpi }) => {
   const [selectedCountry, setSelectedCountry] = useState(currentCountry);
   const queryAddressId = searchParams.get("address_id");
   const memoizedSelectedAdd = useMemo(() => {
+    if (!queryAddressId) return;
+
     const selectedAdd = allAddresses?.find((add) => add.id === queryAddressId);
-    if (selectedAdd) {
-      return {
-        ...selectedAdd,
-        phone: {
-          mobile: selectedAdd?.phone,
-          countryCode: selectedAdd?.country_code?.replace("+", ""),
-          isValidNumber: true,
-        },
-      };
-    }
-    return selectedAdd;
+    if (!selectedAdd) return;
+    
+    return {
+      ...selectedAdd,
+      phone: {
+        mobile: selectedAdd?.phone,
+        countryCode: selectedAdd?.country_code?.replace("+", ""),
+        isValidNumber: true,
+      },
+    };
   }, [allAddresses, queryAddressId]);
 
   useEffect(() => {
@@ -72,23 +77,11 @@ const ProfileAddressPage = ({ fpi }) => {
     }
   }, [currentCountry]);
 
-  useEffect(() => {
-    if (memoizedSelectedAdd?.country_iso_code) {
-      fetchCountrieDetails({
-        countryIsoCode: memoizedSelectedAdd?.country_iso_code,
-      });
-    } else {
-      fetchCountrieDetails({
-        countryIsoCode: selectedCountry?.iso2 ?? countries?.[0]?.iso2,
-      });
-    }
-  }, [selectedCountry, memoizedSelectedAdd]);
-
-  const { formSchema } = useAddressFormSchema({
+  const { formSchema, defaultAddressItem } = useAddressFormSchema({
     fpi,
     countryCode:
-      memoizedSelectedAdd?.country_phone_code ?? selectedCountry?.phone_code,
-    countryIso: memoizedSelectedAdd?.country_iso_code ?? selectedCountry?.iso2,
+      memoizedSelectedAdd?.country_phone_code ?? countryDetails?.phone_code,
+    countryIso: memoizedSelectedAdd?.country_iso_code ?? countryDetails?.iso2,
     addressTemplate: countryDetails?.fields?.address_template?.checkout_form,
     addressFields: countryDetails?.fields?.address,
     addressItem: memoizedSelectedAdd,
@@ -132,32 +125,20 @@ const ProfileAddressPage = ({ fpi }) => {
     navigateToLocation(false);
   };
   const onEditClick = (addressId) => {
-    const countryIsoCode = allAddresses?.find(
+    const addressItem = allAddresses?.find(
       (address) => address?.id === addressId
-    )?.country_iso_code;
-
-    fpi.setI18nDetails({ countryCode: countryIsoCode });
-    navigate({
-      pathname: location.pathname,
-      search: `edit=true&address_id=${addressId}`,
+    );
+    setI18nDetails({
+      iso: addressItem.country_iso_code,
+      phoneCode: addressItem.country_code,
+      name: addressItem.country,
     });
+    navigate(location.pathname + `?edit=true&address_id=${addressId}`);
   };
   const onCancelClick = () => {
     resetPage();
   };
 
-  const setI18NDetails = () => {
-    const cookiesData = JSON.stringify({
-      currency: { code: selectedCountry?.currency?.code },
-      country: {
-        iso_code: selectedCountry?.iso2,
-        isd_code: selectedCountry?.phone_code,
-      },
-      display_name: selectedCountry?.display_name,
-      countryCode: selectedCountry?.country?.iso2,
-    });
-    fpi.setI18nDetails(cookiesData);
-  };
   const addAddressHandler = (obj) => {
     if (
       obj?.geo_location?.latitude === "" &&
@@ -173,17 +154,15 @@ const ProfileAddressPage = ({ fpi }) => {
     obj.country_phone_code = `+${obj.phone.countryCode}`;
     obj.phone = obj.phone.mobile;
     setAddressLoader(true);
-    fpi.setI18nDetails({ countryCode: countryDetails?.iso2 });
     addAddress(obj).then((res) => {
       setAddressLoader(false);
       if (res?.data?.addAddress?.success) {
-        showSnackbar("Address added successfully", "success");
-        setI18NDetails();
+        showSnackbar(t("resource.common.address.address_addition_success"), "success");
         fetchAddresses();
         resetPage();
       } else {
         showSnackbar(
-          res?.errors?.[0]?.message ?? "Failed to create new address",
+          res?.errors?.[0]?.message ?? t("resource.common.address.new_address_creation_failure"),
           "error"
         );
       }
@@ -200,13 +179,12 @@ const ProfileAddressPage = ({ fpi }) => {
     updateAddress(obj, memoizedSelectedAdd?.id).then((res) => {
       setAddressLoader(false);
       if (res?.data?.updateAddress?.success) {
-        showSnackbar("Address updated successfully", "success");
-        setI18NDetails();
+        showSnackbar(t("resource.common.address.address_update_success"), "success");
         fetchAddresses();
         resetPage();
       } else {
         showSnackbar(
-          res?.errors?.[0]?.message ?? "Failed to update an address",
+          res?.errors?.[0]?.message ?? t("resource.common.address.address_update_failure"),
           "error"
         );
       }
@@ -221,11 +199,11 @@ const ProfileAddressPage = ({ fpi }) => {
     removeAddress(id).then((res) => {
       setAddressLoader(false);
       if (res?.data?.removeAddress?.is_deleted) {
-        showSnackbar("Address deleted successfully", "success");
+        showSnackbar(t("resource.common.address.address_deletion_success"), "success");
         fetchAddresses();
         resetPage();
       } else {
-        showSnackbar("Failed to delete an address", "error");
+        showSnackbar(t("resource.common.address.address_deletion_failure"), "error");
       }
       window.scrollTo({
         top: 0,
@@ -238,7 +216,9 @@ const ProfileAddressPage = ({ fpi }) => {
       .executeGQL(LOCALITY, {
         locality: posttype,
         localityValue: `${postcode}`,
-        country: memoizedSelectedAdd?.country_iso_code ?? selectedCountry?.iso2,
+        country:
+          memoizedSelectedAdd?.country_iso_code ??
+          selectedCountry?.meta?.country_code,
       })
       .then((res) => {
         const data = { showError: false, errorMsg: "" };
@@ -263,14 +243,15 @@ const ProfileAddressPage = ({ fpi }) => {
           }
 
           return data;
+        } else {
+          showSnackbar(
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure")
+          );
+          data.showError = true;
+          data.errorMsg =
+            res?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure");
+          return data;
         }
-        showSnackbar(
-          res?.errors?.[0]?.message || "Pincode verification failed"
-        );
-        data.showError = true;
-        data.errorMsg =
-          res?.errors?.[0]?.message || "Pincode verification failed";
-        return data;
       });
   };
 
@@ -282,7 +263,7 @@ const ProfileAddressPage = ({ fpi }) => {
           className={`${styles.commonBtn} ${styles.btn}`}
           type="submit"
         >
-          SAVE
+          {t("resource.facets.save_caps")}
         </button>
       ) : (
         <button
@@ -290,7 +271,7 @@ const ProfileAddressPage = ({ fpi }) => {
           className={`${styles.commonBtn} ${styles.btn}`}
           type="submit"
         >
-          UPDATE ADDRESS
+          {t("resource.common.address.update_address_caps")}
         </button>
       )}
       {!isEditMode ? (
@@ -299,7 +280,7 @@ const ProfileAddressPage = ({ fpi }) => {
           className={`${styles.commonBtn} ${styles.btn} ${styles.cancelBtn}`}
           onClick={onCancelClick}
         >
-          CANCEL
+          {t("resource.facets.cancel_caps")}
         </button>
       ) : (
         <button
@@ -308,7 +289,7 @@ const ProfileAddressPage = ({ fpi }) => {
           className={`${styles.commonBtn} ${styles.btn} ${styles.cancelBtn}`}
           onClick={() => removeAddressHandler(memoizedSelectedAdd?.id)}
         >
-          REMOVE
+          {t("resource.facets.remove_caps")}
         </button>
       )}
     </div>
@@ -324,12 +305,25 @@ const ProfileAddressPage = ({ fpi }) => {
     );
   }
 
-  const setI18nDetails = (e) => {
+  const handleCountryChange = async (e) => {
     const selectedCountry = countries.find(
       (country) => country.display_name === e
     );
     setSelectedCountry(selectedCountry);
-    fetchCountrieDetails({ countryIsoCode: selectedCountry?.iso2 });
+    try {
+      const response = await fetchCountrieDetails({
+        countryIsoCode: selectedCountry?.meta?.country_code,
+      });
+      if (response?.data?.country) {
+        const countryInfo = response.data.country;
+        setI18nDetails({
+          iso: countryInfo.iso2,
+          phoneCode: countryInfo.phone_code,
+          name: countryInfo.display_name,
+          currency: countryInfo.currency.code,
+        });
+      }
+    } catch (error) { }
   };
 
   const handleCountrySearch = (event) => {
@@ -360,7 +354,7 @@ const ProfileAddressPage = ({ fpi }) => {
           <div className={styles.addressContainer}>
             <div className={styles.addressHeader}>
               <div className={`${styles.title} ${styles["bold-md"]}`}>
-                MY ADDRESSES
+                {t("resource.common.address.my_address")}
                 <span
                   className={`${styles.savedAddress} ${styles["bold-xxs"]}`}
                 >
@@ -371,7 +365,7 @@ const ProfileAddressPage = ({ fpi }) => {
                 className={`${styles.addAddr} ${styles["bold-md"]}`}
                 onClick={onCreateClick}
               >
-                ADD NEW ADDRESS
+                {t("resource.common.address.add_new_address_caps")}
               </div>
             </div>
           </div>
@@ -394,7 +388,7 @@ const ProfileAddressPage = ({ fpi }) => {
 
           {allAddresses && allAddresses.length === 0 && (
             <div className={styles.emptyState}>
-              <EmptyState title="No address available" />
+              <EmptyState title={t("resource.common.address.no_address_available")} />
             </div>
           )}
         </div>
@@ -404,19 +398,19 @@ const ProfileAddressPage = ({ fpi }) => {
             <div className={styles.addressHeader}>
               {!isEditMode ? (
                 <div className={`${styles.title} ${styles["bold-md"]}`}>
-                  Add New Address
+                  {t("resource.common.address.add_new_address")}
                 </div>
               ) : (
                 <div className={`${styles.title} ${styles["bold-md"]}`}>
-                  Update Address
+                  {t("resource.common.address.update_address")}
                 </div>
               )}
             </div>
           </div>
           {isEditMode && !memoizedSelectedAdd ? (
             <EmptyState
-              title="Address not found!"
-              btnTitle="RETURN TO MY ADDRESS"
+              title={t("resource.common.address.address_not_found")}
+              btnTitle={t("resource.common.address.return_to_my_address")}
               btnLink={location.pathname}
             />
           ) : (
@@ -424,7 +418,7 @@ const ProfileAddressPage = ({ fpi }) => {
               <AddressForm
                 internationalShipping={isInternational}
                 formSchema={formSchema}
-                addressItem={memoizedSelectedAdd}
+                addressItem={memoizedSelectedAdd ?? defaultAddressItem}
                 showGoogleMap={!!mapApiKey?.length}
                 mapApiKey={mapApiKey}
                 isNewAddress={isCreateMode}
@@ -433,14 +427,14 @@ const ProfileAddressPage = ({ fpi }) => {
                 onGetLocality={getLocality}
                 customFooter={customFooter}
                 fpi={fpi}
-                setI18nDetails={setI18nDetails}
+                setI18nDetails={handleCountryChange}
                 handleCountrySearch={handleCountrySearch}
                 getFilteredCountries={getFilteredCountries}
                 selectedCountry={
                   memoizedSelectedAdd?.country
                     ? memoizedSelectedAdd?.country
                     : (selectedCountry?.display_name ??
-                      countries?.[0]?.display_name)
+                      countryDetails?.display_name)
                 }
                 countryDetails={countryDetails}
               />

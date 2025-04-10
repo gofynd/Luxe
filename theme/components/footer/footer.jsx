@@ -3,13 +3,15 @@ import { FDKLink } from "fdk-core/components";
 import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
 import styles from "./footer.less";
 import useHeader from "../header/useHeader";
-import SvgWrapper from "../core/svgWrapper/SvgWrapper";
-import fallbackLogo from "../../assets/images/logo.png";
 import IntersectionObserverComponent from "../intersection-observer/intersection-observer";
-import SocailMedia from "../socail-media/socail-media";
+import SocialLinks from "../socail-media/socail-media";
+import { useGlobalTranslation } from "fdk-core/utils";
 import { useThemeConfig } from "../../helper/hooks";
+import { useParams } from "react-router-dom";
 
 function Footer({ fpi }) {
+  const { locale } = useParams();
+  const { t } = useGlobalTranslation("translation");
   const { globalConfig, FooterNavigation, contactInfo, supportInfo } =
     useHeader(fpi);
   const { email, phone } = supportInfo?.contact ?? {};
@@ -20,14 +22,12 @@ function Footer({ fpi }) {
   const getArtWork = () => {
     if (globalConfig?.footer_image) {
       return {
-        "--background-desktop": `url(${
-          globalConfig?.footer_image_desktop ||
+        "--background-desktop": `url(${globalConfig?.footer_image_desktop ||
           "../../assets/images/placeholder19x6.png"
-        })`,
-        "--background-mobile": `url(${
-          globalConfig?.footer_image_mobile ||
+          })`,
+        "--background-mobile": `url(${globalConfig?.footer_image_mobile ||
           "../../assets/images/placeholder4x5.png"
-        })`,
+          })`,
         "--footer-opacity": 0.25,
         "--footer-opacity-background": `${pallete?.footer?.footer_bottom_background}40`, // The last two digits represents the opacity (0.25 is converted to hex)
         backgroundRepeat: "no-repeat",
@@ -37,12 +37,6 @@ function Footer({ fpi }) {
     }
     return {};
   };
-
-  function getSocialIcon(title) {
-    return title && typeof title === "string"
-      ? `socail-${title.toLowerCase()}`
-      : "";
-  }
 
   const getLogo = globalConfig?.logo?.replace("original", "resize-h:100");
 
@@ -67,12 +61,13 @@ function Footer({ fpi }) {
                       <img
                         src={getLogo}
                         loading="lazy"
-                        alt="Footer Logo"
+                        alt={t("resource.footer.footer_logo_alt_text")}
                         fetchpriority="low"
                       />
                     </div>
                   )}
                 </IntersectionObserverComponent>
+                {/* footer description here */}
                 <p className={`${styles.description} b1 ${styles.fontBody}`}>
                   {globalConfig?.footer_description}
                 </p>
@@ -90,7 +85,7 @@ function Footer({ fpi }) {
                           {item.display}
                         </a>
                       ) : convertActionToUrl(item?.action)?.length > 0 ? (
-                        <FDKLink to={convertActionToUrl(item?.action)}>
+                        <FDKLink action={item?.action}>
                           {item.display}
                         </FDKLink>
                       ) : (
@@ -114,7 +109,9 @@ function Footer({ fpi }) {
                               </a>
                             ) : convertActionToUrl(subItem?.action)?.length >
                               0 ? (
-                              <FDKLink to={convertActionToUrl(subItem?.action)}>
+                              <FDKLink
+                                action={subItem?.action}
+                              >
                                 {subItem.display}
                               </FDKLink>
                             ) : (
@@ -141,17 +138,16 @@ function Footer({ fpi }) {
                     <h5
                       className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
                     >
-                      Contact Us
+                      {t("resource.common.contact_us")}
                     </h5>
                     <a
                       href={`tel:${phoneArray?.[0]?.number}`}
                       className={`${styles.detail} b1 ${styles.fontBody}`}
                     >
-                      {`${
-                        phoneArray?.[0]?.code
-                          ? `+ ${phoneArray?.[0]?.code} -`
-                          : ""
-                      } ${phoneArray?.[0]?.number}`}
+                      {`${phoneArray?.[0]?.code
+                        ? `+ ${phoneArray?.[0]?.code} -`
+                        : ""
+                        } ${phoneArray?.[0]?.number}`}
                     </a>
                   </div>
                 )}
@@ -160,7 +156,7 @@ function Footer({ fpi }) {
                     <h5
                       className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
                     >
-                      Email ID
+                      {t("resource.footer.email_id")}
                     </h5>
                     <a
                       href={`mailto:${emailArray?.[0]?.value}`}
@@ -176,10 +172,10 @@ function Footer({ fpi }) {
                       <h5
                         className={`${styles.title} ${styles.contacts} ${styles.fontBody}`}
                       >
-                        Social Media
+                        {t("resource.footer.social_media")}
                       </h5>
                       <span>
-                        <SocailMedia social_links={contactInfo?.social_links} />
+                        <SocialLinks social_links={contactInfo?.social_links} />
                       </span>
                     </>
                   )}
@@ -198,7 +194,7 @@ function Footer({ fpi }) {
                 <div className={styles.paymentLogo}>
                   <img
                     src={globalConfig?.payments_logo}
-                    alt="Payment Logo"
+                    alt={t("resource.footer.payment_logo_alt_text")}
                     loading="lazy"
                     fetchpriority="low"
                   />

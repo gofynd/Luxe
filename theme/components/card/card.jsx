@@ -1,9 +1,9 @@
 import React from "react";
-import { FDKLink } from "fdk-core/components";
 import FyImage from "../core/fy-image/fy-image";
 import styles from "./card.less";
 import placeholder1X1 from "../../assets/images/placeholder1X1.png";
 import placeholder3X4 from "../../assets/images/placeholder3x4.png";
+import { FDKLink } from "fdk-core/components";
 
 function Card({ card, cardType, globalConfig }) {
   function getCardLogo() {
@@ -38,9 +38,8 @@ function Card({ card, cardType, globalConfig }) {
       return `/products/?brand=${card?.slug}`;
     }
     if (cardType === "CATEGORIES") {
-      return `/products?category=${card?.slug}&department=${
-        card?.action?.page?.query?.department?.[0]
-      }`;
+      return `/products?category=${card?.slug}&department=${card?.action?.page?.query?.department?.[0]
+        }`;
     }
     return `/products/?${card?.slug}`;
   }
@@ -49,9 +48,8 @@ function Card({ card, cardType, globalConfig }) {
     <div>
       {card && (
         <div
-          className={`${styles.cardItem} ${styles.groupItemBox} ${
-            styles[`${cardType}`]
-          }`}
+          className={`${styles.cardItem} ${styles.groupItemBox} ${styles[`${cardType}`]
+            }`}
         >
           <FDKLink className={styles.displayBlock} to={getUrl()}>
             <FyImage
@@ -67,10 +65,9 @@ function Card({ card, cardType, globalConfig }) {
               globalConfig={globalConfig}
             />
             <div
-              className={`${styles.cardDesc} ${styles.flexAlignCenter} ${
-                (cardType === "COLLECTIONS" || cardType === "CATEGORIES") &&
+              className={`${styles.cardDesc} ${styles.flexAlignCenter} ${(cardType === "COLLECTIONS" || cardType === "CATEGORIES") &&
                 styles.emergeCenter
-              } ${cardType === "BRANDS" && styles.BRANDS}`}
+                } ${cardType === "BRANDS" && styles.BRANDS}`}
             >
               {cardType === "BRANDS" && (
                 <div className={styles.cardLogo}>
@@ -91,9 +88,8 @@ function Card({ card, cardType, globalConfig }) {
                 </div>
               )}
               <h5
-                className={`${styles.title} ${
-                  cardType === "BRANDS" && styles.b1
-                }`}
+                className={`${styles.title} ${cardType === "BRANDS" && styles.b1
+                  }`}
               >
                 {card.name}
               </h5>

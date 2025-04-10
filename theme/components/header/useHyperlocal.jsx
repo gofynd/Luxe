@@ -1,32 +1,29 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import {
   useThemeConfig,
   useToggleState,
   useSnackbar,
   useHyperlocalTat,
+  useGoogleMapConfig,
 } from "../../helper/hooks";
 import { isRunningOnClient } from "../../helper/utils";
 import { LOCALITY, DELIVERY_PROMISE } from "../../queries/logisticsQuery";
 
 const useHyperlocal = (fpi) => {
+  const { t } = useGlobalTranslation("translation");
   const location = useLocation();
   const { showSnackbar } = useSnackbar();
   const { globalConfig } = useThemeConfig({ fpi });
+  const { mapApiKey } = useGoogleMapConfig({ fpi });
   const { convertUTCToHyperlocalTat } = useHyperlocalTat({ fpi });
   const [deliveryPromise, setDeliveryPromise] = useState(null);
   const [servicibilityError, setServicibilityError] = useState(null);
   const [isPromiseLoading, setIsPromiseLoading] = useState(true);
-  const INTEGRATION_TOKENS = useGlobalStore(fpi.getters.INTEGRATION_TOKENS);
-  const isInternationalShippingEnabled =
-    useGlobalStore(fpi.getters.CONFIGURATION)?.app_features?.common
-      ?.international_shipping?.enabled ?? false;
   const pincodeDetails = useGlobalStore(fpi.getters.PINCODE_DETAILS);
   const locationDetails = useGlobalStore(fpi.getters.LOCATION_DETAILS);
-  const sellerDetails = JSON.parse(
-    useGlobalStore(fpi.getters.SELLER_DETAILS) || "{}"
-  );
+
   const pincode = useMemo(() => {
     if (!isRunningOnClient()) {
       return "";
@@ -54,7 +51,7 @@ const useHyperlocal = (fpi) => {
 
   const deliveryMessage = useMemo(() => {
     if (servicibilityError) {
-      return "Product not serviceable";
+      return t("resource.header.product_not_serviceable");
     }
     if (!deliveryPromise?.min) {
       return "";
@@ -90,7 +87,10 @@ const useHyperlocal = (fpi) => {
 
   const handleCurrentLocClick = () => {
     if (!navigator || !("geolocation" in navigator)) {
-      showSnackbar("Geolocation is not available.", "error");
+      showSnackbar(
+        t("resource.header.geolocation_not_available"),
+        "error"
+      );
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -100,19 +100,14 @@ const useHyperlocal = (fpi) => {
           lng: position.coords.longitude,
         };
 
-        const API_KEY = Buffer?.from(
-          INTEGRATION_TOKENS?.tokens?.google_map?.credentials?.api_key,
-          "base64"
-        )?.toString();
-
-        if (!API_KEY) {
-          showSnackbar("API key not available.", "error");
+        if (!mapApiKey) {
+          showSnackbar(t("resource.header.api_key_not_available"), "error");
           return;
         }
 
         try {
           const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${API_KEY}`
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.lat},${location.lng}&key=${mapApiKey}`
           );
           const data = await response.json();
           if (data.results.length > 0) {
@@ -150,7 +145,9 @@ const useHyperlocal = (fpi) => {
           })
           .catch((error) => {
             setServicibilityError({
-              message: error?.message || "Something went wrong",
+              message:
+                error?.message ||
+                t("resource.common.error_message"),
             });
           });
       }
@@ -167,7 +164,9 @@ const useHyperlocal = (fpi) => {
         })
         .catch((error) => {
           setServicibilityError({
-            message: error?.message || "Something went wrong",
+            message:
+              error?.message ||
+              t("resource.common.error_message"),
           });
         })
         .finally(() => {

@@ -4,7 +4,10 @@
   display: flex;
   align-items: center;
   .bagImg {
-    margin: 20px 20px 20px 0;
+    margin-top: 20px;
+    margin-inline-end: 20px;
+    margin-bottom: 20px;
+    margin-inline-start: 0px;
     img {
       max-width: 100px;
       max-height: 100px;
@@ -49,7 +52,10 @@
       margin-top: 20px;
       .sizeContainer {
         background: white;
-        padding: 10px 20px 10px 10px;
+        padding-top: 10px;
+        padding-inline-end: 20px;
+        padding-bottom: 10px;
+        padding-inline-start: 10px;
         border: 1px solid @Iron;
         .regular-xxs {
           font-weight: 400;
@@ -87,10 +93,10 @@
     }
   }
   .qtyCtrl {
-    margin-left: auto;
+    margin-inline-start: auto;
     position: relative;
     @media @mobile {
-      margin-left: 20px;
+      margin-inline-start: 20px;
     }
     .maxAvail {
       // margin: 0px 0px 10px;

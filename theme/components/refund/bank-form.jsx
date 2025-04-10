@@ -3,8 +3,16 @@ import { useForm } from "react-hook-form";
 import styles from "./styles/bank-form.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 import useRefundDetails from "../../page-layouts/orders/useRefundDetails";
+import { useGlobalTranslation } from "fdk-core/utils";
 
-function BankForm({ loadSpinner, fpi, addBankAccount }) {
+function BankForm({
+  loadSpinner,
+  fpi,
+  addBankAccount,
+  setShowBeneficiaryAdditionPage,
+  exisitingBankRefundOptions,
+}) {
+  const { t } = useGlobalTranslation("translation");
   const [inProgress, setInProgress] = useState(false);
   const [isValidIfsc, setIsValidIfsc] = useState(false);
   const [branchName, setBranchName] = useState(null);
@@ -31,27 +39,48 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
 
   const { ifscDetails, verifyIfscCode } = useRefundDetails(fpi);
 
-  const validateIfscCode = (value) => {
+  const validateIfscCode = async (value) => {
     if (value.length !== 11) {
       setIsValidIfsc(false);
       setBranchName("");
       setBankName("");
-      return;
+      return t("resource.order.enter_valid_ifsc_code");
     }
-    verifyIfscCode(value).then((data) => {
-      setBranchName(data.verify_IFSC_code.branch_name);
-      setBankName(data.verify_IFSC_code.bank_name);
-      setIsValidIfsc(true);
-    });
-    return true;
+
+    try {
+      const data = await verifyIfscCode(value);
+      const ifscDetails = data?.verify_IFSC_code;
+
+      if (ifscDetails && Object.keys(ifscDetails).length) {
+        setBranchName(ifscDetails.branch_name);
+        setBankName(ifscDetails.bank_name);
+        setIsValidIfsc(true);
+        return true;
+      } else {
+        setIsValidIfsc(false);
+        setBranchName("");
+        setBankName("");
+        return data?.message || t("resource.common.invalid_ifsc_code");
+      }
+    } catch (error) {
+      setIsValidIfsc(false);
+      setBranchName("");
+      setBankName("");
+      return t("resource.common.error_validating_ifsc");
+    }
   };
   const handleFormSubmit = (formdata) => {
-    addBankAccount(formdata, ifscDetails);
+    addBankAccount(formdata, ifscDetails, { selectedBankCheck: false });
   };
   const validateAccounHolder = (value) => {
     if (value.length === 0) {
       return false;
     }
+
+    if (/\d/.test(value)) {
+      return t("resource.common.error_numbers_not_allowed");
+    }
+
     return true;
   };
   const validateAccountNo = (value) => {
@@ -71,7 +100,8 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
           className={`${styles.formItem} ${errors.ifscCode ? styles.error : ""}`}
         >
           <div className={styles.formTitle} htmlFor={ifscCodeId}>
-            IFSC Code <span className={`${styles.formReq}`}>*</span>
+            {t("resource.common.ifsc_code")}{" "}
+            <span className={`${styles.formReq}`}>*</span>
           </div>
           <div className={`${styles.formInput}`}>
             <input
@@ -80,8 +110,7 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
               maxLength={11}
               type="text"
               {...register("ifscCode", {
-                validate: (value) =>
-                  validateIfscCode(value) || "Please Enter Valid IFSC Code",
+                validate: async (value) => validateIfscCode(value),
               })}
             />
           </div>
@@ -102,7 +131,8 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
           className={`${styles.formItem} ${errors.accountNo ? styles.error : ""}`}
         >
           <div className={styles.formTitle} htmlFor={accountNoId}>
-            Account Number <span className={`${styles.formReq}`}>*</span>
+            {t("resource.order.account_number")}{" "}
+            <span className={`${styles.formReq}`}>*</span>
           </div>
           <div className={`${styles.formInput}`}>
             <input
@@ -112,7 +142,9 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
               {...register("accountNo", {
                 validate: (value) =>
                   validateAccountNo(value) ||
-                  "Please Enter Valid Account Number",
+                  t(
+                    "resource.order.enter_valid_account_number"
+                  ),
               })}
             />
           </div>
@@ -124,7 +156,9 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
           className={`${styles.formItem} ${errors.confirmedAccountNo ? styles.error : ""}`}
         >
           <div className={styles.formTitle} htmlFor={confirmedAccountNoId}>
-            <span>Confirm Account Number</span>
+            <span>
+              {t("resource.order.confirm_account_number")}
+            </span>
             <span className={`${styles.formReq}`}>*</span>
           </div>
           <div className={`${styles.formInput}`}>
@@ -135,7 +169,9 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
               {...register("confirmedAccountNo", {
                 validate: (value) =>
                   value === getValues("accountNo") ||
-                  "Please Re-Enter Valid Account Number",
+                  t(
+                    "resource.order.re_enter_valid_account_number"
+                  ),
               })}
             />
           </div>
@@ -143,11 +179,10 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
             <p className={styles.error}>{errors.confirmedAccountNo.message}</p>
           )}
         </div>
-        <div
-          className={`${styles.formItem} ${errors.accounHolder ? styles.error : ""}`}
-        >
+        <div className={`${styles.formItem}`}>
           <div className={styles.formTitle} htmlFor={accounHolderId}>
-            Account Holder Name <span className={`${styles.formReq}`}>*</span>
+            {t("resource.order.account_holder_name")}{" "}
+            <span className={`${styles.formReq}`}>*</span>
           </div>
           <div className={`${styles.formInput}`}>
             <input
@@ -157,7 +192,9 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
               {...register("accounHolder", {
                 validate: (value) =>
                   validateAccounHolder(value) ||
-                  "Please Enter Valid Account Holder Name",
+                  t(
+                    "resource.order.account_holder_name_validation"
+                  ),
               })}
             />
           </div>
@@ -165,19 +202,32 @@ function BankForm({ loadSpinner, fpi, addBankAccount }) {
             <p className={styles.error}>{errors.accounHolder.message}</p>
           )}
         </div>
-        <button
-          className={`${styles.commonBtn} ${styles.btn} ${styles.modalBtn}`}
-          type="submit"
-        >
-          {loadSpinner && (
-            <SvgWrapper
-              className={`${styles.spinner}`}
-              svgSrc="button-spinner"
-            />
-          )}
+        <div className={styles.footerSection}>
+          <button
+            className={`${styles.commonBtn} ${styles.btn} ${styles.modalBtn} ${styles.cancelButton}`}
+            type="submit"
+            onClick={() => {
+              if (exisitingBankRefundOptions.length > 0) {
+                setShowBeneficiaryAdditionPage(false);
+              }
+            }}
+          >
+            {t("resource.facets.cancel")}
+          </button>
+          <button
+            className={`${styles.commonBtn} ${styles.btn} ${styles.modalBtn}`}
+            type="submit"
+          >
+            {loadSpinner && (
+              <SvgWrapper
+                className={`${styles.spinner}`}
+                svgSrc="button-spinner"
+              />
+            )}
 
-          {!loadSpinner && <span>Add</span>}
-        </button>
+            {!loadSpinner && <span>{t("resource.common.continue")}</span>}
+          </button>
+        </div>
       </form>
     </div>
   );

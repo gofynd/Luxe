@@ -1,6 +1,7 @@
 import { useGlobalStore } from "fdk-core/utils";
 
 export const useThemeConfig = ({ fpi, page = "" }) => {
+  const { app_features } = useGlobalStore(fpi.getters.CONFIGURATION);
   const THEME = useGlobalStore(fpi.getters.THEME);
   const mode = THEME?.config?.list.find(
     (f) => f.name === THEME?.config?.current
@@ -16,11 +17,13 @@ export const useThemeConfig = ({ fpi, page = "" }) => {
       globalConfig,
       pageConfig,
       pallete: { ...(general_setting || {}), ...(advance_setting || {}) },
+      listingPrice: app_features?.common?.listing_price?.value || "range",
     };
   }
 
   return {
     globalConfig,
     pallete: { ...(general_setting || {}), ...(advance_setting || {}) },
+    listingPrice: app_features?.common?.listing_price?.value || "range",
   };
 };

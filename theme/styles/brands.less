@@ -22,30 +22,15 @@
   }
 
   &__breadcrumbs {
+    margin-bottom: 16px;
+    @media @desktop {
+      margin-bottom: 24px;
+    }
     span {
       color: @TextDisabled;
 
       &.active {
         color: @ButtonPrimary;
-      }
-    }
-
-    &.desktop {
-      display: none;
-
-      @media @desktop {
-        display: block;
-        margin-bottom: 24px;
-      }
-    }
-
-    &.mobile {
-      margin-top: 24px;
-      padding: 0px 16px;
-      text-align: center;
-
-      @media @desktop {
-        display: none;
       }
     }
   }
@@ -87,9 +72,12 @@
     border: none;
     position: fixed;
     top: 72px;
-    right: 50%;
+    inset-inline-end: 50%;
     z-index: 1;
     transform: translateX(50%);
+    [dir="rtl"] & {
+      transform: translateX(-50%);
+    }
     z-index: 1;
     & > .arrow-top-icon {
       fill: currentColor;
@@ -100,7 +88,7 @@
     @media @desktop {
       justify-content: center;
       top: unset;
-      right: 40px;
+      inset-inline-end: 40px;
       bottom: 40px;
       width: 40px;
       height: 40px;

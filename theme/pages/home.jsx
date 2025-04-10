@@ -1,22 +1,20 @@
 import React from "react";
 import { SectionRenderer } from "fdk-core/components";
 import { useGlobalStore } from "fdk-core/utils";
+import { useThemeConfig } from "../helper/hooks";
 import styles from "../styles/main.less";
 import Loader from "../components/loader/loader";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function Home({ numberOfSections, fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const page = useGlobalStore(fpi.getters.PAGE) || {};
-  const THEME = useGlobalStore(fpi.getters.THEME);
-  const mode = THEME?.config?.list.find(
-    (f) => f.name === THEME?.config?.current
-  );
-  console.log(page, ":page", THEME, ":theme");
-  const globalConfig = mode?.global_config?.custom?.props;
+  const { globalConfig } = useThemeConfig({ fpi });
   const { sections = [], error, isLoading } = page || {};
   if (error) {
     return (
       <>
-        <h1>Error Occured !</h1>
+        <h1>{t("resource.common.error_occurred")}</h1>
         <pre>{JSON.stringify(error, null, 4)}</pre>
       </>
     );

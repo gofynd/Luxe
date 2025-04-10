@@ -2,7 +2,7 @@
 
 &.pr-16 {
   @media @mobile {
-    padding-right: 16px;
+    padding-inline-end: 16px;
   }
 }
 
@@ -86,8 +86,8 @@
   }
   @media @mobile {
     --gap: 12px;
-    padding-left: 16px;
-    padding-right: var(--p-right-mob, 16px);
+    padding-inline-start: 16px;
+    padding-inline-end: var(--p-right-mob, 16px);
   }
 }
 .blog {
@@ -127,7 +127,7 @@
     }
     &__title {
       .text-line-clamp(8);
-      margin-bottom: 7px;
+      margin-bottom: 8px;
       @media @mobile {
         margin-bottom: 0px;
       }

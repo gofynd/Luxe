@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import OutsideClickHandler from "react-outside-click-handler";
 import styles from "./styles/dropdown.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import { useNavigate, useGlobalTranslation } from "fdk-core/utils";
 
 function Dropdown({ type, selectedOption, dropdownData }) {
+  const { t } = useGlobalTranslation("translation");
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,14 +16,11 @@ function Dropdown({ type, selectedOption, dropdownData }) {
   const replaceQueryParam = (key, value) => {
     const querParams = new URLSearchParams(location.search);
     querParams.set(key, value);
-    navigate({
-      pathname: "/profile/orders",
-      search: querParams.toString(),
-    });
+    navigate("/profile/orders" + (querParams?.toString() ? `?${querParams.toString()}` : ""));
     close();
     getOrderDataWithFilterQuery();
   };
-  const getOrderDataWithFilterQuery = () => {};
+  const getOrderDataWithFilterQuery = () => { };
   const replaceQuery = (option) => {
     switch (type) {
       case "time": {
@@ -42,7 +41,7 @@ function Dropdown({ type, selectedOption, dropdownData }) {
   return (
     <OutsideClickHandler onOutsideClick={() => setIsOpen(false)}>
       <div className={`${styles.selected}`} onClick={openDropdown}>
-        {selectedOption}
+        {selectedOption.startsWith(".resource") ? t(selectedOption) : selectedOption}
         <SvgWrapper svgSrc="arrowDropdownBlack" onBlur={close} />
         {isOpen && (
           <ul className={`${styles.menu}`}>
@@ -50,7 +49,7 @@ function Dropdown({ type, selectedOption, dropdownData }) {
               <li key={index} onClick={() => replaceQuery(option)}>
                 {!option.is_selected && <SvgWrapper svgSrc="regular" />}
                 {option.is_selected && <SvgWrapper svgSrc="radio-selected" />}
-                <span>{option.display}</span>
+                <span>{option?.display?.startsWith('resource.') ? t(option.display) : option.display}</span>
               </li>
             ))}
           </ul>

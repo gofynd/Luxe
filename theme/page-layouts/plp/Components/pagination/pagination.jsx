@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { FDKLink } from "fdk-core/components";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import styles from "./pagination.less";
 import useProductListing from "../../useProductListing";
 import { isRunningOnClient } from "../../../../helper/utils";
+import { FDKLink } from "fdk-core/components";
 
 const PAGES_TO_SHOW = 5;
 const PAGE_OFFSET = 2;
@@ -65,9 +65,8 @@ function Pagination({ value, fpi }) {
         className={`${!has_previous ? styles.disable : ""}`}
       >
         <SvgWrapper
-          className={`${!has_previous ? styles.disable : ""} ${
-            styles["arrow-icon"]
-          } ${styles["left-arrow"]}`}
+          className={`${!has_previous ? styles.disable : ""} ${styles["arrow-icon"]
+            } ${styles["left-arrow"]}`}
           svgSrc="arrow-down"
         />
       </FDKLink>
@@ -75,9 +74,8 @@ function Pagination({ value, fpi }) {
         {[...Array(getPagesButton()).keys()].map((index) => (
           <FDKLink
             key={index}
-            className={`${styles["page-btn"]} b1 ${
-              current === getStartPage() + index ? styles.active : ""
-            }`}
+            className={`${styles["page-btn"]} b1 ${current === getStartPage() + index ? styles.active : ""
+              }`}
             to={getPageUrl(getStartPage() + index)}
           >
             {getStartPage() + index}

@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import Slider from "react-slick";
-import { FDKLink } from "fdk-core/components";
-import { useGlobalStore, useFPI } from "fdk-core/utils";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
 import {
   useAccounts,
   useViewport,
@@ -11,20 +10,22 @@ import {
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import { FEATURED_COLLECTION } from "../queries/collectionsQuery";
 import styles from "../styles/sections/multi-collection-product-list.less";
-import ProductCard from "@gofynd/theme-template/components/product-card/product-card";
-import "@gofynd/theme-template/components/product-card/product-card.css";
-import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
-import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
-import Modal from "@gofynd/theme-template/components/core/modal/modal";
-import "@gofynd/theme-template/components/core/modal/modal.css";
-import AddToCart from "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart";
-import "@gofynd/theme-template/page-layouts/plp/Components/add-to-cart/add-to-cart.css";
-import SizeGuide from "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide";
-import "@gofynd/theme-template/page-layouts/plp/Components/size-guide/size-guide.css";
+import ProductCard from "fdk-react-templates/components/product-card/product-card";
+import "fdk-react-templates/components/product-card/product-card.css";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import "fdk-react-templates/components/core/fy-image/fy-image.css";
+import Modal from "fdk-react-templates/components/core/modal/modal";
+import "fdk-react-templates/components/core/modal/modal.css";
+import AddToCart from "fdk-react-templates/page-layouts/plp/Components/add-to-cart/add-to-cart";
+import "fdk-react-templates/page-layouts/plp/Components/add-to-cart/add-to-cart.css";
+import SizeGuide from "fdk-react-templates/page-layouts/plp/Components/size-guide/size-guide";
+import "fdk-react-templates/page-layouts/plp/Components/size-guide/size-guide.css";
 import { isRunningOnClient } from "../helper/utils";
 import useAddToCartModal from "../page-layouts/plp/useAddToCartModal";
+import { FDKLink } from "fdk-core/components";
 
 export function Component({ props = {}, blocks = [], globalConfig = {} }) {
+  const { t } = useGlobalTranslation("translation");
   const fpi = useFPI();
   const { isInternational } = useThemeFeature({ fpi });
   const {
@@ -125,7 +126,7 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
   }, [activeCollectionItems, per_row]);
 
   const dynamicStyles = {
-    paddingBottom: `${globalConfig?.section_margin_bottom}px`,
+    paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
   };
   const handleLinkChange = (index) => {
     setActiveLink(index);
@@ -184,17 +185,16 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
       <div style={dynamicStyles} className={`${styles.sectionWrapper} `}>
         {heading?.value && (
           <div
-            className={`${styles.titleBlock} ${
-              position?.value === "center" ? styles.moveCenter : ""
-            } ${viewAll?.value ? styles.isViewAllCta : ""}`}
+            className={`${styles.titleBlock} ${position?.value === "center" ? styles.moveCenter : ""
+              } ${viewAll?.value ? styles.isViewAllCta : ""}`}
           >
-            <h2>{heading.value}</h2>
+            <h2 className="fontHeader">{heading.value}</h2>
             {viewAll?.value && (
               <div className={styles.viewAllCta}>
                 <FDKLink
                   to={navigationsAndCollections?.[activeLink]?.link ?? ""}
                 >
-                  <span>View All</span>
+                  <span>{t("resource.facets.view_all")}</span>
                 </FDKLink>
               </div>
             )}
@@ -203,17 +203,15 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
 
         <div className={styles.navigationBlockWrapper}>
           <div
-            className={`${styles.navigationBlock} ${
-              position?.value === "center" ? styles.moveCenter : ""
-            }`}
+            className={`${styles.navigationBlock} ${position?.value === "center" ? styles.moveCenter : ""
+              }`}
           >
             {navigationsAndCollections.map((nav, index) =>
               nav.collection ? (
                 <button
                   key={index + nav.navigation}
-                  className={`${styles.navigation} ${
-                    activeLink === index ? styles.activeLink : ""
-                  }`}
+                  className={`${styles.navigation} ${activeLink === index ? styles.activeLink : ""
+                    }`}
                   onClick={() => handleLinkChange(index)}
                 >
                   {nav.iconImage && (
@@ -222,7 +220,7 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
                       src={nav.iconImage}
                       sources={[{ width: 40 }]}
                       defer={true}
-                      alt={`${nav.navigation} icon`}
+                      alt={`${nav.navigation} ${t("resource.section.product.icon_alt_text")}`}
                       showSkeleton={false}
                       isFixedAspectRatio={false}
                       isLazyLoaded={false}
@@ -234,9 +232,8 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
               ) : (
                 <FDKLink
                   key={index + nav.navigation}
-                  className={`${styles.navigation} ${
-                    activeLink === index ? styles.activeLink : ""
-                  }`}
+                  className={`${styles.navigation} ${activeLink === index ? styles.activeLink : ""
+                    }`}
                   to={nav.link ?? ""}
                 >
                   {nav.iconImage && (
@@ -245,7 +242,7 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
                       src={nav.iconImage}
                       sources={[{ width: 40 }]}
                       defer={true}
-                      alt={`${nav.navigation} icon`}
+                      alt={`${nav.navigation} ${t("resource.section.product.icon_alt_text")}`}
                       showSkeleton={false}
                       isFixedAspectRatio={false}
                       isLazyLoaded={false}
@@ -312,11 +309,10 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
             >
               <Slider
                 className={`
-                ${
-                  activeCollectionItems?.length <= per_row?.value
+                ${activeCollectionItems?.length <= per_row?.value
                     ? "no-nav"
                     : ""
-                } ${styles.customSlider}`}
+                  } ${styles.customSlider}`}
                 {...config}
               >
                 {activeCollectionItems?.map((product, index) => (
@@ -379,13 +375,13 @@ export function Component({ props = {}, blocks = [], globalConfig = {} }) {
 }
 
 export const settings = {
-  label: "Multi Collection Product List",
+  label: "t:resource.sections.multi_collection_product_list.multi_collection_product_list",
   props: [
     {
       type: "text",
       id: "heading",
       default: "",
-      label: "Heading",
+      label: "t:resource.common.heading",
     },
     {
       type: "range",
@@ -394,9 +390,9 @@ export const settings = {
       max: 6,
       step: 1,
       unit: "",
-      label: "Products per row",
+      label: "t:resource.sections.multi_collection_product_list.products_per_row",
       default: 4,
-      info: "Maximum products allowed per row",
+      info: "t:resource.sections.multi_collection_product_list.max_products_per_row",
     },
 
     {
@@ -405,63 +401,68 @@ export const settings = {
       options: [
         {
           value: "left",
-          text: "Left",
+          text: "t:resource.common.left",
         },
         {
           value: "center",
-          text: "Center",
+          text: "t:resource.common.center",
         },
       ],
       default: "left",
-      label: "Header Position",
+      label: "t:resource.sections.multi_collection_product_list.header_position",
     },
     {
       type: "checkbox",
       id: "viewAll",
       default: false,
-      label: "Show View All",
-      info: "Display View All",
+      label: "t:resource.sections.multi_collection_product_list.show_view_all",
+      info: "t:resource.sections.multi_collection_product_list.view_all_requires_heading",
     },
     {
       type: "checkbox",
       id: "show_wishlist_icon",
-      label: "Show Wish List Icon",
+      label: "t:resource.common.show_wish_list_icon",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_add_to_cart",
-      label: "Show Add to Cart",
+      label: "t:resource.common.show_add_to_cart",
+      info: "t:resource.common.not_applicable_international_websites",
       default: true,
     },
   ],
   blocks: [
     {
       type: "collection-item",
-      name: "Navigation",
+      name: "t:resource.common.navigation",
       props: [
+        {
+          type: "header",
+          value: "t:resource.sections.multi_collection_product_list.icon_or_navigation_name_mandatory",
+        },
         {
           type: "image_picker",
           id: "icon_image",
-          label: "Icon",
+          label: "t:resource.common.icon",
           default: "",
         },
         {
           type: "text",
           id: "navigation",
-          label: "Navigation Name",
+          label: "t:resource.sections.multi_collection_product_list.navigation_name",
           default: "",
         },
         {
           type: "collection",
           id: "collection",
-          label: "Collection",
-          info: "Select a collection to display its products",
+          label: "t:resource.sections.featured_collection.collection",
+          info: "t:resource.sections.featured_collection.select_collection_for_products",
         },
         {
           type: "url",
           id: "redirect_link",
-          label: "Button Link",
+          label: "t:resource.sections.featured_collection.button_link",
         },
       ],
     },
@@ -469,7 +470,7 @@ export const settings = {
   preset: {
     blocks: [
       {
-        name: "Navigation",
+        name: "t:resource.common.navigation",
       },
     ],
   },

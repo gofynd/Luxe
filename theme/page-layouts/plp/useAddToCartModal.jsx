@@ -1,14 +1,16 @@
 import React, { useCallback, useMemo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { GET_QUICK_VIEW_PRODUCT_DETAILS } from "../../queries/plpQuery";
 import { FEATURE_PRODUCT_SIZE_PRICE } from "../../queries/featureProductQuery";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import { LOCALITY } from "../../queries/logisticsQuery";
 import { ADD_TO_CART } from "../../queries/pdpQuery";
 import useCart, { fetchCartDetails } from "../cart/useCart";
 import { useSnackbar, useHyperlocalTat } from "../../helper/hooks";
+import { useNavigate } from "fdk-core/utils";
+import { isEmptyOrNull } from "../../helper/utils";
 
 const useAddToCartModal = ({ fpi, pageConfig }) => {
+  const { t } = useGlobalTranslation("translation");
   const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
   const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +24,6 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
   const [currentPincode, setCurrentPincode] = useState(
     (pincodeDetails?.localityValue ?? locationDetails?.pincode) || ""
   );
-  const [selectPincodeError, setSelectPincodeError] = useState(false);
   const [pincodeErrorMessage, setPincodeErrorMessage] = useState("");
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [sizeError, setSizeError] = useState(false);
@@ -51,7 +52,7 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
               selectedSize ||
               productData?.product?.sizes?.sizes[0]?.value,
           },
-          { skipStoreUpdate: true }
+          { skipStoreUpdate: false }
         );
 
         return productPriceData;
@@ -68,7 +69,7 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
         const productDetails = await fpi.executeGQL(
           GET_QUICK_VIEW_PRODUCT_DETAILS,
           { slug },
-          { skipStoreUpdate: true }
+          { skipStoreUpdate: false }
         );
 
         const productPriceData = await fetchProductPrice(
@@ -124,7 +125,6 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
       setIsLoading(false);
       setProductData({ product: {}, productPrice: {} });
       setSelectedSize("");
-      setSelectPincodeError(false);
       setPincodeErrorMessage("");
       setSlug("");
     }
@@ -147,13 +147,22 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
 
         if (localityData?.data?.locality) {
           const productPriceData = await fetchProductPrice();
+
+          if (isEmptyOrNull(productPriceData.data.productPrice)) {
+            setPincodeErrorMessage(
+              productPriceData?.errors?.[0]?.message ||
+              t("resource.product.product_not_serviceable")
+            );
+          } else {
+            setPincodeErrorMessage("");
+          }
           setProductData((prevData) => ({
             ...prevData,
             productPrice: productPriceData?.data?.productPrice || {},
           }));
         } else {
           setPincodeErrorMessage(
-            localityData?.errors?.[0]?.message || "Pincode verification failed"
+            localityData?.errors?.[0]?.message || t("resource.common.address.pincode_verification_failure")
           );
         }
       } catch (error) {
@@ -168,7 +177,7 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
   }, [navigate, productData]);
 
   const handleSetSlug = useCallback((code) => {
-    setSelectPincodeError(false);
+    setPincodeErrorMessage("");
     setCurrentPincode(code);
   }, []);
 
@@ -192,8 +201,9 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
         pageConfig?.mandatory_pincode &&
         (currentPincode?.length !== 6 || pincodeErrorMessage.length)
       ) {
-        setSelectPincodeError(true);
-        setPincodeErrorMessage("");
+        setPincodeErrorMessage(
+          t("resource.product.enter_valid_pincode")
+        );
         return;
       }
       if (
@@ -201,8 +211,9 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
         ((currentPincode?.length > 0 && currentPincode?.length < 6) ||
           pincodeErrorMessage.length)
       ) {
-        setSelectPincodeError(true);
-        setPincodeErrorMessage("");
+        setPincodeErrorMessage(
+          t("resource.product.enter_valid_pincode")
+        );
         return;
       }
       if (
@@ -210,7 +221,6 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
         (!currentPincode?.length || currentPincode?.length === 6) &&
         !pincodeErrorMessage.length
       ) {
-        setSelectPincodeError(false);
         setPincodeErrorMessage("");
       }
 
@@ -256,7 +266,7 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
           if (outRes?.data?.addItemsToCart?.success) {
             if (!buyNow) fetchCartDetails(fpi);
             showSnackbar(
-              outRes?.data?.addItemsToCart?.message || "Added to Cart",
+              outRes?.data?.addItemsToCart?.message || t("resource.common.add_to_cart_success"),
               "success"
             );
             if (buyNow) {
@@ -266,7 +276,7 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
             }
           } else {
             showSnackbar(
-              outRes?.data?.addItemsToCart?.message || "Failed to add to cart",
+              outRes?.data?.addItemsToCart?.message || t("resource.common.add_cart_failure"),
               "error"
             );
           }
@@ -293,7 +303,7 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
 
     if (selectedSize) {
       const cartItemsKey = Object.keys(cartItems || {});
-      const selectedItemKey = `${productData?.product?.uid}_${selectedSize}`;
+      const selectedItemKey = `${productData?.product?.uid}_${selectedSize}_${productData?.productPrice?.store?.uid}`;
 
       cartItemsKey.some((item, index) => {
         if (item === selectedItemKey) {
@@ -306,7 +316,7 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
     }
 
     return currentItemDetails;
-  }, [selectedSize, cartItems]);
+  }, [selectedSize, cartItems, productData]);
 
   const selectedSizeDetails = useMemo(() => {
     return productData?.product?.sizes?.sizes?.find(
@@ -332,13 +342,13 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
     if (!isMto) {
       if (totalQuantity > maxCartQuantity) {
         totalQuantity = maxCartQuantity;
-        showSnackbar(`Maximum quantity is ${maxCartQuantity}.`, "error");
+        showSnackbar(`${t("resource.product.max_quantity")} ${maxCartQuantity}.`, "error");
       }
 
       if (totalQuantity < minCartQuantity) {
         if (operation === "edit_item") {
           totalQuantity = minCartQuantity;
-          showSnackbar(`Minimum quantity is ${minCartQuantity}.`, "error");
+          showSnackbar(`${t("resource.product.min_quantity")} ${minCartQuantity}.`, "error");
         } else if (selectedItemDetails?.quantity > minCartQuantity) {
           totalQuantity = minCartQuantity;
         } else {
@@ -386,7 +396,6 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
       () => ({
         pincode: currentPincode,
         tat: productData?.productPrice?.delivery_promise,
-        selectPincodeError,
         pincodeErrorMessage,
         setCurrentPincode: handleSetSlug,
         checkPincode,
@@ -396,7 +405,6 @@ const useAddToCartModal = ({ fpi, pageConfig }) => {
       [
         currentPincode,
         productData?.productPrice,
-        selectPincodeError,
         pincodeErrorMessage,
         handleSetSlug,
         checkPincode,

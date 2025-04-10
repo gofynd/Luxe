@@ -113,3 +113,29 @@ export const VERIFY_OTP_FOR_BANK = `mutation verifyOtpAndAddBeneficiaryForBank(
     success
   }
 }`;
+
+export const SEND_OTP_FOR_REFUND_BANK_DETAILS = `mutation sendOtpForRefundBankDetails($orderId: String, $shipmentId: String) {
+  sendOtpForRefundBankDetails(orderId: $orderId, shipmentId: $shipmentId) {
+    message
+    request_id
+    resend_timer
+    success
+  }
+}
+`;
+
+export const VERIFY_OTP_FOR_REFUND_BANK_DETAILS = `mutation verifyOtpForRefundBankDetails(
+  $orderId: String
+  $shipmentId: String
+  $verifyOtpInput: VerifyOtpInput
+) {
+  verifyOtpForRefundBankDetails(
+    orderId: $orderId
+    shipmentId: $shipmentId
+    verifyOtpInput: $verifyOtpInput
+  ) {
+    success
+    message
+  }
+}
+`;

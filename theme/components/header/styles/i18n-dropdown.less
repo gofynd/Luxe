@@ -12,27 +12,37 @@
 
   &__selected {
     padding: 8px;
-    cursor: pointer;
     display: flex;
-    align-content: center;
-    justify-content: center;
     align-items: center;
+    gap: 4px;
+    color: @HeaderNav;
 
     @media @tablet {
-      padding: 4px !important;
+      width: 100%;
+      padding: 8px 4px;
     }
 
-    .selectedDropdown {
-      margin-left: 4px;
-
+    .locationLabel {
+      .b2(desktop);
+      color: @HeaderNav;
       @media @tablet {
-        display: none;
+        .b2(mobile);
+        color: @HeaderNav;
+      }
+      &.locationLabelMobile {
+        @media @desktop {
+          display: none;
+        }
       }
     }
-
-    .b2 {
-      color: @ButtonPrimary;
-      margin-left: 4px;
+    .angleDownIcon {
+      width: 24px;
+      height: 24px;
+      margin-left: auto;
+      fill: currentColor;
+      @media @desktop {
+        display: none;
+      }
     }
   }
 
@@ -136,6 +146,18 @@
       }
     }
   }
+
+  .inputLabel {
+    background: @DialogBackground;
+  }
+
+  .inputField {
+    height: 44px;
+    border-radius: @ButtonRadius;
+    input {
+      color: @TextBody;
+    }
+  }
 }
 
 .dropdownIcon {
@@ -148,7 +170,7 @@
 }
 
 .selectedDropdown {
-  margin-left: 4px;
+  margin-inline-start: 4px;
 
   @media @tablet {
     display: none;
@@ -159,7 +181,6 @@
 }
 
 .save_btn {
-  cursor: pointer;
   border: 1px solid @ButtonPrimary;
   color: @ButtonSecondary;
   background-color: @ButtonPrimary;
@@ -169,7 +190,7 @@
   line-height: 16px;
   width: 100%;
   padding: 16px;
-  border-radius: 8px;
+  border-radius: @ButtonRadius;
   margin-top: 16px;
 
   @media @desktop {
@@ -187,6 +208,9 @@
 .i18ModalBody {
   padding: 24px;
   overflow: unset;
+  @media @mobile {
+    padding: 16px;
+  }
 }
 
 .i18ModalContainer {
@@ -207,16 +231,16 @@
   }
 
   .description {
-    color: var(--Text-Body-Text, #3c3131);
-
-    /* Desktop/Body/B3 */
-    font-family: "Work Sans";
+    color: @TextBody;
     font-size: 16px;
-    font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 125% */
     letter-spacing: -0.32px;
     margin-top: 8px;
+    @media @mobile {
+      font-size: 12px;
+      line-height: 16px;
+    }
   }
 }
 
@@ -236,6 +260,9 @@
   }
 }
 
-.inputLabel {
-  background: @DialogBackground !important;
+.languageDisplayContainer {
+  margin-inline-start: 8px;
+  font-weight: 600;
+  color: #585555;
 }
+

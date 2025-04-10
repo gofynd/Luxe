@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import OutsideClickHandler from "react-outside-click-handler";
 import styles from "../styles/sections/featured-product.less";
+import OutsideClickHandler from "react-outside-click-handler";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import PdpImageGallery from "../page-layouts/pdp/components/image-gallery/image-gallery";
 import ProductVariants from "../page-layouts/pdp/components/product-variants/product-variants";
@@ -10,11 +10,13 @@ import {
   FEATURE_PRODUCT_DETAILS,
   FEATURE_PRODUCT_SIZE_PRICE,
 } from "../queries/featureProductQuery";
-import { useGlobalStore, useFPI } from "fdk-core/utils";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
 import useFeatureProductDetails from "../components/featured-product/useFeatureProductDetails";
 import { LOCALITY } from "../queries/logisticsQuery";
+import { currencyFormat } from "../helper/utils";
 
 export function Component({ props, globalConfig = {} }) {
+  const { t } = useGlobalTranslation("translation");
   const {
     size_selection_style,
     hide_single_size,
@@ -29,6 +31,8 @@ export function Component({ props, globalConfig = {} }) {
   const fpi = useFPI();
 
   const customValues = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
+  const i18nDetails = useGlobalStore(fpi.getters.i18N_DETAILS);
   const featureProductDetails = `featureProductDetails-${slug}`;
 
   const isMto =
@@ -48,7 +52,9 @@ export function Component({ props, globalConfig = {} }) {
     article_assignment,
   } = customValues?.[featureProductDetails]?.productPrice?.productPrice || {};
 
-  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedSize, setSelectedSize] = useState(
+    sizes?.sizes?.find((size) => size?.is_available)?.value || ""
+  );
   const [showSizeDropdown, setShowSizeDropdown] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [currentPincode, setCurrentPincode] = useState("");
@@ -84,16 +90,54 @@ export function Component({ props, globalConfig = {} }) {
   ];
 
   function getProductPrice(key) {
-    return `${price_per_piece?.currency_symbol || ""} ${price_per_piece?.[key] || ""}`;
+    if (selectedSize) {
+      if (price_per_piece?.[key]) {
+        return currencyFormat(
+          price_per_piece?.[key],
+          price_per_piece?.currency_symbol
+        );
+      }
+      const priceDataDefault = sizes?.price;
+
+      if (priceDataDefault) {
+        return priceDataDefault?.[key]?.min !== priceDataDefault?.[key]?.max
+          ? `${priceDataDefault?.[key]?.currency_symbol || ""} ${currencyFormat(priceDataDefault?.[key]?.min) || ""
+          } - ${currencyFormat(priceDataDefault?.[key]?.max) || ""}`
+          : currencyFormat(
+            priceDataDefault?.[key]?.max,
+            priceDataDefault?.[key]?.currency_symbol
+          ) || "";
+      }
+    }
   }
 
-  function onSizeSelection(size) {
+  async function onSizeSelection(size) {
     if (size?.quantity === 0 && !isMto) {
       return;
     }
     setSelectedSize(size?.value);
     setShowSizeDropdown(false);
+
+    const payload = {
+      slug,
+      pincode: "",
+      size: size?.value,
+    };
+
+    const productPrice = await fpi.executeGQL(
+      FEATURE_PRODUCT_SIZE_PRICE,
+      payload,
+      {
+        skipStoreUpdate: true,
+      }
+    );
+
+    fpi.custom.setValue(`featureProductDetails-${slug}`, {
+      ...customValues?.[featureProductDetails],
+      productPrice: productPrice?.data,
+    });
   }
+
   useEffect(() => {
     if (localStorage.getItem("pincode")) {
       setCurrentPincode(localStorage.getItem("pincode"));
@@ -111,15 +155,18 @@ export function Component({ props, globalConfig = {} }) {
           }
         );
         const { sizes } = productDetails?.data?.product;
+        const size = sizes?.sizes?.find((size) => size?.is_available)?.value;
         const payload = {
           slug,
           pincode: "",
-          size: sizes?.sizes[0]?.value,
+          size: selectedSize || size,
         };
         const productPrice = await fpi.executeGQL(
           FEATURE_PRODUCT_SIZE_PRICE,
           payload,
-          { skipStoreUpdate: true }
+          {
+            skipStoreUpdate: true,
+          }
         );
 
         return fpi.custom.setValue(`featureProductDetails-${slug}`, {
@@ -131,11 +178,16 @@ export function Component({ props, globalConfig = {} }) {
       }
     };
 
-    if (slug && !customValues?.[featureProductDetails]) {
+    if (slug) {
       fetchProductData();
     }
-  }, [slug]);
+  }, [slug, locationDetails?.pincode, i18nDetails?.currency?.code]);
 
+  useEffect(() => {
+    if (!selectedSize) {
+      setSelectedSize(sizes?.sizes?.find((size) => size?.is_available)?.value);
+    }
+  }, [sizes?.sizes]);
   const isSizeGuideAvailable = () => {
     const sizeChartHeader = sizes?.size_chart?.headers || {};
     return Object.keys(sizeChartHeader).length > 0 || sizes?.size_chart?.image;
@@ -160,7 +212,10 @@ export function Component({ props, globalConfig = {} }) {
         } else {
           localStorage?.removeItem("pincode");
           setPincodeErrorMessage(
-            res?.errors?.[0]?.message || "Pincode verification failed"
+            res?.errors?.[0]?.message ||
+            t(
+              "resource.common.address.pincode_verification_failure"
+            )
           );
         }
       });
@@ -169,7 +224,10 @@ export function Component({ props, globalConfig = {} }) {
   return (
     <div
       className={styles.featured_product_container}
-      style={{ paddingBottom: `${globalConfig?.section_margin_bottom}px` }}
+      style={{
+        paddingTop: `16px`,
+        paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
+      }}
     >
       <div className={styles["featured-products-header"]}>
         {Heading?.value && (
@@ -218,19 +276,19 @@ export function Component({ props, globalConfig = {} }) {
                   </h4>
                   {getProductPrice("marked") &&
                     getProductPrice("effective") !==
-                      getProductPrice("marked") && (
+                    getProductPrice("marked") && (
                       <span
                         className={`${styles.mrpLabel} ${styles["mrpLabel--marked"]}`}
                       >
-                        &nbsp;MRP:
+                        &nbsp;{t("resource.common_common_words.mrp")}
                       </span>
                     )}
                   {getProductPrice("effective") !==
                     getProductPrice("marked") && (
-                    <span className={styles["product__price--marked"]}>
-                      {getProductPrice("marked")}
-                    </span>
-                  )}
+                      <span className={styles["product__price--marked"]}>
+                        {getProductPrice("marked")}
+                      </span>
+                    )}
                   {sizes?.discount && (
                     <span className={styles["product__price--discount"]}>
                       {sizes?.discount}
@@ -270,7 +328,7 @@ export function Component({ props, globalConfig = {} }) {
                 </div>
               )}
               {/* ---------- Seller Details ---------- */}
-              {show_seller?.value && (
+              {show_seller?.value && seller?.name && (
                 <div className={`${styles.sellerInfo} ${styles.fontBody}`}>
                   <div className={`${styles.storeSeller} captionNormal`}>
                     <span className={styles.soldByLabel}>Seller :</span>
@@ -281,9 +339,7 @@ export function Component({ props, globalConfig = {} }) {
                           className={`captionSemiBold ${styles.otherSellers}`}
                         >
                           &nbsp;&&nbsp;
-                          {`${(seller?.count ?? 2) - 1} Other${
-                            seller?.count > 1 > 2 ? "s" : ""
-                          }`}
+                          {`${(seller?.count ?? 2) - 1} ${t(seller?.count > 1 ? 'resource.common.other_plural' : 'resource.common.other')}`}
                         </span>
                       )}
                     </div>
@@ -294,13 +350,14 @@ export function Component({ props, globalConfig = {} }) {
               <div className={styles.sizeContainer}>
                 {isSizeSelectionBlock && (
                   <div
-                    className={`${styles.sizeSelection} ${
-                      isSizeCollapsed ? styles["sizeSelection--collapse"] : ""
-                    }`}
+                    className={`${styles.sizeSelection} ${isSizeCollapsed ? styles["sizeSelection--collapse"] : ""
+                      }`}
                   >
                     <div>
                       <p className={`b2 ${styles.sizeSelection__label}`}>
-                        <span>Size :</span>
+                        <span>
+                          {t("resource.common.size")} :
+                        </span>
                       </p>
 
                       <div className={styles.sizeSelection__wrapper}>
@@ -308,17 +365,14 @@ export function Component({ props, globalConfig = {} }) {
                           <button
                             type="button"
                             key={`${size?.display}`}
-                            className={`b2 ${styles.sizeSelection__block} ${
-                              size.quantity === 0 &&
+                            className={`b2 ${styles.sizeSelection__block} ${size.quantity === 0 &&
                               !isMto &&
                               styles["sizeSelection__block--disable"]
-                            } ${
-                              (size?.quantity !== 0 || isMto) &&
+                              } ${(size?.quantity !== 0 || isMto) &&
                               styles["sizeSelection__block--selectable"]
-                            } ${
-                              selectedSize === size?.value &&
+                              } ${selectedSize === size?.value &&
                               styles["sizeSelection__block--selected"]
-                            } `}
+                              } `}
                             title={size?.value}
                             onClick={() => onSizeSelection(size)}
                           >
@@ -344,7 +398,11 @@ export function Component({ props, globalConfig = {} }) {
                       onClick={() => setShowSizeGuide(true)}
                       className={`${styles["product__size--guide"]} ${styles.buttonFont} ${styles.fontBody}`}
                     >
-                      <span>SIZE GUIDE</span>
+                      <span>
+                        {t(
+                          "resource.common.size_guide"
+                        )}
+                      </span>
                       <SvgWrapper svgSrc="scale" className={styles.scaleIcon} />
                     </button>
                   )}
@@ -362,16 +420,13 @@ export function Component({ props, globalConfig = {} }) {
               <div className={styles.sizeCartContainer}>
                 {size_selection_style?.value === "dropdown" && (
                   <div
-                    className={`${styles.sizeWrapper} ${
-                      isSizeCollapsed && styles["sizeWrapper--collapse"]
-                    }`}
+                    className={`${styles.sizeWrapper} ${isSizeCollapsed && styles["sizeWrapper--collapse"]
+                      }`}
                   >
                     <div
-                      className={` ${styles.sizeButton} ${
-                        styles.flexAlignCenter
-                      } ${styles.justifyBetween} ${styles.fontBody} ${
-                        sizes?.sizes?.length && styles.disabledButton
-                      }`}
+                      className={` ${styles.sizeButton} ${styles.flexAlignCenter
+                        } ${styles.justifyBetween} ${styles.fontBody} ${sizes?.sizes?.length && styles.disabledButton
+                        }`}
                       onClick={() => setShowSizeDropdown(!showSizeDropdown)}
                       disabled={!sizes?.sizes?.length}
                     >
@@ -379,19 +434,22 @@ export function Component({ props, globalConfig = {} }) {
                         className={`${styles.buttonFont} ${styles.selectedSize}`}
                         title={
                           selectedSize
-                            ? `Size : ${selectedSize}`
-                            : "SELECT SIZE"
+                            ? `${t("resource.common.size")} : ${selectedSize}`
+                            : t(
+                              "resource.common.select_size_caps"
+                            )
                         }
                       >
                         {selectedSize
-                          ? `Size : ${selectedSize}`
-                          : "SELECT SIZE"}
+                          ? `${t("resource.common.size")} : ${selectedSize}`
+                          : t(
+                            "resource.common.select_size_caps"
+                          )}
                       </p>
                       <SvgWrapper
                         svgSrc="arrow-down"
-                        className={`${styles.dropdownArrow} ${
-                          showSizeDropdown && styles.rotateArrow
-                        }`}
+                        className={`${styles.dropdownArrow} ${showSizeDropdown && styles.rotateArrow
+                          }`}
                       />
                     </div>
                     <OutsideClickHandler
@@ -409,14 +467,12 @@ export function Component({ props, globalConfig = {} }) {
                           <li
                             onClick={() => onSizeSelection(size)}
                             key={size?.value}
-                            className={`${
-                              selectedSize === size.display &&
+                            className={`${selectedSize === size.display &&
                               styles.selected_size
-                            } ${
-                              size.quantity === 0 && !isMto
+                              } ${size.quantity === 0 && !isMto
                                 ? styles.disabled_size
                                 : styles.selectable_size
-                            }`}
+                              }`}
                           >
                             {size.display}
                           </li>
@@ -428,9 +484,8 @@ export function Component({ props, globalConfig = {} }) {
 
                 {button_options?.includes("addtocart") && (
                   <div
-                    className={`${styles.cartWrapper} ${
-                      isSizeSelectionBlock && styles["cartWrapper--half-width"]
-                    }`}
+                    className={`${styles.cartWrapper} ${isSizeSelectionBlock && styles["cartWrapper--half-width"]
+                      }`}
                   >
                     {!disable_cart && (
                       <button
@@ -446,7 +501,9 @@ export function Component({ props, globalConfig = {} }) {
                         disabled={!slug}
                       >
                         <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
-                        ADD TO CART
+                        {t(
+                          "resource.common.add_to_cart"
+                        )}
                       </button>
                     )}
                   </div>
@@ -454,10 +511,9 @@ export function Component({ props, globalConfig = {} }) {
 
                 {button_options?.includes("buynow") && isSizeSelectionBlock && (
                   <div
-                    className={`${styles.actionBuyNow} ${
-                      button_options?.includes("addtocart") &&
+                    className={`${styles.actionBuyNow} ${button_options?.includes("addtocart") &&
                       styles["actionBuyNow--ml-12"]
-                    }`}
+                      }`}
                   >
                     {!disable_cart && (
                       <button
@@ -476,7 +532,7 @@ export function Component({ props, globalConfig = {} }) {
                           svgSrc="buyNow"
                           className={styles.buyNow__icon}
                         />
-                        BUY NOW
+                        {t("resource.common.buy_now_caps")}
                       </button>
                     )}
                   </div>
@@ -502,7 +558,7 @@ export function Component({ props, globalConfig = {} }) {
                         svgSrc="buyNow"
                         className={styles.buyNow__icon}
                       />
-                      BUY NOW
+                      {t("resource.common.buy_now_caps")}
                     </button>
                   )}
                 </div>
@@ -513,7 +569,7 @@ export function Component({ props, globalConfig = {} }) {
                 }}
                 className={styles["view-more"]}
               >
-                View more details
+                {t("resource.common.view_more_details")}
               </div>
             </div>
           </div>
@@ -535,67 +591,67 @@ export function Component({ props, globalConfig = {} }) {
   );
 }
 export const settings = {
-  label: "Featured Products",
+  label: "t:resource.sections.featured_products",
   props: [
     {
       type: "product",
-      name: "Product",
+      name: "t:resource.common.product",
       id: "product",
-      label: "Select a Product",
-      info: "Product Item to be displayed",
+      label: "t:resource.common.select_a_product",
+      info: "t:resource.common.product_item_display",
     },
     {
       type: "text",
       id: "Heading",
       default: "",
-      label: "Heading",
-      info: "Heading text of the section",
+      label: "t:resource.common.heading",
+      info: "t:resource.common.section_heading_text",
     },
     {
       type: "text",
       id: "description",
       default: "",
-      label: "Description",
-      info: "Description text of the section",
+      label: "t:resource.common.description",
+      info: "t:resource.common.section_description_text",
     },
     {
       type: "checkbox",
       id: "show_seller",
-      label: "Show Seller",
+      label: "t:resource.common.show_seller",
       default: true,
     },
     {
       type: "checkbox",
       id: "show_size_guide",
-      label: "Show Size Guide",
+      label: "t:resource.common.show_size_guide",
       default: true,
     },
     {
       type: "radio",
       id: "size_selection_style",
-      label: "Size selection style",
+      label: "t:resource.common.size_selection_style",
       default: "dropdown",
       options: [
         {
           value: "dropdown",
-          text: "Dropdown style",
+          text: "t:resource.common.dropdown_style",
         },
         {
           value: "block",
-          text: "Block style",
+          text: "t:resource.common.block_style",
         },
       ],
     },
     {
       type: "checkbox",
       id: "hide_single_size",
-      label: "Hide single size",
+      label: "t:resource.common.hide_single_size",
       default: false,
     },
     {
       type: "text",
       id: "tax_label",
-      label: "Price tax label text",
+      label: "t:resource.common.price_tax_label_text",
       default: "Price inclusive of all tax",
     },
   ],
@@ -619,7 +675,7 @@ Component.serverFetch = async ({ fpi, props }) => {
     const payload = {
       slug,
       pincode: "",
-      size: sizes?.sizes[0]?.value,
+      size: sizes?.sizes?.find((size) => size?.is_available)?.value,
     };
     const productPrice = await fpi.executeGQL(
       FEATURE_PRODUCT_SIZE_PRICE,

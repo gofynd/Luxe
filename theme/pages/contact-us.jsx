@@ -1,15 +1,16 @@
 import React from "react";
+import useHeader from "../components/header/useHeader";
+import { CREATE_TICKET } from "../queries/supportQuery";
+import { useSnackbar } from "../helper/hooks";
 import Base64 from "crypto-js/enc-base64";
 import Utf8 from "crypto-js/enc-utf8";
-import { useGlobalStore } from "fdk-core/utils";
-import ContactPage from "@gofynd/theme-template/pages/contact-us/contact-us";
-import { useSnackbar } from "../helper/hooks";
-import { CREATE_TICKET } from "../queries/supportQuery";
-import useHeader from "../components/header/useHeader";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
+import ContactPage from "fdk-react-templates/pages/contact-us/contact-us";
 import SocailMedia from "../components/socail-media/socail-media";
-import "@gofynd/theme-template/pages/contact-us/contact-us.css";
+import "fdk-react-templates/pages/contact-us/contact-us.css";
 
 function ContactUs({ fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const { contactInfo, supportInfo, appInfo } = useHeader(fpi);
   const THEME = useGlobalStore(fpi.getters.THEME);
   const mode = THEME?.config?.list.find(
@@ -61,12 +62,12 @@ function ContactUs({ fpi }) {
       fpi
         .executeGQL(CREATE_TICKET, values)
         .then(() => {
-          showSnackbar("Ticket created successfully", "success");
+          showSnackbar(t("resource.common.ticket_success"), "success");
         })
-        .catch(() => showSnackbar("Something went wrong", "error"));
+        .catch(() => showSnackbar(t("resource.common.error_message"), "error"));
     } catch (error) {
       console.error("Error submitting form:", error);
-      showSnackbar("An error occurred while submitting the form", "error");
+      showSnackbar(t("resource.common.error_occurred_submitting_form"), "error");
     }
   };
 
@@ -89,20 +90,20 @@ export const settings = JSON.stringify({
       options: [
         {
           value: "left",
-          text: "Left",
+          text: "t:resource.common.left",
         },
         {
           value: "right",
-          text: "Right",
+          text: "t:resource.common.right",
         },
       ],
       default: "right",
-      label: "Banner alignment",
+      label: "t:resource.sections.contact_us.banner_alignment"
     },
     {
       type: "image_picker",
       id: "image_desktop",
-      label: "Upload banner",
+      label: "t:resource.sections.contact_us.upload_banner",
       default: "",
       options: {
         aspect_ratio: "3:4",
@@ -116,43 +117,43 @@ export const settings = JSON.stringify({
       max: 100,
       step: 1,
       unit: "%",
-      label: "Overlay Banner opacity",
+      label: "t:resource.sections.contact_us.overlay_banner_opacity",
       default: 30,
     },
     {
       type: "checkbox",
       id: "show_address",
       default: true,
-      label: "Address",
-      info: "Show Address",
+      label: "t:resource.sections.contact_us.address",
+      info: "t:resource.sections.contact_us.show_address",
     },
     {
       type: "checkbox",
       id: "show_phone",
       default: true,
-      label: "Phone",
-      info: "Show Phone",
+      label: "t:resource.sections.contact_us.phone",
+      info: "t:resource.sections.contact_us.show_phone",
     },
     {
       type: "checkbox",
       id: "show_email",
       default: true,
-      label: "Email",
-      info: "Show Email",
+      label: "t:resource.sections.contact_us.email",
+      info: "t:resource.sections.contact_us.show_email",
     },
     {
       type: "checkbox",
       id: "show_icons",
       default: true,
-      label: "Social media icons",
-      info: "Show Icons",
+      label: "t:resource.sections.contact_us.social_media_icons",
+      info: "t:resource.sections.contact_us.show_icons",
     },
     {
       type: "checkbox",
       id: "show_working_hours",
       default: true,
-      label: "Working Hours",
-      info: "Show Working Hours",
+      label: "t:resource.sections.contact_us.working_hours",
+      info: "t:resource.sections.contact_us.show_working_hours",
     },
   ],
 });

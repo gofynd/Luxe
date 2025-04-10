@@ -98,6 +98,11 @@ export const COLLECTION = `query collection(
         }
       }
     }
+    seo {
+        title
+        description
+        canonical_url
+    }
   }
 }
 `;
@@ -150,6 +155,14 @@ export const COLLECTION_ITEMS = `query collectionItems(
       brand {
         name
       }
+      action {
+        type
+        page {
+          params
+          query
+          type
+        }
+      }  
       price {
         effective {
             currency_code

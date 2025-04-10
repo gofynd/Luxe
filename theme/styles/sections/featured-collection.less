@@ -91,8 +91,8 @@
   padding: 7px 15px;
   text-align: center;
   bottom: 12px;
-  left: 12px;
-  right: 12px;
+  inset-inline-start: 12px;
+  inset-inline-end: 12px;
   margin: 0 auto;
 
   //   width: calc(100% - 24px);
@@ -158,6 +158,10 @@
   }
   @media @desktop {
     margin-top: 64px;
+
+    &.lessGap {
+      margin-top: 24px;
+    }
   }
 }
 
@@ -187,14 +191,14 @@
   // min-height: 370px;
   @media @mobile {
     padding: 0;
-    padding-left: 10px;
+    padding-inline-start: 10px;
     // min-height: 420px;
   }
   :global {
     .slick-list {
-      padding-left: 5px !important;
+      padding-inline-start: 5px !important;
       @media @mobile {
-        padding-left: 0 !important;
+        padding-inline-start: 0 !important;
       }
     }
     .slick-slider:not(.no-nav) {
@@ -222,14 +226,15 @@
       width: 100%;
     }
   }
-  .customNextBtn {
+  .customNextBtn,
+  .customPrevBtn {
     @media @tablet {
       display: none;
     }
   }
   .slideWrapBanner {
     width: 50%;
-    padding-left: 22px;
+    padding-inline-start: 22px;
 
     @media @tablet {
       width: 100vw;
@@ -246,12 +251,13 @@
   }
 }
 
-.customNextBtn {
+.customNextBtn,
+.customPrevBtn {
   width: 48px;
   height: 48px;
   position: absolute;
   top: 45%;
-  right: 4rem;
+  inset-inline-end: 4rem;
   transform: translateY(-50%);
   cursor: pointer;
   display: flex;
@@ -262,4 +268,12 @@
   svg > path {
     stroke: @TextHeading;
   }
+}
+.customNextBtn {
+  inset-inline-end: 4rem;
+}
+
+.customPrevBtn {
+  inset-inline-start: 27px;
+  transform: translateY(-50%) rotate(180deg);
 }

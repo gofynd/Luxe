@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FDKLink } from "fdk-core/components";
-import { convertActionToUrl } from "@gofynd/fdk-client-javascript/sdk/common/Utility";
 import styles from "./styles/mega-menu.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import { useParams } from "react-router-dom";
 
 function MegaMenu({ headerNavigation }) {
+  const { locale } = useParams();
   const [searchQuery, setSarchQuery] = useState("");
   const l2Categories = useRef([]);
   const l2Category = useRef([]);
@@ -12,7 +13,7 @@ function MegaMenu({ headerNavigation }) {
 
   useEffect(() => {
     setNavWidths();
-    return () => {};
+    return () => { };
   }, []);
 
   const getPreciseOffsetWidth = (element) => {
@@ -71,10 +72,10 @@ function MegaMenu({ headerNavigation }) {
 
       const toLeft = getToLeftPx(l2Child);
       if (toLeft) {
-        l2Child.style.left = "auto";
-        l2Child.style.right = "0";
+        l2Child.style.insetInlineStart = "auto";
+        l2Child.style.insetInlineEnd = "0";
       } else {
-        l2Child.style.left = "0";
+        l2Child.style.insetInlineStart = "0";
       }
     });
   };
@@ -99,7 +100,7 @@ function MegaMenu({ headerNavigation }) {
             <div link={menu.link} className={`${styles.navigationItem}`}>
               <div className={`${styles.l1Category}`}>
                 <h5 className={`${styles.l1CategoryHeading}`}>
-                  <FDKLink to={convertActionToUrl(menu?.action)}>
+                  <FDKLink action={menu?.action}>
                     {menu.display}
                   </FDKLink>
                 </h5>
@@ -129,7 +130,7 @@ function MegaMenu({ headerNavigation }) {
                       key={l2index}
                     >
                       <FDKLink
-                        to={convertActionToUrl(l2Menu?.action)}
+                        action={l2Menu?.action}
                         className={`${styles.l2CategoryHeading}`}
                       >
                         <div className={`${styles.l2CategoryItem}`}>
@@ -141,7 +142,7 @@ function MegaMenu({ headerNavigation }) {
                           {l2Menu?.sub_navigation.map((l3Menu, l3index) => (
                             <FDKLink
                               key={l3index}
-                              to={convertActionToUrl(l3Menu?.action)}
+                              action={l3Menu?.action}
                             >
                               <div className={`${styles.l3CategoryItem}`}>
                                 {l3Menu.display}

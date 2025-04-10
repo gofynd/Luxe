@@ -4,10 +4,12 @@ import {
   detectMobileWidth,
   currencyFormat,
   getProductImgAspectRatio,
+  formatLocale,
 } from "../../helper/utils";
 import FyImage from "../core/fy-image/fy-image";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 import styles from "./product-card.less";
+import { useGlobalTranslation, useGlobalStore, useFPI } from "fdk-core/utils";
 
 function ProductCard({
   product,
@@ -20,6 +22,10 @@ function ProductCard({
   customClass = [],
   getReviewRatingData,
 }) {
+  const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
+  const { t } = useGlobalTranslation("translation");
   const [disable, setDisable] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
@@ -47,22 +53,24 @@ function ProductCard({
 
     switch (listingPriceConfig) {
       case "min":
-        price = currencyFormat(priceDetails.min, priceDetails.currency_symbol);
+        price = currencyFormat(priceDetails.min, priceDetails.currency_symbol, formatLocale(locale, countryCode, true));
         break;
       case "max":
-        price = currencyFormat(priceDetails.max, priceDetails.currency_symbol);
+        price = currencyFormat(priceDetails.max, priceDetails.currency_symbol, formatLocale(locale, countryCode, true));
         break;
       case "range":
         price =
           priceDetails.min !== priceDetails.max
             ? `${currencyFormat(
-                priceDetails.min,
-                priceDetails.currency_symbol
-              )} - ${currencyFormat(
-                priceDetails.max,
-                priceDetails.currency_symbol
-              )}`
-            : currencyFormat(priceDetails.min, priceDetails.currency_symbol);
+              priceDetails.min,
+              priceDetails.currency_symbol,
+              formatLocale(locale, countryCode, true)
+            )} - ${currencyFormat(
+              priceDetails.max,
+              priceDetails.currency_symbol,
+              formatLocale(locale, countryCode, true)
+            )}`
+            : currencyFormat(priceDetails.min, priceDetails.currency_symbol, formatLocale(locale, countryCode, true));
         break;
       default:
         break;
@@ -130,7 +138,7 @@ function ProductCard({
       return (
         <div className={`${styles.badge} ${styles.outOfStock}`}>
           <span className={`${styles.text} ${styles.fontBody} captionNormal`}>
-            Out of stock
+            {t("resource.common.out_of_stock")}
           </span>
         </div>
       );
@@ -150,7 +158,7 @@ function ProductCard({
       return (
         <div className={`${styles.badge} ${styles.sale}`}>
           <span className={`${styles.text} ${styles.fontBody} captionNormal`}>
-            Sale
+            {t("resource.common.sale")}
           </span>
         </div>
       );
@@ -161,11 +169,9 @@ function ProductCard({
 
   return (
     <div
-      className={`${styles.productCard} ${
-        !product.sellable ? styles.disableCursor : ""
-      } ${styles[customClass[0]]} ${styles[customClass[1]]} ${
-        styles[customClass[2]]
-      }`}
+      className={`${styles.productCard} ${!product.sellable ? styles.disableCursor : ""
+        } ${styles[customClass[0]]} ${styles[customClass[1]]} ${styles[customClass[2]]
+        }`}
     >
       <div className={styles.imageContainer}>
         {!isMobile && hoverImageUrl && (
@@ -197,9 +203,8 @@ function ProductCard({
           // }
           >
             <SvgWrapper
-              className={`${styles.icon} ${styles.wishlistIcon} ${
-                product.follow ? styles.active : ""
-              }`}
+              className={`${styles.icon} ${styles.wishlistIcon} ${product.follow ? styles.active : ""
+                }`}
               svgSrc="wishlist-plp"
             />
           </div>

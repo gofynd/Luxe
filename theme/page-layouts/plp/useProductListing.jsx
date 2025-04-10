@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { useGlobalStore } from "fdk-core/utils";
+import { useGlobalStore, useGlobalTranslation } from "fdk-core/utils";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAccounts, useWishlist } from "../../helper/hooks";
 import useSortModal from "./useSortModal";
 import useFilterModal from "./useFilterModal";
 import { PLP_PRODUCTS } from "../../queries/plpQuery";
@@ -11,27 +10,34 @@ import {
 } from "../../helper/utils";
 import placeholder from "../../assets/images/placeholder3x4.png";
 import useAddToCartModal from "./useAddToCartModal";
-import { useThemeConfig, useThemeFeature } from "../../helper/hooks";
+import {
+  useAccounts,
+  useWishlist,
+  useThemeConfig,
+  useThemeFeature,
+} from "../../helper/hooks";
+import useInternational from "../../components/header/useInternational";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
 const PAGE_OFFSET = 2;
 
 const useProductListing = ({ fpi }) => {
+  const { t } = useGlobalTranslation("translation");
   const location = useLocation();
   const navigate = useNavigate();
-  const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
-  const listingPrice =
-    CONFIGURATION?.app_features?.common?.listing_price?.value || "range";
+  const { i18nDetails, defaultCurrency } = useInternational({
+    fpi,
+  });
 
-  const { globalConfig, pageConfig } = useThemeConfig({
+  const { globalConfig, pageConfig, listingPrice } = useThemeConfig({
     fpi,
     page: "product-listing",
   });
   const { isInternational } = useThemeFeature({ fpi });
 
-  const productsListData = useGlobalStore(fpi?.getters?.PRODUCTS);
-  const { isPlpSsrFetched } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const { isPlpSsrFetched, customProductList: productsListData } =
+    useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
   const locationDetails = useGlobalStore(fpi?.getters?.LOCATION_DETAILS);
   const pincodeDetails = useGlobalStore(fpi?.getters?.PINCODE_DETAILS);
 
@@ -51,8 +57,10 @@ const useProductListing = ({ fpi }) => {
   );
   const [isResetFilterDisable, setIsResetFilterDisable] = useState(false);
 
+  const isAlgoliaEnabled = globalConfig?.algolia_enabled;
+
   const breadcrumb = useMemo(
-    () => [{ label: "Home", link: "/" }, { label: "Products" }],
+    () => [{ label: t("resource.common.breadcrumb.home"), link: "/" }, { label: t("resource.common.breadcrumb.products") }],
     []
   );
 
@@ -90,8 +98,12 @@ const useProductListing = ({ fpi }) => {
         search: searchParams?.get("q") || undefined,
       };
 
-      if (pageConfig?.loading_options === "pagination")
-        payload.pageNo = pageNo || 1;
+      const loadingOptions =
+        pageConfig?.loading_options === undefined
+          ? "pagination"
+          : pageConfig?.loading_options;
+
+      if (loadingOptions === "pagination") payload.pageNo = pageNo || 1;
 
       fetchProducts(payload);
 
@@ -103,25 +115,119 @@ const useProductListing = ({ fpi }) => {
     }
   }, [location?.search, pincode, locationDetails]);
 
+  const convertQueryParamsForAlgolia = () => {
+    if (typeof window === "undefined") return "";
+    const params = new URLSearchParams(location?.search);
+    const filterParams = [];
+
+    const skipKeys = new Set(["sort_on", "siteTheme", "page_no", "q"]);
+
+    params.forEach((value, key) => {
+      if (skipKeys.has(key)) return;
+
+      const decodedValue = decodeURIComponent(value);
+
+      // Check if the key already exists in the filterParams
+      const existingParam = filterParams.find((param) =>
+        param.startsWith(`${key}:`)
+      );
+
+      if (existingParam) {
+        // If the key already exists, append the new value using "||"
+        const updatedParam = `${existingParam}||${decodedValue}`;
+        filterParams[filterParams.indexOf(existingParam)] = updatedParam;
+      } else {
+        // Otherwise, add the key-value pair
+        filterParams.push(`${key}:${decodedValue}`);
+      }
+    });
+
+    // Join all the filters with ":::"
+    return filterParams.join(":::");
+  };
+
   const fetchProducts = (payload, append = false) => {
     setApiLoading(true);
 
-    fpi
-      .executeGQL(PLP_PRODUCTS, payload)
-      .then((res) => {
-        if (append) {
-          setProductList((prevState) => {
-            return prevState.concat(res?.data?.products?.items || []);
-          });
-        } else {
-          setProductList(res?.data?.products?.items || []);
-        }
-        setApiLoading(false);
+    if (isAlgoliaEnabled) {
+      const BASE_URL = `${window.location.origin}/ext/algolia/application/api/v1.0/products`;
+
+      const url = new URL(BASE_URL);
+      url.searchParams.append(
+        "page_id",
+        payload?.pageNo === 1 || !payload?.pageNo ? "*" : payload?.pageNo - 1
+      );
+      url.searchParams.append("page_size", payload?.first);
+
+      const filterQuery = convertQueryParamsForAlgolia();
+
+      if (payload?.sortOn) {
+        url.searchParams.append("sort_on", payload?.sortOn);
+      }
+      if (filterQuery) {
+        url.searchParams.append("f", filterQuery);
+      }
+      if (payload?.search) {
+        url.searchParams.append("q", payload?.search);
+      }
+
+      fetch(url, {
+        headers: {
+          "x-location-detail": JSON.stringify({
+            country_iso_code: i18nDetails?.countryCode || "IN",
+          }),
+          "x-currency-code":
+            i18nDetails?.currency?.code || defaultCurrency?.code,
+        },
       })
-      .finally(() => {
-        setApiLoading(false);
-        setIsPageLoading(false);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          const productDataNormalization = data.items?.map((item) => ({
+            ...item,
+            media: item.medias,
+          }));
+
+          data.page.current = payload?.pageNo;
+
+          const productList = {
+            filters: data?.filters,
+            items: productDataNormalization,
+            page: data?.page,
+            sort_on: data?.sort_on,
+          };
+          setApiLoading(false);
+          fpi.custom.setValue("customProductList", productList);
+          if (append) {
+            setProductList((prevState) => {
+              return prevState.concat(productList?.items || []);
+            });
+          } else {
+            setProductList(productList?.items || []);
+          }
+        })
+        .finally(() => {
+          setApiLoading(false);
+          setIsPageLoading(false);
+        });
+    } else {
+      fpi
+        .executeGQL(PLP_PRODUCTS, payload, { skipStoreUpdate: false })
+        .then((res) => {
+          if (append) {
+            setProductList((prevState) => {
+              return prevState.concat(res?.data?.products?.items || []);
+            });
+          } else {
+            setProductList(res?.data?.products?.items || []);
+          }
+          fpi.custom.setValue("customProductList", res?.data?.products);
+          setApiLoading(false);
+        })
+        .finally(() => {
+          setApiLoading(false);
+          setIsPageLoading(false);
+        });
+    }
   };
 
   const handleLoadMoreProducts = () => {
@@ -134,6 +240,7 @@ const useProductListing = ({ fpi }) => {
       first: PAGE_SIZE,
       filterQuery: appendDelimiter(searchParams?.toString()) || undefined,
       sortOn: searchParams?.get("sort_on") || undefined,
+      search: searchParams?.get("q") || undefined,
     };
     fetchProducts(payload, true);
   };
@@ -162,17 +269,15 @@ const useProductListing = ({ fpi }) => {
     const { value, is_selected } = item;
 
     if (kind === "range") {
-      searchParams?.set(name, value);
+      if (value) searchParams?.set(name, value);
+      else searchParams?.delete(name);
     } else if (!searchParams?.has(name, value) && !is_selected) {
       searchParams?.append(name, value);
     } else {
       searchParams?.delete(name, value);
     }
     searchParams?.delete("page_no");
-    navigate?.({
-      pathname: location?.pathname,
-      search: searchParams?.toString(),
-    });
+    navigate?.(location?.pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""));
   };
 
   const handleSortUpdate = (value) => {
@@ -185,10 +290,7 @@ const useProductListing = ({ fpi }) => {
       searchParams?.delete("sort_on");
     }
     searchParams?.delete("page_no");
-    navigate?.({
-      pathname: location?.pathname,
-      search: searchParams?.toString(),
-    });
+    navigate?.(location?.pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""));
   };
 
   function resetFilters() {
@@ -199,10 +301,7 @@ const useProductListing = ({ fpi }) => {
       searchParams?.delete(filter.key.name);
     });
     searchParams?.delete("page_no");
-    navigate?.({
-      pathname: location?.pathname,
-      search: searchParams?.toString(),
-    });
+    navigate?.(location?.pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""));
   }
 
   const getPageUrl = (pageNo) => {
@@ -219,11 +318,11 @@ const useProductListing = ({ fpi }) => {
 
     if (index <= 1) {
       return 1;
-    }
-    if (index > lastIndex) {
+    } else if (index > lastIndex) {
       return lastIndex;
+    } else {
+      return index;
     }
-    return index;
   };
 
   const paginationProps = useMemo(() => {
@@ -341,7 +440,7 @@ const useProductListing = ({ fpi }) => {
     filterList,
     selectedFilters,
     sortList: sortOn,
-    productList: productList || items,
+    productList: productList || items || [],
     columnCount,
     isProductOpenInNewTab: pageConfig?.in_new_tab,
     isBrand: !pageConfig?.hide_brand,

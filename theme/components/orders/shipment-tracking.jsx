@@ -1,7 +1,14 @@
 import React, { useState } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import styles from "./styles/shipment-tracking.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import {
+  useGlobalTranslation,
+  useNavigate,
+  useGlobalStore,
+  useFPI
+} from "fdk-core/utils";
+import { formatLocale } from "../../helper/utils";
 
 function ShipmentTracking({
   tracking,
@@ -9,6 +16,10 @@ function ShipmentTracking({
   changeinit,
   invoiceDetails,
 }) {
+  const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
+  const { t } = useGlobalTranslation("translation");
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
@@ -34,7 +45,7 @@ function ShipmentTracking({
     };
     // Convert the UTC date and time to the desired format
     const formattedDate = utcDate
-      .toLocaleString("en-US", options)
+      .toLocaleString(formatLocale(locale, countryCode), options)
       .replace(" at ", ", ");
     return formattedDate;
   };
@@ -53,20 +64,22 @@ function ShipmentTracking({
     }
     if (shipmentInfo?.track_url) {
       arrLinks.push({
-        text: "TRACK",
+        text: t("resource.common.track"),
         link: shipmentInfo?.track_url ? shipmentInfo?.track_url : "",
       });
     }
     if (shipmentInfo?.need_help_url) {
       arrLinks.push({
         type: "internal",
-        text: "NEED HELP",
+        text: t("resource.common.need_help"),
         link: "/faq/" || shipmentInfo?.need_help_url,
       });
     }
     if (invoiceDetails?.success) {
       arrLinks.push({
-        text: "DOWNLOAD INVOICE",
+        text: t(
+          "resource.common.download_invoice"
+        ),
         link: invoiceDetails?.presigned_url,
       });
     }
@@ -74,7 +87,9 @@ function ShipmentTracking({
   };
 
   const updateType = () => {
-    return shipmentInfo?.can_return ? "RETURN" : "CANCEL";
+    return shipmentInfo?.can_return
+      ? t("resource.facets.return_caps")
+      : t("resource.facets.cancel_caps");
   };
   const update = (item) => {
     if (
@@ -99,11 +114,13 @@ function ShipmentTracking({
         <div className={`${styles.status}`}>
           <div>
             <div className={`${styles.title} ${styles.boldsm}`}>
-              Shipment: {shipmentInfo?.shipment_id}
+              {t("resource.common.shipment")}:{" "}
+              {shipmentInfo?.shipment_id}
             </div>
             {shipmentInfo?.awb_no && (
               <div className={`${styles.awbText} ${styles.lightxxs}`}>
-                AWB: {shipmentInfo?.awb_no}
+                {t("resource.common.awb")}:{" "}
+                {shipmentInfo?.awb_no}
               </div>
             )}
           </div>
@@ -111,43 +128,47 @@ function ShipmentTracking({
         <div>
           {tracking?.map((item, index) => (
             <div
-              className={`${styles.trackItem} ${item?.is_current || item?.is_passed ? styles.title : ""} ${
-                item.status === "In Transit" ? styles.detailedTracking : ""
-              }`}
+              className={`${styles.trackItem} ${item?.is_current || item?.is_passed ? styles.title : ""} ${item.status === "In Transit" ? styles.detailedTracking : ""
+                }`}
             >
               {item?.status === "In Transit" &&
                 (item?.is_current.toString() || item?.is_passed.toString()) && (
                   <div className={`${styles.inTransitItem}`}>
-                    <div className={`${styles.trackingDetails}`}>
-                      <div>
-                        <SvgWrapper svgSrc="tick-black-active" />
-                      </div>
-                      <div className={`${styles.trackInfo}`}>
-                        <div className={`${styles.boldsm}`}>{item?.status}</div>
-                        {item.time && (
-                          <div className={`${styles.time} ${styles.lightxxs}`}>
-                            {getTime(item?.time)}
+                    <>
+                      <div className={`${styles.trackingDetails}`}>
+                        <div>
+                          <SvgWrapper svgSrc="tick-black-active" />
+                        </div>
+                        <div className={`${styles.trackInfo}`}>
+                          <div className={`${styles.boldsm}`}>
+                            {item?.status}
                           </div>
-                        )}
+                          {item.time && (
+                            <div
+                              className={`${styles.time} ${styles.lightxxs}`}
+                            >
+                              {getTime(item?.time)}
+                            </div>
+                          )}
+                        </div>
+                        {!(
+                          (item.is_current || item.is_passed) &&
+                          showDetailedTracking
+                        ) && (
+                            <SvgWrapper
+                              className={`${styles.dropdownaArow}`}
+                              svgSrc="dropdown-arrow"
+                            />
+                          )}
+                        {(item.is_current || item.is_passed) &&
+                          showDetailedTracking && (
+                            <SvgWrapper
+                              className={`${styles.dropdownaArow}`}
+                              svgSrc="arrow-top-black"
+                            />
+                          )}
                       </div>
-                      {!(
-                        (item.is_current || item.is_passed) &&
-                        showDetailedTracking
-                      ) && (
-                        <SvgWrapper
-                          className={`${styles.dropdownaArow}`}
-                          svgSrc="dropdown-arrow"
-                        />
-                      )}
-                      {(item.is_current || item.is_passed) &&
-                        showDetailedTracking && (
-                          <SvgWrapper
-                            className={`${styles.dropdownaArow}`}
-                            svgSrc="arrow-top-black"
-                          />
-                        )}
-                    </div>
-                    {/* <ukt-accordion>
+                      {/* <ukt-accordion>
                             <ul v-if="showDetailedTracking">
                                 <li
                                     v-for="(detail, index) in detailedTracking"
@@ -172,6 +193,7 @@ function ShipmentTracking({
                                 </li>
                             </ul>
                         </ukt-accordion> */}
+                    </>
                   </div>
                 )}
               {item?.status !== "In Transit" &&
@@ -196,25 +218,29 @@ function ShipmentTracking({
         <div className={`${styles.links}`}>
           {getLinks()?.map((item, index) => (
             <>
-              {item.type === "internal" && (
-                <div
-                  key={index}
-                  onClick={() => update(item)}
-                  className={`${styles.regularsm}`}
-                >
-                  {" "}
-                  {item.text}
-                </div>
-              )}
-              {item.type !== "internal" && (
-                <a
-                  key={index}
-                  href={`${item.link}`}
-                  className={`${styles.regularsm}`}
-                >
-                  {item.text}
-                </a>
-              )}
+              <>
+                {item.type === "internal" && (
+                  <div
+                    key={index}
+                    onClick={() => update(item)}
+                    className={`${styles.regularsm}`}
+                  >
+                    {" "}
+                    {item.text}
+                  </div>
+                )}
+              </>
+              <>
+                {item.type !== "internal" && (
+                  <a
+                    key={index}
+                    href={`${item.link}`}
+                    className={`${styles.regularsm}`}
+                  >
+                    {item.text}
+                  </a>
+                )}
+              </>
             </>
           ))}
         </div>

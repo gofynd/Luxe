@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import RangeSlider from "react-range-slider-input";
 import styles from "./range-slider.less";
-import { currencyFormat } from "../../../../helper/utils";
+import { currencyFormat, formatLocale } from "../../../../helper/utils";
+import { useGlobalStore, useFPI, useGlobalTranslation } from "fdk-core/utils";
 
 export default function InputRangeSlider({
   filterItem,
@@ -12,6 +13,10 @@ export default function InputRangeSlider({
   reset,
   sliderQuery,
 }) {
+  const { t } = useGlobalTranslation("translation");
+  const fpi = useFPI();
+  const { language, countryCode } = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const locale = language?.locale
   const [displayVal, setDisplayVal] = useState(null);
 
   function generateDisplayValue(filter, data) {
@@ -56,7 +61,7 @@ export default function InputRangeSlider({
     lazy: true,
     useKeyboard: false,
     formatter: (v) =>
-      currencyFormat(v, filterItem.values[0].currency_symbol || ""),
+      currencyFormat(v, filterItem.values[0].currency_symbol || "", formatLocale(locale, countryCode, true)),
   };
 
   // const [sliderInfo, setSliderInfo] = useState(initialSliderInfo);
@@ -124,12 +129,14 @@ export default function InputRangeSlider({
                 <div>
                   {currencyFormat(
                     sliderVal?.[0],
-                    filterItem?.values?.[0]?.currency_code
+                    filterItem?.values?.[0]?.currency_code,
+                    formatLocale(locale, countryCode, true)
                   )}
                   to
                   {currencyFormat(
                     sliderVal?.[1],
-                    filterItem?.values?.[0]?.currency_code
+                    filterItem?.values?.[0]?.currency_code,
+                    formatLocale(locale, countryCode, true)
                   )}
                 </div>
               )}
@@ -162,7 +169,7 @@ export default function InputRangeSlider({
           <div className={styles["range-box"]}>
             <div className={styles["range-item"]}>
               <label className={styles.label} htmlFor="fromSlider">
-                From
+                {t("resource.facets.from")}
                 <div className={styles.flexAlignCenter}>
                   {filterItem?.values?.[0]?.currency_code && (
                     <span className={styles.currency}>
@@ -184,7 +191,7 @@ export default function InputRangeSlider({
             </div>
             <div className={styles["range-item"]}>
               <label className={styles.label} htmlFor="toSlider">
-                To
+                {t("resource.facets.to")}
                 <div className={styles.flexAlignCenter}>
                   {filterItem?.values?.[0]?.currency_code && (
                     <span className={styles.currency}>

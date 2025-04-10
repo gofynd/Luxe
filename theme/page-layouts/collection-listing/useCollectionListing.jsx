@@ -1,7 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
-import { useGlobalStore } from "fdk-core/utils";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { useWishlist, useAccounts } from "../../helper/hooks";
+import { useLocation } from "react-router-dom";
 import useSortModal from "./useSortModal";
 import useFilterModal from "./useFilterModal";
 import { COLLECTION, COLLECTION_ITEMS } from "../../queries/collectionsQuery";
@@ -10,18 +8,29 @@ import {
   isRunningOnClient,
 } from "../../helper/utils";
 import useAddToCartModal from "../plp/useAddToCartModal";
-import { useThemeConfig, useThemeFeature } from "../../helper/hooks";
+import {
+  useWishlist,
+  useAccounts,
+  useThemeConfig,
+  useThemeFeature,
+} from "../../helper/hooks";
+import useInternational from "../../components/header/useInternational";
+import { useNavigate, useGlobalTranslation, useGlobalStore } from "fdk-core/utils";
 
 const PAGE_SIZE = 12;
 const PAGES_TO_SHOW = 5;
 const PAGE_OFFSET = 2;
 
 const useCollectionListing = ({ fpi, slug }) => {
+  const { t } = useGlobalTranslation("translation");
   const location = useLocation();
   const navigate = useNavigate();
   const { toggleWishlist, followedIdList } = useWishlist({ fpi });
 
   const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
+  const { i18nDetails, defaultCurrency } = useInternational({
+    fpi,
+  });
   const listingPrice =
     CONFIGURATION?.app_features?.common?.listing_price?.value || "range";
 
@@ -29,22 +38,26 @@ const useCollectionListing = ({ fpi, slug }) => {
     fpi,
     page: "collection-listing",
   });
+
   const { isInternational } = useThemeFeature({ fpi });
 
-  const collectionData = useGlobalStore(fpi?.getters?.COLLECTION);
-  const { isCollectionsSsrFetched } = useGlobalStore(fpi.getters.CUSTOM_VALUE);
+  const {
+    isCollectionsSsrFetched,
+    customCollectionList,
+    customCollection,
+    url,
+  } = useGlobalStore(fpi.getters.CUSTOM_VALUE);
 
-  const { name: collectionName, description: collectionDesc } =
-    collectionData?.collection || {};
+  const { name: collectionName, description: collectionDesc, seo } =
+    customCollection || {};
   const {
     filters = [],
     sort_on: sortOn,
     page: pageInfo,
     items,
-  } = collectionData?.item || {};
+  } = customCollectionList || {};
 
   const [productList, setProductList] = useState(items || undefined);
-  // const [pageNo, setPageNo] = useState(productsListData?.page?.current);
   const currentPage = pageInfo?.current ?? 1;
   const [apiLoading, setApiLoading] = useState(!isCollectionsSsrFetched);
   const [isPageLoading, setIsPageLoading] = useState(!isCollectionsSsrFetched);
@@ -60,14 +73,16 @@ const useCollectionListing = ({ fpi, slug }) => {
     }
   );
 
+  const isAlgoliaEnabled = globalConfig?.algolia_enabled || false;
+
   const [isResetFilterDisable, setIsResetFilterDisable] = useState(false);
 
   const addToCartModalProps = useAddToCartModal({ fpi, pageConfig });
 
   const breadcrumb = useMemo(
     () => [
-      { label: "Home", link: "/" },
-      { label: "Collections", link: "/collections" },
+      { label: t("resource.common.breadcrumb.home"), link: "/" },
+      { label: t("resource.common.breadcrumb.collections"), link: "/collections" },
       { label: collectionName },
     ],
     [collectionName]
@@ -117,33 +132,129 @@ const useCollectionListing = ({ fpi, slug }) => {
 
   const fetchCollection = (payload) => {
     fpi
-      .executeGQL(COLLECTION, payload)
-      .then(() => {})
-      .catch((err) => {});
+      .executeGQL(COLLECTION, payload, { skipStoreUpdate: true })
+      .then((data) => {
+        fpi.custom.setValue("customCollection", data?.data?.collection);
+      })
+      .catch((err) => { });
+  };
+
+  const convertQueryParamsForAlgolia = () => {
+    if (typeof window === "undefined") return "";
+    const params = new URLSearchParams(location?.search);
+    const filterParams = [];
+
+    const skipKeys = new Set(["sort_on", "siteTheme", "page_no", "q"]);
+
+    params.forEach((value, key) => {
+      if (skipKeys.has(key)) return;
+
+      const decodedValue = decodeURIComponent(value);
+
+      // Check if the key already exists in the filterParams
+      const existingParam = filterParams.find((param) =>
+        param.startsWith(`${key}:`)
+      );
+
+      if (existingParam) {
+        // If the key already exists, append the new value using "||"
+        const updatedParam = `${existingParam}||${decodedValue}`;
+        filterParams[filterParams.indexOf(existingParam)] = updatedParam;
+      } else {
+        // Otherwise, add the key-value pair
+        filterParams.push(`${key}:${decodedValue}`);
+      }
+    });
+
+    // Join all the filters with ":::"
+    return filterParams.join(":::");
   };
 
   const fetchProducts = (payload, append = false) => {
     setApiLoading(true);
 
-    fpi
-      .executeGQL(COLLECTION_ITEMS, payload)
-      .then((res) => {
-        if (res.errors) {
-          throw res.errors[0];
-        }
-        if (append) {
-          setProductList((prevState) => {
-            return prevState.concat(res?.data?.collectionItems?.items || []);
-          });
-        } else {
-          setProductList(res?.data?.collectionItems?.items || []);
-        }
-        setApiLoading(false);
+    if (isAlgoliaEnabled) {
+      const BASE_URL = `${window.location.origin}/ext/algolia/application/api/v1.0/collections/${slug}/items`;
+
+      const url = new URL(BASE_URL);
+      url.searchParams.append(
+        "page_id",
+        payload?.pageNo === 1 || !payload?.pageNo ? "*" : payload?.pageNo - 1
+      );
+      url.searchParams.append("page_size", "12");
+
+      const filterQuery = convertQueryParamsForAlgolia();
+
+      if (payload?.sortOn) {
+        url.searchParams.append("sort_on", payload?.sortOn);
+      }
+      if (filterQuery) {
+        url.searchParams.append("f", filterQuery);
+      }
+
+      fetch(url, {
+        headers: {
+          "x-location-detail": JSON.stringify({
+            country_iso_code: i18nDetails?.countryCode || "IN",
+          }),
+          "x-currency-code":
+            i18nDetails?.currency?.code || defaultCurrency?.code,
+        },
       })
-      .finally(() => {
-        setIsPageLoading(false);
-        setApiLoading(false);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          const productDataNormalization = data.items?.map((item) => ({
+            ...item,
+            media: item.medias,
+          }));
+
+          data.page.current = payload?.pageNo;
+
+          const productList = {
+            filters: data?.filters,
+            items: productDataNormalization,
+            page: data?.page,
+            sort_on: data?.sort_on,
+          };
+          setApiLoading(false);
+          fpi.custom.setValue("customCollectionList", productList);
+          if (append) {
+            setProductList((prevState) => {
+              return prevState.concat(productList?.items || []);
+            });
+          } else {
+            setProductList(productList?.items || []);
+          }
+        })
+        .finally(() => {
+          setIsPageLoading(false);
+          setApiLoading(false);
+        });
+    } else {
+      fpi
+        .executeGQL(COLLECTION_ITEMS, payload, { skipStoreUpdate: true })
+        .then((res) => {
+          if (res.errors) {
+            throw res.errors[0];
+          }
+          fpi.custom.setValue(
+            "customCollectionList",
+            res?.data?.collectionItems
+          );
+          if (append) {
+            setProductList((prevState) => {
+              return prevState.concat(res?.data?.collectionItems?.items || []);
+            });
+          } else {
+            setProductList(res?.data?.collectionItems?.items || []);
+          }
+          setApiLoading(false);
+        })
+        .finally(() => {
+          setIsPageLoading(false);
+          setApiLoading(false);
+        });
+    }
   };
 
   const handleLoadMoreProducts = () => {
@@ -192,10 +303,7 @@ const useCollectionListing = ({ fpi, slug }) => {
       searchParams?.delete(name, value);
     }
     searchParams?.delete("page_no");
-    navigate?.({
-      pathname: location?.pathname,
-      search: searchParams?.toString(),
-    });
+    navigate?.(location?.pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""));
   };
 
   const handleSortUpdate = (value) => {
@@ -208,10 +316,7 @@ const useCollectionListing = ({ fpi, slug }) => {
       searchParams?.delete("sort_on");
     }
     searchParams?.delete("page_no");
-    navigate?.({
-      pathname: location?.pathname,
-      search: searchParams?.toString(),
-    });
+    navigate?.(location?.pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""));
   };
 
   function resetFilters() {
@@ -222,10 +327,7 @@ const useCollectionListing = ({ fpi, slug }) => {
       searchParams?.delete(filter.key.name);
     });
     searchParams?.delete("page_no");
-    navigate?.({
-      pathname: location?.pathname,
-      search: searchParams?.toString(),
-    });
+    navigate?.(location?.pathname + (searchParams?.toString() ? `?${searchParams.toString()}` : ""));
   }
 
   const getPageUrl = (pageNo) => {
@@ -242,11 +344,11 @@ const useCollectionListing = ({ fpi, slug }) => {
 
     if (index <= 1) {
       return 1;
-    }
-    if (index > lastIndex) {
+    } else if (index > lastIndex) {
       return lastIndex;
+    } else {
+      return index;
     }
-    return index;
   };
 
   const paginationProps = useMemo(() => {
@@ -354,6 +456,7 @@ const useCollectionListing = ({ fpi, slug }) => {
   }, [filterList]);
 
   return {
+    seo,
     isProductCountDisplayed: pageConfig?.product_number,
     isScrollTop: pageConfig?.back_top,
     isBrand: !pageConfig?.hide_brand,
@@ -370,7 +473,7 @@ const useCollectionListing = ({ fpi, slug }) => {
     filterList,
     selectedFilters,
     sortList: sortOn,
-    productList: productList || items,
+    productList: productList || items || [],
     isProductLoading: apiLoading,
     isPageLoading,
     loadingOption: pageConfig.loading_options,

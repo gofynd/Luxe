@@ -1,7 +1,7 @@
 import React from "react";
-import SharedCartLib from "@gofynd/theme-template/pages/shared-cart/shared-cart";
 import styles from "./shared-cart.less";
-import "@gofynd/theme-template/pages/shared-cart/shared-cart.css";
+import SharedCartLib from "fdk-react-templates/pages/shared-cart/shared-cart";
+import "fdk-react-templates/pages/shared-cart/shared-cart.css";
 import useSharedCart from "./useSharedCart";
 
 function SharedCart({ fpi }) {

@@ -1,11 +1,15 @@
-import React from "react";
-import { FDKLink } from "fdk-core/components";
-import { useGlobalStore } from "fdk-core/utils";
+import React, { useEffect, useState } from "react";
+import {
+  useGlobalStore,
+  useGlobalTranslation,
+  useLocale,
+} from "fdk-core/utils";
 import Navigation from "./navigation";
 import I18Dropdown from "./i18n-dropdown";
 import Search from "./search";
 import styles from "./styles/desktop-header.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import { FDKLink } from "fdk-core/components";
 
 function HeaderDesktop({
   checkLogin,
@@ -22,14 +26,12 @@ function HeaderDesktop({
   isPromiseLoading = false,
   pincode = "",
   deliveryMessage = "",
-  onDeliveryClick = () => {},
+  onDeliveryClick = () => { },
+  languageIscCode
 }) {
-  const CONFIGURATION = useGlobalStore(fpi.getters.CONFIGURATION);
-  const international_shipping =
-    CONFIGURATION?.app_features?.common?.international_shipping?.enabled ??
-    false;
-
+  const { t } = useGlobalTranslation("translation");
   const isDoubleRowHeader = globalConfig?.header_layout === "double";
+
   const getMenuMaxLength = () => {
     if (isDoubleRowHeader) {
       return 10;
@@ -50,17 +52,15 @@ function HeaderDesktop({
 
   return (
     <div
-      className={`${styles.headerDesktop}  ${
-        styles[globalConfig.header_layout]
-      } ${styles[globalConfig.logo_menu_alignment]}`}
+      className={`${styles.headerDesktop}  ${styles[globalConfig.header_layout]
+        } ${styles[globalConfig.logo_menu_alignment]}`}
     >
       <div className={styles.firstRow}>
         <div className={styles.left}>
           {!isDoubleRowHeader && (
             <Navigation
-              customClass={`${styles.firstRowNav} ${
-                styles[globalConfig?.header_layout]
-              }`}
+              customClass={`${styles.firstRowNav} ${styles[globalConfig?.header_layout]
+                }`}
               maxMenuLength={getMenuMaxLength()}
               fallbackLogo={fallbackLogo}
               navigationList={navigation}
@@ -69,6 +69,7 @@ function HeaderDesktop({
               reset
               checkLogin={checkLogin}
               contactInfo={contactInfo}
+              languageIscCode={languageIscCode}
             />
           )}
           {isDoubleRowHeader && globalConfig?.always_on_search && (
@@ -86,8 +87,12 @@ function HeaderDesktop({
           )}
         </div>
         <div className={`${styles.middle} ${styles.flexCenter}`}>
-          <FDKLink link="/">
-            <img className={styles.logo} src={getShopLogo()} alt="Name" />
+          <FDKLink to="/">
+            <img
+              className={styles.logo}
+              src={getShopLogo()}
+              alt={t("resource.header.shop_logo_alt_text")}
+            />
           </FDKLink>
           {isHyperlocal &&
             globalConfig?.always_on_search &&
@@ -99,11 +104,13 @@ function HeaderDesktop({
                 onClick={onDeliveryClick}
               >
                 {isPromiseLoading ? (
-                  "Fetching..."
+                  t("resource.header.fetching")
                 ) : (
                   <>
                     <div className={styles.label}>
-                      {pincode ? deliveryMessage : "Enter a pincode"}
+                      {pincode
+                        ? deliveryMessage
+                        : t("resource.header.pin_code")}
                     </div>
                     {pincode && (
                       <div className={styles.pincode}>
@@ -120,7 +127,7 @@ function HeaderDesktop({
             )}
         </div>
         <div className={`${styles.right} ${styles.right__icons}`}>
-          {international_shipping && <I18Dropdown fpi={fpi}></I18Dropdown>}
+          <I18Dropdown fpi={fpi} languageIscCode={languageIscCode}></I18Dropdown>
           {isHyperlocal &&
             (!globalConfig?.always_on_search ||
               globalConfig?.logo_menu_alignment === "layout_4") && (
@@ -129,11 +136,13 @@ function HeaderDesktop({
                 onClick={onDeliveryClick}
               >
                 {isPromiseLoading ? (
-                  "Fetching..."
+                  t("resource.header.fetching")
                 ) : (
                   <>
                     <div className={styles.label}>
-                      {pincode ? deliveryMessage : "Enter a pincode"}
+                      {pincode
+                        ? deliveryMessage
+                        : t("resource.header.pin_code")}
                     </div>
                     {pincode && (
                       <div className={styles.pincode}>
@@ -147,26 +156,31 @@ function HeaderDesktop({
                   </>
                 )}
               </button>
-            )}
-          {isDoubleRowHeader && !LoggedIn && (
-            <button
-              className={`${styles.labelSignin} b2 ${styles.fontBody}`}
-              onClick={() => checkLogin("profile")}
-              type="button"
-            >
-              <span>Sign in</span>
-            </button>
-          )}
-          {(!isDoubleRowHeader || !globalConfig?.always_on_search) && (
-            <div className={`${styles.icon} ${styles["right__icons--search"]}`}>
-              <Search
-                customClass={`${styles[globalConfig?.header_layout]}-row-search`}
-                screen="desktop"
-                globalConfig={globalConfig}
-                fpi={fpi}
-              />
-            </div>
-          )}
+            )
+          }
+          {
+            isDoubleRowHeader && !LoggedIn && (
+              <button
+                className={`${styles.labelSignin} b2 ${styles.fontBody}`}
+                onClick={() => checkLogin("profile")}
+                type="button"
+              >
+                <span>{t("resource.header.signin")}</span>
+              </button>
+            )
+          }
+          {
+            (!isDoubleRowHeader || !globalConfig?.always_on_search) && (
+              <div className={`${styles.icon} ${styles["right__icons--search"]}`}>
+                <Search
+                  customClass={`${styles[globalConfig?.header_layout]}-row-search`}
+                  screen="desktop"
+                  globalConfig={globalConfig}
+                  fpi={fpi}
+                />
+              </div>
+            )
+          }
 
           <button
             type="button"
@@ -184,20 +198,23 @@ function HeaderDesktop({
               )}
             </div>
           </button>
-          {(!isDoubleRowHeader || (isDoubleRowHeader && LoggedIn)) && (
-            <button
-              type="button"
-              className={`${styles.icon} ${styles["right__icons--profile"]}`}
-              onClick={() => checkLogin("profile")}
-              aria-label="Profile"
-            >
-              <SvgWrapper
-                className={`${styles.user} ${styles.headerIcon} ${styles.singleRowIcon}`}
-                svgSrc="single-row-user"
-              />
-            </button>
-          )}
-          {!globalConfig?.disable_cart &&
+          {
+            (!isDoubleRowHeader || (isDoubleRowHeader && LoggedIn)) && (
+              <button
+                type="button"
+                className={`${styles.icon} ${styles["right__icons--profile"]}`}
+                onClick={() => checkLogin("profile")}
+                aria-label="Profile"
+              >
+                <SvgWrapper
+                  className={`${styles.user} ${styles.headerIcon} ${styles.singleRowIcon}`}
+                  svgSrc="single-row-user"
+                />
+              </button>
+            )
+          }
+          {
+            !globalConfig?.disable_cart &&
             globalConfig?.button_options !== "none" && (
               <button
                 type="button"
@@ -219,9 +236,10 @@ function HeaderDesktop({
                   </p>
                 </div>
               </button>
-            )}
-        </div>
-      </div>
+            )
+          }
+        </div >
+      </div >
       {isDoubleRowHeader && (
         <Navigation
           customClass={styles.secondRow}
@@ -233,9 +251,11 @@ function HeaderDesktop({
           LoggedIn={LoggedIn}
           checkLogin={checkLogin}
           contactInfo={contactInfo}
+          languageIscCode={languageIscCode}
         />
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 }
 

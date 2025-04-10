@@ -1,19 +1,19 @@
 import React, { memo, useEffect, useState, useRef } from "react";
-import { FDKLink } from "fdk-core/components";
 import Slider from "react-slick";
-import FyImage from "@gofynd/theme-template/components/core/fy-image/fy-image";
-import "@gofynd/theme-template/components/core/fy-image/fy-image.css";
+import FyImage from "fdk-react-templates/components/core/fy-image/fy-image";
+import "fdk-react-templates/components/core/fy-image/fy-image.css";
 import SvgWrapper from "../components/core/svgWrapper/SvgWrapper";
 import styles from "../styles/sections/image-slideshow.less";
-import placeHolder3X4 from "../assets/images/slideshow-mobile-placeholder.png";
-import placeHolder16X5 from "../assets/images/slideshow-desktop-placeholder.png";
+import placeholderDesktop from "../assets/images/placeholder/image-slideshow-desktop.png";
+import placeholderMobile from "../assets/images/placeholder/image-slideshow-mobile.png";
 import IntersectionObserverComponent from "../components/intersection-observer/intersection-observer";
+import { FDKLink } from "fdk-core/components";
 
 function getMobileImage(block) {
-  return block?.mobile_image?.value || placeHolder3X4;
+  return block?.mobile_image?.value || placeholderMobile;
 }
 function getDesktopImage(block) {
-  return block?.image?.value || placeHolder16X5;
+  return block?.image?.value || placeholderDesktop;
 }
 
 function getImgSrcSet(block, globalConfig) {
@@ -191,7 +191,7 @@ export function Component({ props, blocks, globalConfig, preset }) {
     <div
       className={styles.carouselImage}
       style={{
-        paddingBottom: `${globalConfig?.section_margin_bottom}px`,
+        paddingBottom: `${globalConfig?.section_margin_bottom + 16}px`,
         maxWidth: "100vw",
       }}
     >
@@ -254,17 +254,17 @@ export function Component({ props, blocks, globalConfig, preset }) {
 }
 
 export const settings = {
-  label: "Image Slideshow",
+  label: "t:resource.sections.image_slideshow.image_slideshow",
   blocks: [
     {
-      name: "Image card",
+      name: "t:resource.common.image_card",
       type: "gallery",
 
       props: [
         {
           type: "image_picker",
           id: "image",
-          label: "Desktop Image",
+          label: "t:resource.common.desktop_image",
           default: "",
           options: {
             aspect_ratio: "16:5",
@@ -274,7 +274,7 @@ export const settings = {
         {
           type: "image_picker",
           id: "mobile_image",
-          label: "Mobile Image",
+          label: "t:resource.common.mobile_image",
           default: "",
           options: {
             aspect_ratio: "3:4",
@@ -283,7 +283,7 @@ export const settings = {
         {
           type: "url",
           id: "redirect_link",
-          label: "Slide Link",
+          label: "t:resource.sections.image_slideshow.slide_link",
         },
       ],
     },
@@ -293,8 +293,8 @@ export const settings = {
       type: "checkbox",
       id: "autoplay",
       default: true,
-      label: "Auto Play Slides",
-      info: "Check to autoplay slides",
+      label: "t:resource.common.auto_play_slides",
+      info: "t:resource.sections.image_slideshow.check_to_autoplay_slides",
     },
     {
       type: "range",
@@ -303,15 +303,15 @@ export const settings = {
       max: 10,
       step: 1,
       unit: "sec",
-      label: "Change slides every",
+      label: "t:resource.common.change_slides_every",
       default: 3,
-      info: "Autoplay slide duration",
+      info: "t:resource.sections.image_slideshow.autoplay_slide_duration",
     },
   ],
   preset: {
     blocks: [
       {
-        name: "Image card",
+        name: "t:resource.common.image_card",
         props: {
           image: {
             type: "image_picker",
@@ -324,7 +324,7 @@ export const settings = {
         },
       },
       {
-        name: "Image card",
+        name: "t:resource.common.image_card",
         props: {
           image: {
             type: "image_picker",
@@ -337,7 +337,7 @@ export const settings = {
         },
       },
       {
-        name: "Image card",
+        name: "t:resource.common.image_card",
         props: {
           image: {
             type: "image_picker",

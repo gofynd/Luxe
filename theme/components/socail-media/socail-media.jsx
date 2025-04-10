@@ -1,7 +1,7 @@
 import React from "react";
-import { FDKLink } from "fdk-core/components";
 import styles from "./socail-media.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
+import { FDKLink } from "fdk-core/components";
 
 export default function SocailMedia({ social_links }) {
   return (

@@ -1,5 +1,6 @@
 @md-min: 481px;
 @lg-min: 769px;
+@lg-semi: 1024px;
 @xl-min: 1440px;
 
 @sm-max: (@md-min - 1);
@@ -11,6 +12,7 @@
 
 @tablet: ~"only screen and (max-width: @{md-max})";
 @tablet-strict: ~"only screen and (min-width: @{md-min}) and (max-width: @{md-max})";
+@tablet-extend: ~"only screen and (max-width: @{lg-semi})";
 
 @desktop: ~"only screen and (min-width: @{lg-min})";
 @desktop-down: ~"only screen and (max-width: @{lg-max})";

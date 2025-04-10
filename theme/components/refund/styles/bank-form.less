@@ -17,9 +17,11 @@
     width: 100%;
     .formTitle {
       color: @DustyGray2;
+      font-size: 14px;
     }
     .formReq {
       color: @Required;
+      font-size: 12px;
     }
     .formInput {
       //margin: 10px 0px;
@@ -34,7 +36,7 @@
         width: 100%;
         animation: fadeIn 0.5s ease;
         height: 40px;
-        padding-left: 10px;
+        padding-inline-start: 10px;
       }
       .paymentInputSecurity {
         -webkit-text-security: disc;
@@ -57,39 +59,74 @@
     }
     .error {
       color: @Required !important;
+      font-size: 12px;
+      margin-bottom: 12px;
     }
   }
-  .btn {
-    padding: 15px;
-    border-radius: 5px;
-    width: 100%;
-    margin: 10px 0px;
-    border: none;
-    font-weight: 800;
-    text-transform: uppercase;
-    background-color: @ButtonPrimary;
-    margin-right: 10px;
-    margin-top: auto;
-    @media @mobile {
-      margin-right: 0;
+  .footerSection{
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 16px;
+    .btn {
+      padding: 15px;
+      border-radius: 5px;
+      // width: 100%;
+      width: 48%;
+      // margin: 10px 0px;
+      border: none;
+      font-weight: 800;
+      text-transform: uppercase;
+      background-color: @ButtonPrimary;
+      color:@ButtonSecondary;
+      // margin-right: 10px;
+      margin-top: auto;
+      @media @mobile {
+        margin-right: 0;
+      }
     }
-  }
-  .modalBtn {
-    @media @mobile {
+
+    @media @mobile{
+      display: flex;
       position: fixed;
-      box-sizing: border-box;
-      left: 2.5%;
       bottom: 20px;
-      width: 95%;
+      flex-direction: row;
+      justify-content: space-between;
+      gap:10px;
+      width: 91%;
+    }
+
+    .modalBtn {
+      @media @mobile {
+        display: flex;
+        height: 48px;
+        padding: 20px 24px;
+        justify-content: center;
+        align-items: center;
+      }
+    }
+    .cancelButton{
+      border: 1px solid @ButtonPrimary;
+      color:@ButtonPrimary;
+      background-color: @ButtonSecondary;
+      @media @mobile{
+        display: flex;
+        height: 48px;
+        padding: 20px 24px;
+        justify-content: center;
+        align-items: center;
+      }
     }
   }
+  
   .branchName {
     color: @Profit;
     display: flex;
     align-items: center;
-    margin-top: 10px;
+    font-size: 12px;
+    margin-bottom: 12px;
     .inlineSvg {
-      margin-right: 5px;
+      margin-inline-end: 5px;
       height: 25px;
       width: 25px;
     }

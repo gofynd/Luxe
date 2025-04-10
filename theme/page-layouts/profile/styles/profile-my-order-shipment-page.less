@@ -41,7 +41,7 @@
 .viewMore,
 .showLess {
   text-align: center;
-  padding-right: 30px;
+  padding-inline-end: 30px;
   padding-top: 5px;
   cursor: pointer;
   color: @ButtonLink;
@@ -51,21 +51,41 @@
     width: 100%;
     display: flex;
     flex-direction: row;
-    text-align: center;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 40px 20px 0;
 
-    img {
-      width: 40px;
-      height: 50px;
+    @media @mobile {
+      padding: 16px 16px 0;
+      gap: 8px;
     }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: @TextHeading;
+      flex: 1;
+
+      @media @mobile {
+        font-size: 14px;
+        line-height: 140%;
+      }
+    }
+
     .status {
-      margin: auto;
       text-align: center;
       color: @White;
       padding: 10px;
       display: inline-flex;
-      border-radius: 3px;
+      font-weight: 500;
       font-size: 14px;
       line-height: 14px;
+      border-radius: @ButtonRadius;
+
+      @media @mobile {
+        padding: 4px;
+        font-size: 12px;
+      }
     }
   }
   .shipmentBagItem {
@@ -123,9 +143,9 @@
       text-transform: uppercase;
       color: #fff;
       background-color: @TextHeading;
-      margin-right: 10px;
+      margin-inline-end: 10px;
       @media @mobile {
-        margin-right: 0;
+        margin-inline-end: 0;
       }
     }
     .cancelBtn {

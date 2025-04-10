@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useGlobalStore } from "fdk-core/utils";
+import placeholderImage from "../../assets/images/blog-placeholder.png";
 import { GET_BLOG } from "../../queries/blogQuery";
 
 const useBlogDetails = ({ fpi }) => {
@@ -33,7 +34,7 @@ const useBlogDetails = ({ fpi }) => {
       show_search: pageConfig?.show_search || "",
       show_tags: pageConfig?.show_tags || "",
       show_top_blog: pageConfig?.show_top_blog || "",
-      fallback_image: pageConfig?.fallback_image || "",
+      fallback_image: pageConfig?.fallback_image || placeholderImage,
       button_text: pageConfig?.button_text || "",
       autoplay: pageConfig?.autoplay || false,
       slide_interval: pageConfig?.slide_interval || 3.5,
@@ -47,7 +48,9 @@ const useBlogDetails = ({ fpi }) => {
   );
 
   const contactInfo = useGlobalStore(fpi.getters.CONTACT_INFO);
-  const { blogDetails } = useGlobalStore(fpi?.getters?.CUSTOM_VALUE);
+  const { blogDetails, isBlogNotFound } = useGlobalStore(
+    fpi?.getters?.CUSTOM_VALUE
+  );
 
   const [isBlogDetailsLoading, setIsBlogDetailsLoading] = useState(
     !blogDetails?.[slug]
@@ -57,15 +60,23 @@ const useBlogDetails = ({ fpi }) => {
     fpi.custom.setValue("isBlogSsrFetched", false);
   }, []);
 
-  function getBlog(slug) {
+  useEffect(() => {
+    fpi.custom.setValue("isBlogNotFound", false);
+  }, [location.pathname]);
+
+  function getBlog(slug, preview) {
     try {
       setIsBlogDetailsLoading(true);
       const values = {
         slug: slug || "",
+        preview: preview || false,
       };
       return fpi
         .executeGQL(GET_BLOG, values)
         .then((res) => {
+          if (res?.errors) {
+            fpi.custom.setValue(`isBlogNotFound`, true);
+          }
           if (res?.data?.blog) {
             const data = res?.data?.blog;
             fpi.custom.setValue("blogDetails", {
@@ -87,6 +98,7 @@ const useBlogDetails = ({ fpi }) => {
     sliderProps,
     footerProps,
     contactInfo,
+    isBlogNotFound,
     getBlog,
     isBlogDetailsLoading,
   };

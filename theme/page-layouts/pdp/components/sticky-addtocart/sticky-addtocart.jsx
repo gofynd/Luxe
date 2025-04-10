@@ -1,14 +1,16 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
-import Modal from "@gofynd/theme-template/components/core/modal/modal";
-import "@gofynd/theme-template/components/core/modal/modal.css";
+import Modal from "fdk-react-templates/components/core/modal/modal";
+import "fdk-react-templates/components/core/modal/modal.css";
+
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import DeliveryInfo from "../delivery-info/delivery-info";
 import SizeGuide from "../../size-guide/size-guide";
 import styles from "./sticky-addtocart.less";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 const StickyAddToCart = ({
-  addToCartBtnRef,
   productMeta,
   selectedSize,
   onSizeSelection,
@@ -19,58 +21,54 @@ const StickyAddToCart = ({
   productPriceBySlug,
   isSizeGuideAvailable,
   deliveryInfoProps,
+  showBuyNow,
 }) => {
+  const { t } = useGlobalTranslation("translation");
   const [showSizeModal, setShowSizeModal] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
-  const [isComponentVisible, setIsComponentVisible] = useState(false);
-  const observerRef = useRef(null);
-  useEffect(() => {
-    const onAddToCartIntersection = (entries) => {
-      if (entries[0]?.isIntersecting) {
-        setIsComponentVisible(false);
-      } else {
-        setIsComponentVisible(true);
-      }
-    };
-    observerRef.current = new IntersectionObserver(onAddToCartIntersection, {
-      threshold: 1.0,
-    });
+  const [modalType, setModalType] = useState("");
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, []);
-  useEffect(() => {
-    if (!productMeta?.loading && addToCartBtnRef?.current) {
-      observerRef.current.observe(addToCartBtnRef?.current);
+  const openSizeModal = (e, modalType) => {
+    if (
+      selectedSize &&
+      deliveryInfoProps?.pincode &&
+      deliveryInfoProps?.isValidDeliveryLocation
+    ) {
+      cartHandler(e, modalType === "buy-now");
+    } else {
+      e.preventDefault();
+      setShowSizeModal(true);
+      setModalType(modalType);
     }
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [productMeta]);
-
-  const openSizeModal = (e) => {
-    e.preventDefault();
-    setShowSizeModal(true);
   };
-  const addToCartHandler = async (e) => {
-    const outRes = await addProductForCheckout(e, selectedSize, false);
-    if (outRes?.data?.addItemsToCart?.success) {
-      setShowSizeModal(false);
-    }
+  const cartHandler = async (e, isBuyNow) => {
+    addProductForCheckout(e, selectedSize, isBuyNow);
   };
 
   return (
     <>
       <AnimatePresence mode="wait">
-        {isComponentVisible && (
+        <motion.div
+          className={`${styles.stickyAddtocart} ${showSizeGuide && styles["stickyAddtocart--zIndex"]}`}
+          key="add-to-cart-container"
+          initial={{ opacity: 0, y: "100%" }}
+          animate={{ opacity: 1, y: "0%" }}
+          exit={{ opacity: 0, y: "100%" }}
+          transition={{ duration: 0.5 }}
+        >
+          <button
+            type="button"
+            className={`btnSecondary ${styles.button}`}
+            onClick={(e) => openSizeModal(e, "add-to-cart")}
+          >
+            <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
+            {t("resource.common.add_to_cart")}
+          </button>
+        </motion.div>
+        {showBuyNow && (
           <motion.div
             className={`${styles.stickyAddtocart} ${showSizeGuide && styles["stickyAddtocart--zIndex"]}`}
-            key="add-to-cart-container"
+            key="buy-now-container"
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: "0%" }}
             exit={{ opacity: 0, y: "100%" }}
@@ -78,11 +76,11 @@ const StickyAddToCart = ({
           >
             <button
               type="button"
-              className={`btnSecondary ${styles.button}`}
-              onClick={openSizeModal}
+              className={`${styles.button} btnPrimary`}
+              onClick={(e) => openSizeModal(e, "buy-now")}
             >
-              <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
-              ADD TO CART
+              <SvgWrapper svgSrc="buyNow" className={styles.cartIcon} />
+              {t("resource.common.buy_now")}
             </button>
           </motion.div>
         )}
@@ -90,7 +88,7 @@ const StickyAddToCart = ({
       <div className={styles.addToCartModal}>
         <Modal
           isOpen={showSizeModal}
-          title="Select Size"
+          title={t("resource.common.select_size")}
           closeDialog={() => setShowSizeModal(false)}
           headerClassName={styles.customMHeader}
           bodyClassName={styles.customMBody}
@@ -100,20 +98,22 @@ const StickyAddToCart = ({
             <div className={styles.guideCta}>
               <span style={{ width: "65%" }}>
                 {selectedSize
-                  ? `Style : Size (${selectedSize})`
-                  : "SELECT SIZE"}
+                  ? `${t("resource.product.style_size")} (${selectedSize})`
+                  : t("resource.common.select_size_caps")}
               </span>
               {isSizeGuideAvailable && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowSizeGuide(true);
-                  }}
-                  className={styles["product__size--guide"]}
-                >
-                  <span>SIZE GUIDE</span>
-                  <SvgWrapper svgSrc="scale" className={styles.scaleIcon} />
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowSizeGuide(true);
+                    }}
+                    className={styles["product__size--guide"]}
+                  >
+                    <span>{t("resource.common.size_guide")}</span>
+                    <SvgWrapper svgSrc="scale" className={styles.scaleIcon} />
+                  </button>
+                </>
               )}
             </div>
 
@@ -139,7 +139,7 @@ const StickyAddToCart = ({
               {getProductPrice("effective") &&
                 blockProps?.mrp_label &&
                 getProductPrice("effective") === getProductPrice("marked") && (
-                  <span className="mrp-label">MRP:</span>
+                  <span className="mrp-label">{t("resource.common_common_words.mrp")}</span>
                 )}
               <h4 className={styles["productPrice--effective"]}>
                 {getProductPrice("effective")}
@@ -149,7 +149,7 @@ const StickyAddToCart = ({
                 blockProps?.mrp_label &&
                 getProductPrice("effective") !== getProductPrice("marked") && (
                   <>
-                    <span className={styles.mrpLabel}>MRP:</span>
+                    <span className={styles.mrpLabel}>{t("resource.common_common_words.mrp")}</span>
                     <span className={styles["productPrice--marked"]}>
                       {getProductPrice("marked")}
                     </span>
@@ -172,16 +172,30 @@ const StickyAddToCart = ({
 
           {selectedSize && <DeliveryInfo {...deliveryInfoProps} />}
 
-          <button
-            type="button"
-            className={`btnSecondary ${styles.button}`}
-            onClick={addToCartHandler}
-            disabled={!productMeta.sellable}
-          >
-            <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
-            ADD TO CART
-          </button>
-        </Modal>
+          {modalType === "add-to-cart" && (
+            <button
+              type="button"
+              className={`btnSecondary ${styles.button}`}
+              onClick={(e) => cartHandler(e, false)}
+              disabled={!productMeta.sellable}
+            >
+              <SvgWrapper svgSrc="cart" className={styles.cartIcon} />
+              {t("resource.common.add_to_cart")}
+            </button>
+          )}
+
+          {modalType === "buy-now" && (
+            <button
+              type="button"
+              className={`btnPrimary ${styles.button}`}
+              onClick={(e) => cartHandler(e, true)}
+              disabled={!productMeta.sellable}
+            >
+              <SvgWrapper svgSrc="buyNow" className={styles.cartIcon} />
+              {t("resource.common.buy_now")}
+            </button>
+          )}
+        </Modal >
         {isSizeGuideAvailable && (
           <SizeGuide
             customClass={styles.sizeGuide}
@@ -193,7 +207,7 @@ const StickyAddToCart = ({
             productMeta={productMeta}
           />
         )}
-      </div>
+      </div >
     </>
   );
 };

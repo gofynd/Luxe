@@ -1,28 +1,29 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import { FDKLink } from "fdk-core/components";
-import { useGlobalStore } from "fdk-core/utils";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
+import { useGlobalStore, useGlobalTranslation, useNavigate, useLocale } from "fdk-core/utils";
+import {
+  isRunningOnClient,
+  throttle,
+  isEmptyOrNull,
+} from "../../helper/utils";
 import { CART_COUNT } from "../../queries/headerQuery";
-import { isRunningOnClient, throttle, isEmptyOrNull } from "../../helper/utils";
 import Search from "./search";
 import HeaderDesktop from "./desktop-header";
 import Navigation from "./navigation";
-import I18Dropdown from "./i18n-dropdown";
 import useHeader from "./useHeader";
 import styles from "./styles/header.less";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
 import fallbackLogo from "../../assets/images/logo.png";
 import { useAccounts } from "../../helper/hooks";
 import useHyperlocal from "./useHyperlocal";
-import LocationModal from "@gofynd/theme-template/components/location-modal/location-modal";
-import "@gofynd/theme-template/components/location-modal/location-modal.css";
+import LocationModal from "fdk-react-templates/components/location-modal/location-modal";
+import "fdk-react-templates/components/location-modal/location-modal.css";
+import { FDKLink } from "fdk-core/components";
+import { LANGUAGES } from "../../queries/languageQuery";
 
 function Header({ fpi }) {
+  const { t } = useGlobalTranslation("translation");
   const CART_ITEMS = useGlobalStore(fpi?.getters?.CART);
-  const CONFIGURATION = useGlobalStore(fpi?.getters?.CONFIGURATION);
-  const international_shipping =
-    CONFIGURATION?.app_features?.common?.international_shipping?.enabled ??
-    false;
 
   const [resetNav, setResetNav] = useState(false);
   const [headerHeight, setHeaderHeight] = useState(0);
@@ -37,18 +38,62 @@ function Header({ fpi }) {
     wishlistCount,
     loggedIn,
   } = useHeader(fpi);
-
   const { openLogin } = useAccounts({ fpi });
   const [searchParams] = useSearchParams();
   const location = useLocation();
+  const { activeLocale } = useLocale();
+  const i18N_DETAILS = useGlobalStore(fpi.getters.i18N_DETAILS);
+  const [languageIscCode, setLanguageIscCode] = useState([]);
 
   const buyNow = searchParams?.get("buy_now") || false;
+
+  const isListingPage = useMemo(() => {
+    const regex = /^\/(products\/?|collection\/.+)$/;
+    return regex.test(location?.pathname);
+  }, [location?.pathname]);
 
   const checkHeaderHeight = throttle(() => {
     if (isRunningOnClient()) {
       setHeaderHeight(headerRef.current.getBoundingClientRect().height);
     }
   }, 1400);
+
+  useEffect(() => {
+    fpi
+      .executeGQL(LANGUAGES)
+      .then((response) => {
+        setLanguageIscCode(response.data.languages);
+      })
+      .catch(() => {
+        setLanguageIscCode([]);
+      });
+
+    const i18n = i18N_DETAILS;
+    if (!i18n?.language?.locale) {
+      fpi.setI18nDetails({
+        ...i18n,
+        language: {
+          ...i18n.language,
+          locale: "en",
+        },
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!i18N_DETAILS || activeLocale === i18N_DETAILS?.language?.locale) return;
+
+    fpi.setI18nDetails({
+      ...i18N_DETAILS,
+      language: {
+        ...i18N_DETAILS.language,
+        locale: activeLocale || "en",
+      },
+    });
+
+    window.location.reload();
+  }, [activeLocale, i18N_DETAILS]);
+
 
   useEffect(() => {
     if (
@@ -77,7 +122,7 @@ function Header({ fpi }) {
 
   useEffect(() => {
     if (isRunningOnClient()) {
-      setTimeout(() => {}, 1000);
+      setTimeout(() => { }, 1000);
       const cssVariables = {
         "--headerHeight": `${headerHeight}px`,
       };
@@ -134,13 +179,6 @@ function Header({ fpi }) {
     }, 500);
   };
 
-  // to scroll top whenever path changes
-  useEffect(() => {
-    if (isRunningOnClient()) {
-      window?.scrollTo?.(0, 0);
-    }
-  }, [location?.pathname]);
-
   const {
     isHyperlocal,
     isLoading,
@@ -156,7 +194,9 @@ function Header({ fpi }) {
 
   return (
     <>
-      <div className={`${styles.ctHeaderWrapper} fontBody`}>
+      <div
+        className={`${styles.ctHeaderWrapper} fontBody ${isListingPage ? styles.listing : ""}`}
+      >
         <header className={styles.header} ref={headerRef}>
           <div
             className={`${styles.headerContainer} basePageContainer margin0auto `}
@@ -178,18 +218,17 @@ function Header({ fpi }) {
                 pincode={pincode}
                 deliveryMessage={deliveryMessage}
                 onDeliveryClick={handleLocationModalOpen}
+                languageIscCode={languageIscCode}
               />
             </div>
             <div className={styles.mobile}>
               <div
-                className={`${styles.mobileTop} ${
-                  styles[globalConfig.header_layout]
-                } ${styles[globalConfig.logo_menu_alignment]}`}
+                className={`${styles.mobileTop} ${styles[globalConfig.header_layout]
+                  } ${styles[globalConfig.logo_menu_alignment]}`}
               >
                 <Navigation
-                  customClass={`${styles.left} ${styles.flexAlignCenter} ${
-                    styles[globalConfig.header_layout]
-                  }`}
+                  customClass={`${styles.left} ${styles.flexAlignCenter} ${styles[globalConfig.header_layout]
+                    }`}
                   fallbackLogo={fallbackLogo}
                   maxMenuLenght={12}
                   reset
@@ -200,6 +239,7 @@ function Header({ fpi }) {
                   globalConfig={globalConfig}
                   checkLogin={checkLogin}
                   contactInfo={contactInfo}
+                  languageIscCode={languageIscCode}
                 />
                 <FDKLink
                   to="/"
@@ -208,7 +248,7 @@ function Header({ fpi }) {
                   <img
                     className={styles.logo}
                     src={getShopLogoMobile()}
-                    alt="name"
+                    alt={t("resource.header.shop_logo_alt_text")}
                   />
                 </FDKLink>
                 <div className={styles.right}>
@@ -250,11 +290,14 @@ function Header({ fpi }) {
                   onClick={handleLocationModalOpen}
                 >
                   {isLoading ? (
-                    "Fetching..."
+                    t("resource.header.fetching")
                   ) : (
                     <>
                       <div className={styles.label}>
-                        {pincode ? deliveryMessage : "Enter a pincode"}
+                        {/* {pincode ? deliveryMessage : "Enter a pincode"} */}
+                        {pincode
+                          ? deliveryMessage
+                          : t("resource.header.pin_code")}
                       </div>
                       {pincode && (
                         <div className={styles.pincode}>
@@ -270,9 +313,6 @@ function Header({ fpi }) {
                 </button>
               )}
             </div>
-          </div>
-          <div className={`${styles.mobile} ${styles.i18Wrapper}`}>
-            {international_shipping && <I18Dropdown fpi={fpi}></I18Dropdown>}
           </div>
         </header>
       </div>

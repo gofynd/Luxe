@@ -1,22 +1,28 @@
 import React, { useState } from "react";
 import SvgWrapper from "../core/svgWrapper/SvgWrapper";
-import { FDKLink } from "fdk-core/components";
 import styles from "./share-item.less";
 import { copyToClipboard } from "../../helper/utils";
+import { useGlobalTranslation } from "fdk-core/utils";
+import { FDKLink } from "fdk-core/components";
 
 function ShareItom({ setShowSocialLinks, description }) {
-  const [btnText, setBtnText] = useState("Copy Link");
+  const { t } = useGlobalTranslation("translation");
+  const [btnText, setBtnText] = useState(
+    t("resource.common.copy_link")
+  );
 
-  const encodedDescription = encodeURIComponent(description);
+  const encodedDescription = encodeURIComponent(
+    description
+  );
   const encodedUrl = encodeURIComponent(window?.location?.href);
 
   const handleCopyToClipboard = (event) => {
     event.stopPropagation();
     const url = window.location.href;
     copyToClipboard(url);
-    setBtnText("Copied");
+    setBtnText(t("resource.common.copied"));
     setTimeout(() => {
-      setBtnText("Copy Link");
+      setBtnText(t("resource.common.copy_link"));
     }, 5000);
   };
 
@@ -39,7 +45,7 @@ function ShareItom({ setShowSocialLinks, description }) {
           onClick={(e) => e.stopPropagation()}
         >
           <div className={`${styles["popup-title"]} fontHeader`}>
-            Share
+            {t("resource.common.share")}
             <span
               className={styles["close-icon"]}
               onClick={() => setShowSocialLinks(false)}

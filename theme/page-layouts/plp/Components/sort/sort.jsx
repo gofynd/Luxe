@@ -3,8 +3,10 @@ import OutsideClickHandler from "react-outside-click-handler";
 import SvgWrapper from "../../../../components/core/svgWrapper/SvgWrapper";
 import { isRunningOnClient } from "../../../../helper/utils";
 import styles from "./sort.less";
+import { useGlobalTranslation } from "fdk-core/utils";
 
 function Sort({ filteredSorts = [], customClass, updateSelection }) {
+  const { t } = useGlobalTranslation("translation");
   const [sortOpen, setSortOpen] = useState(false);
   function selectedSort() {
     if (filteredSorts?.length) {
@@ -36,7 +38,7 @@ function Sort({ filteredSorts = [], customClass, updateSelection }) {
   return (
     <OutsideClickHandler onOutsideClick={(e) => closeSortOption(e)}>
       <div className={` ${styles.items} ${styles["sort-list"]} ${customClass}`}>
-        <span className={` ${styles["dd-label"]} b1`}>Sort by: </span>
+        <span className={` ${styles["dd-label"]} b1`}>{t("resource.facets.sort_by")}: </span>
         <button
           type="button"
           className={`${styles.selected} b1 ${styles.flexAlignCenter} ${styles.justifyStart}`}
@@ -44,9 +46,8 @@ function Sort({ filteredSorts = [], customClass, updateSelection }) {
         >
           <span className={styles.selectedSort}> {selectedSort()} </span>
           <SvgWrapper
-            className={`${styles.icon} ${styles["arrow-icon"]} ${
-              styles.open && styles.sortOpen
-            }`}
+            className={`${styles.icon} ${styles["arrow-icon"]} ${styles.open && styles.sortOpen
+              }`}
             svgSrc="arrow-down"
           />
         </button>

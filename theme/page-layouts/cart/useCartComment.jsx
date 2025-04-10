@@ -14,6 +14,7 @@ const useCartComment = ({ fpi, cartData }) => {
   }, [cartData]);
 
   const updateComment = (comm) => {
+    if (comm?.length > 500) return;
     const payload = {
       updateCartMetaId: cartData.id?.toString(),
       cartMetaRequestInput: {

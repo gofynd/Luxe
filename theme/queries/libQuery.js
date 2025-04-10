@@ -172,6 +172,11 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
     updated_at
   }
   applicationConfiguration {
+    app_currencies {
+      default_currency {
+        code  
+      }
+    }
     integration_tokens {
       id
       application
@@ -326,6 +331,11 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
     features {
       id
       app
+      buybox {
+        show_name
+        enable_selection
+        is_seller_buybox_enabled
+      }
       common {
         listing_price {
           sort
@@ -368,6 +378,10 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
       robots_txt
       sitemap_enabled
       additonal_sitemap
+      custom_meta_tags{
+        content
+        name
+      }
       details {
         description
         image_url
@@ -488,6 +502,37 @@ export const GLOBAL_DATA = `query ApplicationConfiguration {
         platform
         slug
         version
+      }
+    }
+  }
+}`;
+
+export const INTERNATIONAL = `query International {
+  applicationConfiguration {
+    app_currencies {
+      supported_currency {
+        id
+        code
+        created_at
+        decimal_digits
+        is_active
+        name
+        symbol
+        updated_at
+        country_name
+        country_code
+      }
+    }
+  }
+  allCountries {
+    results {
+      display_name
+      is_active
+      name
+      uid
+      meta {
+        country_code
+        isd_code
       }
     }
   }
