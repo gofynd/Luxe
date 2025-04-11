@@ -17,7 +17,7 @@ import {
   FORGOT_PASSWORD,
 } from "../../queries/authQuery";
 import { useSnackbar } from "./hooks";
-import { isRunningOnClient } from "../utils";
+import { isRunningOnClient, getLocalizedRedirectUrl } from "../utils";
 import { useGlobalTranslation } from "fdk-core/utils";
 import { useNavigate } from "fdk-core/utils";
 // import { loginUserInFb } from '../../helper/facebook.utils';
@@ -69,8 +69,8 @@ export const useAccounts = ({ fpi }) => {
       ? new URLSearchParams(location.search)
       : null;
     const redirectUrl = queryParams?.get("redirectUrl") || "";
-    window.location.href =
-      window.location.origin + decodeURIComponent(redirectUrl);
+    const finalUrl = getLocalizedRedirectUrl(decodeURIComponent(redirectUrl), locale);
+    window.location.href = window.location.origin + finalUrl;
   };
 
   const updateProfile = (data) => {
@@ -131,8 +131,8 @@ export const useAccounts = ({ fpi }) => {
           ? new URLSearchParams(location.search)
           : null;
         const redirectUrl = queryParams?.get("redirectUrl") || "";
-        const finalRedirectUrl = window.location.origin + `${locale ? "/" + locale + "/" : ""}` + decodeURIComponent(redirectUrl);
-        window.location.href = finalRedirectUrl;
+        const finalUrl = getLocalizedRedirectUrl(decodeURIComponent(redirectUrl), locale);
+        window.location.href = window.location.origin + finalUrl;
         return res?.data;
       }
       return Promise.reject();
@@ -161,8 +161,8 @@ export const useAccounts = ({ fpi }) => {
             ? new URLSearchParams(location.search)
             : null;
           const redirectUrl = queryParams?.get("redirectUrl") || "";
-          window.location.href =
-            window.location.origin + decodeURIComponent(redirectUrl);
+          const finalUrl = getLocalizedRedirectUrl(decodeURIComponent(redirectUrl), locale);
+          window.location.href = window.location.origin + finalUrl;
         }
         return res?.data?.loginWithEmailAndPassword;
       });
@@ -231,15 +231,15 @@ export const useAccounts = ({ fpi }) => {
       const { user_exists: userExists } = res.data.verifyMobileOTP || {};
       if (!userExists) {
         if (isRedirection) {
-          navigate?.("/auth/edit-profile" + (location.search ? `?${location.search}` : ""))
+          navigate?.("/auth/edit-profile" + (location.search ? `?${location.search}` : ""));
         }
       } else {
         const queryParams = isRunningOnClient()
           ? new URLSearchParams(location.search)
           : null;
         const redirectUrl = queryParams?.get("redirectUrl") || "";
-        window.location.href =
-          window.location.origin + decodeURIComponent(redirectUrl);
+        const finalUrl = getLocalizedRedirectUrl(decodeURIComponent(redirectUrl), locale);
+        window.location.href = window.location.origin + finalUrl;
       }
       return res.data.verifyMobileOTP;
     });
@@ -445,8 +445,8 @@ export const useAccounts = ({ fpi }) => {
             ? new URLSearchParams(location.search)
             : null;
           const redirectUrl = queryParams?.get("redirectUrl") || "";
-          window.location.href =
-            window.location.origin + decodeURIComponent(redirectUrl);
+          const finalUrl = getLocalizedRedirectUrl(decodeURIComponent(redirectUrl), locale);
+          window.location.href = window.location.origin + finalUrl;
         }
       }
       return res?.data?.verifyMobileOTP;
@@ -491,8 +491,8 @@ export const useAccounts = ({ fpi }) => {
             ? new URLSearchParams(location.search)
             : null;
           const redirectUrl = queryParams?.get("redirectUrl") || "";
-          window.location.href =
-            window.location.origin + decodeURIComponent(redirectUrl);
+          const finalUrl = getLocalizedRedirectUrl(decodeURIComponent(redirectUrl), locale);
+          window.location.href = window.location.origin + finalUrl;
         }
       }
       return res?.data?.verifyEmailOTP;

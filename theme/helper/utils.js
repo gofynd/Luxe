@@ -395,3 +395,15 @@ export function createLocalitiesPayload(slug, fieldsMap, values) {
   result[slug] = values?.[slug]?.display_name || values?.[slug] || undefined;
   return result;
 }
+
+export function getLocalizedRedirectUrl(path = "", currentLocale) {
+  // Ensure path starts with a slash
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  // If we have a non-English locale and path doesn't already have it
+  if (currentLocale && currentLocale !== "en" && !normalizedPath.startsWith(`/${currentLocale}`)) {
+    return `/${currentLocale}${normalizedPath}`;
+  }
+
+  return normalizedPath;
+};
