@@ -228,7 +228,8 @@
         "items_per_row_desktop": "Items per row(Desktop)",
         "max_items_per_row_horizontal": "Maximum items allowed per row for Horizontal view, for gallery max 5 are viewable and only 5 blocks are required",
         "category_item": "Category Item",
-        "select_department": "Select Department"
+        "select_department": "Select Department",
+        "desktop_layout": "Desktop Layout"
       },
       "collections_listing": {
         "collections_listing": "Collections Listing",
@@ -469,6 +470,9 @@
       "products_listing": {
         "desktop_banner_image": "Desktop Banner Image",
         "mobile_banner_image": "Mobile Banner Image"
+      },
+      "custom_html": {
+        "custom_html": "Custom HTML"
       }
     }
   }
