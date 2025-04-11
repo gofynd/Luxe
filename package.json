@@ -27,7 +27,7 @@
     }
   },
   "fdk_feature": {
-    "enable_section_chunking": true
+    "enable_section_chunking": false
   },
   "devDependencies": {
     "@loadable/babel-plugin": "^5.16.1",
