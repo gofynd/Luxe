@@ -1,4 +1,5 @@
 {
+  "resource": {
     "common": {
       "link_text": "Link text",
       "hover_link_text": "Hover Link Text",
@@ -471,3 +472,4 @@
       }
     }
   }
+}

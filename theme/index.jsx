@@ -1,5 +1,4 @@
-import FPIClient from "@gofynd/fdk-store-gql";
-// import FPIClient from "../../../PlatformCoreLibraries/shadowfire-graphql/lib/index";
+import FPIClient from "fdk-store";
 import customTemplates from "./custom-templates";
 import "./styles/base.global.less";
 import sections from "./sections";

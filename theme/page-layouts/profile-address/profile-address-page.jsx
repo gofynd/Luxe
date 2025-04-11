@@ -358,7 +358,7 @@ const ProfileAddressPage = ({ fpi }) => {
                 <span
                   className={`${styles.savedAddress} ${styles["bold-xxs"]}`}
                 >
-                  {allAddresses?.length ? `${allAddresses?.length} saved` : ""}{" "}
+                  {allAddresses?.length ? `${allAddresses?.length} ${t("resource.profile.saved")}` : ""}{" "}
                 </span>
               </div>
               <div
